@@ -1,19 +1,27 @@
 package org.votingsystem.pkcs7;
 
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.bouncycastle.openssl.PEMKeyPair;
-import org.bouncycastle.openssl.PEMParser;
-import org.bouncycastle.openssl.jcajce.JcaPEMKeyConverter;
+import org.apache.http.NameValuePair;
+import org.apache.http.message.BasicNameValuePair;
 import org.votingsystem.BaseTest;
+import org.votingsystem.Constants;
 import org.votingsystem.crypto.Encryptor;
-import org.votingsystem.crypto.MockDNIe;
 import org.votingsystem.crypto.PEMUtils;
 import org.votingsystem.crypto.cms.CMSSignedMessage;
+import org.votingsystem.dto.MessageDto;
+import org.votingsystem.dto.OperationTypeDto;
+import org.votingsystem.dto.QRMessageDto;
+import org.votingsystem.dto.ResponseDto;
+import org.votingsystem.dto.indentity.SessionCertificationDto;
+import org.votingsystem.http.HttpConn;
+import org.votingsystem.socket.SocketOperation;
+import org.votingsystem.util.CurrencyOperation;
+import org.votingsystem.util.JSON;
 
-import java.io.ByteArrayInputStream;
-import java.io.InputStreamReader;
 import java.security.PrivateKey;
-import java.security.Security;
+import java.security.PublicKey;
+import java.util.ArrayList;
+import java.util.Base64;
+import java.util.List;
 import java.util.logging.Logger;
 
 public class EncryptTest extends BaseTest {
@@ -75,7 +83,7 @@ public class EncryptTest extends BaseTest {
         //log.info("cert" + new String(PEMUtils.getPEMEncoded(signatureService.getX509Certificate())));
         //Security.insertProviderAt(new BouncyCastleProvider(),1);
         //signAndEncrypt(signatureService);
-        decryptPEM();
+        new EncryptTest().sendMessageToBrowser();
         System.exit(0);
     }
 
@@ -111,5 +119,42 @@ public class EncryptTest extends BaseTest {
         byte[] decryptedBytes = Encryptor.decryptCMS(ENCRYPTED_CONTENT.getBytes(), privateKey);
         log.info("decryptedBytes: " + new String(decryptedBytes));
     }
+
+    private static final String QR_CODE = "eid=https://votingsystem.ddns.net/currency-server;op=0;uid=0657d937-515f-411a-a15b-7eb265b4aa11;";
+
+    private void sendMessageToBrowser() throws Exception {
+        QRMessageDto qrMessageDto = QRMessageDto.FROM_QR_CODE(QR_CODE);
+        List<NameValuePair> urlParameters = new ArrayList<>();
+        urlParameters.add(new BasicNameValuePair("UUID", qrMessageDto.getUUID()));
+        urlParameters.add(new BasicNameValuePair("operation", qrMessageDto.getOperation()));
+        ResponseDto responseDto = HttpConn.getInstance().doPostFormRequest(
+                CurrencyOperation.QR_INFO.getUrl(Constants.CURRENCY_SERVICE_ENTITY_ID), urlParameters);
+        if(ResponseDto.SC_OK != responseDto.getStatusCode()) {
+            log.info("status: " + responseDto.getStatusCode() + " - responseDto: " + responseDto.getMessage());
+        }
+        SessionCertificationDto sessionCertificationDto = JSON.getMapper().readValue(responseDto.getMessageBytes(),
+                SessionCertificationDto.class);
+        PublicKey publicKey = PEMUtils.fromPEMToRSAPublicKey(sessionCertificationDto.getPublicKeyPEM());
+
+        MessageDto messageDto = new MessageDto();
+        messageDto.setSocketOperation(SocketOperation.MSG_TO_DEVICE).setDeviceToUUID(qrMessageDto.getUUID());
+
+        MessageDto messageContent = new MessageDto();
+        messageContent.setOperation(new OperationTypeDto(CurrencyOperation.SESSION_CERTIFICATION, null)).setMessage("");
+        SessionCertificationDto sessionCertification = new SessionCertificationDto();
+        sessionCertification.setPrivateKeyPEM("setPrivateKeyPEM");
+        String base64Data = Base64.getEncoder().encodeToString(
+                JSON.getMapper().writeValueAsString(sessionCertification).getBytes());
+        messageContent.setBase64Data(base64Data);
+
+        byte[] encryptedMessage = Encryptor.encryptToCMS(JSON.getMapper().writeValueAsBytes(messageContent), publicKey);
+        messageDto.setEncryptedMessage(new String(encryptedMessage));
+
+        responseDto = HttpConn.getInstance().doPostRequest(JSON.getMapper().writeValueAsBytes(messageDto), null,
+                CurrencyOperation.MSG_TO_DEVICE.getUrl(Constants.CURRENCY_SERVICE_ENTITY_ID));
+
+        log.info("message: " + responseDto.getMessage());
+    }
+
 
 }

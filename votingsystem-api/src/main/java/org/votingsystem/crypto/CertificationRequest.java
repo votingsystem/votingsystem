@@ -12,6 +12,7 @@ import org.votingsystem.dto.CertExtensionDto;
 import org.votingsystem.dto.currency.CurrencyCertExtensionDto;
 import org.votingsystem.dto.currency.TagDto;
 import org.votingsystem.dto.voting.CertVoteExtensionDto;
+import org.votingsystem.model.Device;
 import org.votingsystem.throwable.CertificateRequestException;
 import org.votingsystem.util.Constants;
 import org.votingsystem.util.CurrencyCode;
@@ -87,6 +88,26 @@ public class CertificationRequest implements java.io.Serializable {
             pkcs10Builder.addAttribute(new  ASN1ObjectIdentifier(Constants.CURRENCY_OID),
                     new DERUTF8String(JSON.getMapper().writeValueAsString(dto)));
             pkcs10Builder.addAttribute(new  ASN1ObjectIdentifier(Constants.ANON_CERT_OID), ASN1Boolean.getInstance(true));
+            PKCS10CertificationRequest request = pkcs10Builder.build(new JcaContentSignerBuilder(
+                    Constants.SIGNATURE_ALGORITHM).setProvider(Constants.PROVIDER).build(keyPair.getPrivate()));
+            return new CertificationRequest(keyPair, request, Constants.SIGNATURE_ALGORITHM);
+        } catch (Exception ex) {
+            throw new CertificateRequestException(ex.getMessage(), ex);
+        }
+    }
+
+    public static CertificationRequest getUserRequest(String numId, String email, String phone, String deviceName,
+            String deviceUUID, String givenName, String surName, Device.Type deviceType) throws NoSuchAlgorithmException,
+            NoSuchProviderException, InvalidKeyException, SignatureException, IOException, CertificateRequestException {
+        try {
+            KeyPair keyPair = KeyGenerator.INSTANCE.genKeyPair();
+            X500Principal subject = new X500Principal("SERIALNUMBER=" + numId + ", GIVENNAME=" + givenName + ", SURNAME=" + surName);
+            CertExtensionDto dto = new CertExtensionDto(deviceName, deviceUUID,
+                    email, phone, deviceType).setNumId(numId).setGivenname(givenName).setSurname(surName);
+            PKCS10CertificationRequestBuilder pkcs10Builder = new JcaPKCS10CertificationRequestBuilder(subject,
+                    keyPair.getPublic());
+            pkcs10Builder.addAttribute(new  ASN1ObjectIdentifier(Constants.DEVICE_OID),
+                    new DERUTF8String(JSON.getMapper().writeValueAsString(dto)));
             PKCS10CertificationRequest request = pkcs10Builder.build(new JcaContentSignerBuilder(
                     Constants.SIGNATURE_ALGORITHM).setProvider(Constants.PROVIDER).build(keyPair.getPrivate()));
             return new CertificationRequest(keyPair, request, Constants.SIGNATURE_ALGORITHM);

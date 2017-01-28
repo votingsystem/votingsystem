@@ -84,7 +84,7 @@ public class ElectionBean implements Serializable {
     public String initAuthentication() throws JsonProcessingException {
         log.info("selectedCountry: " + selectedCountry + " - electionUUID: " + electionUUID);
         Set<MetadataDto> identityProviders = trustedServices.getEntitySetByTypeAndCountryCode(
-                SystemEntityType.VOTING_ID_PROVIDER, selectedCountry);
+                SystemEntityType.ID_PROVIDER, selectedCountry);
         if(identityProviders.isEmpty()) {
             FacesContext.getCurrentInstance().getExternalContext().getSessionMap().put("responseDto",
                     new ResponseDto(ResponseDto.SC_ERROR, Messages.currentInstance().get("serviceUnavailableForCountryMsg"))

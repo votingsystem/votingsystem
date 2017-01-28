@@ -282,7 +282,7 @@ public class ConfigEJB implements Config, ConfigCurrencyServer, Serializable {
             if(metadata == null) {
                 Properties properties = new Properties();
                 properties.load(new FileInputStream(new File(applicationDirPath + "/config.properties")));
-                metadata = MetadataUtils.initMetadata(SystemEntityType.VOTING_ID_PROVIDER, entityId, properties,
+                metadata = MetadataUtils.initMetadata(SystemEntityType.ID_PROVIDER, entityId, properties,
                         signingCert, signingCert);
                 metadata.setTrustedEntities(trustedServices.getTrustedEntities());
             }

@@ -9,7 +9,7 @@ import java.util.logging.Logger;
 
 
 @Provider
-public class ResponseInterceptor implements WriterInterceptor{
+public class ResponseInterceptor implements WriterInterceptor {
 
     private static final Logger log = Logger.getLogger(ResponseInterceptor.class.getName());
 
@@ -18,4 +18,5 @@ public class ResponseInterceptor implements WriterInterceptor{
         context.getHeaders().add("vs-msg", "hello from currency server");
         context.proceed();
     }
+
 }

@@ -42,11 +42,6 @@ public class XmlReader {
         return qrResponse;
     }
 
-    //<?xml version='1.0' encoding='UTF-8' ?><IdentityRequest Type="ANON_VOTE_CERT_REQUEST">
-    // <IndentityServiceEntity Id="ID_PROVIDER_URL" Type="voting-idprovider"></IndentityServiceEntity>
-    // <CallbackServiceEntity Id="SERVICE_PROVIDER_URL" Type="voting-service-provider"></CallbackServiceEntity>
-    // <RevocationHashBase64>RevocationHashBase64</RevocationHashBase64>
-    // <UUID>db2f59c1-60b8-4cc0-be6c-a14d2996db64</UUID></IdentityRequest>
     public static IdentityRequestDto readIdentityRequest(byte[] xmlBytes) throws IOException, XmlPullParserException {
         Element mainElement = XMLUtils.parse(xmlBytes).getRootElement();
         IdentityRequestDto request = new IdentityRequestDto();

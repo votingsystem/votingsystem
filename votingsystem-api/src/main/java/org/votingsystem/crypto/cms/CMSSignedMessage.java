@@ -19,6 +19,7 @@ import org.bouncycastle.util.Store;
 import org.votingsystem.crypto.PEMUtils;
 import org.votingsystem.model.Signature;
 import org.votingsystem.model.User;
+import org.votingsystem.throwable.ValidationException;
 import org.votingsystem.util.Constants;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.JSON;
@@ -231,20 +232,22 @@ public class CMSSignedMessage extends CMSSignedData {
                     }
                     Date timeStampDate = tsToken.getTimeStampInfo().getGenTime();
                     Signature signature = new Signature(user, Base64.getEncoder().encodeToString(signerDigest),
-                            DateUtils.getLocalDateFromUTCDate(timeStampDate));
+                            DateUtils.getLocalDateFromUTCDate(timeStampDate)).setSigningCert(cert);
                     signatures.add(signature);
                     if (firstSignature == null || firstSignature.after(timeStampDate)) {
                         firstSignature = timeStampDate;
                         this.firstSignature = signature;
                         timeStampToken = tsToken;
                     }
-                } else signatures.add(new Signature(user, Base64.getEncoder().encodeToString(signerDigest), null));
+                } else signatures.add(new Signature(user, Base64.getEncoder().encodeToString(signerDigest), null).setSigningCert(cert));
                 signerCerts.add(cert);
             }
             return true;
         }
 
-        public Signature getFirstSignature() {
+        public Signature getFirstSignature() throws ValidationException {
+            if(timeStampToken == null)
+                throw new ValidationException("CMSMessageReader without timestamp");
             return firstSignature;
         }
 

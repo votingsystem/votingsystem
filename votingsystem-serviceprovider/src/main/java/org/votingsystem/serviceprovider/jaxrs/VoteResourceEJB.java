@@ -15,7 +15,6 @@ import org.votingsystem.model.voting.Election;
 import org.votingsystem.model.voting.ElectionOption;
 import org.votingsystem.model.voting.Vote;
 import org.votingsystem.util.DateUtils;
-import org.votingsystem.util.FileUtils;
 import org.votingsystem.util.Messages;
 import org.votingsystem.xml.XML;
 

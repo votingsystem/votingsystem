@@ -183,7 +183,7 @@ public class UserResourceEJB {
     }
 
     @Transactional
-    @Path("/searchByDevice")
+    @Path("/search-by-device")
     @GET @Produces(javax.ws.rs.core.MediaType.APPLICATION_JSON)
     public Object searchByDevice(@QueryParam("phone") String phone, @QueryParam("email") String email,
                                  @Context HttpServletRequest req) throws Exception {
@@ -202,7 +202,7 @@ public class UserResourceEJB {
         }
     }
 
-    @Path("/bankList")
+    @Path("/bank-list")
     @GET @Produces(javax.ws.rs.core.MediaType.APPLICATION_JSON)
     public Response bankList(@Context ServletContext context, @Context HttpServletRequest req,
                              @Context HttpServletResponse resp) throws Exception {

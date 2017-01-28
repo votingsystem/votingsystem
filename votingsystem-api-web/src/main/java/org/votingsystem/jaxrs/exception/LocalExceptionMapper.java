@@ -49,7 +49,7 @@ public class LocalExceptionMapper implements ExceptionMapper<Exception> {
                     message = exception.getMessage();
                     break;
                 case vs_0410:
-                    message = Messages.currentInstance().get("requestBadFormedMsg") + " - " + exception.getMessage();
+                    message = Messages.currentInstance().get("errorLbl") + " - " + exception.getMessage();
                     break;
                 case vs_0500:
                     message = Messages.currentInstance().get("systemErrorMsg");

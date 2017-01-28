@@ -1,12 +1,10 @@
-package org.votingsystem.idprovider.jaxrs.provider;
+package org.votingsystem.jaxrs.provider;
 
-import eu.europa.esig.dss.InMemoryDocument;
-import org.votingsystem.crypto.SignatureParams;
-import org.votingsystem.crypto.SignedDocumentType;
 import org.votingsystem.ejb.SignatureService;
 import org.votingsystem.http.MediaType;
 import org.votingsystem.model.SignedDocument;
-import org.votingsystem.model.User;
+import org.votingsystem.util.FileUtils;
+
 import javax.inject.Inject;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.WebApplicationException;
@@ -41,12 +39,11 @@ public class SignedDocumentReader implements MessageBodyReader<SignedDocument> {
             javax.ws.rs.core.MediaType mediaType, MultivaluedMap<String, String> multivaluedMap, InputStream inputStream)
             throws IOException, WebApplicationException {
         try {
-            SignatureParams signatureParams = new SignatureParams(null, User.Type.ID_CARD_USER,
-                    SignedDocumentType.SIGNED_DOCUMENT).setWithTimeStampValidation(true);
-            return signatureService.validateXAdESAndSave(new InMemoryDocument(inputStream), signatureParams);
+            return signatureService.validateXAdESAndSave(FileUtils.getBytesFromStream(inputStream));
         } catch (Exception ex) {
             log.log(Level.SEVERE, ex.getMessage(), ex);
             throw new WebApplicationException("Signed document with errors");
         }
     }
+
 }

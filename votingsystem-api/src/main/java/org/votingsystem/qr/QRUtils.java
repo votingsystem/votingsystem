@@ -27,6 +27,24 @@ import java.util.Map;
  */
 public class QRUtils {
 
+
+    //Codes that identify the parameters of a qr code
+    public static final String DEVICE_ID_KEY           = "did";
+    public static final String ITEM_ID_KEY             = "iid";
+    public static final String OPERATION_KEY           = "op";
+    public static final String OPERATION_CODE_KEY      = "opc";
+    public static final String PUBLIC_KEY_KEY          = "pk";
+    public static final String SYSTEM_ENTITY_KEY       = "eid";
+    public static final String MSG_KEY                 = "msg";
+    public static final String URL_KEY                 = "url";
+    public static final String UUID_KEY                = "uid";
+
+
+    public static final String GET_BROWSER_CERTIFICATE = "0";
+    public static final String MESSAGE_INFO            = "1";
+    public static final String CURRENCY_SEND           = "2";
+
+
     public static final Integer MARGIN = 0;
     private static final int MAX_DIMENSION = 4096;
     private static final Collection<Charset> SUPPORTED_OUTPUT_ENCODINGS;
@@ -42,8 +60,8 @@ public class QRUtils {
     public static void sendRedirect(HttpServletRequest req, HttpServletResponse res, String entityId, String qrUUID,
                                     String caption, String message) throws IOException {
         String qrCodeURL = OperationType.GET_QR.getUrl(entityId) + "?cht=qr&chs=250x250&chl=" +
-                QRConstants.SYSTEM_ENTITY_KEY + "=" + entityId + ";" +
-                QRConstants.UUID_KEY + "=" + qrUUID + ";";
+                SYSTEM_ENTITY_KEY + "=" + entityId + ";" +
+                UUID_KEY + "=" + qrUUID + ";";
         req.getSession().setAttribute("qrId", qrUUID.substring(0, 4).toUpperCase());
         req.getSession().setAttribute("qrURL", qrCodeURL);
         req.getSession().setAttribute("qrUUID", qrUUID);

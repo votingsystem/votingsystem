@@ -13,23 +13,24 @@ public class CertExtensionDto {
     private String deviceName;
     private String email;
     private String mobilePhone;
-    private String nif;
+    private String numId;
     private String givenname;
     private String surname;
+    private String entityId;
     private Device.Type deviceType;
     private String UUID;
 
     public CertExtensionDto() {}
 
-    public CertExtensionDto(String nif , String givenname, String surname) {
-        this.nif = nif;
+    public CertExtensionDto(String numId , String givenname, String surname) {
+        this.numId = numId;
         this.givenname = givenname;
         this.surname = surname;
     }
 
     public CertExtensionDto(String deviceName, String UUID, String email, String phone, Device.Type deviceType) {
-        this.UUID = UUID;
         this.deviceName = deviceName;
+        this.UUID = UUID;
         this.email = email;
         this.mobilePhone = phone;
         this.deviceType = deviceType;
@@ -39,58 +40,64 @@ public class CertExtensionDto {
         return deviceName;
     }
 
-    public void setDeviceName(String deviceName) {
+    public CertExtensionDto setDeviceName(String deviceName) {
         this.deviceName = deviceName;
+        return this;
     }
 
     public String getEmail() {
         return email;
     }
 
-    public void setEmail(String email) {
+    public CertExtensionDto setEmail(String email) {
         this.email = email;
+        return this;
     }
 
     public String getMobilePhone() {
         return mobilePhone;
     }
 
-    public void setMobilePhone(String mobilePhone) {
+    public CertExtensionDto setMobilePhone(String mobilePhone) {
         this.mobilePhone = mobilePhone;
+        return this;
     }
 
     public Device.Type getDeviceType() {
         return deviceType;
     }
 
-    public void setDeviceType(Device.Type deviceType) {
+    public CertExtensionDto setDeviceType(Device.Type deviceType) {
         this.deviceType = deviceType;
+        return this;
     }
 
-    public String getNif() {
-        return nif;
+    public String getNumId() {
+        return numId;
     }
 
-    public void setNif(String nif) {
-        this.nif = nif;
+    public CertExtensionDto setNumId(String numId) {
+        this.numId = numId;
+        return this;
     }
 
     public String getGivenname() {
         return givenname;
     }
 
-    public void setGivenname(String givenname) {
+    public CertExtensionDto setGivenname(String givenname) {
         this.givenname = givenname;
+        return this;
     }
 
     public String getSurname() {
         return surname;
     }
 
-    public void setSurname(String surname) {
+    public CertExtensionDto setSurname(String surname) {
         this.surname = surname;
+        return this;
     }
-
 
     public String getUUID() {
         return UUID;
@@ -103,7 +110,16 @@ public class CertExtensionDto {
 
     @JsonIgnore
     public String getPrincipal() {
-        return "SERIALNUMBER=" + nif + ", GIVENNAME=" + givenname + ", SURNAME=" + surname;
+        return "SERIALNUMBER=" + numId + ", GIVENNAME=" + givenname + ", SURNAME=" + surname;
+    }
+
+    public String getEntityId() {
+        return entityId;
+    }
+
+    public CertExtensionDto setEntityId(String entityId) {
+        this.entityId = entityId;
+        return this;
     }
 
 }

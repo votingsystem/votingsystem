@@ -2,9 +2,8 @@ package org.votingsystem.currency.web.managed;
 
 import com.google.zxing.WriterException;
 import org.votingsystem.ejb.Config;
-import org.votingsystem.qr.QRConstants;
+import org.votingsystem.qr.QRUtils;
 import org.votingsystem.util.Constants;
-
 import javax.ejb.AccessTimeout;
 import javax.enterprise.context.SessionScoped;
 import javax.faces.context.FacesContext;
@@ -58,9 +57,9 @@ public class PageBean implements Serializable {
     public String getAccessCodeQR() throws WriterException, IOException {
         HttpServletRequest req = (HttpServletRequest) FacesContext.getCurrentInstance().getExternalContext().getRequest();
         String qrCodeURL = req.getContextPath() + "/api/qr?cht=qr&chs=200x200&chl=" +
-                QRConstants.SYSTEM_ENTITY_KEY + "=" + config.getEntityId() + ";" +
-                QRConstants.OPERATION_KEY + "=" + QRConstants.GENERATE_BROWSER_CERTIFICATE + ";" +
-                QRConstants.UUID_KEY + "=" + req.getSession().getAttribute(Constants.USER_UUID) + ";";
+                QRUtils.SYSTEM_ENTITY_KEY + "=" + config.getEntityId() + ";" +
+                QRUtils.OPERATION_KEY + "=" + QRUtils.GET_BROWSER_CERTIFICATE + ";" +
+                QRUtils.UUID_KEY + "=" + req.getSession().getAttribute(Constants.USER_UUID) + ";";
         return qrCodeURL;
     }
 }

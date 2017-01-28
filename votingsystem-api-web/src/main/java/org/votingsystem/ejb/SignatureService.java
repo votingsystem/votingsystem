@@ -8,6 +8,8 @@ import org.votingsystem.throwable.DuplicatedDbItemException;
 import org.votingsystem.throwable.SignatureException;
 import org.votingsystem.throwable.XAdESValidationException;
 
+import java.io.IOException;
+
 /**
  * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
@@ -17,6 +19,7 @@ public interface SignatureService {
     public byte[] signXAdES(byte[] xmlToSign) throws SignatureException;
     public SignedDocument validateXAdESAndSave(DSSDocument signedDocument, SignatureParams signatureParams)
             throws XAdESValidationException, DuplicatedDbItemException;
+    public SignedDocument validateXAdESAndSave(byte[] httpRequest) throws XAdESValidationException, DuplicatedDbItemException, IOException;
     public XAdESDocument validateXAdES(final DSSDocument signedDocument, final SignatureParams signatureParams)
             throws XAdESValidationException;
 

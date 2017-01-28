@@ -6,8 +6,8 @@ import org.votingsystem.ejb.Config;
 import org.votingsystem.ejb.QRSessionsEJB;
 import org.votingsystem.model.voting.Election;
 import org.votingsystem.model.voting.ElectionOption;
-import org.votingsystem.qr.QRConstants;
 import org.votingsystem.qr.QRRequestBundle;
+import org.votingsystem.qr.QRUtils;
 import org.votingsystem.util.Constants;
 import org.votingsystem.util.OperationType;
 import org.votingsystem.xml.XML;
@@ -117,8 +117,8 @@ public class PublishElectionBean implements Serializable {
     public String getQRCodeURL() throws WriterException, IOException {
         HttpServletRequest req = (HttpServletRequest) FacesContext.getCurrentInstance().getExternalContext().getRequest();
         String qrCodeURL = req.getContextPath() + "/api/qr?cht=qr&chs=200x200&chl=" +
-                QRConstants.SYSTEM_ENTITY_KEY + "=" + config.getEntityId() + ";" +
-                QRConstants.UUID_KEY + "=" + qrUUID + ";";
+                QRUtils.SYSTEM_ENTITY_KEY + "=" + config.getEntityId() + ";" +
+                QRUtils.UUID_KEY + "=" + qrUUID + ";";
         return qrCodeURL;
     }
 

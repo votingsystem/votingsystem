@@ -14,18 +14,23 @@ import eu.europa.esig.dss.xades.validation.XAdESSignature;
 import org.votingsystem.crypto.SignatureParams;
 import org.votingsystem.crypto.SignedDocumentType;
 import org.votingsystem.crypto.TSPHttpSource;
+import org.votingsystem.dto.OperationCheckerDto;
 import org.votingsystem.dto.metadata.MetaInfDto;
 import org.votingsystem.model.*;
 import org.votingsystem.throwable.*;
+import org.votingsystem.util.CurrencyOperation;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.Messages;
 import org.votingsystem.xades.CertificateVerifier;
+import org.votingsystem.xml.XML;
 
 import javax.ejb.Singleton;
 import javax.ejb.TransactionAttribute;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
+import javax.ws.rs.WebApplicationException;
+import java.io.IOException;
 import java.security.cert.X509Certificate;
 import java.time.LocalDateTime;
 import java.util.Arrays;
@@ -96,6 +101,32 @@ public class SignatureServiceEJB implements SignatureService {
             }
             throw ex;
         }
+    }
+
+    @Override
+    public SignedDocument validateXAdESAndSave(byte[] httpRequestBytes) throws XAdESValidationException,
+            DuplicatedDbItemException, IOException {
+        OperationCheckerDto checkerDto = XML.getMapper().readValue(httpRequestBytes, OperationCheckerDto.class);
+        if(checkerDto.getOperation() == null)
+            throw new WebApplicationException("Signed document without operation info");
+        SignatureParams signatureParams = null;
+        if(checkerDto.getOperation().isCurrencyOperation()) {
+            switch ((CurrencyOperation)checkerDto.getOperation().getType()) {
+                case SESSION_CERTIFICATION:
+                    signatureParams = new SignatureParams(checkerDto.getOperation().getEntityId(),
+                            User.Type.IDENTITY_SERVER, SignedDocumentType.SESSION_CERTIFICATION_RECEIPT)
+                            .setWithTimeStampValidation(true);
+                    break;
+                default:
+                    signatureParams = new SignatureParams(checkerDto.getOperation().getEntityId(),
+                            User.Type.ID_CARD_USER, SignedDocumentType.SIGNED_DOCUMENT).setWithTimeStampValidation(true);
+                    break;
+            }
+        } else if(checkerDto.getOperation().isOperationType()) {
+            signatureParams = new SignatureParams(null, User.Type.ID_CARD_USER,
+                    SignedDocumentType.SIGNED_DOCUMENT).setWithTimeStampValidation(true);
+        }
+        return validateXAdESAndSave(new InMemoryDocument(httpRequestBytes), signatureParams);
     }
 
     public XAdESDocument validateXAdES(final DSSDocument signedDocument, final SignatureParams signatureParams)
@@ -193,7 +224,7 @@ public class SignatureServiceEJB implements SignatureService {
                             throw new TimeStampValidationException("Timestamp cert validation error", ex);
                         }
                     } else
-                        log.severe("bypassing trusted check of TimeStamp issuer certificate");
+                        log.severe("by-passing trusted check of TimeStamp issuer certificate");
 
                     if(!timestampToken.isMessageImprintDataIntact()) {
                         throw new TimeStampValidationException("Timestamp DOES NOT MATCH the signed data");

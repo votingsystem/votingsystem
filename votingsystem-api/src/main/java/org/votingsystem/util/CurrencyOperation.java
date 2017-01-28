@@ -10,8 +10,6 @@ public enum CurrencyOperation implements SystemOperation {
 
     @JsonProperty("CLOSE_SESSION")
     CLOSE_SESSION(null),
-    @JsonProperty("MSG_TO_DEVICE")
-    MSG_TO_DEVICE(null),
     @JsonProperty("CURRENCY_WALLET_CHANGE")
     CURRENCY_WALLET_CHANGE(null),
     @JsonProperty("TRANSACTION_INFO")
@@ -24,6 +22,8 @@ public enum CurrencyOperation implements SystemOperation {
     GET_METADATA("/api/metadata"),
     @JsonProperty("CURRENCY_SEND")
     CURRENCY_SEND("/api/currency/send"),
+    @JsonProperty("MSG_TO_DEVICE")
+    MSG_TO_DEVICE("/api/msg/send"),
     @JsonProperty("TRANSACTION_FROM_USER")
     TRANSACTION_FROM_USER(null),
     @JsonProperty("CURRENCY_CHANGE")
@@ -40,10 +40,16 @@ public enum CurrencyOperation implements SystemOperation {
     GET_CURRENCY_BUNDLE_STATUS("/api/currency/bundle-state"),
     @JsonProperty("GET_TRANSACTION")
     GET_TRANSACTION("/api/transaction"),
-    @JsonProperty("BROWSER_CERTIFICATION")
-    BROWSER_CERTIFICATION("/api/cert-issuer/browser-csr"),
+    @JsonProperty("SESSION_CERTIFICATION")
+    SESSION_CERTIFICATION("/api/cert-issuer/session-csr"),
+    @JsonProperty("SESSION_CERTIFICATION_DATA")
+    SESSION_CERTIFICATION_DATA("/api/device/session-certification-data"),
     @JsonProperty("INIT_BROWSER_SESSION")
     INIT_BROWSER_SESSION("/api/device/init-browser-session"),
+    @JsonProperty("INIT_MOBILE_SESSION")
+    INIT_MOBILE_SESSION("/api/device/init-mobile-session"),
+    @JsonProperty("QR_INFO")
+    QR_INFO("/api/currency-qr/info"),
     @JsonProperty("BANK_NEW")
     BANK_NEW("/api/user/new-bank");
 
@@ -57,5 +63,6 @@ public enum CurrencyOperation implements SystemOperation {
     public String getUrl(String entityId) {
         return entityId + url;
     }
+
 
 }

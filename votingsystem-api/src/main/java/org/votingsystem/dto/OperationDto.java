@@ -18,6 +18,7 @@ public class OperationDto<T> {
     private String deviceId;
     private String httpSessionId;
     private String base64Data;
+    private String userUUID;
     private String UUID;
 
     public OperationDto() {}
@@ -82,6 +83,15 @@ public class OperationDto<T> {
 
     public OperationDto setOperation(OperationTypeDto operation) {
         this.operation = operation;
+        return this;
+    }
+
+    public String getUserUUID() {
+        return userUUID;
+    }
+
+    public OperationDto setUserUUID(String userUUID) {
+        this.userUUID = userUUID;
         return this;
     }
 

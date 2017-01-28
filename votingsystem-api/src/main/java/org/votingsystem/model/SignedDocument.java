@@ -38,7 +38,7 @@ public class SignedDocument extends EntityBase implements Serializable {
 
 
     public enum Indication {TOTAL_PASSED(false), LOCAL_SIGNATURE(false), ERROR_ZERO_SIGNATURES(true), ERROR_SIGNATURES_COUNT(true),
-            ERROR_SIGNER(true), ERROR_TIMESTAMP(true), ERROR(true);
+            ERROR_SIGNER(true), ERROR_TIMESTAMP(true), ERROR(true), VALIDATION_ERROR(true);
         private boolean isError;
         Indication(boolean isError) {
             this.isError = isError;
@@ -166,8 +166,9 @@ public class SignedDocument extends EntityBase implements Serializable {
         return receipt;
     }
 
-    public void setReceipt(SignedDocument receipt) {
+    public SignedDocument setReceipt(SignedDocument receipt) {
         this.receipt = receipt;
+        return this;
     }
 
     public Set<Signature> getSignatures() {

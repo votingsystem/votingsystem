@@ -1,8 +1,8 @@
-package org.votingsystem.currency.web.jaxrs.provider;
+package org.votingsystem.jaxrs.provider;
 
 import org.apache.commons.io.IOUtils;
 import org.votingsystem.crypto.cms.CMSSignedMessage;
-import org.votingsystem.currency.web.ejb.CmsEJB;
+import org.votingsystem.ejb.CmsEJB;
 import org.votingsystem.http.MediaType;
 import org.votingsystem.model.CMSDocument;
 import org.votingsystem.throwable.ValidationException;

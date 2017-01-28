@@ -97,7 +97,7 @@ public class PageBean implements Serializable {
     }
 
     public String getIdProvidersCountryMapAsJSON() throws JsonProcessingException {
-        Set<MetadataDto> idProviders = trustedServices.getEntitySetByType(SystemEntityType.VOTING_ID_PROVIDER);
+        Set<MetadataDto> idProviders = trustedServices.getEntitySetByType(SystemEntityType.ID_PROVIDER);
         return getCountryMapAsJSON(idProviders);
     }
 

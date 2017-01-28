@@ -14,6 +14,7 @@ import org.votingsystem.model.converter.LocalDateTimeAttributeConverter;
 import org.votingsystem.util.Constants;
 import org.votingsystem.util.IdDocument;
 import org.votingsystem.util.JSON;
+
 import javax.persistence.*;
 import javax.xml.bind.DatatypeConverter;
 import javax.xml.bind.annotation.adapters.HexBinaryAdapter;
@@ -27,6 +28,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Logger;
+
 import static javax.persistence.GenerationType.IDENTITY;
 
 /**

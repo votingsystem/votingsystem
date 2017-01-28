@@ -43,7 +43,7 @@ public class GenerateCertificateForBrowser extends BaseTest {
             "61zKGg3tSVzhNsSv/rdfQt75dADiKO0vpR8u1tRTgN3WtQ==\n" +
             "-----END CERTIFICATE REQUEST-----";
 
-    private static final String QR_CODE = "eid=https://votingsystem.ddns.net/currency-server;op=0;uid=d0384dca-a86d-46bf-844d-7a4b9acb3ce1;";
+    private static final String QR_CODE = "eid=https://votingsystem.ddns.net/currency-server;op=0;uid=aa1cbbb8-a41e-402b-85a2-5992cc9b93bd;";
 
 
     public static void main(String[] args) throws Exception {
@@ -73,7 +73,8 @@ public class GenerateCertificateForBrowser extends BaseTest {
         SessionCertificationDto csrRequestDto = new SessionCertificationDto();
         csrRequestDto.setBrowserCsr(csrRequest).setUserUUID(userUUID);
 
-        PKCS10CertificationRequest csr = PEMUtils.fromPEMToPKCS10CertificationRequest(csrRequestDto.getBrowserCsr().getBytes());
+        PKCS10CertificationRequest csr = PEMUtils.fromPEMToPKCS10CertificationRequest(
+                csrRequestDto.getBrowserCsr().getBytes());
         String mobileHTTPSessionUUID = UUID.randomUUID().toString();
 
         CertExtensionDto certExtension = new CertExtensionDto(NifUtils.getNif(12345), "TestGivenName", "TestSurname")
@@ -93,7 +94,7 @@ public class GenerateCertificateForBrowser extends BaseTest {
         log.info("signatureBytes: " + new String(signatureBytes));
 
         ResponseDto response = HttpConn.getInstance().doPostRequest(signatureBytes, MediaType.XML,
-                CurrencyOperation.BROWSER_CERTIFICATION.getUrl(Constants.ID_PROVIDER_ENTITY_ID));
+                CurrencyOperation.SESSION_CERTIFICATION.getUrl(Constants.ID_PROVIDER_ENTITY_ID));
         log.info("statusCode: " + response.getStatusCode() + " - msg: " + response.getMessage());
 
         if(ResponseDto.SC_OK != response.getStatusCode()) {
@@ -102,12 +103,10 @@ public class GenerateCertificateForBrowser extends BaseTest {
         }
 
         SessionCertificationDto browserCertification = XmlReader.getUserCertificationRequest(response.getMessageBytes());
-
         ResponseDto responseDto = HttpConn.getInstance().doPostRequest(response.getMessageBytes(), MediaType.XML,
-                CurrencyOperation.INIT_BROWSER_SESSION.getUrl(Constants.CURRENCY_SERVICE_ENTITY_ID));
-
-
+                CurrencyOperation.SESSION_CERTIFICATION_DATA.getUrl(Constants.CURRENCY_SERVICE_ENTITY_ID));
         log.info("StatusCode: " + responseDto.getStatusCode() + " - Response: " + responseDto.getMessage());
+
     }
 
 }

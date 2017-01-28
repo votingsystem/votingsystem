@@ -4,9 +4,10 @@ import eu.europa.esig.dss.x509.CertificateToken;
 import org.bouncycastle.pkcs.PKCS10CertificationRequest;
 import org.votingsystem.crypto.*;
 import org.votingsystem.dto.*;
-import org.votingsystem.dto.indentity.SessionCertificationDto;
 import org.votingsystem.dto.indentity.IdentityRequestDto;
+import org.votingsystem.dto.indentity.SessionCertificationDto;
 import org.votingsystem.dto.voting.CertVoteExtensionDto;
+import org.votingsystem.ejb.CmsEJB;
 import org.votingsystem.ejb.SignatureService;
 import org.votingsystem.ejb.SignerInfoService;
 import org.votingsystem.model.*;
@@ -42,6 +43,7 @@ import java.util.List;
 import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
 import static java.text.MessageFormat.format;
 import static javax.ejb.TransactionAttributeType.REQUIRES_NEW;
 
@@ -56,6 +58,8 @@ public class CertIssuerEJB {
     @PersistenceContext
     private EntityManager em;
     @Inject private ConfigIdProvider config;
+    @Inject private CmsEJB cmsEJB;
+
     @Inject private SignerInfoService signerEJB;
     @Inject private SignatureService signatureService;
     @EJB private ElectionsEJB electionsEJB;
@@ -323,16 +327,22 @@ public class CertIssuerEJB {
     }
 
     @TransactionAttribute(REQUIRES_NEW)
-    public SignedDocument signBrowserCSR(SignedDocument signedDocument) throws Exception {
+    public SignedDocument signSessionCSR(SignedDocument signedDocument) throws Exception {
         User signer = signedDocument.getFirstSignature().getSigner();
         X509Certificate signerCertificate = signedDocument.getFirstSignature().getSigningCert();
-        SessionCertificationDto csrRequest = signedDocument.getSignedContent(SessionCertificationDto.class);
-        PKCS10CertificationRequest csr = PEMUtils.fromPEMToPKCS10CertificationRequest(csrRequest.getBrowserCsr().getBytes());
+        SessionCertificationDto csrRequest = null;
+        if(signedDocument instanceof CMSDocument)
+            csrRequest = JSON.getMapper().readValue(((CMSDocument)signedDocument).getCMS().getSignedContentStr(),
+                    SessionCertificationDto.class);
+        else
+            csrRequest = signedDocument.getSignedContent(SessionCertificationDto.class);
+
+        PKCS10CertificationRequest browserCSR = PEMUtils.fromPEMToPKCS10CertificationRequest(csrRequest.getBrowserCsr().getBytes());
         PKCS10CertificationRequest mobileCSR = PEMUtils.fromPEMToPKCS10CertificationRequest(csrRequest.getMobileCsr().getBytes());
         ZonedDateTime dateBegin = ZonedDateTime.now();
         ZonedDateTime dateFinish = dateBegin.plus(1, ChronoUnit.DAYS).toLocalDate().atStartOfDay(ZoneId.of("UTC"))
                 .withZoneSameInstant(ZoneId.systemDefault());
-        X509Certificate browserCert = CertUtils.signCSR(csr, "browser-certificate", certIssuerPrivateKey,
+        X509Certificate browserCert = CertUtils.signCSR(browserCSR, "browser-certificate", certIssuerPrivateKey,
                 certIssuerSigningCert, dateBegin.toLocalDateTime(), dateFinish.toLocalDateTime(),
                 config.getOcspServerURL());
         X509Certificate mobileCert = CertUtils.signCSR(mobileCSR, "mobile-certificate", certIssuerPrivateKey,
@@ -346,61 +356,25 @@ public class CertIssuerEJB {
                 .setAuthorityCertificate(config.getCACertificate(certIssuerSigningCert.getSerialNumber().longValue()))
                 .setSignedDocument(signedDocument);
 
-        SessionCertificationDto csrResponse = new SessionCertificationDto(new OperationTypeDto(
-                CurrencyOperation.BROWSER_CERTIFICATION, config.getEntityId())).setUser(new UserDto(signer))
+        SessionCertificationDto csrResponse = csrRequest.setOperation(new OperationTypeDto(
+                CurrencyOperation.SESSION_CERTIFICATION, config.getEntityId())).setUser(new UserDto(signer))
                 .setBrowserCsrSigned(new String(PEMUtils.getPEMEncoded(browserCert)))
                 .setMobileCsrSigned(new String(PEMUtils.getPEMEncoded(mobileCert)))
                 .setSignerCertPEM(new String(PEMUtils.getPEMEncoded(signerCertificate)));
         em.persist(browserCertificate);
         em.persist(mobileCertificate);
 
-        SignatureParams signatureParams = new SignatureParams(config.getEntityId(), User.Type.CURRENCY_SERVER,
-                SignedDocumentType.BROWSER_CERTIFICATION_REQUEST_RECEIPT).setWithTimeStampValidation(true);
-        SignedDocument response = signatureService.signXAdESAndSave(XML.getMapper().writeValueAsBytes(csrResponse), signatureParams);
+        SignatureParams signatureParams = new SignatureParams(config.getEntityId(), User.Type.IDENTITY_SERVER,
+                SignedDocumentType.SESSION_CERTIFICATION_RECEIPT).setWithTimeStampValidation(true);
+        SignedDocument response = null;
+        if(signedDocument instanceof CMSDocument)
+            response = cmsEJB.signAndSave(JSON.getMapper().writeValueAsBytes(csrResponse),
+                    SignedDocumentType.SESSION_CERTIFICATION_RECEIPT);
+        else
+            response = signatureService.signXAdESAndSave(XML.getMapper().writeValueAsBytes(csrResponse), signatureParams);
+        em.merge(signedDocument.setReceipt(response).setSignedDocumentType(SignedDocumentType.SESSION_CERTIFICATION));
         return response;
     }
 
-    /*@TransactionAttribute(REQUIRES_NEW)
-    public X509Certificate signCSRRequestSignedWithIDCard(SignedDocument signedDocument) throws Exception {
-        User signer = signedDocument.getFirstSignature().getSigner();
-        if(signer.getCertificate().getType() != Certificate.Type.USER_ID_CARD)
-            throw new Exception("Service available only for ID CARD signed requests");
-        BrowserCertificationDto requestDto = signedDocument.getSignedContent(BrowserCertificationDto.class);
-        PKCS10CertificationRequest csr = PEMUtils.fromPEMToPKCS10CertificationRequest(requestDto.getCsr().getBytes());
-        CertExtensionDto certExtensionDto = CertUtils.getCertExtensionData(CertExtensionDto.class, csr, Constants.DEVICE_OID);
-        String validatedNif = NifUtils.validate(certExtensionDto.getNif());
-        Address address = signer.getAddress();
-        if(address == null) {
-            address = new Address(requestDto.getAddress());
-            em.persist(address);
-            signer.setAddress(address);
-        } else {
-            address.update(requestDto.getAddress());
-            em.merge(address);
-        }
-        em.merge(signer);
-        LocalDateTime validFrom = LocalDateTime.now();
-        LocalDateTime validTo = validFrom.plus(1, ChronoUnit.YEARS); //one year
-        Certificate issuedCert =  signCSR(null, csr, config.getEntityId(),
-                validFrom, validTo, Certificate.Type.USER, null);
-        List<Device> deviceList = em.createQuery("select d from Device d where d.UUID =:deviceId and d.user.numId =:numId ")
-                .setParameter("deviceId", certExtensionDto.getUUID()).setParameter("numId", validatedNif).getResultList();
-        Device device = null;
-        if(deviceList.isEmpty()) {
-            device = new Device(signer, certExtensionDto.getUUID(), certExtensionDto.getEmail(),
-                    certExtensionDto.getMobilePhone(), certExtensionDto.getDeviceType()).setState(Device.State.OK)
-                    .setCertificate(issuedCert);
-            em.persist(device);
-        } else {
-            device.getCertificate().setState(Certificate.State.CANCELED).setSignedDocument(signedDocument);
-            device.setEmail(certExtensionDto.getEmail()).setPhone(certExtensionDto.getMobilePhone())
-                    .setCertificate(issuedCert);
-        }
-        em.createQuery("UPDATE UserToken u SET u.state=:state WHERE u.user=:user").setParameter(
-                "state", UserToken.State.CANCELLED).setParameter("user", signer).executeUpdate();
-        em.persist(new UserToken(signer, requestDto.getToken(), issuedCert, signedDocument));
-        log.info("signCertUser - issued new Certificate id: " + issuedCert.getId() + " for device: " + device.getId());
-        return issuedCert.getX509Certificate();
-    }*/
 
 }

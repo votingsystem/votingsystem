@@ -33,7 +33,7 @@ public class AppResourceEJB {
 
     @Inject private DashBoardEJB dashBoardBean;
 
-    @GET @Path("/androidClient")
+    @GET @Path("/android-client")
     public Response androidClient(@QueryParam("androidClientLoaded") @DefaultValue("false") Boolean androidClientLoaded,
                       @Context ServletContext context, @Context HttpServletRequest req,
                       @Context HttpServletResponse resp) throws ServletException, IOException, URISyntaxException {
@@ -49,7 +49,7 @@ public class AppResourceEJB {
         }
     }
 
-    @GET @Path("/userDashboard")
+    @GET @Path("/user-dashboard")
     @Produces(MediaType.APPLICATION_JSON)
     public Response user(@Context ServletContext context, @Context HttpServletRequest req,
                          @Context HttpServletResponse resp) throws ServletException, IOException {
@@ -58,7 +58,7 @@ public class AppResourceEJB {
         return Response.ok().entity(JSON.getMapper().writeValueAsBytes(dto)).build();
     }
 
-    @GET @Path("/userDashboard/hoursAgo/{numHours}")
+    @GET @Path("/user-dashboard/hours-ago/{numHours}")
     @Produces(MediaType.APPLICATION_JSON)
     public Response user(@PathParam("numHours") Integer numHours, @Context ServletContext context,
              @Context HttpServletRequest req, @Context HttpServletResponse resp) throws ServletException, IOException {
@@ -66,6 +66,5 @@ public class AppResourceEJB {
         DashBoardDto dto = dashBoardBean.getUserInfo(timePeriod);
         return Response.ok().entity(JSON.getMapper().writeValueAsBytes(dto)).build();
     }
-
 
 }

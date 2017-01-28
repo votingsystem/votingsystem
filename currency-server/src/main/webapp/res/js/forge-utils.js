@@ -107,6 +107,9 @@ RSAUtil.prototype.decryptMessage = function(messageJSON) {
     if(decryptedMsg.content && decryptedMsg.content.data) {
         var encryptedContentJSON = toJSON(decryptedMsg.content.data);
 
+
+        console.log("encryptedContentJSON: ", encryptedContentJSON);
+
         if(encryptedContentJSON.socketOperation != null)
             messageJSON.socketOperation = encryptedContentJSON.socketOperation;
         if(encryptedContentJSON.operation != null)
@@ -131,8 +134,8 @@ RSAUtil.prototype.decryptMessage = function(messageJSON) {
             messageJSON.deviceToName = encryptedContentJSON.deviceToName;
         if(encryptedContentJSON.message != null)
             messageJSON.message = encryptedContentJSON.message;
-        if(encryptedContentJSON.signedMessageBase64 != null)
-            messageJSON.signedMessageBase64 = encryptedContentJSON.signedMessageBase64;
+        if(encryptedContentJSON.base64Data != null)
+            messageJSON.base64Data = encryptedContentJSON.base64Data;
         if(encryptedContentJSON.subject != null)
             messageJSON.subject = encryptedContentJSON.subject;
         if(encryptedContentJSON.publicKeyPEM != null)
@@ -157,6 +160,7 @@ RSAUtil.prototype.decryptMessage = function(messageJSON) {
     } else console.error("encrypted content not found")
 
     console.log("messageJSON: ", messageJSON);
+    return messageJSON;
 }
 
 vs.getPublicKeyBase64 = function(publicKey) {
@@ -173,6 +177,7 @@ vs.extractUserInfoFromCert = function(x509Certificate) {
         if (subjectAttrs[i].type === forge.pki.oids.givenName) result.givenName = subjectAttrs[i].value
         if (subjectAttrs[i].type === forge.pki.oids.surname) result.surname = subjectAttrs[i].value
     }
+    result.fullName = result.givenName + " " + result.surname;
     return result
 }
 

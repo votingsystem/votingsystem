@@ -1,4 +1,4 @@
-package org.votingsystem.currency.web.ejb;
+package org.votingsystem.ejb;
 
 import org.bouncycastle.tsp.TSPException;
 import org.bouncycastle.tsp.TimeStampToken;
@@ -9,14 +9,13 @@ import org.votingsystem.crypto.cms.CMSSignedMessage;
 import org.votingsystem.crypto.cms.CMSUtils;
 import org.votingsystem.dto.CMSDto;
 import org.votingsystem.dto.OperationCheckerDto;
-import org.votingsystem.ejb.SignatureService;
-import org.votingsystem.ejb.SignerInfoService;
 import org.votingsystem.model.CMSDocument;
 import org.votingsystem.model.Signature;
 import org.votingsystem.model.SignedDocument;
 import org.votingsystem.model.User;
 import org.votingsystem.throwable.ValidationException;
 import org.votingsystem.util.Constants;
+import org.votingsystem.util.CurrencyOperation;
 import org.votingsystem.util.Messages;
 
 import javax.annotation.PostConstruct;
@@ -27,6 +26,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import java.io.File;
 import java.io.FileInputStream;
+import java.math.BigInteger;
 import java.security.KeyStore;
 import java.security.PrivateKey;
 import java.security.PublicKey;
@@ -48,7 +48,7 @@ public class CmsEJB {
 
     @PersistenceContext
     private EntityManager em;
-    @Inject private ConfigCurrencyServer config;
+    @Inject private Config config;
     @Inject private SignatureService signatureService;
     @Inject private SignerInfoService signerInfoService;
 
@@ -78,21 +78,32 @@ public class CmsEJB {
     }
 
     @TransactionAttribute(REQUIRES_NEW)
-    public CMSDto validateCMS(CMSSignedMessage cmsSignedMessage, SignedDocumentType documentType) throws Exception {
+    public CMSDto validateCMS(CMSSignedMessage cmsSignedMessage, SignedDocumentType documentType)
+            throws Exception {
+        if(documentType == null)
+            documentType = SignedDocumentType.SIGNED_DOCUMENT;
         if (cmsSignedMessage.isValidSignature() != null) {
             List<CMSDocument> documentList = em.createNamedQuery(CMSDocument.FIND_BY_MESSAGE_DIGEST)
                     .setParameter("messageDigest", cmsSignedMessage.getContentDigestStr()).getResultList();
             if(!documentList.isEmpty())
                 throw new ValidationException(Messages.currentInstance().get("cmsDigestRepeatedErrorMsg",
                         cmsSignedMessage.getContentDigestStr()));
-            CMSDto cmsDto = validateSignersCerts(cmsSignedMessage);
-
 
             OperationCheckerDto operationDto = cmsSignedMessage.getSignedContent(OperationCheckerDto.class);
             log.info("operation: " + operationDto.getOperation().getType());
 
+            User.Type userType = User.Type.USER;
+            if(operationDto.getOperation().isCurrencyOperation()) {
+                switch ((CurrencyOperation)operationDto.getOperation().getType()) {
+                    case SESSION_CERTIFICATION:
+                        userType = User.Type.ENTITY;
+                        break;
+                }
+            }
+            CMSDto cmsDto = validateSignersCerts(cmsSignedMessage, operationDto.getOperation().getEntityId(), userType);
+
             CMSDocument cmsDocument = new CMSDocument(cmsSignedMessage);
-            cmsDocument.setIndication(SignedDocument.Indication.TOTAL_PASSED).setSignedDocumentType(SignedDocumentType.SIGNED_DOCUMENT);
+            cmsDocument.setIndication(SignedDocument.Indication.TOTAL_PASSED).setSignedDocumentType(documentType);
             em.persist(cmsDocument);
 
             for(Signature signature : cmsDto.getSignatures()) {
@@ -105,10 +116,10 @@ public class CmsEJB {
         } else throw new ValidationException("invalid CMSDocument");
     }
 
-    public CMSDto validateSignersCerts(CMSSignedMessage signedMessage) throws Exception {
+    public CMSDto validateSignersCerts(CMSSignedMessage signedMessage, String entityId, User.Type userType) throws Exception {
         if(signedMessage.getSignatures().isEmpty())
             throw new ValidationException("document without signatures");
-        String signerNumId = signedMessage.getFirstSignature().getSigner().getNumId();
+        BigInteger signerNumId = signedMessage.getFirstSignature().getSigner().getX509Certificate().getSerialNumber();
         CMSDto cmsDto = new CMSDto();
         for(Signature signature: signedMessage.getSignatures()) {
             User signer = signature.getSigner();
@@ -116,12 +127,12 @@ public class CmsEJB {
                 validateToken(signer.getTimeStampToken());
             else log.info("signature without timestamp - signer: " + signer.getX509Certificate().getSubjectDN());
             signerInfoService.verifyUserCertificate(signer);
-            signature.setSigner(signerInfoService.checkSigner(signer.getX509Certificate(), User.Type.USER, null));
+            signature.setSigner(signerInfoService.checkSigner(signer.getX509Certificate(), userType, entityId));
             if(signer.isAnonymousUser()) {
                 log.log(Level.FINE, "anonymous signer: " + signer.getX509Certificate().getSubjectDN());
                 cmsDto.setFirstSignature(signature).setAnonymousSignature(signature);
             } else {
-                if(signer.getNumId().equals(signerNumId))
+                if(signer.getX509Certificate().getSerialNumber().equals(signerNumId))
                     cmsDto.setFirstSignature(signature);
                 cmsDto.addSignature(signature);
             }
@@ -142,6 +153,14 @@ public class CmsEJB {
         TimeStampToken timeStampToken = CMSUtils.getTimeStampToken(cmsGenerator.getSignatureMechanism(), contentToSign,
                 config.getTimestampServiceURL());
         return cmsGenerator.signDataWithTimeStamp(contentToSign, timeStampToken);
+    }
+
+    public CMSDocument signAndSave(byte[] contentToSign, SignedDocumentType signedDocumentType) throws Exception {
+        CMSSignedMessage cmsSignedMessage = signDataWithTimeStamp(contentToSign);
+        CMSDocument cmsDocument = new CMSDocument(cmsSignedMessage);
+        cmsDocument.setIndication(SignedDocument.Indication.LOCAL_SIGNATURE).setSignedDocumentType(signedDocumentType);
+        em.persist(cmsDocument);
+        return cmsDocument;
     }
 
     public CMSSignedMessage signData(byte[] contentToSign) throws Exception {

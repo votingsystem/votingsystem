@@ -21,7 +21,6 @@ import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.cert.X509Certificate;
 import java.time.ZonedDateTime;
-import java.util.Base64;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
@@ -49,7 +48,7 @@ public class MessageDto {
     private String deviceToName;
     private String message;
     private String encryptedMessage;
-    private String signedMessageBase64;
+    private String base64Data;
     private String subject;
     private String publicKeyPEM;
     private AESParamsDto aesParams;
@@ -81,7 +80,7 @@ public class MessageDto {
     }
 
     public MessageDto getResponse(Integer statusCode, String message, String deviceFromUUID,
-                                  byte[] signedMessage, OperationTypeDto operation) throws Exception {
+                  String base64Data, OperationTypeDto operation) throws Exception {
         MessageDto socketMessageDto = new MessageDto();
         socketMessageDto.setSocketOperation(SocketOperation.MSG_TO_DEVICE);
         socketMessageDto.setStatusCode(ResponseDto.SC_PROCESSING);
@@ -89,8 +88,7 @@ public class MessageDto {
         MessageDto encryptedDto = new MessageDto();
         encryptedDto.setStatusCode(statusCode);
         encryptedDto.setMessage(message);
-        if(signedMessage != null)
-            encryptedDto.setSignedMessageBase64(Base64.getEncoder().encodeToString(signedMessage));
+        encryptedDto.setBase64Data(base64Data);
         encryptedDto.setDeviceFromUUID(deviceFromUUID);
         encryptedDto.setOperation(operation);
         encryptMessage(encryptedDto);
@@ -280,12 +278,12 @@ public class MessageDto {
         return this;
     }
 
-    public String getSignedMessageBase64() {
-        return signedMessageBase64;
+    public String getBase64Data() {
+        return base64Data;
     }
 
-    public MessageDto setSignedMessageBase64(String signedMessageBase64) {
-        this.signedMessageBase64 = signedMessageBase64;
+    public MessageDto setBase64Data(String base64Data) {
+        this.base64Data = base64Data;
         return this;
     }
 
@@ -425,8 +423,8 @@ public class MessageDto {
             deviceFromName = decryptedDto.getDeviceFromName();
         if(decryptedDto.getDeviceFromUUID() != null)
             deviceFromUUID = decryptedDto.getDeviceFromUUID();
-        if(decryptedDto.getSignedMessageBase64() != null)
-            signedMessageBase64 = decryptedDto.getSignedMessageBase64();
+        if(decryptedDto.getBase64Data() != null)
+            base64Data = decryptedDto.getBase64Data();
         if(decryptedDto.getCurrencySet() != null)
             currencySet = CurrencyDto.deSerialize(decryptedDto.getCurrencyDtoSet());
         if(decryptedDto.getSubject() != null)
@@ -448,6 +446,5 @@ public class MessageDto {
         timeLimited = decryptedDto.isTimeLimited();
         this.encryptedMessage = null;
     }
-
 
 }

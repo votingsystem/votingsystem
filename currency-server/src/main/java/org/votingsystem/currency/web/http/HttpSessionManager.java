@@ -22,7 +22,9 @@ public class HttpSessionManager implements HttpSessionListener {
 
     private static Logger log = Logger.getLogger(HttpSessionManager.class.getName());
 
-    private static final ConcurrentHashMap<String, HttpSession> sessionMap = new ConcurrentHashMap();
+    private static final ConcurrentHashMap<String, HttpSession> userSessionMap = new ConcurrentHashMap();
+    private static final ConcurrentHashMap<String, HttpSession> sessionIdMap = new ConcurrentHashMap();
+
     private static HttpSessionManager INSTANCE;
 
     public HttpSessionManager() {
@@ -37,7 +39,8 @@ public class HttpSessionManager implements HttpSessionListener {
         String userUUID = UUID.randomUUID().toString();
         sessionEvent.getSession().setAttribute(Constants.USER_UUID, userUUID);
         log.info("session id: " + sessionEvent.getSession().getId() + " - userUUID: " + userUUID);
-        sessionMap.put(userUUID, sessionEvent.getSession());
+        userSessionMap.put(userUUID, sessionEvent.getSession());
+        sessionIdMap.put(sessionEvent.getSession().getId(), sessionEvent.getSession());
     }
 
     @Override
@@ -57,11 +60,13 @@ public class HttpSessionManager implements HttpSessionListener {
         } catch (Exception ex) {
             log.log(Level.SEVERE,"EXCEPTION CLOSING CONNECTION: " + ex.getMessage());
         }
-        sessionMap.remove(sessionEvent.getSession().getId());
+        String userUUID = (String)sessionEvent.getSession().getAttribute(Constants.USER_KEY);
+        userSessionMap.remove(userUUID);
+        sessionIdMap.remove(sessionEvent.getSession().getId());
     }
 
     public HttpSession getHttpSession(String userUUID) {
-        return sessionMap.get(userUUID);
+        return userSessionMap.get(userUUID);
     }
 
     public static HttpSessionManager getInstance() {
@@ -69,17 +74,20 @@ public class HttpSessionManager implements HttpSessionListener {
     }
 
     public int getSessionCount() {
-        return sessionMap.size();
+        return userSessionMap.size();
     }
 
     public Set<String> getSessionUUIDSet() {
-        return sessionMap.keySet();
+        return userSessionMap.keySet();
     }
 
-    public void setUserInSession(String userUUID, User user) {
-        if(sessionMap.containsKey(userUUID)) {
-            sessionMap.get(userUUID).setAttribute(Constants.USER_KEY, user);
-        } else log.log(Level.SEVERE, "HttpSession not found - userUUID: " + userUUID);
+    public void updateSession(String previousUserUUID, String newUserUUID, String httpSessionId, User user) {
+        log.info("httpSession id: " + httpSessionId + " - previousUserUUID: " + previousUserUUID + " - newUserUUID: " + newUserUUID);
+        HttpSession httpSession = sessionIdMap.get(httpSessionId);
+        httpSession.setAttribute(Constants.USER_UUID, newUserUUID);
+        httpSession.setAttribute(Constants.USER_KEY, user);
+        userSessionMap.remove(previousUserUUID);
+        userSessionMap.put(newUserUUID, httpSession);
     }
 
 }

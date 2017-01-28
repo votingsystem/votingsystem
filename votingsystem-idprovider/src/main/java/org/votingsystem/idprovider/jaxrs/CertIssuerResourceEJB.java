@@ -1,7 +1,14 @@
 package org.votingsystem.idprovider.jaxrs;
 
+import org.votingsystem.crypto.cms.CMSSignedMessage;
+import org.votingsystem.ejb.CmsEJB;
+import org.votingsystem.ejb.SignatureService;
+import org.votingsystem.http.HttpRequest;
+import org.votingsystem.http.MediaType;
 import org.votingsystem.idprovider.ejb.CertIssuerEJB;
 import org.votingsystem.model.SignedDocument;
+import org.votingsystem.util.FileUtils;
+
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
@@ -22,11 +29,20 @@ public class CertIssuerResourceEJB {
     private static final Logger log = Logger.getLogger(CertIssuerResourceEJB.class.getName());
 
     @Inject private CertIssuerEJB certIssuer;
+    @Inject CmsEJB cmsBean;
+    @Inject SignatureService signatureService;
 
-    @POST @Path("/browser-csr")
-    public Response browserCsr(@Context HttpServletRequest req, @Context HttpServletResponse res,
-                               SignedDocument signedDocument) throws Exception {
-        SignedDocument response = certIssuer.signBrowserCSR(signedDocument);
+    @POST @Path("/session-csr")
+    public Response sessionCsrXML(@Context HttpServletRequest req, @Context HttpServletResponse res) throws Exception {
+        String reqContentType = HttpRequest.getContentType(req, false);
+        SignedDocument signedDocument = null;
+        if(MediaType.PKCS7_SIGNED.equals(reqContentType)) {
+            CMSSignedMessage cmsSignedMessage = CMSSignedMessage.FROM_PEM(req.getInputStream());
+            signedDocument = cmsBean.validateCMS(cmsSignedMessage, null).getCmsDocument();
+        } else {
+            signedDocument = signatureService.validateXAdESAndSave(FileUtils.getBytesFromStream(req.getInputStream()));
+        }
+        SignedDocument response = certIssuer.signSessionCSR(signedDocument);
         return Response.ok().type(javax.ws.rs.core.MediaType.APPLICATION_XML_TYPE).entity(response.getBody()).build();
     }
 

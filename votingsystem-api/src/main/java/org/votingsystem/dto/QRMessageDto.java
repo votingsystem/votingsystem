@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import org.votingsystem.crypto.HashUtils;
+import org.votingsystem.qr.QRUtils;
 import org.votingsystem.util.Constants;
 import org.votingsystem.util.OperationType;
 
@@ -26,16 +27,6 @@ public class QRMessageDto<T> implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    public static final String DEVICE_ID_KEY          = "did";
-    public static final String ITEM_ID_KEY            = "iid";
-    public static final String OPERATION_CODE_KEY     = "op";
-    public static final String PUBLIC_KEY_KEY         = "pk";
-    public static final String SYSTEM_ENTITY_ID_KEY   = "eid";
-    public static final String MSG_KEY                = "msg";
-    public static final String URL_KEY                = "url";
-    public static final String QR_UUID_KEY            = "uid";
-
-
     @JsonIgnore private OperationType operationType;
     @JsonIgnore private T data;
     @JsonIgnore private String originRevocationHash;
@@ -43,6 +34,7 @@ public class QRMessageDto<T> implements Serializable {
     @JsonIgnore private AESParamsDto aesParams;;
 
     private String systemEntityID;
+    private String operation;
     private String operationCode;
     private String deviceUUID;
     private String itemId;
@@ -64,22 +56,24 @@ public class QRMessageDto<T> implements Serializable {
 
     public static QRMessageDto FROM_QR_CODE(String msg) {
         QRMessageDto qrMessageDto = new QRMessageDto();
-        if (msg.contains(DEVICE_ID_KEY + "="))
-            qrMessageDto.setDeviceUUID(msg.split(DEVICE_ID_KEY + "=")[1].split(";")[0]);
-        if (msg.contains(ITEM_ID_KEY + "="))
-            qrMessageDto.setItemId(msg.split(ITEM_ID_KEY + "=")[1].split(";")[0]);
-        if (msg.contains(SYSTEM_ENTITY_ID_KEY + "="))
-            qrMessageDto.setSystemEntityID(msg.split(SYSTEM_ENTITY_ID_KEY + "=")[1].split(";")[0]);
-        if (msg.contains(OPERATION_CODE_KEY + "="))
-            qrMessageDto.setOperationCode(msg.split(OPERATION_CODE_KEY + "=")[1].split(";")[0]);
-        if (msg.contains(PUBLIC_KEY_KEY + "="))
-            qrMessageDto.setPublicKeyBase64(msg.split(PUBLIC_KEY_KEY + "=")[1].split(";")[0]);
-        if (msg.contains(MSG_KEY + "="))
-            qrMessageDto.setMsg(msg.split(MSG_KEY + "=")[1].split(";")[0]);
-        if (msg.contains(QR_UUID_KEY + "="))
-            qrMessageDto.setUUID(msg.split(QR_UUID_KEY + "=")[1].split(";")[0]);
-        if (msg.contains(URL_KEY + "="))
-            qrMessageDto.setUrl(msg.split(URL_KEY + "=")[1].split(";")[0]);
+        if (msg.contains(QRUtils.DEVICE_ID_KEY + "="))
+            qrMessageDto.setDeviceUUID(msg.split(QRUtils.DEVICE_ID_KEY + "=")[1].split(";")[0]);
+        if (msg.contains(QRUtils.ITEM_ID_KEY + "="))
+            qrMessageDto.setItemId(msg.split(QRUtils.ITEM_ID_KEY + "=")[1].split(";")[0]);
+        if (msg.contains(QRUtils.OPERATION_KEY + "="))
+            qrMessageDto.setOperation(msg.split(QRUtils.OPERATION_KEY + "=")[1].split(";")[0]);
+        if (msg.contains(QRUtils.SYSTEM_ENTITY_KEY + "="))
+            qrMessageDto.setSystemEntityID(msg.split(QRUtils.SYSTEM_ENTITY_KEY + "=")[1].split(";")[0]);
+        if (msg.contains(QRUtils.OPERATION_CODE_KEY + "="))
+            qrMessageDto.setOperationCode(msg.split(QRUtils.OPERATION_CODE_KEY + "=")[1].split(";")[0]);
+        if (msg.contains(QRUtils.PUBLIC_KEY_KEY + "="))
+            qrMessageDto.setPublicKeyBase64(msg.split(QRUtils.PUBLIC_KEY_KEY + "=")[1].split(";")[0]);
+        if (msg.contains(QRUtils.MSG_KEY + "="))
+            qrMessageDto.setMsg(msg.split(QRUtils.MSG_KEY + "=")[1].split(";")[0]);
+        if (msg.contains(QRUtils.UUID_KEY + "="))
+            qrMessageDto.setUUID(msg.split(QRUtils.UUID_KEY + "=")[1].split(";")[0]);
+        if (msg.contains(QRUtils.URL_KEY + "="))
+            qrMessageDto.setUrl(msg.split(QRUtils.URL_KEY + "=")[1].split(";")[0]);
         return qrMessageDto;
     }
 
@@ -233,4 +227,14 @@ public class QRMessageDto<T> implements Serializable {
     public void setDeviceUUID(String deviceUUID) {
         this.deviceUUID = deviceUUID;
     }
+
+    public String getOperation() {
+        return operation;
+    }
+
+    public QRMessageDto setOperation(String operation) {
+        this.operation = operation;
+        return this;
+    }
+
 }

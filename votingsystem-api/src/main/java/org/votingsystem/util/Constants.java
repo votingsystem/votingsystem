@@ -25,17 +25,18 @@ public class Constants {
     public static final String DEVICE_OID                              = VOTING_SYSTEM_BASE_OID + 4;
     public static final String ANON_CERT_OID                           = VOTING_SYSTEM_BASE_OID + 5;
 
-    public static final int KEY_SIZE = 2048;
-    public static final String SIG_NAME = "RSA";
-    public static final String ALGORITHM_RNG = "SHA1PRNG";
+    public static final int KEY_SIZE                         = 2048;
+    public static final String SIG_NAME                      = "RSA";
+    public static final String ALGORITHM_RNG                 = "SHA1PRNG";
     public static final String CERT_GENERATION_SIG_ALGORITHM = "SHA256WithRSAEncryption";
-    public static final String SIGNATURE_ALGORITHM = "SHA256withRSA";
-    public static final String DATA_DIGEST_ALGORITHM = "SHA256";
+    public static final String SIGNATURE_ALGORITHM           = "SHA256withRSA";
+    public static final String DATA_DIGEST_ALGORITHM         = "SHA256";
 
-    public static final String QR_OPERATIONS = "QR_OPERATIONS_KEY";
-    public static final String USER_UUID     = "USER_UUID_KEY";
-    public static final String CSR           = "CSR_KEY";
-    public static final String USER_KEY      = "USER_KEY";
+    public static final String QR_OPERATIONS       = "QR_OPERATIONS_KEY";
+    public static final String USER_UUID           = "USER_UUID_KEY";
+    public static final String CSR                 = "CSR_KEY";
+    public static final String USER_KEY            = "USER_KEY";
+    public static final String BROWSER_PLUBLIC_KEY = "BROWSER_PLUBLIC_KEY";
 
     //For tests environments
     public static final String USER_CERT_ALIAS = "userKey";
@@ -55,7 +56,7 @@ public class Constants {
     public static final String ANON_CERTIFICATE_REQUEST_FILE_NAME = "anon-cert-request" + ":" + MediaType.XML;
     public static final String CURRENCY_REQUEST_FILE_NAME         = "currency-request" + ":" + MediaType.XML;
     public static final String CMS_FILE_NAME                      = "cms" + ":" + MediaType.PKCS7_SIGNED;
-    public static final String XML_SIGNED_getTransactionServiceURLFILE_NAME               = "signed" + ":" + MediaType.XML;
+    public static final String XML_SIGNED_FILE_NAME               = "signed" + ":" + MediaType.XML;
     public static final String BUNDLE_BASE_NAME                   = "org.votingsystem.messages";
 
     public static final int SIGNED_MAX_FILE_SIZE_KB = 512;

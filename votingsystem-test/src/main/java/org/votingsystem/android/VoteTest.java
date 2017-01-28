@@ -78,7 +78,7 @@ public class VoteTest extends BaseTest {
         IdentityRequestDto identityRequest = new IdentityRequestDto();
 
         SystemEntityDto identityEntity = new SystemEntityDto(
-                org.votingsystem.Constants.ID_PROVIDER_ENTITY_ID, SystemEntityType.VOTING_ID_PROVIDER);
+                org.votingsystem.Constants.ID_PROVIDER_ENTITY_ID, SystemEntityType.ID_PROVIDER);
         SystemEntityDto callbackEntity = new SystemEntityDto(
                 org.votingsystem.Constants.VOTING_SERVICE_ENTITY_ID, SystemEntityType.VOTING_SERVICE_PROVIDER);
         identityRequest.setIndentityServiceEntity(identityEntity).setCallbackServiceEntityId(callbackEntity);

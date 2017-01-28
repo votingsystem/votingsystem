@@ -3,7 +3,6 @@ package org.votingsystem.pkcs7;
 import org.votingsystem.BaseTest;
 import org.votingsystem.crypto.MockDNIe;
 import org.votingsystem.crypto.cms.CMSSignedMessage;
-import org.votingsystem.dto.OperationCheckerDto;
 import org.votingsystem.dto.OperationDto;
 import org.votingsystem.dto.OperationTypeDto;
 import org.votingsystem.dto.ResponseDto;
@@ -11,7 +10,6 @@ import org.votingsystem.http.HttpConn;
 import org.votingsystem.http.MediaType;
 import org.votingsystem.util.CurrencyOperation;
 import org.votingsystem.util.JSON;
-import org.votingsystem.util.SystemOperation;
 
 import java.util.UUID;
 import java.util.logging.Logger;
@@ -21,61 +19,72 @@ public class SignatureTest extends BaseTest {
     private static Logger log =  Logger.getLogger(SignatureTest.class.getName());
 
     private static String forge_pkcs7PEM = "-----BEGIN PKCS7-----\n" +
-            "MIIIPgYJKoZIhvcNAQcCoIIILzCCCCsCAQExDzANBglghkgBZQMEAgEFADBjBgkq\n" +
-            "hkiG9w0BBwGgVgRUeyJvcGVyYXRpb24iOnsidHlwZSI6IkNMT1NFX1NFU1NJT04i\n" +
-            "fSwidXVpZCI6ImU3MTRmYWE5LTFhNGYtNGI3OC05MmViLTAzZTE4ZTQ1YTExYiJ9\n" +
-            "oIIDWjCCA1YwggI+oAMCAQICCFg6kuEHlP1gMA0GCSqGSIb3DQEBCwUAMCwxGjAY\n" +
-            "BgNVBAMMEUZBS0UgUk9PVCBETkllIENBMQ4wDAYDVQQLDAVDZXJ0czAeFw0xNzAx\n" +
-            "MTgwODAwMTFaFw0xNzAxMTgyMzAwMDBaME0xHDAaBgNVBAsME2Jyb3dzZXItY2Vy\n" +
-            "dGlmaWNhdGUxLTArBgNVBAUTJDIwNWUwZTA3LWYwMjItNDRlOS05YjMyLTFmZTE2\n" +
-            "M2M1MTczMjCBnzANBgkqhkiG9w0BAQEFAAOBjQAwgYkCgYEAp9uSiKSEI7vXbPKw\n" +
-            "AW0HfUfxZXoo2OPegdcC58srpIeI93qAcXEAQPh5nL0Q7xWmBgwnjRdfhydfdJ6r\n" +
-            "ydpwqxjU2BilincT/lMJwpA54mbvxkH+IdH8ls66JhPi2VdmIzjZ3Bja7i4C/+R1\n" +
-            "U/iz2601cVZPnNjYEaWimDd+FeECAwEAAaOB3jCB2zBbBgNVHSMEVDBSgBQ9mNuH\n" +
-            "s0MLYMMDMD1iarJr0LxcMKEwpC4wLDEaMBgGA1UEAwwRRkFLRSBST09UIEROSWUg\n" +
-            "Q0ExDjAMBgNVBAsMBUNlcnRzgghvzDD4vCDU6jA/BggrBgEFBQcBAQQzMDEwLwYI\n" +
-            "KwYBBQUHMAGGI2h0dHBzOi8vMTkyLjE2OC4xLjUvaWRwcm92aWRlci9vY3NwMB0G\n" +
-            "A1UdDgQWBBS40tHq4pdJE9ug64XqTsjPHoahuTAMBgNVHRMBAf8EAjAAMA4GA1Ud\n" +
-            "DwEB/wQEAwIFoDANBgkqhkiG9w0BAQsFAAOCAQEAzuDVfyNcOoBnzFypr3OqirTe\n" +
-            "4MIDnccJSSztmuwkZfP+NcxuTzA6ub6Lx6h+mPSPTca9B9jIl/OoO7Db37np8Fzj\n" +
-            "gwSkneeOCQpWWjBkBEt9OYFSCTtj4R7adMnzWIm53IUB1EqBPVsxvvJLnNWRrQKn\n" +
-            "tRPg5ET8l+Dvi3HAvC27602i5rvEeeRiPLSUwmR+MOykWn02EgnHeyCXSiaplrBL\n" +
-            "xEQ2Y4QcFgQ45n21S7/IAa1BANoSN9t59x3YLl2DuBbH+mRR5XEy8JS4Pst+CHW2\n" +
-            "gQoee6gvvdeCU0wws3VS+Hr18BEePyAu5WKO/vGtV4WGoo4T5EdrY7JDfwoipTGC\n" +
-            "BFAwggRMAgEBMDgwLDEaMBgGA1UEAwwRRkFLRSBST09UIEROSWUgQ0ExDjAMBgNV\n" +
-            "BAsMBUNlcnRzAghYOpLhB5T9YDANBglghkgBZQMEAgEFAKCCA2owGAYJKoZIhvcN\n" +
-            "AQkDMQsGCSqGSIb3DQEHATAvBgkqhkiG9w0BCQQxIgQg8bjYwbsjTWs3KVnuGXRB\n" +
-            "ilgPYRJ8URiQQHS9GgOeYDEwHAYJKoZIhvcNAQkFMQ8XDTE3MDExODA5MDAyNFow\n" +
-            "ggL9BgsqhkiG9w0BCRACDjGCAuwwggLoBgkqhkiG9w0BBwKgggLZMIIC1QIBAzEP\n" +
-            "MA0GCWCGSAFlAwQCAQUAMIGBBgsqhkiG9w0BCRABBKByJHAEbjBsAgEBBgaCEoQ3\n" +
-            "hnowMTANBglghkgBZQMEAgEFAAQg8bjYwbsjTWs3KVnuGXRBilgPYRJ8URiQQHS9\n" +
-            "GgOeYDECCET3Ecswj6arGA8yMDE3MDExODA4MDAyNFowCwIBAYACAfSBAgH0AgQA\n" +
-            "u2hVMYICOTCCAjUCAQEwNjAsMRowGAYDVQQDDBFGQUtFIFJPT1QgRE5JZSBDQTEO\n" +
-            "MAwGA1UECwwFQ2VydHMCBgFY6QWksjANBglghkgBZQMEAgEFAKCB0zAaBgkqhkiG\n" +
-            "9w0BCQMxDQYLKoZIhvcNAQkQAQQwHAYJKoZIhvcNAQkFMQ8XDTE3MDExODA4MDAy\n" +
-            "NFowLQYJKoZIhvcNAQk0MSAwHjANBglghkgBZQMEAgEFAKENBgkqhkiG9w0BAQEF\n" +
-            "ADAvBgkqhkiG9w0BCQQxIgQgxpno6Z/yv7Kga3K4varZre7S6CxHzNV+HEEOY9xm\n" +
-            "9xgwNwYLKoZIhvcNAQkQAi8xKDAmMCQwIgQgUy2JTVFUgmjh8GAaqbZYf0sIlf4+\n" +
-            "6ycaEo9TpJMgIQUwDQYJKoZIhvcNAQEBBQAEggEAAn+D2sGeG2OBh04nhnk9PO44\n" +
-            "g0n+4UhlzCvFaPx+uqA0EU996217ImegME4IyTeTEEjfukUY53eo+uZjr6od4o+U\n" +
-            "2+xzxUPziQf2JsE7wAROD1LpZ04Ct/w4OSQSxsnVCXzkWVbmkLWpFEs2wSgK0RRM\n" +
-            "ZT+ivAZXumFD3+Ov37ZwihXFZVP6pBhWFZ1ymw4FkeT5mMOf41KW9mDemO5/Hfha\n" +
-            "70R5ox1dMeRYR82r4ecs43baaUAU9FwkT+pGiqIltGrKnJBMB0Pr2QoulB3PRZie\n" +
-            "h2n1Hz/ujIzTwnRuuybk4xSMOxyUbpGsLCkeEmBFl/tKMzX65xV8roKCAcPTtqEA\n" +
-            "MA0GCSqGSIb3DQEBAQUABIGASRfBRHR/Z4tH+KMuwsRBaG5PFGCb/wQ0gJc7LrQq\n" +
-            "Ds+d/+I3twsUnxabXboOMbOGcuI+YZqZk0NvTtCSpsqRi1JQp+G4xoQ1FDviAZ85\n" +
-            "wsjYloYJbCtHby7ZCHovFf1lyK+6rGzphCeg/jFstiqRk/2vGVz/SI7mTfdo5pwR\n" +
-            "lHw=\n" +
+            "MIIKIAYJKoZIhvcNAQcCoIIKETCCCg0CAQExDzANBglghkgBZQMEAgEFADBvBgkq\n" +
+            "hkiG9w0BBwGgYgRgeyJvcGVyYXRpb24iOnsidHlwZSI6IlNFU1NJT05fQ0VSVElG\n" +
+            "SUNBVElPTiJ9LCJ1c2VyVVVJRCI6ImIzODNkZWQ3LTAwNzctNGI1ZS1iNmY2LWRk\n" +
+            "OWQ1ZmU2NTQxMSJ9oIIErzCCBKswggOToAMCAQICCBlqwGNgjwR/MA0GCSqGSIb3\n" +
+            "DQEBCwUAMCwxGjAYBgNVBAMMEUZBS0UgUk9PVCBETkllIENBMQ4wDAYDVQQLDAVD\n" +
+            "ZXJ0czAeFw0xNzAxMjcyMDA4MzRaFw0xNzAxMjcyMzAwMDBaMFMxHDAaBgNVBAsM\n" +
+            "E2Jyb3dzZXItY2VydGlmaWNhdGUxEDAOBgNVBAQMB0dhcmPDrWExDTALBgNVBCoM\n" +
+            "BEpvc2UxEjAQBgNVBAUTCTA4ODg4ODg4RDCCASIwDQYJKoZIhvcNAQEBBQADggEP\n" +
+            "ADCCAQoCggEBAKoOcooYIfn32uKWJK3q6HITErdQAOOA4kXkcCCCBmtAlkVT1Wzs\n" +
+            "ZViSKP0mOTgrF1vG+vt/3S/Ke9Fajk17/ZoT1V9+xetP/cSfqtQ7TYToolM/Qm6y\n" +
+            "MT/HImxrfY4BWk9OXrnby/xM7or2rkcuGnq5NH2v5YXeyrxVg5uMmgmFg32nIeXz\n" +
+            "im8i7ksBvGy9b3p5+tz2iGHSFJPNynhIgHWpzO+ZiyLWnpBg3Qs4pBM2i348wMT8\n" +
+            "SuU83V0ffYQ8q61avJxljcrzjvW8bHDwIWuwa27T3tNS5qY2rnxyj4Y2BPBoAug5\n" +
+            "fkKyb/NnCE9RHCoGpLFdrFroIG7fIk7UgXsCAwEAAaOCAagwggGkMFsGA1UdIwRU\n" +
+            "MFKAFD2Y24ezQwtgwwMwPWJqsmvQvFwwoTCkLjAsMRowGAYDVQQDDBFGQUtFIFJP\n" +
+            "T1QgRE5JZSBDQTEOMAwGA1UECwwFQ2VydHOCCG/MMPi8INTqMD8GCCsGAQUFBwEB\n" +
+            "BDMwMTAvBggrBgEFBQcwAYYjaHR0cHM6Ly8xOTIuMTY4LjEuNS9pZHByb3ZpZGVy\n" +
+            "L29jc3AwHQYDVR0OBBYEFF/y/niDjA0K82z69gsRHYmZDnxxMAwGA1UdEwEB/wQC\n" +
+            "MAAwDgYDVR0PAQH/BAQDAgWgMBIGCQAAAAAAAAAABQQFMQMBAf8wgbIGCQAAAAAA\n" +
+            "AAAAAwSBpDGBoQyBnnsiZGV2aWNlTmFtZSI6InRlc3AtYXBwbGljYXRpb24iLCJu\n" +
+            "aWYiOiIwODg4ODg4OEQiLCJnaXZlbm5hbWUiOiJKb3NlIiwic3VybmFtZSI6Ikdh\n" +
+            "cmPDrWEiLCJkZXZpY2VUeXBlIjoiTU9CSUxFIiwidXVpZCI6ImIzODNkZWQ3LTAw\n" +
+            "NzctNGI1ZS1iNmY2LWRkOWQ1ZmU2NTQxMSJ9MA0GCSqGSIb3DQEBCwUAA4IBAQCl\n" +
+            "qGGCYMHFSQXi+YWXwwhDEjc8+rYLZrWQFJdMEnOZGfqghxJUMDYWbyr0wLdb3fsE\n" +
+            "Fo/0N6BAI7wQdRupZE4eBOaC3pZQxKctGTcqi9LXR7bJ83L1XdORshTld63pCa98\n" +
+            "nKek3l1u07p0bNOFHP9/BvUinAOdxp8F5MS4oGZlqvxPtVbkO2LGoNDm4XaU9sZq\n" +
+            "jVDE9yjh3Hm9N9ccBtrFy7GZk64+uYNPVECGGozJ76D2ycEr8ic72/hAJA6+XIEw\n" +
+            "iJonl8aCdu54m2ohnhV0NuIhWiTf9a9envJnl2vpyLec5xsD5YhBhStgIZYf1BLI\n" +
+            "/jm+O+yIqbBnWaImE1kNMYIE0TCCBM0CAQEwODAsMRowGAYDVQQDDBFGQUtFIFJP\n" +
+            "T1QgRE5JZSBDQTEOMAwGA1UECwwFQ2VydHMCCBlqwGNgjwR/MA0GCWCGSAFlAwQC\n" +
+            "AQUAoIIDajAYBgkqhkiG9w0BCQMxCwYJKoZIhvcNAQcBMC8GCSqGSIb3DQEJBDEi\n" +
+            "BCC9Leu2mJgBEeXtf9rqlxzfDwQY22Y2PH1maf9pzECJWzAcBgkqhkiG9w0BCQUx\n" +
+            "DxcNMTcwMTI3MjEwODM1WjCCAv0GCyqGSIb3DQEJEAIOMYIC7DCCAugGCSqGSIb3\n" +
+            "DQEHAqCCAtkwggLVAgEDMQ8wDQYJYIZIAWUDBAIBBQAwgYEGCyqGSIb3DQEJEAEE\n" +
+            "oHIkcARuMGwCAQEGBoIShDeGejAxMA0GCWCGSAFlAwQCAQUABCC9Leu2mJgBEeXt\n" +
+            "f9rqlxzfDwQY22Y2PH1maf9pzECJWwIIMN5uDtW43r8YDzIwMTcwMTI3MjAwODM1\n" +
+            "WjALAgEBgAIB9IECAfQCBAFMA6wxggI5MIICNQIBATA2MCwxGjAYBgNVBAMMEUZB\n" +
+            "S0UgUk9PVCBETkllIENBMQ4wDAYDVQQLDAVDZXJ0cwIGAVjpBaSyMA0GCWCGSAFl\n" +
+            "AwQCAQUAoIHTMBoGCSqGSIb3DQEJAzENBgsqhkiG9w0BCRABBDAcBgkqhkiG9w0B\n" +
+            "CQUxDxcNMTcwMTI3MjAwODM1WjAtBgkqhkiG9w0BCTQxIDAeMA0GCWCGSAFlAwQC\n" +
+            "AQUAoQ0GCSqGSIb3DQEBAQUAMC8GCSqGSIb3DQEJBDEiBCB3temRJCmaEt1CwY7q\n" +
+            "Xd37QuNN3LxJNeLTdQxPsFeDHzA3BgsqhkiG9w0BCRACLzEoMCYwJDAiBCBTLYlN\n" +
+            "UVSCaOHwYBqptlh/SwiV/j7rJxoSj1OkkyAhBTANBgkqhkiG9w0BAQEFAASCAQB/\n" +
+            "0TAMZSIbvkoqrRLDq43x8BYbIgf/mloQyS2hfUDMXrtkeTT+xU1eO6sqrvhTfxEN\n" +
+            "ZrMoKLBWEVJ3pvc9T7p85Ob9WobdcHCIm/X/+3geFBKj5kw7RkmQI+HqFZL8LMLt\n" +
+            "xCmq9fCI/43uAOBelXqbTII7bIl7MkDSmODKHNKxR5blBt8E3m5y0yDQEqqZVoGL\n" +
+            "aJbDCpFqRS4KulnrImz0yNNiA62frh+iheP1HvG08Rg1+OI8TLIVR8jwAFOPRCCk\n" +
+            "5/lfJ3vaJKEe2c2X3fWoUoCiHnM+Mn1h2acxQvS17ZSJUkDobE0SEQemGsUK1d5I\n" +
+            "vC8X0h5ZaE357KmRvC0EoQAwDQYJKoZIhvcNAQEBBQAEggEAf29ZAeg244mHu5JO\n" +
+            "a9Qs7nV3kq/ygxpt9OH/u1z7A8GhYDmvHu/dgtS3I4ZYdxYplUk8igIRHcWz64PV\n" +
+            "LBbJyjlsnW2V910qKAPpsRKnsMPD20ZqlYxQtSGifbFFysklJgFnwg6JIhJO18Dl\n" +
+            "/og6xwW2QZxVGyo2tVY+K+cWiLF4Al+ptxv+BkPuPz3YgA6IQ8vebUmTf76Q2FQX\n" +
+            "CW6VMuAruffPQWX7B+Zn6jQ8A5C5n7qHWJvdX/6JSzIsnR1xriS5bV+td/dY51XE\n" +
+            "/ny3razcyxh2YnG6kGS2tnNGf+pTGSMjx7xtVv+QfeVLt+frcB6pDKGf+qIyagQy\n" +
+            "v/wZjQ==\n" +
             "-----END PKCS7-----";
 
 
 
     public static void main(String[] args) throws Exception {
         SignatureTest signatureTest = new SignatureTest();
-        CMSSignedMessage cmsSignedMessage = signatureTest.sign();
+        //CMSSignedMessage cmsSignedMessage = signatureTest.sign();
         //signatureTest.validate(cmsSignedMessage.toPEM());
-        signatureTest.sendToServer(cmsSignedMessage.toPEM());
-        //signatureTest.readPem();
+        //signatureTest.sendToServer(cmsSignedMessage.toPEM(), "http://votingsystem.ddns.net/currency-server/api/test/cms-document");
+        //signatureTest.sendToServer(cmsSignedMessage.toPEM(), "http://votingsystem.ddns.net/currency-server/api/device/init-browser-session");
+        signatureTest.readPem();
         System.exit(0);
     }
 
@@ -91,14 +100,12 @@ public class SignatureTest extends BaseTest {
 
     public CMSSignedMessage sign() throws Exception {
         SignatureBuilder signatureService = new SignatureBuilder(new MockDNIe("08888888D"));
-        OperationTypeDto operationType = new OperationTypeDto(CurrencyOperation.CLOSE_SESSION, null);
+        OperationTypeDto operationType = new OperationTypeDto(CurrencyOperation.INIT_BROWSER_SESSION, null);
         OperationDto operation = new OperationDto();
         operation.setOperation(operationType);
         operation.setUUID(UUID.randomUUID().toString());
         String operationStr = JSON.getMapper().writeValueAsString(operation);
         log.info("operation: " + operationStr);
-
-
 
         CMSSignedMessage cmsSignedMessage = signatureService.signDataWithTimeStamp(operationStr.getBytes());
         return cmsSignedMessage;
@@ -110,12 +117,11 @@ public class SignatureTest extends BaseTest {
                 cmsSignedMessage.getContentDigestStr());
     }
 
-    public void sendToServer(byte[] cmsPEMBytes) throws Exception {
+    public void sendToServer(byte[] cmsPEMBytes, String serviceURL) throws Exception {
         CMSSignedMessage cmsSignedMessage = CMSSignedMessage.FROM_PEM(cmsPEMBytes);
         log.info("isValidSignature: " + cmsSignedMessage.isValidSignature());
         //doPostRequest(byte[] byteArray, String contentType, String targetURL)
-        ResponseDto response = HttpConn.getInstance().doPostRequest(cmsPEMBytes, "application/pkcs7-signature",
-                "http://votingsystem.ddns.net/currency-server/api/test-signed/cms");
+        ResponseDto response = HttpConn.getInstance().doPostRequest(cmsPEMBytes, MediaType.PKCS7_SIGNED, serviceURL);
         log.info("status: " + response.getStatusCode() + " - message: " + response.getMessage());
     }
 

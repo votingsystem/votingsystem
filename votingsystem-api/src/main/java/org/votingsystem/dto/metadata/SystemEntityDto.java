@@ -88,6 +88,6 @@ public class SystemEntityDto {
     }
 
     public static SystemEntityDto buildIdentityServiceEntity(String entityId) {
-        return new SystemEntityDto(entityId, SystemEntityType.VOTING_ID_PROVIDER);
+        return new SystemEntityDto(entityId, SystemEntityType.ID_PROVIDER);
     }
 }

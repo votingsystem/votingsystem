@@ -22,6 +22,7 @@ public class DeviceDto implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
+
     private String deviceName;
     private String email;
     private String phone;

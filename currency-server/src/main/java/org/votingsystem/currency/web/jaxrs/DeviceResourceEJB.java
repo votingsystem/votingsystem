@@ -1,13 +1,14 @@
 package org.votingsystem.currency.web.jaxrs;
 
+import org.votingsystem.crypto.SignedDocumentType;
+import org.votingsystem.crypto.cms.CMSSignedMessage;
 import org.votingsystem.currency.web.ejb.DeviceEJB;
 import org.votingsystem.currency.web.http.CurrencyPrincipal;
+import org.votingsystem.currency.web.http.HttpSessionManager;
+import org.votingsystem.currency.web.managed.SocketPushEvent;
 import org.votingsystem.currency.web.util.AuthRole;
 import org.votingsystem.currency.web.websocket.SessionManager;
-import org.votingsystem.dto.DeviceDto;
-import org.votingsystem.dto.OperationDto;
-import org.votingsystem.dto.ResultListDto;
-import org.votingsystem.dto.UserDto;
+import org.votingsystem.dto.*;
 import org.votingsystem.dto.indentity.SessionCertificationDto;
 import org.votingsystem.ejb.SignerInfoService;
 import org.votingsystem.model.*;
@@ -55,9 +56,8 @@ public class DeviceResourceEJB {
     @Inject private BeanManager beanManager;
     @Inject private DeviceEJB deviceEJB;
 
-    @RolesAllowed(AuthRole.USER)
-    @POST @Path("/close-session")
     @Transactional
+    @POST @Path("/close-session")
     public Response closeSession(CMSDocument signedDocument, @Context HttpServletRequest req,
                                  @Context HttpServletResponse resp) throws Exception {
         User user = ((CurrencyPrincipal)req.getUserPrincipal()).getUser();
@@ -83,6 +83,17 @@ public class DeviceResourceEJB {
         User sessionUser = ((CurrencyPrincipal)req.getUserPrincipal()).getUser();
         User signer = signedDocument.getFirstSignature().getSigner();
         if(!signer.getNumId().equals(sessionUser.getNumId())) 
+            throw new ValidationException("signer NIF doesn't match session NIF");
+        DeviceDto dto = new DeviceDto(sessionUser.getDevice());
+        return Response.ok().entity(JSON.getMapper().writeValueAsBytes(dto)).build();
+    }
+
+    @Path("/authenticate")
+    @POST @Produces(MediaType.APPLICATION_JSON)
+    public Response authenticated(SignedDocument signedDocument, @Context HttpServletRequest req) throws Exception {
+        User sessionUser = ((CurrencyPrincipal)req.getUserPrincipal()).getUser();
+        User signer = signedDocument.getFirstSignature().getSigner();
+        if(!signer.getNumId().equals(sessionUser.getNumId()))
             throw new ValidationException("signer NIF doesn't match session NIF");
         DeviceDto dto = new DeviceDto(sessionUser.getDevice());
         return Response.ok().entity(JSON.getMapper().writeValueAsBytes(dto)).build();
@@ -159,20 +170,51 @@ public class DeviceResourceEJB {
         return Response.ok().entity(JSON.getMapper().writeValueAsBytes(UserDto.DEVICES(user, deviceSetDto, null))).build();
     }
 
-    @POST @Path("/browser-csr")
+    @POST @Path("/browser-publickey")
     @Produces(MediaType.TEXT_PLAIN)
-    public Response browserCsr(@Context HttpServletRequest req, byte[] csrRequestBytes) throws Exception {
-        SessionCertificationDto csrRequest = JSON.getMapper().readValue(csrRequestBytes, SessionCertificationDto.class);
-        req.getSession().setAttribute(Constants.CSR, csrRequest);
+    public Response browserPublickey(@Context HttpServletRequest req, byte[] csrRequestBytes) throws Exception {
+        SessionCertificationDto certDto = JSON.getMapper().readValue(csrRequestBytes, SessionCertificationDto.class);
+        req.getSession().setAttribute(Constants.BROWSER_PLUBLIC_KEY, certDto);
         return Response.ok().entity("OK").build();
     }
 
-    @POST @Path("/init-browser-session")
-    @Produces(MediaType.TEXT_PLAIN)
+    @POST @Path("/session-certification-data")
     @TransactionAttribute(REQUIRES_NEW)
-    public Response initBrowserSession(SignedDocument signedDocument, @Context HttpServletRequest req) throws Exception{
-        deviceEJB.initBrowserSession(signedDocument);
-        return Response.ok().entity("OK").build();
+    public Response sessionCertificationData(@FormParam("cmsMessage") String cmsMessage,
+            @FormParam("browserUUID") String browserUUID,
+            @FormParam("socketMsg") String socketMsg, @Context HttpServletRequest req) throws Exception {
+        CMSSignedMessage cmsSignedMessage = CMSSignedMessage.FROM_PEM(cmsMessage.getBytes());
+        deviceEJB.sessionCertification(cmsSignedMessage);
+
+        MessageDto message = JSON.getMapper().readValue(socketMsg, MessageDto.class);
+        switch (message.getSocketOperation()) {
+            case MSG_TO_DEVICE:
+                if(SessionManager.getInstance().hasSession(message.getDeviceToUUID())) {
+                    SessionManager.getInstance().sendMessage(socketMsg, message.getDeviceToUUID());
+                } else {
+                    SocketPushEvent pushEvent = new SocketPushEvent(socketMsg,
+                            SocketPushEvent.Type.TO_USER).setUserUUID(message.getDeviceToUUID());
+                    beanManager.fireEvent(pushEvent);
+                }
+                break;
+            default:
+                log.info("unprocessed socket operation: " + message.getSocketOperation());
+        }
+        return  Response.ok().entity("OK").build();
+    }
+
+    @POST @Path("/init-browser-session")
+    @TransactionAttribute(REQUIRES_NEW)
+    public Response initBrowserSession(CMSDocument signedDocument, @Context HttpServletRequest req) throws Exception {
+        deviceEJB.initBrowserSession(signedDocument, req.getSession());
+        return  Response.ok().entity("OK - init-browser-session").build();
+    }
+
+    @POST @Path("/init-mobile-session")
+    @TransactionAttribute(REQUIRES_NEW)
+    public Response initMobileSession(CMSDocument signedDocument, @Context HttpServletRequest req) throws Exception {
+        deviceEJB.initMobileSession(signedDocument, req.getSession());
+        return  Response.ok().entity("OK - init-mobile-session").build();
     }
 
 }

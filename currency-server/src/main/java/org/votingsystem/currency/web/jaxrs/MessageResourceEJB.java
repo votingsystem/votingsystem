@@ -29,7 +29,7 @@ public class MessageResourceEJB {
 
     @Inject private BeanManager beanManager;
 
-    @Path("/send-msg") @POST
+    @POST @Path("/send-msg")
     public Response sendMessage(@Context HttpServletRequest req, @Context HttpServletResponse res,
                 @FormParam("message") String message, @FormParam("deviceUUID") String deviceUUID) throws Exception {
         if(SessionManager.getInstance().hasSession(deviceUUID)) {
@@ -41,7 +41,7 @@ public class MessageResourceEJB {
         return  Response.ok().entity("OK").type(MediaType.PKCS7_SIGNED).build();
     }
 
-    @Path("/send") @POST
+    @POST @Path("/send")
     public Response send(@Context HttpServletRequest req, @Context HttpServletResponse res, byte[] requestBytes)
             throws Exception {
         MessageDto message = JSON.getMapper().readValue(requestBytes, MessageDto.class);
@@ -50,15 +50,15 @@ public class MessageResourceEJB {
                 if(SessionManager.getInstance().hasSession(message.getDeviceToUUID())) {
                     SessionManager.getInstance().sendMessage(new String(requestBytes), message.getDeviceToUUID());
                 } else {
-                    SocketPushEvent pushEvent = new SocketPushEvent(new String(requestBytes), SocketPushEvent.Type.TO_USER)
-                            .setUserUUID(message.getDeviceToUUID());
+                    SocketPushEvent pushEvent = new SocketPushEvent(new String(requestBytes),
+                            SocketPushEvent.Type.TO_USER).setUserUUID(message.getDeviceToUUID());
                     beanManager.fireEvent(pushEvent);
                 }
                 break;
             default:
                 log.info("unprocessed socket operation: " + message.getSocketOperation());
         }
-        return  Response.ok().entity("OK").type(MediaType.PKCS7_SIGNED).build();
+        return  Response.ok().entity("OK").build();
     }
 
 }

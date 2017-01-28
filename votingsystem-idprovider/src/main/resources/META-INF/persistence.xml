@@ -6,6 +6,7 @@
         <class>org.votingsystem.model.Address</class>
         <class>org.votingsystem.model.voting.AnonVoteCertRequest</class>
         <class>org.votingsystem.model.Certificate</class>
+        <class>org.votingsystem.model.CMSDocument</class>
         <class>org.votingsystem.model.Device</class>
         <class>org.votingsystem.model.voting.Election</class>
         <class>org.votingsystem.model.voting.ElectionOption</class>

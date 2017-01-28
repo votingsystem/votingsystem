@@ -114,7 +114,7 @@ public class WebSocketEJB {
                     responseDto = messageDto.getServerResponse(ResponseDto.SC_WS_CONNECTION_INIT_OK,
                             XML.getMapper().writeValueAsString(mobileDevice))
                             .setMessageType(TypeVS.GENERATE_BROWSER_CERTIFICATE);
-                    responseDto.setConnectedDevice(DeviceDto.INIT_BROWSER_SESSION(signer, browserDevice));
+                    responseDto.setConnectedDevice(DeviceDto.INIT_SESSION(signer, browserDevice));
                     remoteSession.getBasicRemote().sendText(XML.getMapper().writeValueAsString(responseDto));
                     em.merge(cmsMessage.setType(TypeVS.WEB_SOCKET_INIT));
                     remoteHttpSession.setAttribute(PrincipalVS.USER_KEY, signer.setDevice(browserDevice));

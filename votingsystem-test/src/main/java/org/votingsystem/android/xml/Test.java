@@ -19,7 +19,7 @@ public class Test {
 
     public static void identityRequest() throws Exception {
         IdentityRequestDto identityRequest = new IdentityRequestDto(org.votingsystem.util.OperationType.ANON_VOTE_CERT_REQUEST,
-                UUID.randomUUID().toString(), new SystemEntityDto("ID_PROVIDER_URL", SystemEntityType.VOTING_ID_PROVIDER))
+                UUID.randomUUID().toString(), new SystemEntityDto("ID_PROVIDER_URL", SystemEntityType.ID_PROVIDER))
                 .setRevocationHashBase64("RevocationHashBase64").setDate(ZonedDateTime.now())
                 .setCallbackServiceEntityId(new SystemEntityDto("SERVICE_PROVIDER_URL", SystemEntityType.VOTING_SERVICE_PROVIDER));
         //byte[] identityRequestBytes = XML.getMapper().writeValueAsBytes(identityRequest);

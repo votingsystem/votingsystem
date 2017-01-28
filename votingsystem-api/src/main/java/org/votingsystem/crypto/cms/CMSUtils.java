@@ -19,11 +19,12 @@ import org.bouncycastle.operator.DefaultDigestAlgorithmIdentifierFinder;
 import org.bouncycastle.operator.DefaultSignatureAlgorithmIdentifierFinder;
 import org.bouncycastle.tsp.TimeStampRequest;
 import org.bouncycastle.tsp.TimeStampRequestGenerator;
+import org.bouncycastle.tsp.TimeStampResponse;
 import org.bouncycastle.tsp.TimeStampToken;
 import org.votingsystem.dto.ResponseDto;
 import org.votingsystem.http.HttpConn;
 import org.votingsystem.http.MediaType;
-import org.votingsystem.throwable.HttpRequestException;
+import org.votingsystem.throwable.ValidationException;
 
 import java.security.MessageDigest;
 import java.util.*;
@@ -128,20 +129,19 @@ public class CMSUtils {
 
     public static TimeStampToken getTimeStampToken(String signatureAlgorithm, byte[] contentToSign,
             String timestampServiceURL) throws Exception {
-        AlgorithmIdentifier sigAlgId = new DefaultSignatureAlgorithmIdentifierFinder()
-                .find(signatureAlgorithm);
+        TimeStampRequestGenerator reqgen = new TimeStampRequestGenerator();
+        AlgorithmIdentifier sigAlgId = new DefaultSignatureAlgorithmIdentifierFinder().find(signatureAlgorithm);
         AlgorithmIdentifier digAlgId = new DefaultDigestAlgorithmIdentifierFinder().find(sigAlgId);
         MessageDigest digest = MessageDigest.getInstance(digAlgId.getAlgorithm().getId());
         byte[]  digestBytes = digest.digest(contentToSign);
-        TimeStampRequestGenerator reqgen = new TimeStampRequestGenerator();
-        TimeStampRequest timeStampRequest = reqgen.generate(
-                digAlgId.getAlgorithm().getId(), digestBytes);
-        ResponseDto response = HttpConn.getInstance().doPostRequest(
-                timeStampRequest.getEncoded(), MediaType.TIMESTAMP_QUERY, timestampServiceURL);
-        if(ResponseDto.SC_OK == response.getStatusCode()) {
-            byte[] bytesToken = response.getMessageBytes();
-            return new TimeStampToken(new CMSSignedData(bytesToken));
-        } else throw new HttpRequestException(response.getMessage());
+        TimeStampRequest timeStampRequest = reqgen.generate(digAlgId.getAlgorithm(), digestBytes);
+        ResponseDto responseDto = HttpConn.getInstance().doPostRequest(timeStampRequest.getEncoded(),
+                MediaType.TIMESTAMP_QUERY, timestampServiceURL);
+        if(ResponseDto.SC_OK == responseDto.getStatusCode()) {
+            byte[] bytesToken = responseDto.getMessageBytes();
+            TimeStampResponse timeStampResponse = new TimeStampResponse(bytesToken);
+            return timeStampResponse.getTimeStampToken();
+        } else throw new ValidationException(responseDto.getMessage());
     }
 
     public static ASN1Encodable getSingleValuedAttribute(AttributeTable signedAttrTable,

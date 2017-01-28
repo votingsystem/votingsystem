@@ -9,8 +9,8 @@ public enum SystemEntityType {
 
     @JsonProperty("voting-service-provider")
     VOTING_SERVICE_PROVIDER("voting-service-provider"),
-    @JsonProperty("voting-idprovider")
-    VOTING_ID_PROVIDER("voting-idprovider"),
+    @JsonProperty("idprovider")
+    ID_PROVIDER("idprovider"),
     @JsonProperty("timestamp-server")
     TIMESTAMP_SERVER("timestamp-server"),
     @JsonProperty("anonymizer")

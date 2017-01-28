@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <TrustedEntities>
 	<Entity Type="timestamp-server" Id="https://votingsystem.ddns.net/timestamp-server" CountryCode="ES"/>
-	<Entity Type="voting-idprovider" Id="https://votingsystem.ddns.net/idprovider" CountryCode="DE"/>
+	<Entity Type="idprovider" Id="https://votingsystem.ddns.net/idprovider" CountryCode="DE"/>
 </TrustedEntities>

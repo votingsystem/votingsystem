@@ -12,6 +12,7 @@ import org.votingsystem.throwable.CertificateValidationException;
 import org.votingsystem.throwable.InsufficientPrivilegesException;
 import org.votingsystem.throwable.SignerValidationException;
 import org.votingsystem.util.Constants;
+import org.votingsystem.util.IdDocument;
 import org.votingsystem.util.Messages;
 
 import javax.ejb.Stateless;
@@ -55,8 +56,8 @@ public class SignerInfoEJB implements SignerInfoService {
         User requestSigner;
         List<User> userListDB = null;
         X509Certificate signerCert = signatureParams.getSigningCert();
-        //CertExtensionDto deviceData = CertUtils.getCertExtensionData(CertExtensionDto.class, signerCert, Constants.DEVICE_OID);
         try {
+            CertExtensionDto deviceData = CertUtils.getCertExtensionData(CertExtensionDto.class, signerCert, Constants.DEVICE_OID);
             requestSigner = User.FROM_CERT(signerCert, signatureParams.getSignerType());
             List<Certificate> certificates = em.createNamedQuery(Certificate.FIND_BY_SERIALNUMBER_AND_AUTHORITY)
                     .setParameter("serialNumber", signerCert.getSerialNumber().longValue())
@@ -82,11 +83,17 @@ public class SignerInfoEJB implements SignerInfoService {
                     } else requestSigner.setValidElector(false);
                     return requestSigner;
                 default:
-                    if(requestSigner.getNumId() == null || requestSigner.getDocumentType() == null)
-                        throw new SignerValidationException("Missing user identification data");
-                    userListDB = em.createQuery("select s from User s where s.numId=:numId and s.documentType=:typeId")
-                            .setParameter("numId", requestSigner.getNumId())
-                            .setParameter("typeId", requestSigner.getDocumentType()).getResultList();
+                    if(requestSigner.getNumId() == null) {
+                        if(deviceData != null && deviceData.getNumId() != null) {
+                            userListDB = em.createQuery("select s from User s where s.numId=:numId and s.documentType=:typeId")
+                                    .setParameter("numId", deviceData.getNumId())
+                                    .setParameter("typeId", IdDocument.NIF).getResultList();
+                        } else throw new SignerValidationException("Missing user identification data");
+                    } else {
+                        userListDB = em.createQuery("select s from User s where s.numId=:numId and s.documentType=:typeId")
+                                .setParameter("numId", requestSigner.getNumId())
+                                .setParameter("typeId", requestSigner.getDocumentType()).getResultList();
+                    }
                     break;
             }
             if(!userListDB.isEmpty()) {

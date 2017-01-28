@@ -2,7 +2,7 @@ package org.votingsystem.serviceprovider.managed;
 
 import org.votingsystem.ejb.Config;
 import org.votingsystem.model.voting.Election;
-import org.votingsystem.qr.QRConstants;
+import org.votingsystem.qr.QRUtils;
 import org.votingsystem.util.Messages;
 import org.votingsystem.util.OperationType;
 
@@ -51,8 +51,8 @@ public class ElectionsBean implements Serializable {
             electionState = Election.State.ACTIVE;
         }
         qrURL = OperationType.GET_QR.getUrl(config.getEntityId()) + "?cht=qr&chs=180x180&chl=" +
-                QRConstants.SYSTEM_ENTITY_KEY + "=" + config.getEntityId() + ";" +
-                QRConstants.OPERATION_KEY + "=" + OperationType.FETCH_ELECTIONS.name() + ";";
+                QRUtils.SYSTEM_ENTITY_KEY + "=" + config.getEntityId() + ";" +
+                QRUtils.OPERATION_KEY + "=" + OperationType.FETCH_ELECTIONS.name() + ";";
         loadPages(DEFAULT_PAGE_SIZE, 0);
     }
 
