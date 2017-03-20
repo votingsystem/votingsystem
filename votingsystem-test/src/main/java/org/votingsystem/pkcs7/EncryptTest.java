@@ -127,7 +127,7 @@ public class EncryptTest extends BaseTest {
         List<NameValuePair> urlParameters = new ArrayList<>();
         urlParameters.add(new BasicNameValuePair("UUID", qrMessageDto.getUUID()));
         urlParameters.add(new BasicNameValuePair("operation", qrMessageDto.getOperation()));
-        ResponseDto responseDto = HttpConn.getInstance().doPostFormRequest(
+        ResponseDto responseDto = HttpConn.getInstance().doPostForm(
                 CurrencyOperation.QR_INFO.getUrl(Constants.CURRENCY_SERVICE_ENTITY_ID), urlParameters);
         if(ResponseDto.SC_OK != responseDto.getStatusCode()) {
             log.info("status: " + responseDto.getStatusCode() + " - responseDto: " + responseDto.getMessage());

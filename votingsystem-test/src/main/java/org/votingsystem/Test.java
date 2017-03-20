@@ -1,5 +1,7 @@
 package org.votingsystem;
 
+import org.apache.http.NameValuePair;
+import org.apache.http.message.BasicNameValuePair;
 import org.votingsystem.crypto.MockDNIe;
 import org.votingsystem.crypto.xml.SignatureAlgorithm;
 import org.votingsystem.crypto.xml.SignatureBuilder;
@@ -11,8 +13,9 @@ import org.votingsystem.http.MediaType;
 import org.votingsystem.util.JSON;
 import org.votingsystem.util.XMLUtils;
 
-import java.time.LocalDateTime;
-import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
 import java.util.logging.Logger;
 
 
@@ -21,11 +24,20 @@ public class Test extends BaseTest {
     private static final Logger log = Logger.getLogger(Test.class.getName());
 
     public static void main(String[] args) throws Exception {
-        long minutes = ChronoUnit.MINUTES.between(LocalDateTime.now(), LocalDateTime.now());
-        log.info("minutes: " + minutes);
+        new Test().testCert();
         System.exit(0);
     }
 
+    public void testCert() throws Exception {
+        List<NameValuePair> urlParameters = new ArrayList<>();
+        urlParameters.add(new BasicNameValuePair("UUID", UUID.randomUUID().toString()));
+        urlParameters.add(new BasicNameValuePair("operation", "0"));
+        ResponseDto responseDto = HttpConn.getInstance().doPostForm(
+                "http://votingsystem.ddns.net/currency-server/api/currency-qr/info", urlParameters);
+
+        //doPostForm(String targetURL, List<NameValuePair> urlParameters)
+        log.info("responseDto: " + responseDto.getMessage());
+    }
 
     public void run() throws Exception {
         String textToSign = XMLUtils.prepareRequestToSign("<dummy>test</dummy>".getBytes());

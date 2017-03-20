@@ -1,8 +1,6 @@
 package org.votingsystem.currency.web.jaxrs;
 
-import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import org.votingsystem.currency.web.http.HttpSessionManager;
-import org.votingsystem.dto.ResponseDto;
 import org.votingsystem.dto.indentity.SessionCertificationDto;
 import org.votingsystem.ejb.Config;
 import org.votingsystem.ejb.QRSessionsEJB;

@@ -36,7 +36,7 @@ public class GenerateSessionCertificates extends BaseTest {
 
     private static final Logger log = Logger.getLogger(GenerateSessionCertificates.class.getName());
 
-    private static final String QR_CODE = "eid=https://votingsystem.ddns.net/currency-server;op=0;uid=ad4aeff7-8fc2-4b5b-867a-e540dc1ddab1;";
+    private static final String QR_CODE = "eid=https://votingsystem.ddns.net/currency-server;op=0;uid=2f38674d-ab16-418f-8b0b-39ae84d14412;";
 
     private static CMSSignedMessage sessionCertification;
 
@@ -58,12 +58,12 @@ public class GenerateSessionCertificates extends BaseTest {
             User user = User.FROM_CERT(mockDNIe.getX509Certificate(), User.Type.CURRENCY_SERVER);
             String mobileUUID = UUID.randomUUID().toString();
             CertificationRequest mobileCsrReq = CertificationRequest.getUserRequest(
-                    user.getNumId(), user.getEmail(), user.getPhone(), "tesp-application",
+                    user.getNumId(), user.getEmail(), user.getPhone(), "test-application",
                     mobileUUID, user.getName(), user.getSurname(), Device.Type.MOBILE);
 
             String browserUUID = UUID.randomUUID().toString();
             CertificationRequest browserCsrReq = CertificationRequest.getUserRequest(
-                    user.getNumId(), user.getEmail(), user.getPhone(), "tesp-application",
+                    user.getNumId(), user.getEmail(), user.getPhone(), "test-application",
                     browserUUID, user.getName(), user.getSurname(), Device.Type.BROWSER);
 
             SessionCertificationDto sessionCertDto = new SessionCertificationDto(new UserDto(user),
@@ -98,13 +98,13 @@ public class GenerateSessionCertificates extends BaseTest {
         }
         return result;
     }
-    
+
     private void sendMessageToBrowser(SessionCertificationDto certificationDto) throws Exception {
         QRMessageDto qrMessageDto = QRMessageDto.FROM_QR_CODE(QR_CODE);
         List<NameValuePair> urlParameters = new ArrayList<>();
         urlParameters.add(new BasicNameValuePair("UUID", qrMessageDto.getUUID()));
         urlParameters.add(new BasicNameValuePair("operation", qrMessageDto.getOperation()));
-        ResponseDto responseDto = HttpConn.getInstance().doPostFormRequest(
+        ResponseDto responseDto = HttpConn.getInstance().doPostForm(
                 CurrencyOperation.QR_INFO.getUrl(Constants.CURRENCY_SERVICE_ENTITY_ID), urlParameters);
         if(ResponseDto.SC_OK != responseDto.getStatusCode()) {
             log.info("status: " + responseDto.getStatusCode() + " - responseDto: " + responseDto.getMessage());
@@ -131,9 +131,8 @@ public class GenerateSessionCertificates extends BaseTest {
         urlParameters.add(new BasicNameValuePair("browserUUID", qrMessageDto.getUUID()));
         urlParameters.add(new BasicNameValuePair("cmsMessage", new String(sessionCertification.toPEM())));
         urlParameters.add(new BasicNameValuePair("socketMsg", JSON.getMapper().writeValueAsString(messageDto)));
-        responseDto = HttpConn.getInstance().doPostFormRequest(
+        responseDto = HttpConn.getInstance().doPostForm(
                 CurrencyOperation.SESSION_CERTIFICATION_DATA.getUrl(Constants.CURRENCY_SERVICE_ENTITY_ID), urlParameters);
-
         log.info("message: " + responseDto.getMessage());
     }
 

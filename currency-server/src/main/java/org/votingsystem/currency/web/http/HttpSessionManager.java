@@ -57,12 +57,12 @@ public class HttpSessionManager implements HttpSessionListener {
                             device.getCertificate().getState());
                 }
             }
+            String userUUID = (String)sessionEvent.getSession().getAttribute(Constants.USER_KEY);
+            userSessionMap.remove(userUUID);
+            sessionIdMap.remove(sessionEvent.getSession().getId());
         } catch (Exception ex) {
             log.log(Level.SEVERE,"EXCEPTION CLOSING CONNECTION: " + ex.getMessage());
         }
-        String userUUID = (String)sessionEvent.getSession().getAttribute(Constants.USER_KEY);
-        userSessionMap.remove(userUUID);
-        sessionIdMap.remove(sessionEvent.getSession().getId());
     }
 
     public HttpSession getHttpSession(String userUUID) {

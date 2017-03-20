@@ -75,7 +75,7 @@ public class SignatureGenerator extends BaseTest {
         List<NameValuePair> urlParameters = new ArrayList<>();
         urlParameters.add(new BasicNameValuePair("signedXML", new String(signedDocumentBytes)));
         urlParameters.add(new BasicNameValuePair("withTimeStampValidation", WITH_TIMESTAMP_VALIDATION.toString()));
-        ResponseDto responseDto = HttpConn.getInstance().doPostFormRequest(
+        ResponseDto responseDto = HttpConn.getInstance().doPostForm(
                 OperationType.VALIDATE_SIGNED_DOCUMENT.getUrl(Constants.ID_PROVIDER_ENTITY_ID), urlParameters);
         log.info("response: " + responseDto.getStatusCode() + " - " + responseDto.getMessage());
     }

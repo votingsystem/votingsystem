@@ -330,7 +330,7 @@ public class HttpConn {
         }
     }
 
-    public ResponseDto doPostFormRequest(String targetURL, List<NameValuePair> urlParameters) {
+    public ResponseDto doPostForm(String targetURL, List<NameValuePair> urlParameters) {
         ResponseDto responseDto = null;
         HttpPost httpPost = null;
         CloseableHttpResponse response = null;

@@ -58,7 +58,7 @@
                     <h3 class="modal-title" id="alertCaption" style="color:#b71c1c;"></h3>
                 </div>
                 <div id="alertDialogQRImgDiv" style="margin: 0 auto; text-align: center; display: none;padding: 0 0 15px 0;">
-                    <div id="alertDialogQRId" style="font-size: 1.8em;color: #434343;"></div>
+                    <div id="alertDialogQRId" style="font-size: 1.8em;color: #a5d6a7;"></div>
                     <img id="alertDialogQRImg" src=""/>
                 </div>
                 <div id="alertDialogMsgDiv" class="modal-body" style="font-size: 1.3em; display: block; margin-right: 20px;word-wrap: break-word;">
@@ -252,13 +252,11 @@
 
                             sessionCertification.userFullName = sessionCertification.user.givenName + " " + sessionCertification.user.surName;
                             localStorage.setItem('pkiSessionData', JSON.stringify(pkiSessionDataMap));
-
-
-                            console.log("============= ", localStorage.getItem('pkiSessionData'));
-
                             setUserAuthenticated(true, sessionCertification.userFullName);
 
                             var msgDto = {operation:{type:"SESSION_CERTIFICATION"}, httpSessionId:sessionId, userUUID:vs.userUUID};
+
+                            console.log("=========== msgDto: ", msgDto);
 
                             vs.rsaUtil.sign(JSON.stringify(msgDto), function(cmsSignedMessage) {
                                 var cmsSignedMessage = forge.pkcs7.messageToPem(cmsSignedMessage);
@@ -272,8 +270,6 @@
                     break;
             }
         }
-
-        console.log("************", localStorage.getItem('pkiSessionData'));
 
         var pkiSessionDataMap;
         if(localStorage.getItem('pkiSessionData')) {
@@ -290,7 +286,7 @@
         if(pkiSessionDataMap[vs.userUUID] == null) {
             pkiSessionDataMap = {}
             localStorage.setItem('pkiSessionData', null);
-            console.log("deleting previous sessions");
+            console.log("deleted previous sessions");
         }
 
         console.log("pkiSessionDataMap: ", pkiSessionDataMap);

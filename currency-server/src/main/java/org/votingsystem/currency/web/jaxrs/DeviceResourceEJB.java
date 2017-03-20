@@ -1,10 +1,8 @@
 package org.votingsystem.currency.web.jaxrs;
 
-import org.votingsystem.crypto.SignedDocumentType;
 import org.votingsystem.crypto.cms.CMSSignedMessage;
 import org.votingsystem.currency.web.ejb.DeviceEJB;
 import org.votingsystem.currency.web.http.CurrencyPrincipal;
-import org.votingsystem.currency.web.http.HttpSessionManager;
 import org.votingsystem.currency.web.managed.SocketPushEvent;
 import org.votingsystem.currency.web.util.AuthRole;
 import org.votingsystem.currency.web.websocket.SessionManager;

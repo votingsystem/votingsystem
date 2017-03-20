@@ -78,7 +78,7 @@ public class PublishElection extends BaseTest {
         List<NameValuePair> urlParameters = new ArrayList<>();
         urlParameters.add(new BasicNameValuePair("signedXML", new String(signatureBytes)));
         urlParameters.add(new BasicNameValuePair("withTimeStampValidation", Boolean.TRUE.toString()));
-        ResponseDto responseDto = HttpConn.getInstance().doPostFormRequest(OperationType.VALIDATE_SIGNED_DOCUMENT
+        ResponseDto responseDto = HttpConn.getInstance().doPostForm(OperationType.VALIDATE_SIGNED_DOCUMENT
                         .getUrl(entityId), urlParameters);
         log.info("Publish result: " + responseDto.getStatusCode() + " - msg: " + responseDto.getMessage());
     }

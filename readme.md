@@ -6,7 +6,7 @@ To build the project and install javascript libraries
 ## TimeStamp server
 
 All the signatures made by the system incorporates a TimeStamp, the system 
-needs a TimeStampServer to add TimeStamps to the signatures.
+needs a TimeStamp server to add TimeStamps to the signatures.
 You need to install the one provided in the proyect and update the
 param **timestampServerURL** on **config.properties** with the value of your
 installation.

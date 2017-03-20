@@ -64,7 +64,7 @@ public class CheckUserCertificate extends BaseTest {
         List<NameValuePair> urlParameters = new ArrayList<>();
         urlParameters.add(new BasicNameValuePair("signedXML", new String(signedDocumentBytes)));
         urlParameters.add(new BasicNameValuePair("userType", User.Type.ENTITY.name()));
-        ResponseDto responseDto = HttpConn.getInstance().doPostFormRequest(
+        ResponseDto responseDto = HttpConn.getInstance().doPostForm(
                 OperationType.ADMIN_OPERATION_PROCESS.getUrl(TEST_ENTITY), urlParameters);
         log.info("status: " + responseDto.getStatusCode() + " - message: " + responseDto.getMessage());
     }

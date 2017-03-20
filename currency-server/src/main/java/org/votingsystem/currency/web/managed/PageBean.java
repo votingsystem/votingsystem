@@ -4,6 +4,7 @@ import com.google.zxing.WriterException;
 import org.votingsystem.ejb.Config;
 import org.votingsystem.qr.QRUtils;
 import org.votingsystem.util.Constants;
+
 import javax.ejb.AccessTimeout;
 import javax.enterprise.context.SessionScoped;
 import javax.faces.context.FacesContext;

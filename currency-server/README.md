@@ -34,7 +34,7 @@ To enable application filters change what follows to the standalone / domain  se
 
 #### Build and Deploy on Wildfly
 1. Make sure you have  Wildfly server started.
-2. The application needs access to a [timestamp server](https://github.com/votingsystem/votingsystem/tree/master/TimeStampServer),
+2. The application needs access to a [timestamp server](https://github.com/votingsystem/votingsystem/tree/master/timestamp-server),
 the property **vs.timeStampServerURL** must be set according to that.
 3. Add the datasource in Wildfly through the management interface:
 

@@ -1,12 +1,13 @@
 package org.votingsystem.currency.web.ejb;
 
-import org.votingsystem.crypto.CertUtils;
 import org.votingsystem.crypto.PEMUtils;
 import org.votingsystem.crypto.SignedDocumentType;
 import org.votingsystem.crypto.cms.CMSSignedMessage;
 import org.votingsystem.currency.web.http.HttpSessionManager;
 import org.votingsystem.currency.web.managed.SocketPushEvent;
-import org.votingsystem.dto.*;
+import org.votingsystem.dto.OperationDto;
+import org.votingsystem.dto.OperationTypeDto;
+import org.votingsystem.dto.ResponseDto;
 import org.votingsystem.dto.indentity.SessionCertificationDto;
 import org.votingsystem.ejb.CmsEJB;
 import org.votingsystem.ejb.SignerInfoService;
