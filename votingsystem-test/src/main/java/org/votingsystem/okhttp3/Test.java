@@ -9,7 +9,7 @@ public class Test extends BaseTest {
 
     private static final Logger log = Logger.getLogger(org.votingsystem.Test.class.getName());
 
-    private static final String ENDPOINT = "http://votingsystem.ddns.net/currency-server/api/metadata";
+    private static final String ENDPOINT = "http://votingsystem.ddns.net:8080/timestamp-server/api/metadata";
 
     public static void main(String[] args) throws Exception {
         new Test().testCert();

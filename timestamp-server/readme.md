@@ -1,6 +1,6 @@
 ## Config files
 
-The application expects the content of the directory 'docs/application-dir-contents' with values appropriate to the 
+The application expects the content of the distribution directory 'docs/application-dir-contents' with values appropriate to the 
 installation in the directory:
 
     /var/local/middleware/timestamp-server

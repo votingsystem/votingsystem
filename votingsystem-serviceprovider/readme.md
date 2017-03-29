@@ -4,7 +4,7 @@ The application expects the content of the directory 'docs/application-dir-conte
 installation in the directory:
 
     /var/local/middleware/votingsystem-service
-
+****
 It can be changed setting system environment var 'voting_provider_server_dir' with the desired value
 
 

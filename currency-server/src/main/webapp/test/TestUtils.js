@@ -64,7 +64,7 @@ test.createSelfSignedCert = function () {
         name: 'subjectAltName',
         altNames: [{
             type: 6, // URI
-            value: 'https://192.168.1.5/CurrencyServer/rest/usreVS/123456'
+            value: 'https://votingsystem.ddns.net/CurrencyServer/rest/usreVS/123456'
         }, {
             type: 7, // IP
             ip: '127.0.0.1'
