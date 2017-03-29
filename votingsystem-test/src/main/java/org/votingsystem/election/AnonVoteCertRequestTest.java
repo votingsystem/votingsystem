@@ -19,7 +19,7 @@ public class AnonVoteCertRequestTest extends BaseTest {
 
     private static final Logger log = Logger.getLogger(AnonVoteCertRequestTest.class.getName());
 
-    private static String QR_CODE = "eid=https://votingsystem.ddns.net/idprovider;uid=14fa9b79-6fd9-4773-a8e4-13496609c34c;";
+    private static String QR_CODE = "eid=https://voting.ddns.net/idprovider;uid=14fa9b79-6fd9-4773-a8e4-13496609c34c;";
     private static String KEYSTORE = "certs/fake_08888888D.jks";
     private static String KEYSTORE_PASSWORD = org.votingsystem.util.Constants.PASSW_DEMO;
 
@@ -51,7 +51,7 @@ public class AnonVoteCertRequestTest extends BaseTest {
         fileMap.put("test1", "test1Value".getBytes());
         fileMap.put("test2", "test2Value".getBytes());
 
-        //String serviceURL = "https://votingsystem.ddns.net/idprovider/accessRequest";
+        //String serviceURL = "https://voting.ddns.net/idprovider/accessRequest";
         String serviceURL = OperationType.ANON_VOTE_CERT_REQUEST.getUrl(qrMessageDto.getSystemEntityID());
 
         responseDto = HttpConn.getInstance().doPostMultipartRequest(fileMap, serviceURL);

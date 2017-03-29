@@ -43,7 +43,7 @@ public class VoteTest extends BaseTest {
 
     private static final Logger log = Logger.getLogger(VoteTest.class.getName());
 
-    private static final String QR_CODE = "eid=https://votingsystem.ddns.net/idprovider;uid=232585a0-426c-4193-aab4-1b24021e26f8;";
+    private static final String QR_CODE = "eid=https://voting.ddns.net/idprovider;uid=232585a0-426c-4193-aab4-1b24021e26f8;";
     private static final String KEYSTORE_PATH = "./vote.jks";
 
     public static void main(String[] args) throws Exception {

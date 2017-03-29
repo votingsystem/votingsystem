@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Metadata language="es" timeZone="Europe/Madrid" validUntil="2016-10-18T15:47:39.710Z">
-    <Entity ID="https://votingsystem.ddns.net/timestamp-server/api/metadata" type="timestamp-server">
+    <Entity ID="https://voting.ddns.net/timestamp-server/api/metadata" type="timestamp-server">
         <Organization>
             <OrganizationName>organizationName</OrganizationName>
             <OrganizationUnit>organizationUnit</OrganizationUnit>
@@ -42,9 +42,9 @@
     <Services>
         <Service name="timestamping">
             <url http-method="POST" name="requestTimeStampDiscrete">
-                https://votingsystem.ddns.net/timestamp-server/timestamp/discrete
+                https://voting.ddns.net/timestamp-server/timestamp/discrete
             </url>
-            <url http-method="POST" name="requestTimeStamp">https://votingsystem.ddns.net/timestamp-server/api/timestamp
+            <url http-method="POST" name="requestTimeStamp">https://voting.ddns.net/timestamp-server/api/timestamp
             </url>
         </Service>
     </Services>

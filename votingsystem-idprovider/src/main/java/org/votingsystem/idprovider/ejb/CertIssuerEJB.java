@@ -154,6 +154,20 @@ public class CertIssuerEJB {
                 rootCAPrivateCredential, userDN, config.getOcspServerURL());
     }
 
+    public java.security.KeyStore generateServerKeyStore(String commonName, String keyAlias,
+                                                               char[] password) throws Exception {
+        log.info("commonName: " + commonName);
+        LocalDateTime validFrom = LocalDateTime.now();
+        Date validFromDate = DateUtils.getUTCDate(validFrom);
+        LocalDateTime validTo = validFrom.plusDays(365);
+        Date validToDate = DateUtils.getUTCDate(validTo);
+        X500PrivateCredential rootCAPrivateCredential = new X500PrivateCredential(certIssuerSigningCert,
+                certIssuerPrivateKey, Constants.ROOT_CERT_ALIAS);
+        String userDN = format("CN={0}", commonName);
+        return KeyStoreUtils.generateUserKeyStore(validFromDate, validToDate, password, keyAlias,
+                rootCAPrivateCredential, userDN, config.getOcspServerURL());
+    }
+
     @TransactionAttribute(REQUIRES_NEW)
     public Certificate signCSR(User user, PKCS10CertificationRequest csr, String organizationalUnit, LocalDateTime dateBegin,
                LocalDateTime dateFinish, Certificate.Type certificateType, String revocationHashBase64) throws Exception {

@@ -29,7 +29,7 @@ public class MultipleSignatureGenerator extends BaseTest {
 
     private static final Logger log = Logger.getLogger(MultipleSignatureGenerator.class.getName());
 
-    private static String TEST_ENTITY = "https://votingsystem.ddns.net/idprovider";
+    private static String TEST_ENTITY = "https://voting.ddns.net/idprovider";
 
 
     private static String SIGNER1_KEYSTORE = "certs/fake_08888888D.jks";

@@ -62,7 +62,7 @@ public class ConfigEJB implements Config, ConfigCurrencyServer, Serializable {
 
     private static final Logger log = Logger.getLogger(ConfigEJB.class.getName());
 
-    public static final String DEFAULT_APP_HOME = "/var/local/middleware/currency-server";
+    public static final String DEFAULT_APP_HOME = "/var/local/currency-server";
     public static final Integer DEFAULT_METADATA_LIVE_IN_HOURS = 1;
 
     @PersistenceContext

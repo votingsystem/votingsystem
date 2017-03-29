@@ -120,7 +120,7 @@ public class EncryptTest extends BaseTest {
         log.info("decryptedBytes: " + new String(decryptedBytes));
     }
 
-    private static final String QR_CODE = "eid=https://votingsystem.ddns.net/currency-server;op=0;uid=0657d937-515f-411a-a15b-7eb265b4aa11;";
+    private static final String QR_CODE = "eid=https://voting.ddns.net/currency-server;op=0;uid=0657d937-515f-411a-a15b-7eb265b4aa11;";
 
     private void sendMessageToBrowser() throws Exception {
         QRMessageDto qrMessageDto = QRMessageDto.FROM_QR_CODE(QR_CODE);

@@ -1,15 +1,15 @@
 ## Config files
 
-The application expects the content of the distribution directory 'docs/application-dir-contents' with values appropriate to the 
+The application expects the content of the distribution directory 'docs/app-config-files' with values appropriate to the 
 installation in the directory:
 
-    /var/local/middleware/timestamp-server
+    /var/local/timestamp-server
 
 It can be changed setting system environment var 'timestamp_server_dir' with the desired value
 
 ### Configuration
  - The application has been developed and tested on Wildfly 10.
- - The application default working dir is in **/var/local/middleware/timestamp-server**
+ - The application default working dir is in **/var/local/timestamp-server**
 you can modify that location changing the system property **timestamp_server_dir**
  - Inside the config dir there must the content of **docs/config** completed with the values of your installation   
 
@@ -32,7 +32,7 @@ To enable application filters change what follows to the standalone / domain  se
 #### Logging
 Application will store log files in directory:
     
-    /var/log/middleware/timestamp-server
+    /var/log/timestamp-server
 
 #### Certificates
 Certificate dates are expressed as UTC time (Coordinated Universal Time) 

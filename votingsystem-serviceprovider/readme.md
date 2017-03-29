@@ -1,9 +1,9 @@
 ## Config files
 
-The application expects the content of the directory 'docs/application-dir-contents' with values appropriate to the 
+The application expects the content of the directory 'docs/app-config-files' with values appropriate to the 
 installation in the directory:
 
-    /var/local/middleware/votingsystem-service
+    /var/local/votingsystem-service
 ****
 It can be changed setting system environment var 'voting_provider_server_dir' with the desired value
 
@@ -19,5 +19,5 @@ reduce confusion with the local time zone use.
 #### Logging
 Application will store log files in directory:
     
-    /var/log/middleware/votingsystem-serviceprovider
+    /var/log/votingsystem-serviceprovider
     

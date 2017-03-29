@@ -1,9 +1,9 @@
 ## Config files
 
-The application expects the content of the directory 'docs/application-dir-contents' with values appropriate to the 
+The application expects the content of the directory 'docs/app-config-files' with values appropriate to the 
 installation in the directory:
 
-    /var/local/middleware/votingsystem-idprovider
+    /var/local/votingsystem-idprovider
 
 It can be changed setting system environment var 'idprovider_server_dir' with the desired value
 
@@ -32,9 +32,9 @@ relacione la solicitud firmada con certificado expedido.
         
        - Database: Postgres 9.5
        
- - The application default _working dir_ is in **/var/local/middleware/votingsystem-idprovider**,
+ - The application default _working dir_ is in **/var/local/votingsystem-idprovider**,
 it needs read and write privileges. You can modify that location changing the system property **votingsystem_idprovider_dir**
- - Copy inside the _working dir_ the contents of **docs/application-dir-contents** completed with the values of your installation   
+ - Copy inside the _working dir_ the contents of **docs/app-config-files** completed with the values of your installation   
  - The file _trusted-certs.jks_ contains the trusted CA certificates.
     
  
@@ -47,7 +47,7 @@ put here the TimeStampServers and the Voting Service Providers
 #### Logging
 Application will store log files in directory:
     
-    /var/log/middleware/votingsystem-idprovider
+    /var/log/votingsystem-idprovider
     
 ## Dates
 Servers always return a dates in the standardized ISO 8601-format.

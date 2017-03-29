@@ -43,7 +43,7 @@ public class GenerateCertificateForBrowser extends BaseTest {
             "61zKGg3tSVzhNsSv/rdfQt75dADiKO0vpR8u1tRTgN3WtQ==\n" +
             "-----END CERTIFICATE REQUEST-----";
 
-    private static final String QR_CODE = "eid=https://votingsystem.ddns.net/currency-server;op=0;uid=ae48e2a6-56f7-42c9-a387-9846061d58ff;";
+    private static final String QR_CODE = "eid=https://voting.ddns.net/currency-server;op=0;uid=ae48e2a6-56f7-42c9-a387-9846061d58ff;";
 
 
     public static void main(String[] args) throws Exception {

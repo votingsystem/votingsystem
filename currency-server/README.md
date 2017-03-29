@@ -1,9 +1,9 @@
 ## Config files
 
-The application expects the content of the directory 'docs/application-dir-contents' with values appropriate to the 
+The application expects the content of the directory 'docs/app-config-files' with values appropriate to the 
 installation in the directory:
 
-    /var/local/middleware/currency-server
+    /var/local/currency-server
 
 It can be changed setting system environment var 'currency_server_dir' with the desired value. With Wildfly, this can 
 be done:
@@ -27,7 +27,7 @@ Change what follows to the standalone / domain  server configuration (if you are
     </server>
     <handlers>
         <file name="welcome-content" path="${jboss.home.dir}/welcome-content" directory-listing="true"/>
-        <file name="currencyServerStatic" path="/var/local/middleware/currency-server-static-web-content" directory-listing="true"/>
+        <file name="currencyServerStatic" path="/var/local/currency-server-static-web-content" directory-listing="true"/>
     </handlers>
 
 The value of the variables **staticResourcesURL** and **staticResourcesPath** must be set according to the values configured.
@@ -60,6 +60,6 @@ the property **vs.timeStampServerURL** must be set according to that.
 #### Logging
 Application will store log files in directory:
     
-    /var/log/middleware/currency-server
+    /var/log/currency-server
 
 This value can be changed in **./resources/logging.properties**

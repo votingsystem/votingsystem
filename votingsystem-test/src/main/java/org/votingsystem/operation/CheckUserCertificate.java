@@ -31,8 +31,8 @@ public class CheckUserCertificate extends BaseTest {
 
     private static final Logger log = Logger.getLogger(CheckUserCertificate.class.getName());
 
-    //private static String TEST_ENTITY = "https://votingsystem.ddns.net/voting-service";
-    private static String TEST_ENTITY = "https://votingsystem.ddns.net/idprovider";
+    //private static String TEST_ENTITY = "https://voting.ddns.net/voting-service";
+    private static String TEST_ENTITY = "https://voting.ddns.net/idprovider";
 
     private static String ADMIN_KEYSTORE = "certs/votingsystem-idprovider.jks";
     //private static String ADMIN_KEYSTORE = "certs/votingsystem-serviceprovider.jks";

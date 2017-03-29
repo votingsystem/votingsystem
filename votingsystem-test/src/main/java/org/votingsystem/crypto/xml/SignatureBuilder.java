@@ -59,7 +59,7 @@ public class SignatureBuilder {
      * @param privateKey
      * @param signingCertificate
      * @param signingCertificateChain
-     * @param timeStampServiceURL     p.e: http://votingsystem.ddns.net/timestamp-server/api/timestamp
+     * @param timeStampServiceURL     p.e: https://voting.ddns.net/timestamp-server/api/timestamp
      * @throws IOException
      * @throws ParseException
      */

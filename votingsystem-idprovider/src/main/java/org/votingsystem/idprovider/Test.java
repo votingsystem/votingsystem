@@ -27,7 +27,7 @@ public class Test {
     }
 
     private static void createResponse() throws IOException {
-        SystemEntityDto identityEntityDto = new SystemEntityDto("http://votingsystem.ddns.net/voting-service",
+        SystemEntityDto identityEntityDto = new SystemEntityDto("https://voting.ddns.net/voting-service",
                 SystemEntityType.VOTING_SERVICE_PROVIDER);
         IdentityTokenDto indentityResponseDto = new IdentityTokenDto(OperationType.ANON_VOTE_CERT_REQUEST,
                 identityEntityDto, "electionId");

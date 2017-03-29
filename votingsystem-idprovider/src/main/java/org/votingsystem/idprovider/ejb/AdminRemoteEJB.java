@@ -26,7 +26,8 @@ public class AdminRemoteEJB implements EJBAdminRemoteIdProvider {
 
     @PersistenceContext
     private EntityManager em;
-    @EJB CertIssuerEJB certIssuer;
+    @EJB
+    private CertIssuerEJB certIssuer;
 
     @Override
     public void generateBackup(String electionUUID) throws Exception {

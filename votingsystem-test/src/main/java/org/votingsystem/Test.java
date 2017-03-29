@@ -11,6 +11,7 @@ import org.votingsystem.dto.voting.CertVoteExtensionDto;
 import org.votingsystem.http.HttpConn;
 import org.votingsystem.http.MediaType;
 import org.votingsystem.util.JSON;
+import org.votingsystem.util.OperationType;
 import org.votingsystem.util.XMLUtils;
 
 import java.util.ArrayList;
@@ -24,8 +25,14 @@ public class Test extends BaseTest {
     private static final Logger log = Logger.getLogger(Test.class.getName());
 
     public static void main(String[] args) throws Exception {
-        new Test().testCert();
+        new Test().testHttp();
         System.exit(0);
+    }
+
+    public void testHttp() throws Exception {
+        ResponseDto response = HttpConn.getInstance().doGetRequest(
+                OperationType.GET_METADATA.getUrl(Constants.CURRENCY_SERVICE_ENTITY_ID), MediaType.XML);
+        log.info("Message: " + response.getMessage());
     }
 
     public void testCert() throws Exception {
@@ -33,7 +40,7 @@ public class Test extends BaseTest {
         urlParameters.add(new BasicNameValuePair("UUID", UUID.randomUUID().toString()));
         urlParameters.add(new BasicNameValuePair("operation", "0"));
         ResponseDto responseDto = HttpConn.getInstance().doPostForm(
-                "http://votingsystem.ddns.net/currency-server/api/currency-qr/info", urlParameters);
+                "https://voting.ddns.net/currency-server/api/currency-qr/info", urlParameters);
 
         //doPostForm(String targetURL, List<NameValuePair> urlParameters)
         log.info("responseDto: " + responseDto.getMessage());
@@ -46,7 +53,7 @@ public class Test extends BaseTest {
                 SignatureAlgorithm.RSA_SHA_256.getName(), new MockDNIe("08888888D"),
                 Constants.TIMESTAMP_SERVICE_URL).build();
         ResponseDto response = HttpConn.getInstance().doPostRequest(signatureBytes, MediaType.XML,
-                "http://votingsystem.ddns.net/currency-server/api/test-signed");
+                "https://voting.ddns.net/currency-server/api/test-signed");
         log.info("response: " + response.getMessage());
     }
 

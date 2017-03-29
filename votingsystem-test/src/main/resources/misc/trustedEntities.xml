@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <TrustedEntities>
-	<Entity Type="anonymizer" Id="https://votingsystem.ddns.net/voting-service" CountryCode="ES"/>
-	<Entity Type="voting-service-provider" Id="https://votingsystem.ddns.net/voting-service222" CountryCode="ES"/>
-	<Entity Type="voting-service-provider" Id="https://votingsystem.ddns.net/voting-service111" CountryCode="ES"/>
-	<Entity Type="timestamp-server" Id="https://votingsystem.ddns.net/timestamp-server333" CountryCode="ES"/>
-	<Entity Type="timestamp-server" Id="https://votingsystem.ddns.net/timestamp-server222" CountryCode="ES"/>
-	<Entity Type="timestamp-server" Id="https://votingsystem.ddns.net/timestamp-server111" CountryCode="ES"/>
-	<!--Entity type="voting-service-provider" id="https://votingsystem.ddns.net/voting-service" country_code="ES" -->
+	<Entity Type="anonymizer" Id="https://voting.ddns.net/voting-service" CountryCode="ES"/>
+	<Entity Type="voting-service-provider" Id="https://voting.ddns.net/voting-service222" CountryCode="ES"/>
+	<Entity Type="voting-service-provider" Id="https://voting.ddns.net/voting-service111" CountryCode="ES"/>
+	<Entity Type="timestamp-server" Id="https://voting.ddns.net/timestamp-server333" CountryCode="ES"/>
+	<Entity Type="timestamp-server" Id="https://voting.ddns.net/timestamp-server222" CountryCode="ES"/>
+	<Entity Type="timestamp-server" Id="https://voting.ddns.net/timestamp-server111" CountryCode="ES"/>
+	<!--Entity type="voting-service-provider" id="https://voting.ddns.net/voting-service" country_code="ES" -->
 </TrustedEntities>

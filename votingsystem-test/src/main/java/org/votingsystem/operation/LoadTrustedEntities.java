@@ -26,7 +26,7 @@ public class LoadTrustedEntities extends BaseTest {
 
     private static final Logger log = Logger.getLogger(LoadTrustedEntities.class.getName());
 
-    private static String TEST_ENTITY = "https://votingsystem.ddns.net/idprovider";
+    private static String TEST_ENTITY = "https://voting.ddns.net/idprovider";
 
     private static String ADMIN_KEYSTORE = "certs/votingsystem-idprovider.jks";
     //private static String ADMIN_KEYSTORE = "certs/fake_08888888D.jks";

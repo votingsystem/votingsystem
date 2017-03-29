@@ -82,8 +82,8 @@ public class SignatureTest extends BaseTest {
         SignatureTest signatureTest = new SignatureTest();
         //CMSSignedMessage cmsSignedMessage = signatureTest.sign();
         //signatureTest.validate(cmsSignedMessage.toPEM());
-        //signatureTest.sendToServer(cmsSignedMessage.toPEM(), "http://votingsystem.ddns.net/currency-server/api/test/cms-document");
-        //signatureTest.sendToServer(cmsSignedMessage.toPEM(), "http://votingsystem.ddns.net/currency-server/api/device/init-browser-session");
+        //signatureTest.sendToServer(cmsSignedMessage.toPEM(), "https://voting.ddns.net/currency-server/api/test/cms-document");
+        //signatureTest.sendToServer(cmsSignedMessage.toPEM(), "https://voting.ddns.net/currency-server/api/device/init-browser-session");
         signatureTest.readPem();
         System.exit(0);
     }

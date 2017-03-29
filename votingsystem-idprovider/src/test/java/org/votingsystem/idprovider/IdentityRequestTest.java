@@ -16,7 +16,7 @@ public class IdentityRequestTest {
     public void checkIdentityRequest() throws Exception {
         IdentityRequestDto requestDto = new IdentityRequestDto();
         SystemEntityDto systemEntityDto = new SystemEntityDto();
-        systemEntityDto.setId("http://votingsystem.ddns.net/voting-service").setEntityType(SystemEntityType.VOTING_SERVICE_PROVIDER);
+        systemEntityDto.setId("https://voting.ddns.net/voting-service").setEntityType(SystemEntityType.VOTING_SERVICE_PROVIDER);
         requestDto.setIndentityServiceEntity(systemEntityDto);
         requestDto.setUUID("ElectionUUID---");
         System.out.println(XML.getMapper().writeValueAsString(requestDto));
