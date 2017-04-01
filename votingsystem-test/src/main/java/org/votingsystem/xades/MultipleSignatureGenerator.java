@@ -7,16 +7,15 @@ import org.apache.http.message.BasicNameValuePair;
 import org.votingsystem.BaseTest;
 import org.votingsystem.Constants;
 import org.votingsystem.crypto.TSPHttpSource;
-import org.votingsystem.crypto.xml.SignatureValidator;
-import org.votingsystem.crypto.xml.XmlSignature;
 import org.votingsystem.dto.ResponseDto;
 import org.votingsystem.dto.metadata.MetadataDto;
 import org.votingsystem.dto.metadata.SystemEntityDto;
 import org.votingsystem.http.HttpConn;
 import org.votingsystem.http.SystemEntityType;
+import org.votingsystem.test.crypto.xml.SignatureValidator;
+import org.votingsystem.test.crypto.xml.XmlSignature;
 import org.votingsystem.util.OperationType;
 import org.votingsystem.xml.XML;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;

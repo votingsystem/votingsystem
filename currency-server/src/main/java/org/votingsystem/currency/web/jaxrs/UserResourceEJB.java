@@ -27,6 +27,7 @@ import org.votingsystem.util.Interval;
 import org.votingsystem.util.JSON;
 import org.votingsystem.util.Messages;
 
+import javax.annotation.security.PermitAll;
 import javax.annotation.security.RolesAllowed;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
@@ -63,6 +64,7 @@ public class UserResourceEJB {
     @Inject private SignatureService signatureService;
     @Inject private ConfigCurrencyServer config;
 
+    @PermitAll
     @Path("/") @GET
     @Produces(javax.ws.rs.core.MediaType.APPLICATION_JSON)
     public Response indexJSON(@DefaultValue("0") @QueryParam("offset") int offset,
@@ -234,4 +236,12 @@ public class UserResourceEJB {
                 SessionManager.getInstance().getConnectedUsersDto())).build();
     }
 
+    @PermitAll
+    @Path("/register")
+    @POST @Produces(javax.ws.rs.core.MediaType.APPLICATION_JSON)
+    public Response register(@Context HttpServletRequest req, String request) throws Exception {
+        //TODO
+        log.info("request: " + request);
+        return Response.ok().entity("User registration OK").build();
+    }
 }

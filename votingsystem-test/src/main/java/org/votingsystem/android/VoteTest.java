@@ -8,9 +8,6 @@ import org.votingsystem.crypto.CertificationRequest;
 import org.votingsystem.crypto.KeyStoreUtils;
 import org.votingsystem.crypto.MockDNIe;
 import org.votingsystem.crypto.VoteContainer;
-import org.votingsystem.crypto.xml.SignatureAlgorithm;
-import org.votingsystem.crypto.xml.SignatureBuilder;
-import org.votingsystem.crypto.xml.XAdESUtils;
 import org.votingsystem.dto.QRMessageDto;
 import org.votingsystem.dto.QRResponseDto;
 import org.votingsystem.dto.ResponseDto;
@@ -21,18 +18,19 @@ import org.votingsystem.dto.voting.ElectionOptionDto;
 import org.votingsystem.http.HttpConn;
 import org.votingsystem.http.MediaType;
 import org.votingsystem.http.SystemEntityType;
+import org.votingsystem.test.crypto.xml.SignatureAlgorithm;
+import org.votingsystem.test.crypto.xml.SignatureBuilder;
+import org.votingsystem.test.crypto.xml.XAdESUtils;
+import org.votingsystem.test.util.XMLUtils;
 import org.votingsystem.util.Constants;
 import org.votingsystem.util.FileUtils;
 import org.votingsystem.util.OperationType;
-import org.votingsystem.util.XMLUtils;
 import org.votingsystem.xml.XML;
-
 import java.io.File;
 import java.security.KeyStore;
 import java.security.cert.Certificate;
 import java.util.Map;
 import java.util.logging.Logger;
-
 import static org.votingsystem.util.Constants.ANON_CERTIFICATE_REQUEST_FILE_NAME;
 import static org.votingsystem.util.Constants.CSR_FILE_NAME;
 

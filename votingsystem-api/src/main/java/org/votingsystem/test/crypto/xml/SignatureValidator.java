@@ -1,13 +1,12 @@
-package org.votingsystem.crypto.xml;
+package org.votingsystem.test.crypto.xml;
 
 import org.bouncycastle.cms.CMSSignedData;
 import org.bouncycastle.tsp.TimeStampToken;
 import org.kxml2.kdom.Document;
 import org.kxml2.kdom.Element;
+import org.votingsystem.test.util.XMLUtils;
 import org.votingsystem.throwable.ValidationException;
-import org.votingsystem.util.XMLUtils;
 import org.xmlpull.v1.XmlPullParserException;
-
 import java.io.IOException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -42,7 +41,7 @@ public class SignatureValidator {
         //make sure we replace selfclosing tags
         this.plainXML = documentStr.replaceAll("(?six)<(\\w+)([^<]*?)/>", "<$1$2></$1>").trim();
         log.info("plainXml: " + plainXML);
-        signedDocument = org.votingsystem.util.XMLUtils.parse(bytesSigned);
+        signedDocument = XMLUtils.parse(bytesSigned);
     }
 
     public Set<XmlSignature> validate() throws Exception {
@@ -50,7 +49,7 @@ public class SignatureValidator {
         Set<XmlSignature> result = new HashSet<>();
         for(int i = 0; i < rootElement.getChildCount(); i++) {
             Object childElement = rootElement.getChild(i);
-            if(childElement instanceof org.kxml2.kdom.Element) {
+            if(childElement instanceof Element) {
                 if(((Element)childElement).getName().equals("Signature")) {
                     result.add(validate((Element)childElement));
                 }
@@ -104,7 +103,7 @@ public class SignatureValidator {
         Element signedInfoElementCanonicalized = XAdESUtils.buildSignedInfoElement(plainXML.getBytes(),
                 result.getSignatureId(), result.getSigningCertificate(), result.getDocumentDigestAlgorithm(),
                 result.getSignedPropertiesDigestAlgorithm(), result.getSigningTime(), result.getDocumentMimeType(), true);
-        byte[] signedBytes = org.votingsystem.util.XMLUtils.serialize(signedInfoElementCanonicalized, false);
+        byte[] signedBytes = XMLUtils.serialize(signedInfoElementCanonicalized, false);
         Signature signature = Signature.getInstance(result.getSignatureMethod());
         signature.initVerify(result.getSigningCertificate().getPublicKey());
         signature.update(signedBytes);
@@ -154,7 +153,7 @@ public class SignatureValidator {
     private void validateSignedProperties(Element referenceElement, XmlSignature xmlSignature) throws IOException,
             NoSuchAlgorithmException,
             ValidationException {
-        byte[] content = org.votingsystem.util.XMLUtils.serialize(xmlSignature.getSignedPropertiesElementCanonicalized(), false);
+        byte[] content = XMLUtils.serialize(xmlSignature.getSignedPropertiesElementCanonicalized(), false);
         log.info("content: " + new String(content));
         ReferenceDigestData referenceDigestData = new ReferenceDigestData(referenceElement);
         xmlSignature.setSignedPropertiesDigestAlgorithm(referenceDigestData.getDigestMethod());

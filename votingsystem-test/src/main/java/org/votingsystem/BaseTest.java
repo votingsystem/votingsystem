@@ -3,14 +3,11 @@ package org.votingsystem;
 import eu.europa.esig.dss.xades.DSSXMLUtils;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.votingsystem.crypto.KeyGenerator;
-import org.votingsystem.ejb.EJBClient;
 import org.votingsystem.http.HttpConn;
-
 import java.security.Security;
 import java.util.logging.Level;
 import java.util.logging.LogManager;
 import java.util.logging.Logger;
-
 
 /**
  * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
@@ -28,7 +25,7 @@ public class BaseTest {
             String logFile = System.getProperty("org.votingsystem.test.logging.file");
             if(logFile == null){
                 LogManager.getLogManager().readConfiguration(
-                        EJBClient.class.getClassLoader().getResourceAsStream("logging.properties"));
+                        BaseTest.class.getClassLoader().getResourceAsStream("logging.properties"));
             }
             HttpConn.init(HttpConn.HTTPS_POLICY.ALL, null);
 

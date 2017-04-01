@@ -1,6 +1,7 @@
-package org.votingsystem.crypto.xml;
+package org.votingsystem.test.crypto.xml;
 
 
+import eu.europa.esig.dss.DigestAlgorithm;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.tsp.TimeStampRequest;
@@ -15,6 +16,7 @@ import org.votingsystem.crypto.MockDNIe;
 import org.votingsystem.dto.ResponseDto;
 import org.votingsystem.http.ContentType;
 import org.votingsystem.http.HttpConn;
+import org.votingsystem.test.util.XMLUtils;
 import org.votingsystem.util.Constants;
 
 import java.io.IOException;
@@ -114,14 +116,14 @@ public class SignatureBuilder {
         signatureElement.addChild(Node.ELEMENT, buildQualifyingPropertiesElement());
 
         doc.addChild(Node.ELEMENT, signatureElement);
-        byte[] signatureBytes = org.votingsystem.util.XMLUtils.serialize(doc, false);
+        byte[] signatureBytes = XMLUtils.serialize(doc, false);
 
-        org.kxml2.kdom.Document document = org.votingsystem.util.XMLUtils.parse(documentToSignBytes);
+        org.kxml2.kdom.Document document = XMLUtils.parse(documentToSignBytes);
         Element rootElement = document.getRootElement();
-        org.kxml2.kdom.Document signatureDocument = org.votingsystem.util.XMLUtils.parse(signatureBytes);
+        org.kxml2.kdom.Document signatureDocument = XMLUtils.parse(signatureBytes);
         rootElement.addChild(Node.ELEMENT, signatureDocument.getRootElement());
 
-        return org.votingsystem.util.XMLUtils.serialize(document);
+        return XMLUtils.serialize(document);
     }
 
     private Element buildSignatureValueElement() throws CertificateEncodingException, IOException,
@@ -136,7 +138,7 @@ public class SignatureBuilder {
         Element signedInfoElementCanonicalized = XAdESUtils.buildSignedInfoElement(documentToSignBytes, signatureId,
                 signingCertificate, XAdESUtils.DATA_DIGEST_ALGORITHM, XAdESUtils.DATA_DIGEST_ALGORITHM,
                 signingTime, documentToSignMimeType, true);
-        byte[] bytesToSign = org.votingsystem.util.XMLUtils.serialize(signedInfoElementCanonicalized, false);
+        byte[] bytesToSign = XMLUtils.serialize(signedInfoElementCanonicalized, false);
         log.info("bytesToSign: " + new String(bytesToSign));
 
         Signature sig = Signature.getInstance(signatureAlgorithm);
@@ -190,7 +192,7 @@ public class SignatureBuilder {
         signatureTimeStampElement.addChild(Node.ELEMENT, canonicalizationMethodElement);
         signatureTimeStampElement.addChild(Node.ELEMENT, encapsulatedTimeStampElement);
 
-        byte[] signatureValueBytes = org.votingsystem.util.XMLUtils.serialize(signatureValueElementCanonicalized, false);
+        byte[] signatureValueBytes = XMLUtils.serialize(signatureValueElementCanonicalized, false);
         byte[] digest = HashUtils.getHash(signatureValueBytes, Constants.DATA_DIGEST_ALGORITHM);
         if (timeStampServiceURL != null) {
             TimeStampRequestGenerator reqgen = new TimeStampRequestGenerator();

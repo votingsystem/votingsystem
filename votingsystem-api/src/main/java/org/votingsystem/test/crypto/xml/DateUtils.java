@@ -1,4 +1,4 @@
-package org.votingsystem.crypto.xml;
+package org.votingsystem.test.crypto.xml;
 
 
 import java.text.DateFormat;

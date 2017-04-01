@@ -1,10 +1,12 @@
-package org.votingsystem.crypto.xml;
+package org.votingsystem.test.crypto.xml;
 
+import eu.europa.esig.dss.DigestAlgorithm;
 import org.bouncycastle.util.encoders.Base64;
 import org.kxml2.kdom.Document;
 import org.kxml2.kdom.Element;
 import org.kxml2.kdom.Node;
 import org.votingsystem.crypto.HashUtils;
+import org.votingsystem.test.util.XMLUtils;
 import org.votingsystem.util.Constants;
 
 import java.io.ByteArrayInputStream;
@@ -230,7 +232,7 @@ public class XAdESUtils {
         referenceElement.addChild(Node.ELEMENT, digestValueElement);
         Element signedPropertiesElement = XAdESUtils.buildSignedPropertiesElement(signingCertificate,
                 signatureId, signingTime, documentToSignMimeType, true);
-        byte[] signedPropertiesBytes = org.votingsystem.util.XMLUtils.serialize(signedPropertiesElement, false);
+        byte[] signedPropertiesBytes = XMLUtils.serialize(signedPropertiesElement, false);
         digestValueElement.addChild(Node.TEXT, HashUtils.getHashBase64(
                 signedPropertiesBytes, Constants.DATA_DIGEST_ALGORITHM));
         return referenceElement;

@@ -21,7 +21,7 @@ import java.util.logging.Logger;
  */
 public class SortEntities extends BaseTest {
 
-    private static final Logger log = Logger.getLogger(SignatureGenerator.class.getName());
+    private static final Logger log = Logger.getLogger(SortEntities.class.getName());
 
     public static void main(String[] args) throws CertificateException, NoSuchAlgorithmException, KeyStoreException,
             IOException, KeyManagementException {

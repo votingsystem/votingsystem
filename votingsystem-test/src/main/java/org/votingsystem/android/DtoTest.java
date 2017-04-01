@@ -18,7 +18,7 @@ import java.util.logging.Logger;
 
 public class DtoTest extends BaseTest {
 
-    private static final Logger log = Logger.getLogger(VoteTest.class.getName());
+    private static final Logger log = Logger.getLogger(DtoTest.class.getName());
 
     public static void main(String[] args) throws Exception {
         new DtoTest().voteTest();

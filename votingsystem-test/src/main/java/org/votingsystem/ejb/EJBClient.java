@@ -1,14 +1,12 @@
 package org.votingsystem.ejb;
 
-
 import org.votingsystem.BaseTest;
 import org.votingsystem.model.User;
 import org.votingsystem.service.EJBAdminRemoteIdProvider;
+import org.votingsystem.test.util.IOUtils;
 import org.votingsystem.util.Constants;
 import org.votingsystem.util.FileUtils;
-import org.votingsystem.util.IOUtils;
 import org.votingsystem.util.NifUtils;
-
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;

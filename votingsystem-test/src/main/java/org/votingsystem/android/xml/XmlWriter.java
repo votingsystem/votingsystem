@@ -5,6 +5,7 @@ import org.kxml2.kdom.Element;
 import org.kxml2.kdom.Node;
 import org.votingsystem.dto.indentity.IdentityRequestDto;
 import org.votingsystem.dto.voting.VoteDto;
+import org.votingsystem.test.util.XMLUtils;
 
 /**
  * Licence: https://github.com/votingsystem/votingsystem/wiki/Licencia
@@ -44,7 +45,7 @@ public class XmlWriter {
         identityRequestElement.addChild(Node.ELEMENT, uuidElement);
 
         doc.addChild(Node.ELEMENT, identityRequestElement);
-        return org.votingsystem.util.XMLUtils.serialize(doc);
+        return XMLUtils.serialize(doc);
     }
 
     public static byte[] write(VoteDto vote) throws Exception {
@@ -80,7 +81,7 @@ public class XmlWriter {
         }
 
         doc.addChild(Node.ELEMENT, voteElement);
-        return org.votingsystem.util.XMLUtils.serialize(doc);
+        return XMLUtils.serialize(doc);
     }
 
 

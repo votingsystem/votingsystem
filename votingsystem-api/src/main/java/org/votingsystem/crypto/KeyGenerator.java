@@ -1,26 +1,21 @@
 package org.votingsystem.crypto;
 
-
 import java.math.BigInteger;
 import java.security.*;
-import java.util.Date;
-import java.util.logging.Logger;
 
 /**
  * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
 public enum KeyGenerator {
     
-    INSTANCE;   
-    
-    private static Logger log = Logger.getLogger(KeyGenerator.class.getName());
+    INSTANCE;
     
     private KeyPairGenerator keyPairGenerator;
     private SecureRandom random;
-    /** number of bytes serial number to generate, default 8 */
+    //Default number of bytes serial number to generate
     private int noOctets = 8;
     
-    private KeyGenerator() { }
+    KeyGenerator() { }
     
     public void init(String signName, String provider, int keySize, String algorithmRNG) throws
     		NoSuchAlgorithmException, NoSuchProviderException {
@@ -29,7 +24,7 @@ public enum KeyGenerator {
         random = SecureRandom.getInstance(algorithmRNG);
     }
      
-     public synchronized KeyPair genKeyPair () {
+    public synchronized KeyPair genKeyPair () {
          return keyPairGenerator.genKeyPair();
      } 
      
@@ -42,10 +37,7 @@ public enum KeyGenerator {
     }
 
     public BigInteger getSerno() {
-        random.setSeed(new Date().getTime());
-        final byte[] sernobytes = new byte[noOctets];
-        random.nextBytes(sernobytes);
-        return new BigInteger(sernobytes).abs();
+        return new BigInteger(getSalt()).abs();
     }
 
     public byte[] getSalt() {
@@ -54,4 +46,5 @@ public enum KeyGenerator {
         random.nextBytes(sernobytes);
         return  sernobytes;
     }
+
 }

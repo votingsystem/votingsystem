@@ -11,9 +11,9 @@ import org.votingsystem.dto.voting.ElectionOptionDto;
 import org.votingsystem.dto.voting.VoteDto;
 import org.votingsystem.http.SystemEntityType;
 import org.votingsystem.model.voting.Election;
+import org.votingsystem.test.util.XMLUtils;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.OperationType;
-import org.votingsystem.util.XMLUtils;
 import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;

@@ -5,7 +5,7 @@ installation in the directory:
 
     /var/local/currency-server
 
-It can be changed setting system environment var 'currency_server_dir' with the desired value. With Wildfly, this can 
+The default configuration dir can be changed setting system environment var 'currency_server_dir' with the desired value. With Wildfly, this can 
 be done:
 
     <system-properties>
@@ -41,7 +41,7 @@ To enable application filters change what follows to the standalone / domain  se
 #### Build and Deploy on Wildfly
 1. Make sure you have  Wildfly server started.
 2. The application needs access to a [timestamp server](https://github.com/votingsystem/votingsystem/tree/master/timestamp-server),
-the property **vs.timeStampServerURL** must be set according to that.
+the property **timeStampServerURL** must be set according to that.
 3. Add the datasource in Wildfly through the management interface:
 
         Name: CurrencyServer

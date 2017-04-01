@@ -1,4 +1,4 @@
-package org.votingsystem.crypto.xml;
+package org.votingsystem.test.crypto.xml;
 
 /**
  * Licence: https://github.com/votingsystem/votingsystem/wiki/Licencia
