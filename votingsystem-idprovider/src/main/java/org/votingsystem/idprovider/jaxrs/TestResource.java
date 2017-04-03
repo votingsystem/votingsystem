@@ -5,13 +5,10 @@ import org.votingsystem.crypto.cms.CMSSignedMessage;
 import org.votingsystem.dto.ResponseDto;
 import org.votingsystem.ejb.CmsEJB;
 import org.votingsystem.idprovider.ejb.CertIssuerEJB;
-import org.votingsystem.model.User;
-import org.votingsystem.util.Constants;
 import org.votingsystem.util.FileUtils;
 import org.votingsystem.util.JSON;
 import org.votingsystem.xml.XML;
 
-import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;

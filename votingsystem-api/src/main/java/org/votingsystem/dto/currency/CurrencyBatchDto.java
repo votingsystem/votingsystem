@@ -4,13 +4,13 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import org.bouncycastle.pkcs.PKCS10CertificationRequest;
+import org.votingsystem.model.SignedDocument;
+import org.votingsystem.throwable.ValidationException;
+import org.votingsystem.util.*;
 import org.votingsystem.crypto.CertUtils;
 import org.votingsystem.crypto.PEMUtils;
-import org.votingsystem.model.SignedDocument;
-import org.votingsystem.model.currency.Currency;
 import org.votingsystem.model.currency.CurrencyBatch;
 import org.votingsystem.model.currency.Tag;
-import org.votingsystem.throwable.ValidationException;
 import org.votingsystem.util.*;
 import org.votingsystem.xml.XML;
 
@@ -45,13 +45,13 @@ public class CurrencyBatchDto {
     private BigDecimal batchAmount;
     private BigDecimal leftOver = BigDecimal.ZERO;
     @JsonIgnore
-    private Currency leftOverCurrency;
+    private org.votingsystem.model.currency.Currency leftOverCurrency;
     @JsonIgnore
     private PKCS10CertificationRequest leftOverPKCS10;
     @JsonIgnore
     private PKCS10CertificationRequest currencyChangePKCS10;
     @JsonIgnore
-    private List<Currency> currencyList;
+    private List<org.votingsystem.model.currency.Currency> currencyList;
     @JsonIgnore
     private byte[] content;
 
@@ -75,7 +75,7 @@ public class CurrencyBatchDto {
     }
 
     public static CurrencyBatchDto NEW(String subject, String toUserIBAN, BigDecimal batchAmount,
-            CurrencyCode currencyCode, Tag tag, Boolean timeLimited, List<Currency> currencyList,
+            CurrencyCode currencyCode, Tag tag, Boolean timeLimited, List<org.votingsystem.model.currency.Currency> currencyList,
             String currencyEntityId, String timestampEntityId) throws Exception {
         CurrencyBatchDto batchDto = new CurrencyBatchDto();
         batchDto.subject = subject;
@@ -87,7 +87,7 @@ public class CurrencyBatchDto {
         batchDto.currencyList = currencyList;
         batchDto.batchUUID = UUID.randomUUID().toString();
         BigDecimal accumulated = BigDecimal.ZERO;
-        for (Currency currency : currencyList) {
+        for (org.votingsystem.model.currency.Currency currency : currencyList) {
             accumulated = accumulated.add(currency.getAmount());
         }
         if(batchAmount.compareTo(accumulated) > 0) {
@@ -95,11 +95,11 @@ public class CurrencyBatchDto {
                     batchAmount, accumulated));
         } else if(batchAmount.compareTo(accumulated) != 0){
             batchDto.leftOver = accumulated.subtract(batchAmount);
-            batchDto.leftOverCurrency = new Currency(currencyEntityId, batchDto.leftOver, currencyCode, timeLimited,tag);
+            batchDto.leftOverCurrency = new org.votingsystem.model.currency.Currency(currencyEntityId, batchDto.leftOver, currencyCode, timeLimited,tag);
             batchDto.leftOverCSR = new String(batchDto.leftOverCurrency.getCertificationRequest().getCsrPEM());
         }
         batchDto.currencySet = new HashSet<>();
-        for (Currency currency : currencyList) {
+        for (org.votingsystem.model.currency.Currency currency : currencyList) {
             byte[] xmlToSign = XML.getMapper().writeValueAsBytes(
                     CurrencyDto.BATCH_ITEM(batchDto, currency));
             byte[] xmlSigned = currency.getCertificationRequest().signDataWithTimeStamp(xmlToSign,
@@ -119,7 +119,7 @@ public class CurrencyBatchDto {
             try {
                 SignedDocument signedDocument = null;
                 //TODO create SignedDocument from currencyItem
-                Currency currency = new Currency(signedDocument);
+                org.votingsystem.model.currency.Currency currency = new org.votingsystem.model.currency.Currency(signedDocument);
                 if(currencyList == null) {
                     currencyList = new ArrayList<>();
                 }
@@ -206,11 +206,11 @@ public class CurrencyBatchDto {
     }
 
     @JsonIgnore
-    public Map<String, Currency> getCurrencyMap() throws ValidationException {
+    public Map<String, org.votingsystem.model.currency.Currency> getCurrencyMap() throws ValidationException {
         if(currencyList == null)
             throw new ValidationException("Empty currencyList");
-        Map<String, Currency> result = new HashMap<>();
-        for(Currency currency : currencyList) {
+        Map<String, org.votingsystem.model.currency.Currency> result = new HashMap<>();
+        for(org.votingsystem.model.currency.Currency currency : currencyList) {
             result.put(currency.getRevocationHash(), currency);
         }
         return result;
@@ -303,11 +303,11 @@ public class CurrencyBatchDto {
         this.leftOver = leftOver;
     }
 
-    public List<Currency> getCurrencyList() {
+    public List<org.votingsystem.model.currency.Currency> getCurrencyList() {
         return currencyList;
     }
 
-    public void setCurrencyList(List<Currency> currencyList) {
+    public void setCurrencyList(List<org.votingsystem.model.currency.Currency> currencyList) {
         this.currencyList = currencyList;
     }
 
@@ -343,11 +343,11 @@ public class CurrencyBatchDto {
         this.leftOverPKCS10 = leftOverPKCS10;
     }
 
-    public Currency getLeftOverCurrency() {
+    public org.votingsystem.model.currency.Currency getLeftOverCurrency() {
         return leftOverCurrency;
     }
 
-    public void setLeftOverCurrency(Currency leftOverCurrency) {
+    public void setLeftOverCurrency(org.votingsystem.model.currency.Currency leftOverCurrency) {
         this.leftOverCurrency = leftOverCurrency;
     }
 

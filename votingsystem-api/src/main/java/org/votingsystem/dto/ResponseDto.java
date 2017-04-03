@@ -11,8 +11,8 @@ import org.votingsystem.model.User;
 import org.votingsystem.throwable.ExceptionBase;
 import org.votingsystem.util.AppCode;
 import org.votingsystem.util.JSON;
-import org.votingsystem.util.OperationType;
 import org.votingsystem.util.SystemOperation;
+import org.votingsystem.util.OperationType;
 
 import java.io.File;
 import java.io.Serializable;

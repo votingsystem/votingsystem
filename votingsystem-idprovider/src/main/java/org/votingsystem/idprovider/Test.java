@@ -5,8 +5,8 @@ import org.votingsystem.dto.indentity.IdentityRequestDto;
 import org.votingsystem.dto.indentity.IdentityTokenDto;
 import org.votingsystem.dto.metadata.SystemEntityDto;
 import org.votingsystem.http.SystemEntityType;
-import org.votingsystem.util.OperationType;
 import org.votingsystem.xml.XML;
+import org.votingsystem.util.OperationType;
 
 import java.io.IOException;
 import java.util.Base64;

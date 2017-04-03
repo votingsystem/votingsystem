@@ -8,7 +8,6 @@ import eu.europa.esig.dss.token.JKSSignatureToken;
 import eu.europa.esig.dss.tsl.TrustedListsCertificateSource;
 import eu.europa.esig.dss.x509.CertificateToken;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.votingsystem.crypto.KeyGenerator;
 import org.votingsystem.crypto.PEMUtils;
 import org.votingsystem.dto.metadata.MetadataDto;
 import org.votingsystem.dto.metadata.MetadataUtils;
@@ -19,8 +18,9 @@ import org.votingsystem.http.SystemEntityType;
 import org.votingsystem.model.Certificate;
 import org.votingsystem.util.Constants;
 import org.votingsystem.util.Messages;
-import org.votingsystem.util.OperationType;
 import org.votingsystem.util.StringUtils;
+import org.votingsystem.crypto.KeyGenerator;
+import org.votingsystem.util.OperationType;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;

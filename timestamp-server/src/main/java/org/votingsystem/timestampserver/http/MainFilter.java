@@ -1,7 +1,7 @@
 package org.votingsystem.timestampserver.http;
 
-import org.votingsystem.util.Constants;
 import org.votingsystem.util.Messages;
+import org.votingsystem.util.Constants;
 
 import javax.servlet.*;
 import javax.servlet.annotation.WebFilter;

@@ -5,10 +5,10 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
+import org.votingsystem.util.IdDocument;
 import org.votingsystem.model.Certificate;
 import org.votingsystem.model.Device;
 import org.votingsystem.model.User;
-import org.votingsystem.util.IdDocument;
 
 import java.io.Serializable;
 import java.util.HashSet;

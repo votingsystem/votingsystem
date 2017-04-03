@@ -2,13 +2,13 @@ package org.votingsystem.idprovider.jaxrs;
 
 import eu.europa.esig.dss.InMemoryDocument;
 import org.votingsystem.crypto.SignatureParams;
-import org.votingsystem.crypto.SignedDocumentType;
-import org.votingsystem.dto.ResponseDto;
 import org.votingsystem.ejb.Config;
 import org.votingsystem.ejb.SignatureService;
 import org.votingsystem.model.SignedDocument;
 import org.votingsystem.model.User;
 import org.votingsystem.xml.XML;
+import org.votingsystem.crypto.SignedDocumentType;
+import org.votingsystem.dto.ResponseDto;
 
 import javax.ejb.Stateless;
 import javax.inject.Inject;

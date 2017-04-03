@@ -1,6 +1,7 @@
 package org.votingsystem.dto.metadata;
 
 import org.votingsystem.dto.UserDto;
+import org.votingsystem.util.Country;
 import org.votingsystem.http.SystemEntityType;
 
 import java.io.IOException;
@@ -28,7 +29,7 @@ public class MetadataUtils {
         String city = (String) properties.get("city");
         String address = (String) properties.get("address");
         String postalCode = (String) properties.get("postalCode");
-        org.votingsystem.util.Country country = org.votingsystem.util.Country.valueOf(countryCode);
+        Country country = Country.valueOf(countryCode);
         LocationDto location = new LocationDto(city, address, postalCode, country, languageCode);
         //Contact person data
         String company = (String) properties.get("company");

@@ -1,10 +1,10 @@
 package org.votingsystem.model.currency;
 
-import org.votingsystem.dto.currency.CurrencyRequestDto;
 import org.votingsystem.model.EntityBase;
 import org.votingsystem.model.SignedDocument;
 import org.votingsystem.model.User;
 import org.votingsystem.model.converter.LocalDateTimeAttributeConverter;
+import org.votingsystem.dto.currency.CurrencyRequestDto;
 import org.votingsystem.util.CurrencyCode;
 
 import javax.persistence.*;

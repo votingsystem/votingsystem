@@ -2,12 +2,12 @@ package org.votingsystem.model.voting;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.bouncycastle.tsp.TimeStampToken;
-import org.votingsystem.crypto.CertUtils;
-import org.votingsystem.dto.voting.CertVoteExtensionDto;
-import org.votingsystem.model.Certificate;
 import org.votingsystem.model.EntityBase;
 import org.votingsystem.model.SignedDocument;
 import org.votingsystem.model.converter.LocalDateTimeAttributeConverter;
+import org.votingsystem.crypto.CertUtils;
+import org.votingsystem.dto.voting.CertVoteExtensionDto;
+import org.votingsystem.model.Certificate;
 import org.votingsystem.util.Constants;
 
 import javax.persistence.*;

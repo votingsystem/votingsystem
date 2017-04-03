@@ -24,7 +24,7 @@ import java.util.Date;
 public class OCSPUtils {
 
     public static Certificate.State validateCert(X509CertificateHolder intermediateCertHolder,
-                                 BigInteger serialNumber, Date dateCheck) throws Exception {
+                                                 BigInteger serialNumber, Date dateCheck) throws Exception {
         DigestCalculatorProvider digCalcProv = new JcaDigestCalculatorProviderBuilder().setProvider(Constants.PROVIDER).build();
 
         CertificateID id = new CertificateID(digCalcProv.get(CertificateID.HASH_SHA1), intermediateCertHolder, serialNumber);

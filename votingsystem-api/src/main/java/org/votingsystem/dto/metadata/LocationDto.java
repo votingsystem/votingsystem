@@ -3,6 +3,7 @@ package org.votingsystem.dto.metadata;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
+import org.votingsystem.util.Country;
 import org.votingsystem.dto.AddressDto;
 
 import java.util.logging.Logger;
@@ -25,7 +26,7 @@ public class LocationDto {
 
     public LocationDto() {}
 
-    public LocationDto(String city, String address, String postalCode, org.votingsystem.util.Country country,
+    public LocationDto(String city, String address, String postalCode, Country country,
                        String language) {
         this.country = new CountryDto(country, language);
         this.city = city;

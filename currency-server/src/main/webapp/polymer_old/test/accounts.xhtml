@@ -1,0 +1,30 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                template="/WEB-INF/templates/basic.xhtml">
+    <ui:define name="title">${msg.electionSystemLbl}</ui:define>
+    <ui:define name="head">
+        <title>${msg.testAccountsPageCaption}</title>
+        <style type="text/css" media="screen"></style>
+    </ui:define>
+    <ui:define name="content">
+        <div class="pagevs">
+            <div style="margin: 100px 0 0 0;">
+                <div onclick="initTransaction('${msg.testWebAccountLbl}');"
+                     style="font-size: 1.5em; color: #0000ff; cursor: pointer;">${msg.testWebAccountLbl}</div>
+            </div>
+        </div>
+        <script>
+            function initTransaction(transactionSubject) {
+                var encodedIBAN = encodeURIComponent("")
+                var encodedSubject = encodeURIComponent(transactionSubject)
+                var encodedRefererURL = encodeURIComponent(window.location.href)
+                var encodedReceptor = encodeURIComponent('${msg.receptorTestWebAccountLbl}')
+                var uriData = vs.contextURL + "/rest/app/androidClient?operation=TRANSACTION&amp;amount=20&amp;currencyCode=EUR" +
+                        "&amp;tagVS=HIDROGENO&amp;IBAN=" + encodedIBAN + "&amp;subject=" + encodedSubject + "&amp;toUserName=" + encodedReceptor +
+                        "&amp;toUserIBAN=ES8978788989450000000004&amp;refererURL=" + encodedRefererURL
+                window.location.href = uriData.replace("\n","")
+                return false
+            }
+        </script>
+    </ui:define>
+</ui:composition>

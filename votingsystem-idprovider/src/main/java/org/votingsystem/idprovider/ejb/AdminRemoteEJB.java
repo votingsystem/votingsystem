@@ -2,12 +2,12 @@ package org.votingsystem.idprovider.ejb;
 
 
 import org.votingsystem.crypto.KeyStoreUtils;
-import org.votingsystem.model.Device;
 import org.votingsystem.model.User;
 import org.votingsystem.model.voting.UserCSRRequest;
 import org.votingsystem.service.EJBAdminRemoteIdProvider;
 import org.votingsystem.throwable.ValidationException;
 import org.votingsystem.util.NifUtils;
+import org.votingsystem.model.Device;
 
 import javax.ejb.EJB;
 import javax.ejb.Remote;

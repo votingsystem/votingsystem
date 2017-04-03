@@ -1,0 +1,33 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+        xmlns:ui="http://java.sun.com/jsf/facelets"
+        template="/WEB-INF/templates/basic.xhtml">
+    <ui:define name="content">
+        <div class="pagevs">
+            <div class="horizontal layout center center-justified" style="font-size: 1.2em;">
+                <div><a href="#{contextURL}/spa.xhtml#!/innerVSPage?url=/app/index.xhtml&amp;caption=${msg.docsLbl}">inicio</a></div>
+            </div>
+            <h1 class="pageHeader" style="text-align: center;">cuentas corrientes de usuario</h1>
+            <div class="text-justify" style="margin: 0 auto 0 auto; font-size: 1.2em;">
+                <p>Las <b>etiquetas</b> son un mecanismo para poder determinar en qué tipo de conceptos se puede gastar el dinero.
+                Por ejemplo, el dinero con la <b>etiqueta energía</b> sólo puede emplearse en conceptos que tengan asociada esa etiqueta.</p>
+
+                <p>La etiqueta <b>gastos libres</b> es una etiqueta especial, el dinero asocidado a la misma se puede emplear
+                en cualquier tipo de etiqueta</p>
+                <p>
+                    Cada usuario tiene asignado un codigo <b>IBAN</b> que tiene asociadas tantos depósitos como <b>etiquetas reconocidas por el sistema</b>.
+                </p>
+                <p>
+                    El dinero de un depósito asociado a una etiqueta sólo se puede emplear en conceptos que tengan asociada esa etiqueta,
+                    exceptuando el dinero del depósito asociado a la etiqueta de <b>gastos libres</b> que se puede emplear en cualquier tipo de etiqueta.
+                </p>
+                <p>Cuando un usuario <b>RECIBE</b> un <b>ingreso CON etiqueta</b> el importe se guarda en su depósito para esa etiqueta y sólo
+                puede utilizarse en conceptos asociados a esa etiqueta</p>
+                <p>Cuando un usuario <b>HACE</b> un <b>ingreso</b> a otro usuario el importe se extrae del depósito de <b>gastos libres</b></p>
+                <p>Cuando un usuario <b>HACE</b> un <b>ingreso CON etiqueta</b> el importe se extrae del depósito de esa etiqueta,
+                    si el importe excede el contenido del depósito lo que falta se extrae del depósito para <b>gastos libres</b></p>
+            </div>
+        </div>
+    </ui:define>
+</ui:composition>
+
+

@@ -16,12 +16,12 @@ import org.bouncycastle.tsp.TimeStampToken;
 import org.bouncycastle.tsp.TimeStampTokenInfo;
 import org.bouncycastle.tsp.cms.ImprintDigestInvalidException;
 import org.bouncycastle.util.Store;
+import org.votingsystem.util.DateUtils;
 import org.votingsystem.crypto.PEMUtils;
 import org.votingsystem.model.Signature;
 import org.votingsystem.model.User;
 import org.votingsystem.throwable.ValidationException;
 import org.votingsystem.util.Constants;
-import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.JSON;
 
 import java.io.ByteArrayInputStream;
@@ -204,7 +204,7 @@ public class CMSSignedMessage extends CMSSignedData {
             signatures = new HashSet<>();
             while (it.hasNext()) {
                 SignerInformation signer = (SignerInformation) it.next();
-                byte[] signerDigest = CMSUtils.getSignerDigest(signer);
+                byte[] signerDigest = org.votingsystem.crypto.cms.CMSUtils.getSignerDigest(signer);
                 Collection certCollection = certs.getMatches(signer.getSID());
                 Iterator certIt = certCollection.iterator();
                 X509Certificate cert = new JcaX509CertificateConverter().setProvider(Constants.PROVIDER).getCertificate(
@@ -221,7 +221,7 @@ public class CMSSignedMessage extends CMSSignedData {
                 }
                 User user = User.FROM_X509_CERT(cert);
                 user.setSignerInformation(signer);
-                TimeStampToken tsToken = CMSUtils.checkTimeStampToken(signer);
+                TimeStampToken tsToken = org.votingsystem.crypto.cms.CMSUtils.checkTimeStampToken(signer);
                 user.setTimeStampToken(tsToken);
                 if (tsToken != null) {
                     TimeStampTokenInfo info = tsToken.getTimeStampInfo();

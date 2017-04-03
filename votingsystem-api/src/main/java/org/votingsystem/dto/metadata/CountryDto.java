@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
+import org.votingsystem.util.Country;
 
 import java.util.Locale;
 
@@ -25,7 +26,7 @@ public class CountryDto {
 
     public CountryDto() {}
 
-    public CountryDto(org.votingsystem.util.Country country, String language) {
+    public CountryDto(Country country, String language) {
         this.language = language;
         this.displayName = country.getDisplayCountry();
         this.code = country.name();

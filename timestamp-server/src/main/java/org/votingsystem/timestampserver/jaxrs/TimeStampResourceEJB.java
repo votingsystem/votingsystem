@@ -3,12 +3,12 @@ package org.votingsystem.timestampserver.jaxrs;
 import org.bouncycastle.tsp.TSPException;
 import org.bouncycastle.tsp.TimeStampResponse;
 import org.bouncycastle.tsp.TimeStampToken;
+import org.votingsystem.http.ContentType;
+import org.votingsystem.util.FileUtils;
 import org.votingsystem.crypto.TimeStampResponseGeneratorHelper;
 import org.votingsystem.dto.ResponseDto;
-import org.votingsystem.http.ContentType;
 import org.votingsystem.model.TimeStamp;
 import org.votingsystem.timestampserver.ejb.ConfigEJB;
-import org.votingsystem.util.FileUtils;
 
 import javax.ejb.EJB;
 import javax.ejb.Stateless;

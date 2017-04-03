@@ -7,8 +7,8 @@ import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlText;
-import org.votingsystem.http.SystemEntityType;
 import org.votingsystem.util.FileUtils;
+import org.votingsystem.http.SystemEntityType;
 
 import java.io.File;
 import java.io.IOException;

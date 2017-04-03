@@ -1,8 +1,8 @@
 package org.votingsystem.util;
 
 
-import org.votingsystem.model.voting.Election;
 import org.votingsystem.throwable.ExceptionBase;
+import org.votingsystem.model.voting.Election;
 
 import java.io.File;
 

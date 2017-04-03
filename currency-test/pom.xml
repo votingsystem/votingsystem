@@ -182,7 +182,7 @@
                 <configuration>
                     <archive>
                         <manifest>
-                            <mainClass>org.votingsystem.ejb.EJBClient</mainClass>
+                            <mainClass>EJBClient</mainClass>
                         </manifest>
                         <manifestEntries>
                             <Application-Name>${project.artifactId}</Application-Name>
@@ -197,7 +197,7 @@
                     <finalName>votingsystem-test</finalName>
                     <archive>
                         <manifest>
-                            <mainClass>org.votingsystem.ejb.EJBClient</mainClass>
+                            <mainClass>EJBClient</mainClass>
                         </manifest>
                     </archive>
                     <descriptorRefs>

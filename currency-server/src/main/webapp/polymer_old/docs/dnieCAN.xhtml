@@ -1,0 +1,28 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                template="/WEB-INF/templates/basic.xhtml">
+
+    <ui:define name="head">
+        <meta name="viewport" content="width=device-width, initial-scale=1"/>
+        <style>
+            .pageHeader {
+                color: #6c0404;
+                font-weight: bold;
+                text-overflow: ellipsis;
+                font-size: 1.3em;
+                text-align: center;
+                padding: 5px 10px 5px 10px;
+            }
+        </style>
+    </ui:define>
+    <ui:define name="content">
+        <div>
+            <h1 class="pageHeader" style="text-align: center;">¿qué es el CAN del DNIe?</h1>
+            <div class="text-justify" style="margin: 0 auto 0 auto; font-size: 1.2em;">
+                El CAN (Card Access Number) es un número de 6 dígitos que aparece en el anverso del documento físico
+                del DNIe.
+            </div>
+            <img src="../resources/images/DNIeCAN.png" style="position:relative;width: 100%;"/>
+        </div>
+    </ui:define>
+</ui:composition>

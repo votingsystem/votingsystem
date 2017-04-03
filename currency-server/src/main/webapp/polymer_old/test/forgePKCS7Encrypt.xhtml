@@ -1,0 +1,120 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                template="/WEB-INF/templates/polymer.xhtml">
+    <ui:define name="head">
+        <link href="../resources/forgePKCS7.html" rel="import"/>
+        <style></style>
+    </ui:define>
+    <ui:define name="content">
+        <h3><div id="selectedMsgDiv"></div></h3>
+        <div id="oids"></div>
+        <div id="privateKey" style="display:none;">
+            -----BEGIN RSA PRIVATE KEY-----
+            MIICXAIBAAKBgQDAsXrYoW/33Kb5+9dbKyAQot+jvFOe3h3bpg5QItZEfCACUHl6
+            Koz0KBnjRMFYG+7F4jKRtJmq4xgIapXfdBLZ0xQTdZ3qIYSWJ7t51m62jkKAg7cv
+            +g+sa/599Lk/xYclArZ+5TaJ8h3mbPrUCEv5w7FR38XxDQXlvY/q1r6t9QIDAQAB
+            AoGAfpUYii6jC0RcPGQAONe/nK4iE8GnfPmUy7HuPR5le1++90Y+Rs6lAc9GElIc
+            YPEYjc3mQmlNeUDtjLnX8o6hwmpC0PCZZps0lM3ZMFuSwsRfpNPGFtoj/BQ7Xq2s
+            zp9XOdXzdhbsa8u1jUJxfglxU+GFmaurWDn1x7MVcaf/UJECQQDk2c2yiqikmOPZ
+            M6MowXktqGoTrTXMKD9k5H86/kvKr09JCDfqlRr97KX8NcLqQ6L2aqfGZs94aBh4
+            7e+wO41LAkEA142Sr9GvTPNnIZCUE0rTlgJUvAoCXCxRgcnwx/sNZ8SuSFAWcWw1
+            s8ATdnY9aWNJJ++16a0fmT4aqPOtxMXpvwJAeiTxz+CIAEoGGnCgHemdpsvjyhrB
+            wvScWVpHuhHuHAETvTQgvBjXLj43nXSIUwbEnObyI0fOZkKRBUJhkttGHwJAdQAm
+            kAK8KYOxBhoJFhO2l6U6QzsXntp7f3ySkqol056Bj0TRec1ntOLcbZ+uo+a9jczi
+            rC1Jio+YPv7N4pIe1wJBAApuHhHKXO4MWmcZao+BJ8j1tzjF7GoQ/szHY7SCRnjh
+            gwAr0AJLM4dE8iCwkfCDiW3SzaPZoC33Tybg7YrnYyE=
+            -----END RSA PRIVATE KEY-----
+        </div>
+        <div id="publicKey" style="display:none;">
+            -----BEGIN PUBLIC KEY-----
+            MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDAsXrYoW/33Kb5+9dbKyAQot+j
+            vFOe3h3bpg5QItZEfCACUHl6Koz0KBnjRMFYG+7F4jKRtJmq4xgIapXfdBLZ0xQT
+            dZ3qIYSWJ7t51m62jkKAg7cv+g+sa/599Lk/xYclArZ+5TaJ8h3mbPrUCEv5w7FR
+            38XxDQXlvY/q1r6t9QIDAQAB
+            -----END PUBLIC KEY-----
+        </div>
+        <div id="cert" style="display:none;">
+            -----BEGIN CERTIFICATE-----
+            MIIDaDCCAlCgAwIBAgIIIzUJIYYTAV4wDQYJKoZIhvcNAQELBQAwTzESMBAGA1UE
+            BRMJMDg4ODg4ODhEMRswGQYDVQQEDBJsYXN0TmFtZV8wODg4ODg4OEQxHDAaBgNV
+            BCoME0ZpcnN0TmFtZV8wODg4ODg4OEQwHhcNMTYwMzE2MTkxNjQ5WhcNMTYwMzE3
+            MTkxNjQ5WjBOMRIwEAYDVQQFEwkwODg4ODg4OEQxGjAYBgNVBAQMEXN1cm5hbWVf
+            MDg4ODg4ODhEMRwwGgYDVQQqDBNnaXZlbk5hbWVfMDg4ODg4ODhEMIGfMA0GCSqG
+            SIb3DQEBAQUAA4GNADCBiQKBgQCidwMrCPfrJaWuY6+xQxzfyIp/0bgj1TyGzDdy
+            Nxfu4+NlWXxNK7Jjk9nP6sFtNZ4ioAKF++ocrI2RauVVdxu30PwaDK3EkLovs5k5
+            ppfNVpCe4PzpaV8itTx/52BobNkz7pBmqegPXUG8sDAYwz4ZlMxt2VyhrVVSItN2
+            E0Z6kwIDAQABo4HMMIHJMIGJBgNVHSMEgYEwf4AU+yClGJDofS8w44DwptEwErcG
+            WqGhXaRbMFkxEjAQBgNVBAUTCTA4ODg4ODg4RDEiMCAGA1UEBBMZVGVzdHMtVm90
+            aW5nU3lzdGVtU3VybmFtZTEfMB0GA1UEKhMWVGVzdHMtVm90aW5nU3lzdGVtTmFt
+            ZYIIOLCKPSSsCvAwHQYDVR0OBBYEFJvTai7M4h7R2jXyycd/dvCmkpbpMAwGA1Ud
+            EwEB/wQCMAAwDgYDVR0PAQH/BAQDAgWgMA0GCSqGSIb3DQEBCwUAA4IBAQB0ZJxJ
+            CtBmNgPAQYKjjXRl/B9Pb+h/Pps17JS21/thsuQfFqJzKJS+21rfKJDpMi3P7TQJ
+            nmKxNoKOf+S9umY7S5y0ov3YBPB/+K3qONga+zbp1L0B1a5RIurbyaUP3jFDzqPH
+            Q2lfBGFi+BY3xcf5aDvWR5LSzCCMCWUWqh94KVzSQKoqcNlN8RHAK+9oyVtS6x5A
+            ORoxYbdCIk7XYOUvlEtJh9sK7eHZ4Z+Q0E/rPLPWw6UlS4KsKyKBt0NUgxWNbI/2
+            YljBIxo2Z0Qc1bAQY6om4BaNbEjauNY533ha65q1vOI+X79cxCeiWaXpj7mrWsNk
+            DJHLcKN3E+yhJh7T
+            -----END CERTIFICATE-----
+        </div>
+        <div id="encryptedCMSMsg" style="display:none;">
+            -----BEGIN PKCS7-----
+            MIAGCSqGSIb3DQEHA6CAMIACAQIxgZowgZcCAQKAADANBgkqhkiG9w0BAQEFAASB
+            gCKtG5ZzA24pUhVagUHAvb/H8HYpHf76O2O+iXjELNqKQRdDzr7aDyAxR7JN2gaD
+            pdryfSmX9+6754sN41lOFPN3TYFso5h0Y63TIzgLD2mMMcHWuu98qeGmB+BbuuEc
+            DhKIWzxH3X5KTFnra7NiBLqtnzPifxLuSQBJk9gevdQ5MIAGCSqGSIb3DQEHATAd
+            BglghkgBZQMEASoEEK3EzSkSUOo5uNS5Iu4wJEOggASBkGiGP3zJEoctrunVVzQV
+            sr1TNbn2lEjD5J4ZO2LbidBADdakhgmq45rrowvmXmG0Q6sjZn8WSrpVjtcuw3V4
+            ia1er35Ge5pLy4cBYZQSMSYsovmr+5I9lHMQw7c0X1p0MjMVWvyLPdQuepspzLe4
+            DYkudhb+jJmWbWrS25bw2zg2bxolWZElKhU0ijOaqrhDfAAAAAAAAAAAAAA=
+            -----END PKCS7-----
+        </div>
+        <div id="encryptedCMS1Msg" style="display:none;">
+            -----BEGIN PKCS7-----
+            MIAGCSqGSIb3DQEHA6CAMIACAQAxggGBMIIBfQIBADBlMFkxEjAQBgNVBAUTCTA4
+            ODg4ODg4RDEiMCAGA1UEBBMZVGVzdHMtVm90aW5nU3lzdGVtU3VybmFtZTEfMB0G
+            A1UEKhMWVGVzdHMtVm90aW5nU3lzdGVtTmFtZQIIEy36qJOyFe8wDQYJKoZIhvcN
+            AQEBBQAEggEAXmVcepY0NfPI4oOHmsu+r2s3uak3NWcrzbQIwVHzLKSAYhCHpSlw
+            v3Q5zfT9xFJYgAi/YIWdnBPYU1BPXEtVirXknGNZhtPO1LyhyZd1WgmRpnqSDzJo
+            5KUstXYdirRAvCYarxT1yAJWOrr9ZL3rhGaxfR93U7BTsxYNX2IpwDKMhxWcHYG0
+            sc630iHPJLY3okgz+QhfJe/6RovlmgCp0v9HdPkjt/JJynokIgDtLOQugid+iQ+D
+            gJ2oVrYNqBWnMQxyNoyezcS0qMIVdg9xOg3wLLZkqnjUvGCb4gbeCmKwxy49rAp+
+            ui1FNWkcRRRag0Av/KcM70aliXu8FknZqzCABgkqhkiG9w0BBwEwHQYJYIZIAWUD
+            BAEqBBDt3M7RgwmvDSiaHK8GZ8jMoIAEELPHzrUKdL+UuN6gUIhhRYsAAAAAAAAA
+            AAAA
+            -----END PKCS7-----
+        </div>
+        <script>
+            //<![CDATA[
+            //encrypt aes256-CBC
+            function testEncrypt() {
+                var p7 = forge.pkcs7.createEnvelopedData();
+                var cert = forge.pki.certificateFromPem(document.querySelector("#cert").innerHTML);
+                var userCertData = vs.extractUserInfoFromCert(cert)
+                console.log("userCertData:", userCertData)
+                p7.addRecipient(cert);
+                p7.content = forge.util.createBuffer('Just a little test');
+                p7.encrypt();
+                var pem = forge.pkcs7.messageToPem(p7);
+                console.log("Encrypted:", pem)
+                var privateKey = forge.pki.privateKeyFromPem(document.querySelector("#privateKey").innerHTML);
+                p7 = forge.pkcs7.messageFromPem(pem);
+                p7.decrypt(p7.recipients[0], privateKey);
+                console.log("Decrypted:", p7)
+            }
+
+            function testDecrypt() {
+                var encryptedCMSMsg = forge.pkcs7.messageFromPem(document.querySelector("#encryptedCMSMsg").innerHTML);
+                var privateKey = forge.pki.privateKeyFromPem(document.querySelector("#privateKey").innerHTML);
+                console.log("testDecrypt - privateKey:", privateKey)
+                console.log("encryptedCMSMsg:", encryptedCMSMsg)
+                encryptedCMSMsg.decrypt(encryptedCMSMsg.recipients[0], privateKey);
+                console.log("encryptedCMSMsg:", encryptedCMSMsg)
+            }
+
+            window.addEventListener('WebComponentsReady', function() {
+                testEncrypt();
+            })
+            //]]>
+        </script>
+    </ui:define>
+</ui:composition>

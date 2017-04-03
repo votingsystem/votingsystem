@@ -27,7 +27,8 @@ public class SignedDocumentReader implements MessageBodyReader<SignedDocument> {
 
     private static final Logger log = Logger.getLogger(SignedDocumentReader.class.getName());
 
-    @Inject SignatureService signatureService;
+    @Inject
+    SignatureService signatureService;
 
     @Override
     public boolean isReadable(Class<?> aClass, Type type, Annotation[] annotations, javax.ws.rs.core.MediaType mediaType) {

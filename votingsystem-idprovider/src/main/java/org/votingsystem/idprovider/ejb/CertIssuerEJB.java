@@ -6,19 +6,23 @@ import org.votingsystem.crypto.*;
 import org.votingsystem.dto.*;
 import org.votingsystem.dto.indentity.IdentityRequestDto;
 import org.votingsystem.dto.indentity.SessionCertificationDto;
-import org.votingsystem.dto.voting.CertVoteExtensionDto;
 import org.votingsystem.ejb.CmsEJB;
 import org.votingsystem.ejb.SignatureService;
-import org.votingsystem.ejb.SignerInfoService;
 import org.votingsystem.model.*;
 import org.votingsystem.model.voting.AnonVoteCertRequest;
-import org.votingsystem.model.voting.Election;
 import org.votingsystem.model.voting.UserCSRRequest;
-import org.votingsystem.ocsp.RootCertOCSPInfo;
 import org.votingsystem.throwable.RequestRepeatedException;
 import org.votingsystem.throwable.ValidationException;
 import org.votingsystem.util.*;
 import org.votingsystem.xml.XML;
+import org.votingsystem.crypto.*;
+import org.votingsystem.dto.*;
+import org.votingsystem.dto.voting.CertVoteExtensionDto;
+import org.votingsystem.ejb.SignerInfoService;
+import org.votingsystem.model.*;
+import org.votingsystem.model.voting.Election;
+import org.votingsystem.ocsp.RootCertOCSPInfo;
+import org.votingsystem.util.*;
 
 import javax.annotation.PostConstruct;
 import javax.ejb.EJB;
@@ -326,7 +330,7 @@ public class CertIssuerEJB {
         if(dto.getUUID() == null)
             throw new ValidationException("missing 'device UUID'");
         //TODO for now this only works with Spanish NIF
-        String validatedNIF = org.votingsystem.util.NifUtils.validate(dto.getNumId());
+        String validatedNIF = NifUtils.validate(dto.getNumId());
         List<User> userList = em.createQuery("select u from User u where u.numId =:numId")
                 .setParameter("numId", validatedNIF).getResultList();
         User user;

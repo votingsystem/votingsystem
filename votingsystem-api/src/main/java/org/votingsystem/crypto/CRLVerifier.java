@@ -4,9 +4,9 @@ import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1TaggedObject;
 import org.bouncycastle.asn1.DERIA5String;
 import org.bouncycastle.asn1.x509.*;
-import org.votingsystem.dto.ResponseDto;
 import org.votingsystem.http.HttpConn;
 import org.votingsystem.throwable.ValidationException;
+import org.votingsystem.dto.ResponseDto;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;

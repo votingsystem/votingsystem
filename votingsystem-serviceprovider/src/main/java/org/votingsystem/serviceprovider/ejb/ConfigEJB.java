@@ -7,19 +7,19 @@ import eu.europa.esig.dss.token.JKSSignatureToken;
 import eu.europa.esig.dss.tsl.TrustedListsCertificateSource;
 import eu.europa.esig.dss.x509.CertificateToken;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.votingsystem.crypto.KeyGenerator;
-import org.votingsystem.crypto.PEMUtils;
 import org.votingsystem.dto.metadata.MetadataDto;
 import org.votingsystem.dto.metadata.MetadataUtils;
 import org.votingsystem.ejb.Config;
 import org.votingsystem.ejb.MetadataService;
 import org.votingsystem.ejb.TrustedServicesEJB;
 import org.votingsystem.http.HttpConn;
+import org.votingsystem.util.Messages;
+import org.votingsystem.crypto.KeyGenerator;
+import org.votingsystem.crypto.PEMUtils;
 import org.votingsystem.http.SystemEntityType;
 import org.votingsystem.model.Certificate;
 import org.votingsystem.model.voting.Election;
 import org.votingsystem.util.Constants;
-import org.votingsystem.util.Messages;
 import org.votingsystem.util.OperationType;
 import org.votingsystem.util.StringUtils;
 
@@ -68,8 +68,10 @@ public class ConfigEJB implements Config, ConfigServiceProvider, Serializable {
 
     @PersistenceContext
     private EntityManager em;
-    @Inject MetadataService metadataEJB;
-    @Inject TrustedServicesEJB trustedServices;
+    @Inject
+    MetadataService metadataEJB;
+    @Inject
+    TrustedServicesEJB trustedServices;
 
     private String entityId;
     private String timestampServiceURL;

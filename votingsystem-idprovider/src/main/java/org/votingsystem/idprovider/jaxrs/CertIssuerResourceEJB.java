@@ -2,12 +2,12 @@ package org.votingsystem.idprovider.jaxrs;
 
 import org.votingsystem.crypto.cms.CMSSignedMessage;
 import org.votingsystem.ejb.CmsEJB;
+import org.votingsystem.model.SignedDocument;
+import org.votingsystem.util.FileUtils;
 import org.votingsystem.ejb.SignatureService;
 import org.votingsystem.http.HttpRequest;
 import org.votingsystem.http.MediaType;
 import org.votingsystem.idprovider.ejb.CertIssuerEJB;
-import org.votingsystem.model.SignedDocument;
-import org.votingsystem.util.FileUtils;
 
 import javax.ejb.Stateless;
 import javax.inject.Inject;
@@ -29,7 +29,8 @@ public class CertIssuerResourceEJB {
     private static final Logger log = Logger.getLogger(CertIssuerResourceEJB.class.getName());
 
     @Inject private CertIssuerEJB certIssuer;
-    @Inject CmsEJB cmsBean;
+    @Inject
+    CmsEJB cmsBean;
     @Inject SignatureService signatureService;
 
     @POST @Path("/session-csr")

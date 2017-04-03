@@ -3,8 +3,8 @@ package org.votingsystem.dto.currency;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import org.votingsystem.dto.UserDto;
-import org.votingsystem.model.currency.Tag;
 import org.votingsystem.util.CurrencyCode;
+import org.votingsystem.model.currency.Tag;
 import org.votingsystem.util.Interval;
 
 import java.math.BigDecimal;
@@ -12,8 +12,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-//import org.votingsystem.util.CurrencyCode;
-//import org.votingsystem.model.currency.Tag;
+//import CurrencyCode;
+//import Tag;
 
 /**
  * License: https://github.com/votingsystem/votingsystem/wiki/Licencia

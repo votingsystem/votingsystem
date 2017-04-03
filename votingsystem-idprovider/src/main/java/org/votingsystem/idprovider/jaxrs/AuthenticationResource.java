@@ -29,7 +29,8 @@ public class AuthenticationResource {
 
     private static final Logger log = Logger.getLogger(AuthenticationResource.class.getName());
 
-    @Inject Config config;
+    @Inject
+    Config config;
     @EJB QRSessionsEJB qrSessionsEJB;
 
     //The point where we receive the data from the service provider

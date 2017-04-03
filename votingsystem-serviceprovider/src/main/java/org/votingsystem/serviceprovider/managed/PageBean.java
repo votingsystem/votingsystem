@@ -1,16 +1,16 @@
 package org.votingsystem.serviceprovider.managed;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import org.omnifaces.cdi.Push;
-import org.omnifaces.cdi.PushContext;
 import org.votingsystem.dto.metadata.MetadataDto;
 import org.votingsystem.ejb.Config;
 import org.votingsystem.ejb.TrustedServicesEJB;
-import org.votingsystem.http.SystemEntityType;
-import org.votingsystem.managed.ServiceUpdatedMessage;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.JSON;
 import org.votingsystem.util.Messages;
+import org.omnifaces.cdi.Push;
+import org.omnifaces.cdi.PushContext;
+import org.votingsystem.http.SystemEntityType;
+import org.votingsystem.managed.ServiceUpdatedMessage;
 
 import javax.ejb.EJB;
 import javax.enterprise.event.Observes;
@@ -41,8 +41,10 @@ public class PageBean implements Serializable {
 
     private static final Logger log = Logger.getLogger(PageBean.class.getName());
 
-    @EJB Config config;
-    @EJB TrustedServicesEJB trustedServices;
+    @EJB
+    Config config;
+    @EJB
+    TrustedServicesEJB trustedServices;
     @Inject @Push
     private PushContext serviceUpdated;
 

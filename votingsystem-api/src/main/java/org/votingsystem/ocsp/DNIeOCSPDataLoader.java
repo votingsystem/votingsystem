@@ -3,8 +3,8 @@ package org.votingsystem.ocsp;
 import eu.europa.esig.dss.DSSException;
 import eu.europa.esig.dss.client.http.DataLoader;
 import eu.europa.esig.dss.client.http.commons.DSSNotifier;
-import org.votingsystem.dto.ResponseDto;
 import org.votingsystem.http.HttpConn;
+import org.votingsystem.dto.ResponseDto;
 
 import java.util.List;
 

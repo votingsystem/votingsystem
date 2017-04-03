@@ -29,7 +29,8 @@ public class CMSMessageReader implements MessageBodyReader<CMSDocument> {
 
     private static final Logger log = Logger.getLogger(CMSMessageReader.class.getName());
 
-    @Inject CmsEJB cmsBean;
+    @Inject
+    CmsEJB cmsBean;
 
     @Override
     public boolean isReadable(Class<?> aClass, Type type, Annotation[] annotations, javax.ws.rs.core.MediaType mediaType) {

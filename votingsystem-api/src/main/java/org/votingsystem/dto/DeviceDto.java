@@ -3,10 +3,10 @@ package org.votingsystem.dto;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import org.votingsystem.crypto.PEMUtils;
-import org.votingsystem.model.Device;
 import org.votingsystem.model.User;
 import org.votingsystem.util.IdDocument;
+import org.votingsystem.crypto.PEMUtils;
+import org.votingsystem.model.Device;
 
 import java.io.IOException;
 import java.io.Serializable;

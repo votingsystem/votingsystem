@@ -1,0 +1,72 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                template="/WEB-INF/templates/basic.xhtml">
+    <ui:define name="head">
+        <style>
+            .tableHeadervs {
+                margin: 0px 0px 0px 0px;
+                color:#6c0404;
+                border-bottom: 1px solid #6c0404;
+                background: white;
+                font-weight: bold;
+                padding:5px 0px 5px 0px;
+                width: 100%;
+            }
+            .tableHeadervs div {
+                text-align:center;
+            }
+        </style>
+        <script src="../resources/bower_components/webcomponentsjs/webcomponents-lite.js"></script>
+        <script src="../resources/js/utils_js.vsp" type="text/javascript"></script>
+        <script src="../resources/js/utils.js" type="text/javascript"></script>
+    </ui:define>
+    <ui:define name="content">
+        <div>
+            <p id="pageInfoPanel" class="text-center" style="margin: 20px auto 20px auto; font-size: 1.3em;
+        background-color: #f9f9f9; max-width: 1000px; padding: 10px; display: none;"></p>
+
+            <dom-module name="record-list">
+                <template>
+                    <style></style>
+                    <div class="layout vertical center">
+                        <div id="record_tableDiv" style="margin: 0px auto 0px auto; max-width: 1200px; overflow:auto;">
+                            <table class="table tableHeadervs" id="record_table">
+                                <thead>
+                                <tr style="color: #ff0000;">
+                                    <th style="width: 220px;">${msg.dateLbl}</th>
+                                    <th style="max-width:80px;">${msg.messageLbl}</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <template is="dom-repeat" items="{{logData.resultList}}">
+                                    <tr><td class="text-center">{{item.date}}</td><td class="text-center">{{item.message}}</td></tr>
+                                </template>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </template>
+                <script> Polymer({
+                    is:'record-list',
+                    properties: {
+                        url:{type:String, value: vs.contextURL + '/rest/reports/logs', observer:'getHTTP'},
+                        logData: {type:Object}
+                    },
+                    ready: function() {
+                        sendSignalVS({caption:"${msg.reportsSectionLbl}"})
+                    },
+                    getHTTP: function (targetURL) {
+                        if(!targetURL) targetURL = this.url
+                        console.log(this.tagName + " - getHTTP - targetURL: " + targetURL)
+                        vs.getHTTPJSON(targetURL, function(responseText){
+                            this.logData = toJSON(responseText)
+                        }.bind(this))
+                    }
+                });</script>
+            </dom-module>
+
+            <record-list id="recordList"></record-list>
+
+        </div>
+    </ui:define>
+</ui:composition>

@@ -8,9 +8,9 @@ import org.bouncycastle.tsp.TimeStampRequest;
 import org.bouncycastle.tsp.TimeStampRequestGenerator;
 import org.bouncycastle.tsp.TimeStampResponse;
 import org.bouncycastle.tsp.TimeStampToken;
-import org.votingsystem.dto.ResponseDto;
 import org.votingsystem.http.HttpConn;
 import org.votingsystem.http.MediaType;
+import org.votingsystem.dto.ResponseDto;
 
 import java.util.logging.Logger;
 

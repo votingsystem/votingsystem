@@ -4,16 +4,15 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.type.TypeReference;
+import org.votingsystem.model.SignedDocument;
+import org.votingsystem.throwable.ValidationException;
+import org.votingsystem.util.CurrencyCode;
+import org.votingsystem.util.JSON;
 import org.votingsystem.crypto.CertUtils;
 import org.votingsystem.crypto.PEMUtils;
-import org.votingsystem.model.SignedDocument;
-import org.votingsystem.model.currency.Currency;
 import org.votingsystem.model.currency.Tag;
-import org.votingsystem.throwable.ValidationException;
 import org.votingsystem.util.Constants;
-import org.votingsystem.util.CurrencyCode;
 import org.votingsystem.util.CurrencyOperation;
-import org.votingsystem.util.JSON;
 
 import java.math.BigDecimal;
 import java.security.cert.X509Certificate;
@@ -45,7 +44,7 @@ public class CurrencyRequestDto {
     @JsonIgnore
     private Map<String, CurrencyDto> currencyDtoMap;
     @JsonIgnore
-    private Map<String, Currency> currencyMap;
+    private Map<String, org.votingsystem.model.currency.Currency> currencyMap;
     @JsonIgnore
     private Set<String> requestCSRSet;
 
@@ -63,14 +62,14 @@ public class CurrencyRequestDto {
         currencyRequestDto.tag = new Tag(transactionDto.getTagName());;
         currencyRequestDto.UUID = java.util.UUID.randomUUID().toString();
 
-        Map<String, Currency> currencyMap = new HashMap<>();
+        Map<String, org.votingsystem.model.currency.Currency> currencyMap = new HashMap<>();
         Set<String> requestCSRSet = new HashSet<>();
         BigDecimal divideAndRemainder[] = transactionDto.getAmount().divideAndRemainder(currencyValue);
         if(divideAndRemainder[1].compareTo(BigDecimal.ZERO) != 0) throw new ValidationException(MessageFormat.format(
                 "request with remainder - requestAmount ''{0}''  currencyValue ''{{1}}'' remainder ''{{2}}''",
                 transactionDto.getAmount(), currencyValue, divideAndRemainder[1]));
         for(int i = 0; i < divideAndRemainder[0].intValue(); i++) {
-            Currency currency = new Currency(serverURL, currencyValue, transactionDto.getCurrencyCode(),
+            org.votingsystem.model.currency.Currency currency = new org.votingsystem.model.currency.Currency(serverURL, currencyValue, transactionDto.getCurrencyCode(),
                     transactionDto.isTimeLimited(), currencyRequestDto.tag);
             requestCSRSet.add(new String(currency.getCertificationRequest().getCsrPEM()));
             currencyMap.put(currency.getRevocationHash(), currency);
@@ -88,19 +87,19 @@ public class CurrencyRequestDto {
                     " - num. currency received: " + currencyCerts.size());
         }
         for(String pemCert:currencyCerts) {
-            Currency currency = loadCurrencyCert(pemCert);
+            org.votingsystem.model.currency.Currency currency = loadCurrencyCert(pemCert);
             currencyMap.replace(currency.getRevocationHash(), currency);
         }
     }
 
-    public Currency loadCurrencyCert(String x509CertificatePEM) throws Exception {
+    public org.votingsystem.model.currency.Currency loadCurrencyCert(String x509CertificatePEM) throws Exception {
         Collection<X509Certificate> certificates = PEMUtils.fromPEMToX509CertCollection(x509CertificatePEM.getBytes());
         if(certificates.isEmpty())
             throw new ValidationException("Unable to init Currency. Certs not found on signed CSR");
         X509Certificate x509Certificate = certificates.iterator().next();
         CurrencyCertExtensionDto certExtensionDto = CertUtils.getCertExtensionData(CurrencyCertExtensionDto.class,
                 x509Certificate, Constants.CURRENCY_OID);
-        Currency currency = currencyMap.get(certExtensionDto.getHashCertVS()).setState(Currency.State.OK);
+        org.votingsystem.model.currency.Currency currency = currencyMap.get(certExtensionDto.getHashCertVS()).setState(org.votingsystem.model.currency.Currency.State.OK);
         currency.initSigner(x509CertificatePEM.getBytes());
         return currency;
     }
@@ -214,11 +213,11 @@ public class CurrencyRequestDto {
         this.currencyDtoMap = currencyDtoMap;
     }
 
-    public void setCurrencyMap(Map<String, Currency> currencyMap) {
+    public void setCurrencyMap(Map<String, org.votingsystem.model.currency.Currency> currencyMap) {
         this.currencyMap = currencyMap;
     }
 
-    public Map<String, Currency> getCurrencyMap() {
+    public Map<String, org.votingsystem.model.currency.Currency> getCurrencyMap() {
         return currencyMap;
     }
 

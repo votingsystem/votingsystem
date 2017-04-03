@@ -8,10 +8,10 @@ import org.votingsystem.dto.metadata.SystemEntityDto;
 import org.votingsystem.ejb.Config;
 import org.votingsystem.ejb.TrustedServicesEJB;
 import org.votingsystem.http.SystemEntityType;
-import org.votingsystem.model.voting.Election;
 import org.votingsystem.util.Messages;
-import org.votingsystem.util.OperationType;
 import org.votingsystem.xml.XML;
+import org.votingsystem.model.voting.Election;
+import org.votingsystem.util.OperationType;
 
 import javax.enterprise.context.RequestScoped;
 import javax.faces.context.FacesContext;
@@ -94,7 +94,7 @@ public class ElectionBean implements Serializable {
         MetadataDto metadata = identityProviders.iterator().next();
         switch (selectedCountry) {
             case "ES":
-                IdentityRequestDto identityRequest = new IdentityRequestDto(org.votingsystem.util.OperationType.ANON_VOTE_CERT_REQUEST,
+                IdentityRequestDto identityRequest = new IdentityRequestDto(OperationType.ANON_VOTE_CERT_REQUEST,
                         electionUUID, new SystemEntityDto(config.getEntityId(), SystemEntityType.VOTING_SERVICE_PROVIDER));
                 String xmlInput = Base64.getEncoder().encodeToString(XML.getMapper().writeValueAsBytes(identityRequest));
                 String message = Messages.currentInstance().get("connectingToIdProviderMsg");

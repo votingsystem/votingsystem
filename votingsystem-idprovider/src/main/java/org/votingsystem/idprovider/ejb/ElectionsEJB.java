@@ -2,7 +2,6 @@ package org.votingsystem.idprovider.ejb;
 
 import eu.europa.esig.dss.InMemoryDocument;
 import org.votingsystem.crypto.SignatureParams;
-import org.votingsystem.crypto.SignedDocumentType;
 import org.votingsystem.dto.ResponseDto;
 import org.votingsystem.dto.metadata.MetadataDto;
 import org.votingsystem.dto.voting.ElectionDto;
@@ -13,11 +12,12 @@ import org.votingsystem.ejb.TrustedServicesEJB;
 import org.votingsystem.http.HttpConn;
 import org.votingsystem.model.SignedDocument;
 import org.votingsystem.model.User;
-import org.votingsystem.model.voting.Election;
 import org.votingsystem.throwable.NotFoundException;
 import org.votingsystem.util.Messages;
-import org.votingsystem.util.OperationType;
 import org.votingsystem.xml.XML;
+import org.votingsystem.crypto.SignedDocumentType;
+import org.votingsystem.model.voting.Election;
+import org.votingsystem.util.OperationType;
 
 import javax.ejb.*;
 import javax.inject.Inject;

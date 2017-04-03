@@ -1,0 +1,89 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+        xmlns:ui="http://java.sun.com/jsf/facelets"
+        template="/WEB-INF/templates/polymer.xhtml">
+    <ui:define name="head">
+    </ui:define>
+    <ui:define name="content">
+        <div>
+            <div style="margin:0px auto;width: 100%; max-width: 1000px;">
+                <h3 class="pageHeader text-center">${msg.newBankLbl}</h3>
+
+                <div class="text-left" style="margin:10px 0 10px 0;">
+                    <ul>
+                        <li>${msg.systemAdminReservedOperationMsg}</li>
+                        <li>${msg.signatureRequiredMsg}</li>
+                        <li>${msg.newBankAdviceMsg2}</li>
+                        <li>${msg.newBankAdviceMsg3}</li>
+                    </ul>
+                </div>
+
+                <form onsubmit="return submitForm()">
+                    <input type="text" id="bankIBAN" style="width:400px; margin:0px 0px 0px 20px;"
+                           title="${msg.IBANLbl}" placeholder="${msg.IBANLbl}" required="">
+                    </input>
+
+                    <div style="margin:15px 0px 0px 0px;">
+                        <div>${msg.descriptionLbl}</div>
+                        <textarea id="description" rows="8" required="" style="width: 100%;"></textarea>
+                    </div>
+
+                    <div style="margin:15px 0px 0px 0px;">
+                        <div>${msg.pemCertLbl}</div>
+                        <textarea id="x509CertificatePEM" rows="8" required="" style="width: 100%;"></textarea>
+                    </div>
+
+                    <div style="position:relative; margin:10px 10px 60px 0px;height:20px;">
+                        <div style="position:absolute; right:0;">
+                            <div class="buttonvs" style="margin:10px 0px 0px 10px;">
+                                <i class="fa fa fa-check"></i> ${msg.newBankLbl}
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <script>
+            var appMessageJSON = null
+
+            function submitForm() {
+                try {
+                    if(document.querySelector('#bankIBAN').invalid) {
+                        alert('${msg.fillAllFieldsERRORLbl}', '${msg.dataFormERRORLbl}')
+                        return false
+                    }
+                    if(!document.querySelector('#x509CertificatePEM').validity.valid) {
+                        alert('${msg.fillAllFieldsERRORLbl}', '${msg.dataFormERRORLbl}')
+                        return false
+                    }
+                    if(!document.querySelector('#description').validity.valid) {
+                        alert('${msg.fillAllFieldsERRORLbl}', '${msg.dataFormERRORLbl}')
+                        return false
+                    }
+                    var operationVS = new OperationVS(Operation.BANK_NEW)
+                    operationVS.serviceURL = vs.contextURL + "/rest/user/newBank"
+                    operationVS.subject = "${msg.newBankMsgSubject}"
+                    operationVS.jsonStr = JSON.stringify({info:document.querySelector("#description").value,
+                            certChainPEM:document.querySelector("#x509CertificatePEM").value,
+                            iban:document.querySelector("#bankIBAN").value, operation:Operation.BANK_NEW})
+                    operationVS.setCallback(function(appMessageJSON) {
+                        console.log("newBankCallback");
+                        var caption = '${msg.newBankERRORCaption}'
+                        var msg = appMessageJSON.message
+                        statusCode = appMessageJSON.statusCode
+                        if(ResponseVS.SC_OK == appMessageJSON.statusCode) {
+                            caption = '${msg.newBankOKCaption}'
+                            var msgTemplate = '${msg.accessLinkMsg}';
+                        }
+                        alert(msg, caption)
+                    })
+                    vs.client.processOperation(operationVS);
+                    appMessageJSON = null
+                    return false
+                } catch(ex) {
+                    console.log(ex)
+                    return false
+                }
+            }
+        </script>
+    </ui:define>
+</ui:composition>

@@ -17,8 +17,8 @@ import org.bouncycastle.crypto.params.KeyParameter;
 import org.bouncycastle.crypto.params.ParametersWithIV;
 import org.bouncycastle.openssl.PEMParser;
 import org.votingsystem.dto.AESParamsDto;
-import org.votingsystem.util.Constants;
 import org.votingsystem.util.FileUtils;
+import org.votingsystem.util.Constants;
 
 import javax.crypto.*;
 import javax.crypto.spec.IvParameterSpec;
@@ -112,7 +112,7 @@ public class Encryptor {
             InvalidKeySpecException, NoSuchPaddingException, InvalidKeyException, InvalidParameterSpecException,
             UnsupportedEncodingException, BadPaddingException, IllegalBlockSizeException {
         SecretKeyFactory factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1");
-        byte[] salt = KeyGenerator.INSTANCE.getSalt();
+        byte[] salt = org.votingsystem.crypto.KeyGenerator.INSTANCE.getSalt();
         KeySpec spec = new PBEKeySpec(password, salt, ITERATION_COUNT, KEY_LENGTH);
         SecretKey secret = new SecretKeySpec(factory.generateSecret(spec).getEncoded(), "AES");
         Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");

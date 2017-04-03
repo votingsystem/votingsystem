@@ -1,0 +1,62 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                template="/WEB-INF/templates/basic.xhtml">
+    <ui:define name="content">
+        <div class="pagevs" style="padding: 0 20px 0 20px;">
+            <div class="horizontal layout center center-justified" style="font-size: 1.2em;">
+                <div><a href="#{contextURL}/spa.xhtml#!/innerVSPage?url=/app/index.xhtml&amp;caption=${msg.docsLbl}">inicio</a></div>
+            </div>
+            <h1 class="pageHeader" style="text-align: center;">ingresos</h1>
+            <div class="text-justify" style="margin: 0 auto 0 auto; font-size: 1.2em;">
+                <p>El intercambio monetario puede producirse mediante:</p>
+                <ul><li><b>INGRESOS</b>, que quedan reflejados en un documento firmado que identifica al pagador y al
+                    cobrador.</li>
+                    <li><b>INGRESOS ANONIMOS</b>, que quedan reflejados en un documento firmado que identifica únicamente al
+                        cobrador. La identidad del pagador es anónima. Para este tipo de transacciones es necesario utilizar un <b>certificados-moneda</b>.</li>
+                    <li><a href="https://github.com/votingsystem/votingsystem/wiki/pagos-an%C3%B3nimos-seguros" target="_blank">
+                        <b>PAGOS ANONIMOS SEGUROS</b></a> en los que permanecen anónimos tanto el cobrador como el pagador
+                        existiendo mecanismos que sirven para garantizar que el pago se produce.</li></ul>
+
+                <h4>Notas sobre los 'ingresos'</h4>
+                <ul>
+                    <li>Los usuarios no tienen asociada ninguna etiqueta, cuando un usuario hace una ingreso a otro usuario
+                        el dinero sale de la cuenta de <b>gastos libres</b>.</li>
+                    <li>Es posible hacer un <b>ingreso con etiqueta</b> a otro usuario pero el intercambio directo entre usuarios procede siempre de la cuenta de
+                        <b>gastos libres</b>, es decir, aunque un usuario tenga disponible en su cuenta asociada a esa
+                        etiqueta, si el ingreso es a otro <b>usuario</b> el dinero se extraerá de la cuenta de <b>gastos libres</b></li>
+                </ul>
+                <h4>Notas sobre 'ingresos anónimos'</h4>
+                <ul>
+                    <li>Las transacciones están firmadas con <b>certificados-moneda (anónimos)</b></li>
+                    <li>El dinero para la retirada de certificados-moneda sale siempre de la cuenta de <b>gastos libres</b></li>
+                    <li>Existen mecanismos para poder intercambiar certificados-moneda y hacer transacciones seguras complétamente anónimas</li>
+                    <li>Un <b>certificado-moneda</b> puede tener asociado una etiqueta para que sólo pueda ser utilizado
+                        en servicios o productos asociados a esa etiqueta</li>
+                </ul>
+
+                <h3 class="pageHeader">Preguntas frecuentes</h3>
+                <p><b>¿Qué es que un 'ingreso con etiqueta'?</b> Un igreso en el que el receptor sólo puede emplear el
+                    importe en productos o servicios asociados a esa etiqueta.
+                </p>
+                <p><b>¿Qué es la etiqueta 'WILDTAG'?</b> Es la etiqueta asociada a '<b>gastos libres</b>', etiqueta comodín,
+                    este dinero se puede emplear en cualquier etiqueta.
+                </p>
+                <p><b>¿Qué pasa cuando se recibe un 'ingreso con etiqueta'?</b>
+                    Se comprueba si durante el ciclo semanal el usuario a extradido de su cuenta de '<b>gastos generales</b>' algún importe
+                    asociado a esa etiqueta, en caso afirmativo se reingresa el importe gastado y
+                    el sobrante se ingresa en la cuenta que el usuario tiene asociada a esa etiqueta
+                </p>
+                <p><b>¿Qué pasa cuando se extrae dinero asociándolo a una etiqueta?</b>
+                    Se comprueba si el usuario tiene disponible sufciente en su cuenta asociada  a esa etiqueta y en caso
+                    afirmativo se extrae el dinero de esa cuenta, si el disponible en la cuenta es inferior al importe lo que
+                    falte se obtiene de la cuenta asociada a '<b>gastos libres</b>' (si se dispone de saldo suficiente)
+                </p>
+                <p><b>¿Qué es un ingreso 'caducable'?</b> Es un ingreso cuyo importe debe gastarse antes de las 24:00 horas
+                    del domingo de la semana en curso, lo que no se gaste se ingresa en el sistema. Los ingresos <b>caducables</b>
+                    tienen que estar asociados obligatoriamente a una etiqueta, la unica etiqueta que no permite movimientos
+                    caducables es la etiqueta WILDTAG (la etiqueta asociada a <b>gastos libres</b>).
+                </p>
+            </div>
+        </div>
+    </ui:define>
+</ui:composition>

@@ -14,8 +14,8 @@
         <module>timestamp-server</module>
         <module>votingsystem-idprovider</module>
         <module>votingsystem-serviceprovider</module>
-        <module>votingsystem-test</module>
         <module>currency-test</module>
+        <module>votingsystem-test</module>
         <module>native-client</module>
         <module>currency-server</module>
     </modules>

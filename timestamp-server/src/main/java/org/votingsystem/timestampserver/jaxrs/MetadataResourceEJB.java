@@ -2,13 +2,14 @@ package org.votingsystem.timestampserver.jaxrs;
 
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import eu.europa.esig.dss.token.AbstractSignatureTokenConnection;
-import org.votingsystem.crypto.TSPHttpSource;
-import org.votingsystem.dto.ResponseDto;
 import org.votingsystem.dto.metadata.MetadataDto;
 import org.votingsystem.http.HttpConn;
+import org.votingsystem.util.Messages;
+import org.votingsystem.crypto.TSPHttpSource;
+import org.votingsystem.xades.XAdESSignature;
+import org.votingsystem.dto.ResponseDto;
 import org.votingsystem.throwable.XMLValidationException;
 import org.votingsystem.timestampserver.ejb.ConfigEJB;
-import org.votingsystem.util.Messages;
 
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
@@ -45,7 +46,7 @@ public class MetadataResourceEJB {
         MetadataDto metadata = config.getMetadata();
         byte[] metadataBytes = new XmlMapper().writerWithDefaultPrettyPrinter().writeValueAsBytes(metadata);
         AbstractSignatureTokenConnection signingToken = config.getSigningToken();
-        return org.votingsystem.xades.XAdESSignature.sign(metadataBytes, signingToken,
+        return XAdESSignature.sign(metadataBytes, signingToken,
                 new TSPHttpSource(config.getTimestampServiceURL()));
     }
 
