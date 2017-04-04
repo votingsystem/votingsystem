@@ -5,6 +5,7 @@ import org.currency.web.ejb.ConfigCurrencyServer;
 import org.currency.web.ejb.TransactionEJB;
 import org.currency.web.ejb.UserEJB;
 import org.currency.web.websocket.SessionManager;
+import org.votingsystem.crypto.PEMUtils;
 import org.votingsystem.dto.ResultListDto;
 import org.votingsystem.dto.UserDto;
 import org.votingsystem.dto.currency.RegisterDto;
@@ -243,9 +244,13 @@ public class UserResourceEJB {
     @POST @Produces(javax.ws.rs.core.MediaType.APPLICATION_JSON)
     public Response register(@Context HttpServletRequest req, CMSDocument cmsMessage) throws Exception {
         //TODO
-        log.info("+++ request: " + cmsMessage.getCmsMessage().getSignedContentStr());
+        log.info(" signer CertificateCA: " + cmsMessage.getBody());
         RegisterDto registerDto = cmsMessage.getSignedContent(RegisterDto.class);
+
+        User signer = cmsMessage.getSignatures().iterator().next().getSigner();
+        log.info(" signer CertificateCA: " + signer.getCertificateCA());
 
         return Response.ok().entity("User registration OK - data: " + cmsMessage.getCmsMessage().getSignedContentStr()).build();
     }
+
 }

@@ -9,10 +9,7 @@ import org.votingsystem.crypto.cms.CMSSignedMessage;
 import org.votingsystem.crypto.cms.CMSUtils;
 import org.votingsystem.dto.CMSDto;
 import org.votingsystem.dto.OperationCheckerDto;
-import org.votingsystem.model.CMSDocument;
-import org.votingsystem.model.Signature;
-import org.votingsystem.model.SignedDocument;
-import org.votingsystem.model.User;
+import org.votingsystem.model.*;
 import org.votingsystem.throwable.ValidationException;
 import org.votingsystem.util.Constants;
 import org.votingsystem.util.CurrencyOperation;
@@ -65,13 +62,16 @@ public class CmsEJB {
 
             String issuerKeyStoreFileName = (String) properties.get("issuerKeyStoreFileName");
             String issuerKeyPassword = (String) properties.get("issuerKeyPassword");
-
-            KeyStore keyStoreCertIssuer = KeyStore.getInstance("JKS");
-            keyStoreCertIssuer.load(new FileInputStream(config.getApplicationDirPath() + "/sec/" + issuerKeyStoreFileName),
-                    issuerKeyPassword.toCharArray());
-            String keyAlias = keyStoreCertIssuer.aliases().nextElement();
-            serverCert = (X509Certificate) keyStoreCertIssuer.getCertificate(keyAlias);
-            privateKey = (PrivateKey) keyStoreCertIssuer.getKey(keyAlias, issuerKeyPassword.toCharArray());
+            if(issuerKeyStoreFileName != null && issuerKeyPassword != null) {
+                KeyStore keyStoreCertIssuer = KeyStore.getInstance("JKS");
+                keyStoreCertIssuer.load(new FileInputStream(config.getApplicationDirPath() + "/sec/" + issuerKeyStoreFileName),
+                        issuerKeyPassword.toCharArray());
+                String keyAlias = keyStoreCertIssuer.aliases().nextElement();
+                serverCert = (X509Certificate) keyStoreCertIssuer.getCertificate(keyAlias);
+                privateKey = (PrivateKey) keyStoreCertIssuer.getKey(keyAlias, issuerKeyPassword.toCharArray());
+            } else {
+                log.severe("Mssing issuerKeyStoreFileName and issuerKeyPassword - UNABLE to issue certificates");
+            }
         } catch (Exception ex) {
             log.log(Level.SEVERE, ex.getMessage(), ex);
         }
@@ -126,8 +126,9 @@ public class CmsEJB {
             if(signer.getTimeStampToken() != null)
                 validateToken(signer.getTimeStampToken());
             else log.info("signature without timestamp - signer: " + signer.getX509Certificate().getSubjectDN());
-            signerInfoService.verifyUserCertificate(signer);
-            signature.setSigner(signerInfoService.checkSigner(signer.getX509Certificate(), userType, entityId));
+            signer = signerInfoService.checkSigner(signer.getX509Certificate(), userType, entityId);
+            signature.setSigner(signer).setSignerCertificate(signer.getCertificate())
+                    .setCertificateCA(signer.getCertificateCA());
             if(signer.isAnonymousUser()) {
                 log.log(Level.FINE, "anonymous signer: " + signer.getX509Certificate().getSubjectDN());
                 cmsDto.setFirstSignature(signature).setAnonymousSignature(signature);

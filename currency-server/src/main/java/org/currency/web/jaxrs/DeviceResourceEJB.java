@@ -171,6 +171,14 @@ public class DeviceResourceEJB {
         return Response.ok().entity(JSON.getMapper().writeValueAsBytes(UserDto.DEVICES(user, deviceSetDto, null))).build();
     }
 
+    /**
+     * Called from browser to provide the public key that the mobile uses to encrypt the message with the browser
+     * session certificate
+     * @param req
+     * @param csrRequestBytes
+     * @return
+     * @throws Exception
+     */
     @POST @Path("/browser-publickey")
     @Produces(MediaType.TEXT_PLAIN)
     public Response browserPublickey(@Context HttpServletRequest req, byte[] csrRequestBytes) throws Exception {

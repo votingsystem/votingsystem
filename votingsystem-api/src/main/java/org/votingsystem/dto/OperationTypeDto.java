@@ -3,6 +3,7 @@ package org.votingsystem.dto;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import org.votingsystem.util.CurrencyOperation;
@@ -17,8 +18,10 @@ import org.votingsystem.util.SystemOperation;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class OperationTypeDto<T> {
 
+    @JsonProperty("Type")
     @JacksonXmlProperty(localName = "Type", isAttribute = true)
     private SystemOperation type;
+    @JsonProperty("EntityId")
     @JacksonXmlProperty(localName = "EntityId", isAttribute = true)
     private String entityId;
 

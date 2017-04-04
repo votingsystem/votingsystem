@@ -47,10 +47,12 @@ public class CurrencyQRResourceEJB {
                 case QRUtils.GET_BROWSER_CERTIFICATE:
                     HttpSession httpSession = HttpSessionManager.getInstance().getHttpSession(UUID);
                     if(httpSession != null) {
-                        SessionCertificationDto certDto = (SessionCertificationDto) httpSession.getAttribute(Constants.BROWSER_PLUBLIC_KEY);
-                        if(certDto != null) {
-                            return Response.ok().entity(JSON.getMapper().writeValueAsBytes(certDto)).build();
-                        }
+                        SessionCertificationDto browserPublicKeyObject = (SessionCertificationDto) httpSession.
+                                getAttribute(Constants.BROWSER_PLUBLIC_KEY);
+                        if(browserPublicKeyObject != null) {
+                            return Response.ok().entity(JSON.getMapper().writeValueAsBytes(
+                                    browserPublicKeyObject)).build();
+                        } else httpSession.invalidate();
                     }
                     return Response.status(Response.Status.NOT_FOUND).entity(
                             Messages.currentInstance().get("itemNotFoundErrorMsg")).build();

@@ -1,6 +1,7 @@
 package org.votingsystem.util;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import org.votingsystem.throwable.ValidationException;
 import org.votingsystem.throwable.XAdESValidationException;
 import org.votingsystem.throwable.XMLValidationException;
 
@@ -45,17 +46,18 @@ public enum AppCode {
     }
 
     public static AppCode getByException(Exception ex) {
-        if(ex instanceof PersistenceException) {
+        Throwable cause = ex.getCause() != null ? ex.getCause(): ex;
+        if(cause instanceof PersistenceException) {
             return vs_0510;
-        } else if(ex instanceof XMLValidationException) {
+        } else if(cause instanceof XMLValidationException || cause instanceof ValidationException) {
             return vs_0420;
-        } else if(ex instanceof ServletException) {
+        } else if(cause instanceof ServletException) {
             return vs_0500;
-        } else if(ex instanceof NotAllowedException) {
+        } else if(cause instanceof NotAllowedException) {
             return vs_0405;
-        } else if(ex instanceof NotFoundException) {
+        } else if(cause instanceof NotFoundException) {
             return vs_0400;
-        } else if(ex instanceof XAdESValidationException) {
+        } else if(cause instanceof XAdESValidationException) {
             return vs_0430;
         } else {
             return vs_0410;

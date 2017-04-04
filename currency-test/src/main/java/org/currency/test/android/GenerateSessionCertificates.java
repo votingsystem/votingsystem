@@ -70,9 +70,9 @@ public class GenerateSessionCertificates extends BaseTest {
                     new String(browserCsrReq.getCsrPEM()), browserUUID).setOperation(
                     new OperationTypeDto(CurrencyOperation.SESSION_CERTIFICATION, null));
 
-            byte[] resultBytes = JSON.getMapper().writeValueAsBytes(sessionCertDto);
+            byte[] requestBytes = JSON.getMapper().writeValueAsBytes(sessionCertDto);
 
-            CMSSignedMessage cmsSignedMessage = signatureService.signDataWithTimeStamp(resultBytes, Constants.TIMESTAMP_SERVICE_URL);
+            CMSSignedMessage cmsSignedMessage = signatureService.signDataWithTimeStamp(requestBytes, Constants.TIMESTAMP_SERVICE_URL);
             byte[] signedMessageBytes = cmsSignedMessage.toPEM();
             log.info("cmsSignedMessage: " + new String(signedMessageBytes));
 

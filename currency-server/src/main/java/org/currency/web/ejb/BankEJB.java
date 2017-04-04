@@ -7,6 +7,7 @@ import org.votingsystem.model.SignedDocument;
 import org.votingsystem.model.User;
 import org.votingsystem.model.currency.Bank;
 import org.votingsystem.model.currency.BankInfo;
+import org.votingsystem.util.Constants;
 import org.votingsystem.util.NifUtils;
 import org.iban4j.Iban;
 import org.votingsystem.crypto.CertUtils;
@@ -18,11 +19,9 @@ import javax.ejb.TransactionAttribute;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
+import java.security.cert.PKIXCertPathValidatorResult;
 import java.security.cert.X509Certificate;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -63,7 +62,13 @@ public class BankEJB {
         }
         CertUtils.verifyCertificateChain(cert, additionalCerts);
         Bank bank = Bank.getUser(cert);
-        signerInfoService.verifyUserCertificate(bank);
+
+        PKIXCertPathValidatorResult validatorResult = CertUtils.verifyCertificate(
+                config.getTrustedCertAnchors(), false, Arrays.asList(bank.getX509Certificate()));
+        X509Certificate certCaResult = validatorResult.getTrustAnchor().getTrustedCert();
+        bank.setCertificateCA(config.getCACertificate(certCaResult.getSerialNumber().longValue()));
+        log.log(Level.FINE, "bank:" + bank.getNumIdAndType() + " cert issuer: " + certCaResult.getSubjectDN());
+
         String validatedNIF = NifUtils.validate(bank.getNumId());
         List<Bank> bankList = em.createNamedQuery(User.FIND_USER_BY_NIF).setParameter("nif", validatedNIF).getResultList();
         if(bankList.isEmpty()) {

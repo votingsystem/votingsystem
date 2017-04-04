@@ -191,10 +191,9 @@ public class SignatureServiceEJB implements SignatureService {
                             issuerToken = certificateToken;
                     }
                 }
-                Certificate caCertificate = config.getCACertificate(issuerToken.getCertificate().getSerialNumber().longValue());
-                signatureParams.setSigningCert(signingCertToken.getCertificate()).setCertificateCA(caCertificate);
                 User signer = signerInfoService.checkSigner(signingCertToken.getCertificate(),
                         signatureParams.getSignerType(), signatureParams.getEntityId());
+                signatureParams.setSigningCert(signingCertToken.getCertificate()).setCertificateCA(signer.getCertificateCA());
                 switch (signatureParams.getSignerType()) {
                     case ANON_ELECTOR:
                         xAdESDocument.setAnonSigner(signer);
@@ -203,7 +202,6 @@ public class SignatureServiceEJB implements SignatureService {
                             return xAdESDocument;
                         }
                         break;
-
                 }
                 TimestampToken selectedTimestampToken = null;
                 //we allow only one timestamp per signature
@@ -244,12 +242,12 @@ public class SignatureServiceEJB implements SignatureService {
                         .getTheBestCandidate().getCertificateToken().getCertificate();
                 switch (signatureParams.getSignerType()) {
                     case ANON_ELECTOR:
-                        signatures.add(new Signature(null, signingCert, xAdESDocument, xAdESSignature.getId(),
-                                selectedTokenDate));
+                        signatures.add(new Signature(null, signer.getCertificate(), signer.getCertificateCA(),
+                                signingCert, xAdESDocument, xAdESSignature.getId(), selectedTokenDate));
                         break;
                     default:
-                        signatures.add(new Signature(signer, signingCert, xAdESDocument, xAdESSignature.getId(),
-                                selectedTokenDate));
+                        signatures.add(new Signature(signer, signer.getCertificate(), signer.getCertificateCA(),
+                                signingCert, xAdESDocument, xAdESSignature.getId(), selectedTokenDate));
                 }
             }
             xAdESDocument.setSignatures(signatures);

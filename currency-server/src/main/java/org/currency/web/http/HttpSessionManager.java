@@ -11,6 +11,8 @@ import javax.servlet.annotation.WebListener;
 import javax.servlet.http.HttpSession;
 import javax.servlet.http.HttpSessionEvent;
 import javax.servlet.http.HttpSessionListener;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -45,7 +47,7 @@ public class HttpSessionManager implements HttpSessionListener {
 
     @Override
     public void sessionDestroyed(HttpSessionEvent sessionEvent) {
-        log.info("session id: " + sessionEvent.getSession().getId() + " - userUUID: " +
+        log.severe("session id: " + sessionEvent.getSession().getId() + " - userUUID: " +
                 sessionEvent.getSession().getAttribute(Constants.USER_UUID));
         try {
             User user = (User) sessionEvent.getSession().getAttribute(Constants.USER_KEY);
@@ -57,7 +59,7 @@ public class HttpSessionManager implements HttpSessionListener {
                             device.getCertificate().getState());
                 }
             }
-            String userUUID = (String)sessionEvent.getSession().getAttribute(Constants.USER_KEY);
+            String userUUID = (String)sessionEvent.getSession().getAttribute(Constants.USER_UUID);
             userSessionMap.remove(userUUID);
             sessionIdMap.remove(sessionEvent.getSession().getId());
         } catch (Exception ex) {
@@ -79,6 +81,14 @@ public class HttpSessionManager implements HttpSessionListener {
 
     public Set<String> getSessionUUIDSet() {
         return userSessionMap.keySet();
+    }
+
+    public Map<String, String> getUserUUIDSessionIdMap() {
+        Map<String,String> result = new HashMap<>();
+        for(Map.Entry<String, HttpSession> entry : userSessionMap.entrySet()) {
+            result.put(entry.getValue().getId(), entry.getKey());
+        }
+        return result;
     }
 
     public void updateSession(String previousUserUUID, String newUserUUID, String httpSessionId, User user) {

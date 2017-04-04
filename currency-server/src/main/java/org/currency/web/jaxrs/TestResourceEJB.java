@@ -83,7 +83,7 @@ public class TestResourceEJB {
         log.info("session id: " + session.getId() + " - userUUID: " +
                 req.getSession().getAttribute(Constants.USER_UUID));
         session.invalidate();
-        return Response.ok().entity("session id: " + session.getId() + " - userUUID: " +
+        return Response.ok().entity("Invalidated session id: " + session.getId() + " - userUUID: " +
                 req.getSession().getAttribute(Constants.USER_UUID)).build() ;
     }
 
@@ -92,6 +92,13 @@ public class TestResourceEJB {
     public Response getSessions(@Context HttpServletRequest req, @Context HttpServletResponse res) throws Exception {
         return Response.ok().entity(
                 JSON.getMapper().writeValueAsBytes(HttpSessionManager.getInstance().getSessionUUIDSet())).build() ;
+    }
+
+    @GET @Path("/sessionsMap")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getSessionsMap(@Context HttpServletRequest req, @Context HttpServletResponse res) throws Exception {
+        return Response.ok().entity(
+                JSON.getMapper().writeValueAsBytes(HttpSessionManager.getInstance().getUserUUIDSessionIdMap())).build() ;
     }
 
     @GET @Path("/addToRealm")

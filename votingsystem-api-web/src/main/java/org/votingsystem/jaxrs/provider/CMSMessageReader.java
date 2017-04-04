@@ -52,7 +52,7 @@ public class CMSMessageReader implements MessageBodyReader<CMSDocument> {
             } else throw new ValidationException("Invalid content type: " + contentType);
         } catch (Exception ex) {
             log.log(Level.SEVERE, ex.getMessage(), ex);
-            throw new WebApplicationException(ex);
+            throw new WebApplicationException(ex.getMessage(), ex);
         }
     }
 }

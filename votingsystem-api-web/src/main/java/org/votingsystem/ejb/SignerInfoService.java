@@ -21,8 +21,6 @@ public interface SignerInfoService {
 
     public User checkIfAdmin(X509Certificate x509Certificate) throws InsufficientPrivilegesException;
 
-    public PKIXCertPathValidatorResult verifyUserCertificate(final User user) throws CertificateValidationException;
-
     public void loadCertInfo(User user, CertExtensionDto deviceData) throws CertificateRequestException;
 
     public Certificate verifyCertificate(X509Certificate certToCheck) throws Exception;

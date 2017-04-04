@@ -7,7 +7,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  */
 public enum CurrencyOperation implements SystemOperation {
 
-
+    @JsonProperty("BANK_NEW")
+    BANK_NEW("/api/user/new-bank"),
     @JsonProperty("CLOSE_SESSION")
     CLOSE_SESSION(null),
     @JsonProperty("CURRENCY_WALLET_CHANGE")
@@ -28,8 +29,6 @@ public enum CurrencyOperation implements SystemOperation {
     TRANSACTION_FROM_USER(null),
     @JsonProperty("CURRENCY_CHANGE")
     CURRENCY_CHANGE(null),
-    @JsonProperty("GET_TAG")
-    GET_TAG("/api/tag"),
     @JsonProperty("CURRENCY_PERIOD_INIT")
     CURRENCY_PERIOD_INIT(null),
     @JsonProperty("GET_TRUSTED_CERTS")
@@ -38,21 +37,23 @@ public enum CurrencyOperation implements SystemOperation {
     GET_CURRENCY_STATUS("/api/currency/state"),
     @JsonProperty("GET_CURRENCY_BUNDLE_STATUS")
     GET_CURRENCY_BUNDLE_STATUS("/api/currency/bundle-state"),
+    @JsonProperty("GET_TAG")
+    GET_TAG("/api/tag"),
     @JsonProperty("GET_TRANSACTION")
     GET_TRANSACTION("/api/transaction"),
-    @JsonProperty("SESSION_CERTIFICATION")
-    SESSION_CERTIFICATION("/api/cert-issuer/session-csr"),
-    @JsonProperty("SESSION_CERTIFICATION_DATA")
-    SESSION_CERTIFICATION_DATA("/api/device/session-certification-data"),
     @JsonProperty("INIT_BROWSER_SESSION")
     INIT_BROWSER_SESSION("/api/device/init-browser-session"),
     @JsonProperty("INIT_MOBILE_SESSION")
     INIT_MOBILE_SESSION("/api/device/init-mobile-session"),
+
     @JsonProperty("QR_INFO")
     QR_INFO("/api/currency-qr/info"),
-    @JsonProperty("BANK_NEW")
-    BANK_NEW("/api/user/new-bank");
-
+    @JsonProperty("REGISTER")
+    REGISTER("/api/user/register"),
+    @JsonProperty("SESSION_CERTIFICATION")
+    SESSION_CERTIFICATION("/api/cert-issuer/session-csr"),
+    @JsonProperty("SESSION_CERTIFICATION_DATA")
+    SESSION_CERTIFICATION_DATA("/api/device/session-certification-data");
 
     private String url;
 

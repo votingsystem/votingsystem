@@ -295,7 +295,7 @@
             vs.rsaUtil = new RSAUtil(1024);
             var browserPublicKey = {publicKeyPEM:vs.rsaUtil.publicKeyPEM, userUUID:vs.userUUID};
             vs.httpPost("#{request.contextPath}/api/device/browser-publickey", function(responseText, status) {
-                console.log("responseText: " + responseText + " - status: " + status);
+                console.log("#{request.contextPath}/api/device/browser-publickey responseText: " + responseText + " - status: " + status);
             }, JSON.stringify(browserPublicKey));
         } else {
             var sessionData = pkiSessionDataMap[vs.userUUID];

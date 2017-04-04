@@ -46,92 +46,6 @@ public class SignerInfoEJB implements SignerInfoService {
     private EntityManager em;
     @Inject private Config config;
 
-    /**
-     * @param signatureParams
-     * @return
-     * @throws CertificateEncodingException
-     */
-    @TransactionAttribute(REQUIRES_NEW)
-    private User checkSigner(SignatureParams signatureParams) throws SignerValidationException {
-        User requestSigner;
-        List<User> userListDB = null;
-        X509Certificate signerCert = signatureParams.getSigningCert();
-        try {
-            CertExtensionDto deviceData = CertUtils.getCertExtensionData(CertExtensionDto.class, signerCert, Constants.DEVICE_OID);
-            requestSigner = User.FROM_CERT(signerCert, signatureParams.getSignerType());
-            List<Certificate> certificates = em.createNamedQuery(Certificate.FIND_BY_SERIALNUMBER_AND_AUTHORITY)
-                    .setParameter("serialNumber", signerCert.getSerialNumber().longValue())
-                    .setParameter("authorityCertificate", signatureParams.getCertificateCA()).getResultList();
-            switch (signatureParams.getSignerType()) {
-                case TIMESTAMP_SERVER:
-                case BANK:
-                case ENTITY:
-                case IDENTITY_SERVER:
-                    requestSigner.setEntityId(signatureParams.getEntityId());
-                    userListDB = em.createQuery("select s from User s where s.entityId=:entityId")
-                            .setParameter("entityId", signatureParams.getEntityId()).getResultList();
-                    break;
-                case ANON_ELECTOR:
-                    if(certificates.isEmpty()) {
-                        CertVoteExtensionDto certExtensionDto = CertUtils.getCertExtensionData(CertVoteExtensionDto.class,
-                                signerCert, Constants.VOTE_OID);
-                        Certificate certificate = Certificate.VOTE(certExtensionDto.getRevocationHashBase64(), signerCert,
-                                signatureParams.getCertificateCA()).setCertVoteExtension(certExtensionDto);
-                        em.persist(certificate);
-                        requestSigner.setCertificate(certificate).setCertificateCA(signatureParams.getCertificateCA())
-                                .setValidElector(true);
-                    } else requestSigner.setValidElector(false);
-                    return requestSigner;
-                default:
-                    if(requestSigner.getNumId() == null) {
-                        if(deviceData != null && deviceData.getNumId() != null) {
-                            userListDB = em.createQuery("select s from User s where s.numId=:numId and s.documentType=:typeId")
-                                    .setParameter("numId", deviceData.getNumId())
-                                    .setParameter("typeId", IdDocument.NIF).getResultList();
-                        } else throw new SignerValidationException("Missing user identification data");
-                    } else {
-                        userListDB = em.createQuery("select s from User s where s.numId=:numId and s.documentType=:typeId")
-                                .setParameter("numId", requestSigner.getNumId())
-                                .setParameter("typeId", requestSigner.getDocumentType()).getResultList();
-                    }
-                    break;
-            }
-            if(!userListDB.isEmpty()) {
-                requestSigner = userListDB.iterator().next();
-            } else {
-                if(signatureParams.getCertificateCA() == null) {
-                    String msg = Messages.currentInstance().get("signerCertWithoutCAErrorMsg");
-                    log.log(Level.SEVERE, msg + " - " + signerCert.toString());
-                    throw new CertificateValidationException(msg);
-                }
-                em.persist(requestSigner);
-            }
-            Certificate certificate = null;
-            if(certificates.isEmpty()) {
-                certificate = Certificate.SIGNER(requestSigner, signerCert)
-                        .setAuthorityCertificate(signatureParams.getCertificateCA());
-                em.persist(certificate);
-                log.severe("Added new signer id: " + requestSigner.getId() + " - certificate id: " + certificate.getId() +
-                        " - certificate subjectDN: " + certificate.getSubjectDN() +
-                        " - issuer subjectDN: " + certificate.getAuthorityCertificate().getSubjectDN());
-            } else {
-                certificate = certificates.iterator().next();
-            }
-            requestSigner.setX509Certificate(signerCert).setCertificate(certificate);
-            return requestSigner;
-        } catch (NoSuchAlgorithmException | NoSuchProviderException | CertificateException ex) {
-            String msg = Messages.currentInstance().get("signerCertErrorMsg", ex.getMessage());
-            log.log(Level.SEVERE, msg + ((signerCert != null) ? " - " + signerCert.toString() : ""), ex);
-            throw new SignerValidationException(msg);
-        } catch (CertificateValidationException ex) {
-            log.log(Level.SEVERE, ex.getMessage(), ex);
-            throw new SignerValidationException(ex.getMessage());
-        } catch (Exception ex) {
-            log.log(Level.SEVERE, ex.getMessage(), ex);
-            throw new SignerValidationException(ex.getMessage());
-        }
-    }
-
     @Override
     public User checkIfAdmin(X509Certificate certToCheck) throws InsufficientPrivilegesException {
         log.severe("===== TODO");
@@ -192,32 +106,89 @@ public class SignerInfoEJB implements SignerInfoService {
         }
     }
 
-    public PKIXCertPathValidatorResult verifyUserCertificate(final User user) throws CertificateValidationException {
-        try {
-            PKIXCertPathValidatorResult validatorResult = CertUtils.verifyCertificate(
-                    config.getTrustedCertAnchors(), false, Arrays.asList(user.getX509Certificate()));
-            X509Certificate certCaResult = validatorResult.getTrustAnchor().getTrustedCert();
-            user.setCertificateCA(config.getCACertificate(certCaResult.getSerialNumber().longValue()));
-            if(Boolean.valueOf(CertUtils.getCertExtensionData(user.getX509Certificate(), Constants.ANON_CERT_OID))) {
-                user.setAnonymousUser(true);
-            }
-            log.log(Level.FINE, "user:" + user.getNumIdAndType() + " cert issuer: " + certCaResult.getSubjectDN() +
-                    " - cert Authority: " + user.getCertificateCA().getSubjectDN());
-            return validatorResult;
-        } catch (Exception ex) {
-            log.log(Level.SEVERE, ex.getMessage(), ex);
-            throw new CertificateValidationException(ex.getMessage(), ex);
-        }
-    }
-
     @TransactionAttribute(REQUIRES_NEW)
-    public User checkSigner(X509Certificate x509Certificate, User.Type userType, String entityId)
+    public User checkSigner(X509Certificate signerX509Cert, User.Type signerType, String entityId)
             throws SignerValidationException, CertificateValidationException {
         PKIXCertPathValidatorResult certValidatorResult = CertUtils.verifyCertificate(
-                config.getTrustedCertAnchors(), false, Arrays.asList(x509Certificate));
-        X509Certificate certCaResult = certValidatorResult.getTrustAnchor().getTrustedCert();
-        Certificate caCertificate = config.getCACertificate(certCaResult.getSerialNumber().longValue());
-        return checkSigner(new SignatureParams(entityId, userType, x509Certificate).setCertificateCA(caCertificate));
+                config.getTrustedCertAnchors(), false, Arrays.asList(signerX509Cert));
+        X509Certificate x509CertCa = certValidatorResult.getTrustAnchor().getTrustedCert();
+        Certificate certificateCA = config.getCACertificate(x509CertCa.getSerialNumber().longValue());
+        if(certificateCA == null) {
+            throw new CertificateValidationException(Messages.currentInstance().get("signerCertWithoutCAErrorMsg"));
+        }
+        User signer = null;
+        List<User> dbSignerList = null;
+        Certificate signerCertificate = null;
+        try {
+            CertExtensionDto deviceData = CertUtils.getCertExtensionData(CertExtensionDto.class, signerX509Cert, Constants.DEVICE_OID);
+            signer = User.FROM_CERT(signerX509Cert, signerType);
+            List<Certificate> certificates = em.createNamedQuery(Certificate.FIND_BY_SERIALNUMBER_AND_AUTHORITY)
+                    .setParameter("serialNumber", signerX509Cert.getSerialNumber().longValue())
+                    .setParameter("authorityCertificate", certificateCA).getResultList();
+            switch (signerType) {
+                case TIMESTAMP_SERVER:
+                case BANK:
+                case ENTITY:
+                case IDENTITY_SERVER:
+                    signer.setEntityId(entityId).setType(signerType);
+                    dbSignerList = em.createQuery("select s from User s where s.entityId=:entityId")
+                            .setParameter("entityId", entityId).getResultList();
+                    break;
+                case ANON_ELECTOR:
+                    if(certificates.isEmpty()) {
+                        CertVoteExtensionDto certExtensionDto = CertUtils.getCertExtensionData(CertVoteExtensionDto.class,
+                                signerX509Cert, Constants.VOTE_OID);
+                        Certificate certificate = Certificate.VOTE(certExtensionDto.getRevocationHashBase64(), signerX509Cert,
+                                certificateCA).setCertVoteExtension(certExtensionDto);
+                        em.persist(certificate);
+                        signer.setCertificate(certificate).setCertificateCA(certificateCA)
+                                .setValidElector(true);
+                    } else signer.setValidElector(false);
+                    return signer;
+                default:
+                    if(signer.getNumId() == null) {
+                        if(deviceData != null && deviceData.getNumId() != null) {
+                            dbSignerList = em.createQuery("select s from User s where s.numId=:numId and s.documentType=:typeId")
+                                    .setParameter("numId", deviceData.getNumId())
+                                    .setParameter("typeId", IdDocument.NIF).getResultList();
+                        } else throw new SignerValidationException("Missing user identification data");
+                    } else {
+                        dbSignerList = em.createQuery("select s from User s where s.numId=:numId and s.documentType=:typeId")
+                                .setParameter("numId", signer.getNumId())
+                                .setParameter("typeId", signer.getDocumentType()).getResultList();
+                    }
+                    break;
+            }
+            if(!dbSignerList.isEmpty()) {
+                signer = dbSignerList.iterator().next();
+            } else {
+                em.persist(signer);
+            }
+            if(certificates.isEmpty()) {
+                signerCertificate = Certificate.SIGNER(signer, signerX509Cert)
+                        .setAuthorityCertificate(certificateCA);
+                em.persist(signerCertificate);
+                log.severe("Added new signer id: " + signer.getId() + " - certificate id: " + signerCertificate.getId() +
+                        " - certificate subjectDN: " + signerCertificate.getSubjectDN() +
+                        " - issuer subjectDN: " + signerCertificate.getAuthorityCertificate().getSubjectDN());
+            } else {
+                signerCertificate = certificates.iterator().next();
+            }
+            signer.setX509Certificate(signerX509Cert).setCertificate(signerCertificate)
+                    .setCertificateCA(certificateCA);
+            log.log(Level.FINE, "user num. id and type:" + signer.getNumIdAndType() + " - cert Authority: " + certificateCA.getSubjectDN());
+            return signer;
+        } catch (NoSuchAlgorithmException | NoSuchProviderException | CertificateException ex) {
+            String msg = Messages.currentInstance().get("signerCertErrorMsg", ex.getMessage());
+            log.log(Level.SEVERE, msg + ((signerX509Cert != null) ? " - " + signerX509Cert.toString() : ""), ex);
+            throw new SignerValidationException(msg);
+        } catch (CertificateValidationException ex) {
+            log.log(Level.SEVERE, ex.getMessage(), ex);
+            throw new SignerValidationException(ex.getMessage());
+        } catch (Exception ex) {
+            log.log(Level.SEVERE, ex.getMessage(), ex);
+            throw new SignerValidationException(ex.getMessage());
+        }
     }
 
     public Certificate verifyCertificate(X509Certificate certToCheck) throws Exception {

@@ -48,7 +48,7 @@ public class Certificate implements Serializable {
 
     public enum Type {
         VOTE, USER, USER_ID_CARD, CERTIFICATE_AUTHORITY, CERTIFICATE_AUTHORITY_ID_CARD, BROWSER_SESSION, MOBILE_SESSION,
-        TIMESTAMP_SERVER}
+        ENTITY, CURRENCY}
 
     @Id @GeneratedValue(strategy=IDENTITY)
     @Column(name="ID", unique=true, nullable=false)
@@ -143,23 +143,29 @@ public class Certificate implements Serializable {
         Certificate result = new Certificate(x509Cert);
         if(signer.getCertificateCA() != null &&
                 Type.CERTIFICATE_AUTHORITY_ID_CARD == signer.getCertificateCA().getType()) result.type = Type.USER_ID_CARD;
-        else result.type = Type.USER;
+        else {
+            switch (signer.getType()) {
+                case ANON_ELECTOR:
+                    result.type = Type.VOTE;
+                    break;
+                case TIMESTAMP_SERVER:
+                case CURRENCY_SERVER:
+                case IDENTITY_SERVER:
+                case BANK:
+                case ENTITY:
+                    result.type = Type.ENTITY;
+                    break;
+                case ANON_CURRENCY:
+                    result.type = Type.CURRENCY;
+                    break;
+                default:
+                    result.type = Type.USER;
+            }
+        }
         result.state = Certificate.State.OK;
         result.signer = signer;
         result.subjectDN = x509Cert.getSubjectDN().toString();
         result.authorityCertificate = signer.getCertificateCA();
-        return result;
-    }
-
-    public static Certificate ISSUED_USER_CERT(User user, X509Certificate x509Cert, Certificate authorityCertificate)
-            throws CertificateException, NoSuchAlgorithmException, NoSuchProviderException {
-        Certificate result = new Certificate(x509Cert);
-        if(Type.CERTIFICATE_AUTHORITY_ID_CARD == authorityCertificate.getType()) result.type = Type.USER_ID_CARD;
-        else result.type = Type.USER;
-        result.state = Certificate.State.OK;
-        result.signer = user;
-        result.subjectDN = x509Cert.getSubjectDN().toString();
-        result.authorityCertificate = authorityCertificate;
         return result;
     }
 

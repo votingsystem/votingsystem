@@ -51,6 +51,9 @@ public class LocalExceptionMapper implements ExceptionMapper<Exception> {
                 case vs_0410:
                     message = Messages.currentInstance().get("errorLbl") + " - " + exception.getMessage();
                     break;
+                case vs_0420:
+                    message = Messages.currentInstance().get("errorLbl") + " - " + exception.getMessage();
+                    break;
                 case vs_0500:
                     message = Messages.currentInstance().get("systemErrorMsg");
                     break;

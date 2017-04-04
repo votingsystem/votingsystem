@@ -73,8 +73,6 @@ public enum OperationType implements SystemOperation {
     TIMESTAMP_REQUEST("/api/timestamp"),
     @JsonProperty("TIMESTAMP_REQUEST_DISCRETE")
     TIMESTAMP_REQUEST_DISCRETE("/api/timestamp/discrete"),
-    @JsonProperty("REGISTER")
-    REGISTER("/api/user/register"),
     @JsonProperty("USER_INFO")
     USER_INFO(null),
     @JsonProperty("LISTEN_TRANSACTIONS")

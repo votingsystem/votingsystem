@@ -1,6 +1,7 @@
 package org.votingsystem.model;
 
 import org.votingsystem.crypto.cms.CMSSignedMessage;
+import org.votingsystem.xml.XML;
 
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
@@ -47,6 +48,11 @@ public class CMSDocument extends SignedDocument implements Serializable {
     public CMSDocument setCmsMessage(CMSSignedMessage cmsMessage) {
         this.cmsMessage = cmsMessage;
         return this;
+    }
+
+    @Override
+    public <T> T getSignedContent(Class<T> type) throws Exception {
+        return cmsMessage.getSignedContent(type);
     }
 
 }

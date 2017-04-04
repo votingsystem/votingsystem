@@ -2,9 +2,11 @@ package org.votingsystem.dto.currency;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import org.votingsystem.dto.AddressDto;
 import org.votingsystem.dto.OperationTypeDto;
 import org.votingsystem.dto.UserDto;
+import org.votingsystem.util.CurrencyOperation;
 import org.votingsystem.util.OperationType;
 
 
@@ -15,6 +17,7 @@ import org.votingsystem.util.OperationType;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class RegisterDto {
 
+    @JsonProperty("Operation")
     private OperationTypeDto operation;
     private AddressDto address;
     private UserDto user;
@@ -27,7 +30,7 @@ public class RegisterDto {
         this.user = user;
         this.mobileCsr = mobileCsr;
         this.deviceId = deviceId;
-        operation = new OperationTypeDto(OperationType.REGISTER, entityToId);
+        operation = new OperationTypeDto(CurrencyOperation.REGISTER, entityToId);
     }
 
     public AddressDto getAddress() {

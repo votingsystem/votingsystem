@@ -58,7 +58,12 @@ public class User extends EntityBase implements Serializable {
     public static final String COUNT_USER_ACTIVE_BY_DATE_AND_IN_LIST = "User.countUserActiveByDateAndInList";
 
     public enum Type {ENTITY, USER, ID_CARD_USER, TIMESTAMP_SERVER, ANON_ELECTOR, BANK, CURRENCY_SERVER, IDENTITY_SERVER,
-        ANON_CURRENCY, BROWSER, MOBILE}
+        ANON_CURRENCY, BROWSER, MOBILE
+    }
+
+    public enum TypeCert {
+        VOTE, USER, USER_ID_CARD, CERTIFICATE_AUTHORITY, CERTIFICATE_AUTHORITY_ID_CARD, BROWSER_SESSION, MOBILE_SESSION,
+        TIMESTAMP_SERVER}
 
     public enum State {ACTIVE, PENDING, SUSPENDED, CANCELED}
 
@@ -262,8 +267,9 @@ public class User extends EntityBase implements Serializable {
         return entityId;
     }
 
-    public void setEntityId(String entityId) {
+    public User setEntityId(String entityId) {
         this.entityId = entityId;
+        return this;
     }
 
 	public TimeStampToken getTimeStampToken() {
