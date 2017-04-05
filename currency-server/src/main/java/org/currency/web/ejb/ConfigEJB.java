@@ -7,6 +7,11 @@ import eu.europa.esig.dss.token.JKSSignatureToken;
 import eu.europa.esig.dss.tsl.TrustedListsCertificateSource;
 import eu.europa.esig.dss.x509.CertificateSource;
 import eu.europa.esig.dss.x509.CertificateToken;
+import org.bouncycastle.asn1.x500.AttributeTypeAndValue;
+import org.bouncycastle.asn1.x500.RDN;
+import org.bouncycastle.asn1.x500.X500Name;
+import org.bouncycastle.asn1.x500.style.BCStyle;
+import org.bouncycastle.cert.jcajce.JcaX509CertificateHolder;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.votingsystem.dto.metadata.MetadataDto;
 import org.votingsystem.dto.metadata.MetadataUtils;
@@ -200,7 +205,17 @@ public class ConfigEJB implements Config, ConfigCurrencyServer, Serializable {
         Certificate certificate = null;
         if(certificates.isEmpty()) {
             //TODO
-            Certificate.Type certType = Certificate.Type.CERTIFICATE_AUTHORITY_ID_CARD;
+            X500Name x500name = new JcaX509CertificateHolder(x509Cert).getSubject();
+            Certificate.Type certType = null;
+            for(RDN rdn : x500name.getRDNs()) {
+                AttributeTypeAndValue attributeTypeAndValue = rdn.getFirst();
+                if(BCStyle.O.getId().equals(attributeTypeAndValue.getType().getId())) {
+                    if(attributeTypeAndValue.getValue().toString().contains("DIRECCION GENERAL DE LA POLICIA"))
+                        certType = Certificate.Type.CERTIFICATE_AUTHORITY_ID_CARD;
+                }
+            }
+            if(certType == null)
+                certType = Certificate.Type.ENTITY;
             certificate = Certificate.AUTHORITY(x509Cert, certType, null);
             em.persist(certificate);
             log.info("Added new CA certificate to database - id: " + certificate.getId() + " - SubjectDN: " +
