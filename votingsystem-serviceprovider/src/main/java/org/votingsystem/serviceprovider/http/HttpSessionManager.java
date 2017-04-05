@@ -28,13 +28,13 @@ public class HttpSessionManager implements HttpSessionListener {
 
     @Override
     public void sessionCreated(HttpSessionEvent sessionEvent) {
-        log.info("sessionCreated: " + sessionEvent.getSession().getId());
+        log.info("Session id: " + sessionEvent.getSession().getId());
     }
 
     @Override
     public void sessionDestroyed(HttpSessionEvent sessionEvent) {
         Set<String> qrOperations = (Set<String>) sessionEvent.getSession().getAttribute(Constants.QR_OPERATIONS);
-        log.info("sessionDestroyed: " + sessionEvent.getSession().getId() + " - closing qrOperations: " + qrOperations);
+        log.info("Session id: " + sessionEvent.getSession().getId() + " - closing qrOperations: " + qrOperations);
         if(qrOperations != null) {
             for(String qrOperation:qrOperations) {
                 qrSessions.removeOperation(qrOperation);

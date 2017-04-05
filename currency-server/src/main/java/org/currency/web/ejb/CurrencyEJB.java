@@ -1,13 +1,11 @@
 package org.currency.web.ejb;
 
 import org.apache.commons.io.IOUtils;
-import org.votingsystem.crypto.SignatureParams;
-import org.votingsystem.dto.ResultListDto;
-import org.votingsystem.dto.currency.*;
-import org.votingsystem.util.*;
-import org.votingsystem.crypto.PEMUtils;
-import org.votingsystem.crypto.SignedDocumentType;
 import org.currency.web.util.ReportFiles;
+import org.votingsystem.crypto.PEMUtils;
+import org.votingsystem.crypto.SignatureParams;
+import org.votingsystem.crypto.SignedDocumentType;
+import org.votingsystem.dto.ResultListDto;
 import org.votingsystem.dto.currency.*;
 import org.votingsystem.ejb.SignatureService;
 import org.votingsystem.model.SignedDocument;

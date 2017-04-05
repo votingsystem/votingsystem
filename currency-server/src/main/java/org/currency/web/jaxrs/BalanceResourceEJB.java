@@ -2,7 +2,6 @@ package org.currency.web.jaxrs;
 
 import org.currency.web.ejb.BalancesEJB;
 import org.currency.web.ejb.ConfigCurrencyServer;
-import org.votingsystem.util.*;
 import org.currency.web.ejb.CurrencyAccountEJB;
 import org.currency.web.http.CurrencyPrincipal;
 import org.currency.web.util.AuthRole;

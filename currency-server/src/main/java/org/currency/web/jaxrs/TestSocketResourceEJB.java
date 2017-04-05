@@ -1,9 +1,9 @@
 package org.currency.web.jaxrs;
 
-import org.votingsystem.util.JSON;
 import org.currency.web.managed.SocketPushEvent;
 import org.votingsystem.dto.ResponseDto;
 import org.votingsystem.util.CurrencyOperation;
+import org.votingsystem.util.JSON;
 
 import javax.enterprise.inject.spi.BeanManager;
 import javax.inject.Inject;

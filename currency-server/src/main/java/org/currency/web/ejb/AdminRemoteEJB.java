@@ -1,7 +1,7 @@
 package org.currency.web.ejb;
 
-import org.votingsystem.service.EJBAdminRemoteCurrencyServer;
 import org.votingsystem.dto.ResponseDto;
+import org.votingsystem.service.EJBAdminRemoteCurrencyServer;
 
 import javax.ejb.AsyncResult;
 import javax.ejb.Asynchronous;

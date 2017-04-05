@@ -1,18 +1,18 @@
 package org.currency.web.servlet;
 
-import org.votingsystem.crypto.SignatureParams;
 import org.currency.web.ejb.ConfigCurrencyServer;
 import org.currency.web.ejb.CurrencyEJB;
-import org.votingsystem.dto.ResultListDto;
-import org.votingsystem.model.SignedDocument;
-import org.votingsystem.model.User;
-import org.votingsystem.util.JSON;
+import org.votingsystem.crypto.SignatureParams;
 import org.votingsystem.crypto.SignedDocumentType;
 import org.votingsystem.dto.ResponseDto;
+import org.votingsystem.dto.ResultListDto;
 import org.votingsystem.dto.currency.CurrencyRequestDto;
 import org.votingsystem.ejb.SignatureService;
 import org.votingsystem.http.AnonCertMultipartRequest;
 import org.votingsystem.http.MediaType;
+import org.votingsystem.model.SignedDocument;
+import org.votingsystem.model.User;
+import org.votingsystem.util.JSON;
 
 import javax.inject.Inject;
 import javax.servlet.annotation.MultipartConfig;

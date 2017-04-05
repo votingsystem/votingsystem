@@ -1,29 +1,37 @@
-package org.currency.test.android;
+package org.currency.test.misc;
 
-import org.currency.test.Constants;
-import org.votingsystem.crypto.PEMUtils;
+import org.bouncycastle.cert.X509CRLHolder;
+import org.bouncycastle.cert.X509CertificateHolder;
+import org.bouncycastle.cms.SignerInformationVerifier;
+import org.bouncycastle.cms.jcajce.JcaSimpleSignerInfoVerifierBuilder;
+import org.bouncycastle.tsp.TimeStampToken;
+import org.bouncycastle.util.Selector;
+import org.bouncycastle.util.Store;
+import org.currency.test.android.RegisterDeviceTest;
 import org.votingsystem.crypto.cms.CMSSignedMessage;
-import org.votingsystem.dto.OperationCheckerDto;
-import org.votingsystem.dto.OperationTypeDto;
-import org.votingsystem.dto.currency.RegisterDto;
-import org.votingsystem.http.HttpConn;
-import org.votingsystem.dto.ResponseDto;
-import org.votingsystem.http.MediaType;
+import org.votingsystem.dto.CMSDto;
+import org.votingsystem.model.Signature;
+import org.votingsystem.model.User;
 import org.votingsystem.testlib.BaseTest;
-import org.votingsystem.util.CurrencyOperation;
-import org.votingsystem.util.JSON;
+import org.votingsystem.throwable.ValidationException;
+import org.votingsystem.util.Constants;
 
-import java.security.cert.X509Certificate;
+import java.math.BigInteger;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
  * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-public class RegisterDeviceTest extends BaseTest {
+public class CheckPKCS7TimestampTest extends BaseTest {
 
-    private static final Logger log = Logger.getLogger(RegisterDeviceTest.class.getName());
+    private static final Logger log = Logger.getLogger(CheckPKCS7TimestampTest.class.getName());
 
-    public static final String REQUEST = "-----BEGIN PKCS7-----\n" +
+    public static final String PKCS7_DOC = "-----BEGIN PKCS7-----\n" +
             "MIAGCSqGSIb3DQEHAqCAMIACAQExDzANBglghkgBZQMEAgEFADCABgkqhkiG9w0B\n" +
             "BwGggCSABIID6HsiZGV2aWNlSWQiOiIzN2E0NzUxZi04NjIyLTRlZDgtYmZjNC0z\n" +
             "YmIwZDdlYzMwNWMiLCJtb2JpbGVDc3IiOiItLS0tLUJFR0lOIENFUlRJRklDQVRF\n" +
@@ -172,25 +180,43 @@ public class RegisterDeviceTest extends BaseTest {
             "-----END PKCS7-----\n";
 
     public static void main(String[] args) throws Exception {
-        new RegisterDeviceTest().registerDevice();
+        new CheckPKCS7TimestampTest().checkTimestamp();
         System.exit(0);
     }
 
-    public void checkRequest() throws Exception {
-        CMSSignedMessage cmsSignedMessage = CMSSignedMessage.FROM_PEM(REQUEST);
-        OperationCheckerDto operationDto = cmsSignedMessage.getSignedContent(OperationCheckerDto.class);
-        RegisterDto registerDto = cmsSignedMessage.getSignedContent(RegisterDto.class);
-        log.info("DeviceId: " + registerDto.getDeviceId() + " - SignedContent: " + cmsSignedMessage.getSignedContentStr());
-    }
+    public void checkTimestamp() throws Exception {
+        CMSSignedMessage signedMessage = CMSSignedMessage.FROM_PEM(PKCS7_DOC);
+        if(signedMessage.getSignatures().isEmpty())
+            throw new ValidationException("document without signatures");
+        Set<Long> timestampServersSerialNumbers = new HashSet<>(Arrays.asList(149080567659334L));
+        for(Signature signature: signedMessage.getSignatures()) {
+            User signer = signature.getSigner();
+            if(signer.getTimeStampToken() != null) {
+                TimeStampToken timeStampToken = signer.getTimeStampToken();
+                Store certificates = timeStampToken.getCertificates();
+                Collection matches = certificates.getMatches(new Selector(){
+                    public boolean match(Object obj) {
+                        X509CertificateHolder crl = (X509CertificateHolder)obj;
+                        log.info("crl: " + crl + " - SerialNumber: " + crl.getSerialNumber());
+                        boolean idExists = timestampServersSerialNumbers.stream().anyMatch(
+                                serNumb -> serNumb == crl.getSerialNumber().longValue());
+                        return idExists;
+                    }
+                    public Object clone() {
+                        return this;
+                    }
+                });
+                X509CertificateHolder certificateHolder = null;
+                if(matches.size() > 0) {
+                    certificateHolder = (X509CertificateHolder) matches.iterator().next();
+                    SignerInformationVerifier timeStampSignerInfoVerifier =  new JcaSimpleSignerInfoVerifierBuilder()
+                            .setProvider(Constants.PROVIDER).build(certificateHolder);;
+                    timeStampToken.validate(timeStampSignerInfoVerifier);
+                }
 
-    public void registerDevice() throws Exception {
-        ResponseDto responseDto = HttpConn.getInstance().doPostRequest(REQUEST.getBytes(), MediaType.PKCS7_SIGNED,
-                CurrencyOperation.REGISTER_DEVICE.getUrl(Constants.ID_PROVIDER_ENTITY_ID));
-        log.info("status: " + responseDto.getStatusCode() + " - message: " + responseDto.getMessage());
-        RegisterDto registerDto = (RegisterDto) responseDto.getMessage(RegisterDto.class);
-        log.info("issued cert: " + registerDto.getIssuedCertificate());
-        X509Certificate certificate = PEMUtils.fromPEMToX509Cert(registerDto.getIssuedCertificate().getBytes());
-        log.info("issued cert: " + certificate);
+                log.info("certificates: " + certificates + " - matches: " + matches.size() + " - certificateHolder: " + certificateHolder);
+            } else log.info("signature without timestamp - signer: " + signer.getX509Certificate().getSubjectDN());
+        }
     }
 
 }

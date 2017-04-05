@@ -169,6 +169,17 @@ public class Certificate implements Serializable {
         return result;
     }
 
+    public static Certificate ISSUED_USER_CERT(User user, X509Certificate x509Cert, Certificate authorityCertificate)
+            throws CertificateException, NoSuchAlgorithmException, NoSuchProviderException {
+        Certificate result = new Certificate(x509Cert);
+        result.type = Type.USER;
+        result.state = Certificate.State.OK;
+        result.signer = user;
+        result.subjectDN = x509Cert.getSubjectDN().toString();
+        result.authorityCertificate = authorityCertificate;
+        return result;
+    }
+
     public String getUUID() {
         return UUID;
     }

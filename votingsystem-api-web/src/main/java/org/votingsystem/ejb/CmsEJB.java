@@ -1,7 +1,13 @@
 package org.votingsystem.ejb;
 
+import org.bouncycastle.cert.X509CertificateHolder;
+import org.bouncycastle.cms.SignerInformationVerifier;
+import org.bouncycastle.cms.jcajce.JcaSimpleSignerInfoVerifierBuilder;
+import org.bouncycastle.operator.OperatorCreationException;
 import org.bouncycastle.tsp.TSPException;
 import org.bouncycastle.tsp.TimeStampToken;
+import org.bouncycastle.util.Selector;
+import org.bouncycastle.util.Store;
 import org.votingsystem.crypto.Encryptor;
 import org.votingsystem.crypto.SignedDocumentType;
 import org.votingsystem.crypto.cms.CMSGenerator;
@@ -28,6 +34,7 @@ import java.security.KeyStore;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.cert.X509Certificate;
+import java.util.Collection;
 import java.util.List;
 import java.util.Properties;
 import java.util.logging.Level;
@@ -95,6 +102,9 @@ public class CmsEJB {
             User.Type userType = User.Type.USER;
             if(operationDto.getOperation().isCurrencyOperation()) {
                 switch ((CurrencyOperation)operationDto.getOperation().getType()) {
+                    case REGISTER_DEVICE:
+                        documentType = SignedDocumentType.DEVICE_REGISTER;
+                        break;
                     case SESSION_CERTIFICATION:
                         userType = User.Type.ENTITY;
                         break;
@@ -142,11 +152,27 @@ public class CmsEJB {
     }
 
 
-    public void validateToken(TimeStampToken timeStampToken) throws TSPException {
-        log.info("===== TODO timeStampToken: " + timeStampToken);
-        /*if(timeStampSignerInfoVerifier == null) throw new ExceptionVS("TimeStamp service not initialized");
-        X509CertificateHolder certHolder = timeStampSignerInfoVerifier.getAssociatedCertificate();
-        tsToken.validate(timeStampSignerInfoVerifier);*/
+    public void validateToken(TimeStampToken timeStampToken) throws TSPException, ValidationException, OperatorCreationException {
+        Collection matches = timeStampToken.getCertificates().getMatches(new Selector(){
+            public boolean match(Object obj) {
+                X509CertificateHolder crl = (X509CertificateHolder)obj;
+                log.info("crl: " + crl + " - SerialNumber: " + crl.getSerialNumber());
+                boolean idExists = config.getTrustedTimeStampServers().keySet().stream().anyMatch(
+                        serNumb -> serNumb == crl.getSerialNumber().longValue());
+                return idExists;
+            }
+            public Object clone() {
+                return this;
+            }
+        });
+        if(matches.size() > 0) {
+            X509CertificateHolder certificateHolder = (X509CertificateHolder) matches.iterator().next();
+            X509Certificate timeStampServerCertificate = config.getTrustedTimeStampServers().get(
+                    certificateHolder.getSerialNumber().longValue());
+            SignerInformationVerifier timeStampSignerInfoVerifier =  new JcaSimpleSignerInfoVerifierBuilder()
+                    .setProvider(Constants.PROVIDER).build(timeStampServerCertificate);
+            timeStampToken.validate(timeStampSignerInfoVerifier);
+        } else throw new ValidationException("Timestamp signed with an unknown certificate");
     }
 
     public CMSSignedMessage signDataWithTimeStamp(byte[] contentToSign) throws Exception {

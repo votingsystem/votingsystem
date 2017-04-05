@@ -7,7 +7,6 @@ import org.votingsystem.dto.AddressDto;
 import org.votingsystem.dto.OperationTypeDto;
 import org.votingsystem.dto.UserDto;
 import org.votingsystem.util.CurrencyOperation;
-import org.votingsystem.util.OperationType;
 
 
 /**
@@ -21,16 +20,17 @@ public class RegisterDto {
     private OperationTypeDto operation;
     private AddressDto address;
     private UserDto user;
-    private String mobileCsr;
+    private String csr;
+    private String issuedCertificate;
     private String deviceId;
 
     public RegisterDto() {}
 
-    public RegisterDto(UserDto user, String deviceId, String mobileCsr, String entityToId) {
+    public RegisterDto(UserDto user, String deviceId, String csr, String entityToId) {
         this.user = user;
-        this.mobileCsr = mobileCsr;
+        this.csr = csr;
         this.deviceId = deviceId;
-        operation = new OperationTypeDto(CurrencyOperation.REGISTER, entityToId);
+        operation = new OperationTypeDto(CurrencyOperation.REGISTER_DEVICE, entityToId);
     }
 
     public AddressDto getAddress() {
@@ -41,12 +41,12 @@ public class RegisterDto {
         this.address = address;
     }
 
-    public String getMobileCsr() {
-        return mobileCsr;
+    public String getCsr() {
+        return csr;
     }
 
-    public RegisterDto setMobileCsr(String mobileCsr) {
-        this.mobileCsr = mobileCsr;
+    public RegisterDto setCsr(String csr) {
+        this.csr = csr;
         return this;
     }
 
@@ -75,6 +75,14 @@ public class RegisterDto {
     public RegisterDto setDeviceId(String deviceId) {
         this.deviceId = deviceId;
         return this;
+    }
+
+    public String getIssuedCertificate() {
+        return issuedCertificate;
+    }
+
+    public void setIssuedCertificate(String issuedCertificate) {
+        this.issuedCertificate = issuedCertificate;
     }
 
 }

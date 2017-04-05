@@ -1,7 +1,7 @@
 package org.currency.web.util;
 
-import org.votingsystem.model.currency.Currency;
 import org.votingsystem.dto.currency.TransactionDto;
+import org.votingsystem.model.currency.Currency;
 import org.votingsystem.model.currency.Tag;
 
 import javax.ws.rs.container.AsyncResponse;

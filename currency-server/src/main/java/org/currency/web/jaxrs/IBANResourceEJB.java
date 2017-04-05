@@ -1,9 +1,9 @@
 package org.currency.web.jaxrs;
 
 import org.currency.web.ejb.ConfigCurrencyServer;
-import org.iban4j.Iban;
 import org.currency.web.ejb.TransactionEJB;
 import org.currency.web.util.AuthRole;
+import org.iban4j.Iban;
 import org.votingsystem.model.currency.Transaction;
 
 import javax.annotation.security.RolesAllowed;

@@ -1,16 +1,16 @@
 package org.votingsystem.idprovider.jaxrs;
 
+import org.votingsystem.dto.ResponseDto;
 import org.votingsystem.dto.indentity.IdentityRequestDto;
 import org.votingsystem.dto.voting.ElectionDto;
-import org.votingsystem.qr.QRUtils;
-import org.votingsystem.util.Messages;
-import org.votingsystem.dto.ResponseDto;
 import org.votingsystem.ejb.Config;
 import org.votingsystem.ejb.QRSessionsEJB;
 import org.votingsystem.idprovider.ejb.ElectionsEJB;
 import org.votingsystem.model.voting.Election;
 import org.votingsystem.qr.QRRequestBundle;
+import org.votingsystem.qr.QRUtils;
 import org.votingsystem.util.FileUtils;
+import org.votingsystem.util.Messages;
 import org.votingsystem.util.OperationType;
 import org.votingsystem.xml.XML;
 

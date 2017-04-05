@@ -13,21 +13,20 @@ import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.asn1.x500.style.BCStyle;
 import org.bouncycastle.cert.jcajce.JcaX509CertificateHolder;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.iban4j.*;
+import org.votingsystem.crypto.KeyGenerator;
+import org.votingsystem.crypto.PEMUtils;
 import org.votingsystem.dto.metadata.MetadataDto;
 import org.votingsystem.dto.metadata.MetadataUtils;
 import org.votingsystem.ejb.Config;
 import org.votingsystem.ejb.TrustedServicesEJB;
 import org.votingsystem.http.HttpConn;
-import org.votingsystem.model.User;
-import org.votingsystem.throwable.ValidationException;
-import org.votingsystem.util.*;
-import org.iban4j.*;
-import org.votingsystem.crypto.KeyGenerator;
-import org.votingsystem.crypto.PEMUtils;
 import org.votingsystem.http.SystemEntityType;
 import org.votingsystem.model.Certificate;
+import org.votingsystem.model.User;
 import org.votingsystem.model.currency.CurrencyAccount;
 import org.votingsystem.model.currency.Tag;
+import org.votingsystem.throwable.ValidationException;
 import org.votingsystem.util.*;
 
 import javax.annotation.PostConstruct;
@@ -100,7 +99,7 @@ public class ConfigEJB implements Config, ConfigCurrencyServer, Serializable {
     private Map<String, MetadataDto> entityMap;
     private MetadataDto metadata;
     private Set<TrustAnchor> trustedCertAnchors;
-    private Set<X509Certificate> trustedTimeStampServers;
+    private Map<Long, X509Certificate> trustedTimeStampServers;
 
     private String ocspServerURL;
     private User systemUser;
@@ -336,7 +335,7 @@ public class ConfigEJB implements Config, ConfigCurrencyServer, Serializable {
     }
 
     @Override
-    public Set<X509Certificate> getTrustedTimeStampServers() {
+    public Map<Long, X509Certificate> getTrustedTimeStampServers() {
         return trustedTimeStampServers;
     }
 
@@ -363,8 +362,8 @@ public class ConfigEJB implements Config, ConfigCurrencyServer, Serializable {
     @Override
     public void addTrustedTimeStampIssuer(X509Certificate trustedTimeStampIssuer) {
         if(trustedTimeStampServers == null)
-            trustedTimeStampServers = new HashSet<>();
-        trustedTimeStampServers.add(trustedTimeStampIssuer);
+            trustedTimeStampServers = new HashMap<>();
+        trustedTimeStampServers.put(trustedTimeStampIssuer.getSerialNumber().longValue(), trustedTimeStampIssuer);
     }
 
     @Override

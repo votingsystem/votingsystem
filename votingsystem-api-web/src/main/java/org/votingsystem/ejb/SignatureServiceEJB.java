@@ -210,7 +210,7 @@ public class SignatureServiceEJB implements SignatureService {
                     if(signatureParams.isWithTimeStampValidation()) {
                         try {
                             boolean isTimeStampTokenValidAuthority = false;
-                            for(X509Certificate tstAuthority:config.getTrustedTimeStampServers()) {
+                            for(X509Certificate tstAuthority:config.getTrustedTimeStampServers().values()) {
                                 if(Arrays.equals(tstAuthority.getEncoded(), tokenIssuerCert.getEncoded()))
                                     isTimeStampTokenValidAuthority = true;
                             }

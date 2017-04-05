@@ -7,8 +7,8 @@ import io.undertow.security.idm.Account;
 import io.undertow.server.HttpServerExchange;
 import io.undertow.server.handlers.form.FormParserFactory;
 import io.undertow.servlet.handlers.ServletRequestContext;
-import org.votingsystem.model.User;
 import org.currency.web.util.AuthRole;
+import org.votingsystem.model.User;
 import org.votingsystem.util.Constants;
 
 import javax.servlet.http.HttpServletRequest;

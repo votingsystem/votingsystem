@@ -1,15 +1,15 @@
 package org.currency.web.jaxrs;
 
-import org.votingsystem.qr.QRUtils;
-import org.votingsystem.util.Messages;
 import org.currency.web.http.HttpSessionManager;
 import org.votingsystem.dto.indentity.SessionCertificationDto;
 import org.votingsystem.ejb.Config;
 import org.votingsystem.ejb.QRSessionsEJB;
 import org.votingsystem.http.HttpResponse;
 import org.votingsystem.qr.QRRequestBundle;
+import org.votingsystem.qr.QRUtils;
 import org.votingsystem.util.Constants;
 import org.votingsystem.util.JSON;
+import org.votingsystem.util.Messages;
 
 import javax.ejb.EJB;
 import javax.ejb.Stateless;

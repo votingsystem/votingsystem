@@ -5,9 +5,9 @@ import com.google.common.collect.Sets;
 import org.votingsystem.dto.ConnectedUsersDto;
 import org.votingsystem.dto.DeviceDto;
 import org.votingsystem.dto.MessageDto;
+import org.votingsystem.model.Device;
 import org.votingsystem.model.User;
 import org.votingsystem.util.JSON;
-import org.votingsystem.model.Device;
 
 import javax.websocket.Session;
 import java.util.*;

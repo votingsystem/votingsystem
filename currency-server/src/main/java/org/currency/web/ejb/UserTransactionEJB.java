@@ -1,17 +1,17 @@
 package org.currency.web.ejb;
 
+import org.votingsystem.crypto.SignedDocumentType;
+import org.votingsystem.dto.ResponseDto;
 import org.votingsystem.dto.ResultListDto;
 import org.votingsystem.dto.currency.TransactionDto;
 import org.votingsystem.model.SignedDocument;
 import org.votingsystem.model.User;
 import org.votingsystem.model.currency.CurrencyAccount;
+import org.votingsystem.model.currency.Tag;
 import org.votingsystem.model.currency.Transaction;
 import org.votingsystem.throwable.ValidationException;
-import org.votingsystem.util.Messages;
-import org.votingsystem.crypto.SignedDocumentType;
-import org.votingsystem.dto.ResponseDto;
-import org.votingsystem.model.currency.Tag;
 import org.votingsystem.util.CurrencyOperation;
+import org.votingsystem.util.Messages;
 
 import javax.ejb.Stateless;
 import javax.inject.Inject;

@@ -1,7 +1,7 @@
 package org.votingsystem.idprovider.servlet;
 
-import org.votingsystem.crypto.SignatureParams;
 import org.votingsystem.crypto.CsrResponse;
+import org.votingsystem.crypto.SignatureParams;
 import org.votingsystem.crypto.SignedDocumentType;
 import org.votingsystem.dto.ResponseDto;
 import org.votingsystem.ejb.SignatureService;

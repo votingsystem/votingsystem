@@ -1,18 +1,17 @@
 package org.currency.web.ejb;
 
+import org.iban4j.Iban;
+import org.votingsystem.crypto.CertUtils;
 import org.votingsystem.crypto.PEMUtils;
+import org.votingsystem.crypto.SignedDocumentType;
 import org.votingsystem.dto.currency.BankDto;
 import org.votingsystem.ejb.SignatureService;
+import org.votingsystem.ejb.SignerInfoService;
 import org.votingsystem.model.SignedDocument;
 import org.votingsystem.model.User;
 import org.votingsystem.model.currency.Bank;
 import org.votingsystem.model.currency.BankInfo;
-import org.votingsystem.util.Constants;
 import org.votingsystem.util.NifUtils;
-import org.iban4j.Iban;
-import org.votingsystem.crypto.CertUtils;
-import org.votingsystem.crypto.SignedDocumentType;
-import org.votingsystem.ejb.SignerInfoService;
 
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;

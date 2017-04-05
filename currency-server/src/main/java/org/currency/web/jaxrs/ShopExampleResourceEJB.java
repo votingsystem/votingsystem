@@ -2,6 +2,7 @@ package org.currency.web.jaxrs;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import org.currency.web.ejb.ShopExampleEJB;
+import org.votingsystem.dto.ResponseDto;
 import org.votingsystem.dto.currency.TransactionDto;
 import org.votingsystem.dto.currency.TransactionResponseDto;
 import org.votingsystem.ejb.Config;
@@ -11,7 +12,6 @@ import org.votingsystem.model.currency.Transaction;
 import org.votingsystem.util.CurrencyCode;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.JSON;
-import org.votingsystem.dto.ResponseDto;
 
 import javax.ejb.Stateless;
 import javax.inject.Inject;

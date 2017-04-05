@@ -1,9 +1,9 @@
 package org.currency.web.jaxrs;
 
 import org.currency.web.ejb.DashBoardEJB;
-import org.votingsystem.util.JSON;
 import org.votingsystem.dto.currency.DashBoardDto;
 import org.votingsystem.util.Interval;
+import org.votingsystem.util.JSON;
 
 import javax.ejb.Stateless;
 import javax.inject.Inject;

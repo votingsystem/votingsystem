@@ -2,20 +2,20 @@ package org.currency.web.jaxrs;
 
 import com.google.common.collect.ImmutableMap;
 import org.currency.web.ejb.ConfigCurrencyServer;
+import org.currency.web.ejb.UserEJB;
 import org.currency.web.http.CurrencyPrincipal;
+import org.currency.web.util.AuthRole;
 import org.votingsystem.dto.ResultListDto;
+import org.votingsystem.dto.currency.CurrencyAccountDto;
+import org.votingsystem.dto.currency.SystemAccountsDto;
 import org.votingsystem.dto.currency.TagDto;
 import org.votingsystem.model.User;
+import org.votingsystem.model.currency.Bank;
 import org.votingsystem.model.currency.CurrencyAccount;
+import org.votingsystem.model.currency.Tag;
 import org.votingsystem.model.currency.Transaction;
 import org.votingsystem.util.CurrencyCode;
 import org.votingsystem.util.JSON;
-import org.currency.web.ejb.UserEJB;
-import org.currency.web.util.AuthRole;
-import org.votingsystem.dto.currency.CurrencyAccountDto;
-import org.votingsystem.dto.currency.SystemAccountsDto;
-import org.votingsystem.model.currency.Bank;
-import org.votingsystem.model.currency.Tag;
 
 import javax.annotation.security.RolesAllowed;
 import javax.ejb.Stateless;

@@ -23,12 +23,12 @@ public class HttpSessionManager implements HttpSessionListener {
 
     @Override
     public void sessionCreated(HttpSessionEvent sessionEvent) {
-        log.info("sessionCreated: " + sessionEvent.getSession().getId());
+        log.info("Session id: " + sessionEvent.getSession().getId());
     }
 
     @Override
     public void sessionDestroyed(HttpSessionEvent sessionEvent) {
-        log.info("sessionDestroyed: " + sessionEvent.getSession().getId());
+        log.info("Session id: " + sessionEvent.getSession().getId());
     }
 
     public static HttpSessionManager getInstance() {

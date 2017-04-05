@@ -1,10 +1,10 @@
 package org.currency.web.ejb;
 
 import org.votingsystem.model.currency.CurrencyAccount;
+import org.votingsystem.model.currency.Tag;
 import org.votingsystem.throwable.ValidationException;
 import org.votingsystem.util.CurrencyCode;
 import org.votingsystem.util.Messages;
-import org.votingsystem.model.currency.Tag;
 
 import javax.ejb.Stateless;
 import javax.inject.Inject;

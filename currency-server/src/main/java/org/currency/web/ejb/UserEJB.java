@@ -3,8 +3,8 @@ package org.currency.web.ejb;
 import org.currency.web.websocket.SessionManager;
 import org.votingsystem.dto.DeviceDto;
 import org.votingsystem.dto.UserDto;
-import org.votingsystem.model.User;
 import org.votingsystem.model.Certificate;
+import org.votingsystem.model.User;
 
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;

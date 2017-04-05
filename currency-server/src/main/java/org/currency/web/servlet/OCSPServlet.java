@@ -7,10 +7,10 @@ import org.bouncycastle.cert.ocsp.*;
 import org.bouncycastle.cms.CMSSignedGenerator;
 import org.currency.web.ejb.CurrencyIssuerEJB;
 import org.votingsystem.ejb.Config;
-import org.votingsystem.util.DateUtils;
-import org.votingsystem.util.FileUtils;
 import org.votingsystem.model.Certificate;
 import org.votingsystem.ocsp.RootCertOCSPInfo;
+import org.votingsystem.util.DateUtils;
+import org.votingsystem.util.FileUtils;
 
 import javax.ejb.EJB;
 import javax.inject.Inject;

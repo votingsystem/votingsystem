@@ -4,25 +4,22 @@ import eu.europa.esig.dss.x509.CertificateToken;
 import org.bouncycastle.pkcs.PKCS10CertificationRequest;
 import org.votingsystem.crypto.*;
 import org.votingsystem.dto.*;
+import org.votingsystem.dto.currency.RegisterDto;
 import org.votingsystem.dto.indentity.IdentityRequestDto;
 import org.votingsystem.dto.indentity.SessionCertificationDto;
+import org.votingsystem.dto.voting.CertVoteExtensionDto;
 import org.votingsystem.ejb.CmsEJB;
 import org.votingsystem.ejb.SignatureService;
+import org.votingsystem.ejb.SignerInfoService;
 import org.votingsystem.model.*;
 import org.votingsystem.model.voting.AnonVoteCertRequest;
+import org.votingsystem.model.voting.Election;
 import org.votingsystem.model.voting.UserCSRRequest;
+import org.votingsystem.ocsp.RootCertOCSPInfo;
 import org.votingsystem.throwable.RequestRepeatedException;
 import org.votingsystem.throwable.ValidationException;
 import org.votingsystem.util.*;
 import org.votingsystem.xml.XML;
-import org.votingsystem.crypto.*;
-import org.votingsystem.dto.*;
-import org.votingsystem.dto.voting.CertVoteExtensionDto;
-import org.votingsystem.ejb.SignerInfoService;
-import org.votingsystem.model.*;
-import org.votingsystem.model.voting.Election;
-import org.votingsystem.ocsp.RootCertOCSPInfo;
-import org.votingsystem.util.*;
 
 import javax.annotation.PostConstruct;
 import javax.ejb.EJB;
@@ -95,17 +92,30 @@ public class CertIssuerEJB {
             log.log(Level.SEVERE, ex.getMessage(), ex);
         }
     }
-
+    @TransactionAttribute(REQUIRES_NEW)
     public X509Certificate signUserCert(UserCSRRequest userCSR) throws Exception {
-        LocalDateTime now = LocalDateTime.now();
-        LocalDateTime validTo = now.plusDays(365); //one year
-        PKCS10CertificationRequest csr = PEMUtils.fromPEMToPKCS10CertificationRequest(userCSR.getContent());
-        Certificate issuedCert = signCSR(userCSR.getUser(), csr, null, now, validTo,
-                Certificate.Type.USER, null);
+        Certificate issuedCert = signUserCert(userCSR.getUser(), userCSR.getContent());
         userCSR.setSerialNumber(issuedCert.getSerialNumber());
         em.persist(userCSR.setState(UserCSRRequest.State.OK));
-        log.info("issued Certificate id: " + issuedCert.getSerialNumber() + " for UserRequestCsr: " + userCSR.getId());
         return issuedCert.getX509Certificate();
+    }
+
+    @TransactionAttribute(REQUIRES_NEW)
+    public Certificate signUserCert(User user, byte userCSR[]) throws Exception {
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime validTo = now.plusDays(365); //one year
+        PKCS10CertificationRequest csr = PEMUtils.fromPEMToPKCS10CertificationRequest(userCSR);
+        Certificate issuedCert = signCSR(user, csr, null, now, validTo,
+                Certificate.Type.USER, null);
+        log.info("issued Certificate id: " + issuedCert.getSerialNumber() + " for user id: " + user.getId());
+        return issuedCert;
+    }
+
+    @TransactionAttribute(REQUIRES_NEW)
+    public Certificate signUserCert(CMSDocument cmsMessage, RegisterDto registerDto) throws Exception {
+        Certificate issuedCert = signUserCert(cmsMessage.getFirstSignature().getSigner(), registerDto.getCsr().getBytes());
+        issuedCert.setSignedDocument(cmsMessage);
+        return issuedCert;
     }
 
     public java.security.KeyStore generateUserKeyStore(String givenname, String surname, String nif,
@@ -184,7 +194,7 @@ public class CertIssuerEJB {
                         certIssuerSigningCert.getSerialNumber().longValue()));
                 break;
             case USER:
-                result = Certificate.SIGNER(user, issuedCert);
+                result = Certificate.ISSUED_USER_CERT(user, issuedCert, certificate);
                 break;
             default:
                 log.severe("unknown certificateType: " + certificateType);

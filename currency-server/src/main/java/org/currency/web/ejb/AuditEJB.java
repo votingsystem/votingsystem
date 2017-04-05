@@ -1,19 +1,17 @@
 package org.currency.web.ejb;
 
 import eu.europa.esig.dss.InMemoryDocument;
-import org.votingsystem.crypto.SignatureParams;
-import org.votingsystem.dto.currency.*;
-import org.votingsystem.model.SignedDocument;
-import org.votingsystem.model.currency.*;
-import org.votingsystem.model.currency.Currency;
-import org.votingsystem.util.*;
-import org.votingsystem.crypto.SignedDocumentType;
 import org.currency.web.util.AuditLogger;
 import org.currency.web.util.ReportFiles;
+import org.votingsystem.crypto.SignatureParams;
+import org.votingsystem.crypto.SignedDocumentType;
 import org.votingsystem.dto.currency.*;
 import org.votingsystem.ejb.SignatureService;
 import org.votingsystem.ejb.SignerInfoService;
+import org.votingsystem.model.SignedDocument;
 import org.votingsystem.model.User;
+import org.votingsystem.model.currency.*;
+import org.votingsystem.model.currency.Currency;
 import org.votingsystem.throwable.ValidationException;
 import org.votingsystem.util.*;
 import org.votingsystem.xml.XML;

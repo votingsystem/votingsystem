@@ -2,21 +2,21 @@ package org.currency.web.ejb;
 
 import com.google.common.collect.Sets;
 import org.currency.web.util.AuditLogger;
+import org.votingsystem.cms.BalanceUtils;
 import org.votingsystem.dto.ResultListDto;
+import org.votingsystem.dto.currency.IncomesDto;
+import org.votingsystem.dto.currency.TransactionDto;
 import org.votingsystem.model.SignedDocument;
 import org.votingsystem.model.User;
 import org.votingsystem.model.currency.Currency;
+import org.votingsystem.model.currency.CurrencyAccount;
+import org.votingsystem.model.currency.Tag;
 import org.votingsystem.model.currency.Transaction;
 import org.votingsystem.throwable.ValidationException;
 import org.votingsystem.util.CurrencyCode;
 import org.votingsystem.util.DateUtils;
-import org.votingsystem.util.Messages;
-import org.votingsystem.cms.BalanceUtils;
-import org.votingsystem.dto.currency.IncomesDto;
-import org.votingsystem.dto.currency.TransactionDto;
-import org.votingsystem.model.currency.CurrencyAccount;
-import org.votingsystem.model.currency.Tag;
 import org.votingsystem.util.Interval;
+import org.votingsystem.util.Messages;
 
 import javax.ejb.Stateless;
 import javax.inject.Inject;

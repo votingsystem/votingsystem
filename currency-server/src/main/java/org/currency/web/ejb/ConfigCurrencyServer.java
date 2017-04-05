@@ -18,6 +18,7 @@ import java.security.NoSuchProviderException;
 import java.security.cert.CertificateException;
 import java.security.cert.TrustAnchor;
 import java.security.cert.X509Certificate;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -65,7 +66,7 @@ public interface ConfigCurrencyServer {
 
     public CertificateSource getTrustedCertSource();
 
-    public Set<X509Certificate> getTrustedTimeStampServers();
+    public Map<Long, X509Certificate> getTrustedTimeStampServers();
 
     public MetadataDto getMetadata();
 

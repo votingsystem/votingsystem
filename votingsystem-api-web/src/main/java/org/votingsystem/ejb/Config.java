@@ -7,6 +7,7 @@ import org.votingsystem.model.Certificate;
 
 import java.security.cert.TrustAnchor;
 import java.security.cert.X509Certificate;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -22,7 +23,7 @@ public interface Config {
     public String getTimestampServiceURL();
     public AbstractSignatureTokenConnection getSigningToken();
     public CertificateSource getTrustedCertSource();
-    public Set<X509Certificate> getTrustedTimeStampServers();
+    public Map<Long, X509Certificate> getTrustedTimeStampServers();
     public MetadataDto getMetadata();
     public void putEntityMetadata(MetadataDto metadata);
     public X509Certificate getSigningCert();

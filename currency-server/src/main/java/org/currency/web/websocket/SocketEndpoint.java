@@ -3,11 +3,11 @@ package org.currency.web.websocket;
 import org.currency.web.ejb.ConfigCurrencyServer;
 import org.currency.web.ejb.WebSocketEJB;
 import org.votingsystem.dto.MessageDto;
+import org.votingsystem.dto.ResponseDto;
 import org.votingsystem.socket.SocketRequest;
 import org.votingsystem.util.Constants;
 import org.votingsystem.util.Messages;
 import org.votingsystem.xml.XML;
-import org.votingsystem.dto.ResponseDto;
 
 import javax.inject.Inject;
 import javax.websocket.*;

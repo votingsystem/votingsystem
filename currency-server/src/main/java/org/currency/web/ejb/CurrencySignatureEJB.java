@@ -2,13 +2,13 @@ package org.currency.web.ejb;
 
 import eu.europa.esig.dss.InMemoryDocument;
 import org.votingsystem.crypto.SignatureParams;
+import org.votingsystem.crypto.SignedDocumentType;
+import org.votingsystem.ejb.SignatureService;
 import org.votingsystem.model.SignedDocument;
 import org.votingsystem.model.User;
 import org.votingsystem.throwable.DuplicatedDbItemException;
 import org.votingsystem.throwable.SignatureException;
 import org.votingsystem.throwable.XAdESValidationException;
-import org.votingsystem.crypto.SignedDocumentType;
-import org.votingsystem.ejb.SignatureService;
 
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;

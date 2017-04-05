@@ -65,7 +65,7 @@ public class LocalExceptionMapper implements ExceptionMapper<Exception> {
                     message = Messages.currentInstance().get("errorMsg", appCode);
             }
             try {
-                if(reqContentType.contains("json")){
+                if(reqContentType.contains("json") || reqContentType.contains("application/pkcs7-signature")){
                     return Response.status(appCode.getStatusCode()).entity(JSON.getMapper().writeValueAsBytes(
                                     new ResponseDto(appCode, message))).build();
                 } else if(reqContentType.contains("html")) {

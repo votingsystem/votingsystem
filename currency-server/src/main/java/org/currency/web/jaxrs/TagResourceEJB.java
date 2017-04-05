@@ -3,12 +3,12 @@ package org.currency.web.jaxrs;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import org.currency.web.ejb.ConfigCurrencyServer;
 import org.votingsystem.dto.ResultListDto;
+import org.votingsystem.dto.currency.CurrencyAccountDto;
 import org.votingsystem.ejb.SignatureService;
 import org.votingsystem.http.MediaType;
 import org.votingsystem.model.currency.CurrencyAccount;
-import org.votingsystem.util.JSON;
-import org.votingsystem.dto.currency.CurrencyAccountDto;
 import org.votingsystem.model.currency.Tag;
+import org.votingsystem.util.JSON;
 import org.votingsystem.util.StringUtils;
 
 import javax.ejb.Stateless;

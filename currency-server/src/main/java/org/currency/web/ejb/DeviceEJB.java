@@ -1,24 +1,24 @@
 package org.currency.web.ejb;
 
-import org.votingsystem.crypto.cms.CMSSignedMessage;
 import org.currency.web.http.HttpSessionManager;
+import org.currency.web.managed.SocketPushEvent;
+import org.votingsystem.crypto.PEMUtils;
+import org.votingsystem.crypto.SignedDocumentType;
+import org.votingsystem.crypto.cms.CMSSignedMessage;
 import org.votingsystem.dto.OperationDto;
 import org.votingsystem.dto.OperationTypeDto;
+import org.votingsystem.dto.ResponseDto;
 import org.votingsystem.dto.indentity.SessionCertificationDto;
 import org.votingsystem.ejb.CmsEJB;
+import org.votingsystem.ejb.SignerInfoService;
 import org.votingsystem.model.CMSDocument;
+import org.votingsystem.model.Certificate;
 import org.votingsystem.model.SignedDocument;
 import org.votingsystem.model.User;
 import org.votingsystem.throwable.ValidationException;
-import org.votingsystem.util.JSON;
-import org.votingsystem.crypto.PEMUtils;
-import org.votingsystem.crypto.SignedDocumentType;
-import org.currency.web.managed.SocketPushEvent;
-import org.votingsystem.dto.ResponseDto;
-import org.votingsystem.ejb.SignerInfoService;
-import org.votingsystem.model.Certificate;
 import org.votingsystem.util.Constants;
 import org.votingsystem.util.CurrencyOperation;
+import org.votingsystem.util.JSON;
 
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;

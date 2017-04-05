@@ -85,7 +85,7 @@ public class ConfigEJB implements Config, ConfigServiceProvider, Serializable {
     private Map<Long, Certificate> trustedCACertsMap = new HashMap<>();
     private Map<String, MetadataDto> entityMap;
     private MetadataDto metadata;
-    private Set<X509Certificate> trustedTimeStampServers;
+    private Map<Long, X509Certificate> trustedTimeStampServers;
     private Set<TrustAnchor> trustedCertAnchors;
 
     @PostConstruct
@@ -284,11 +284,11 @@ public class ConfigEJB implements Config, ConfigServiceProvider, Serializable {
 
     public void addTrustedTimeStampIssuer(X509Certificate trustedTimeStampIssuer) {
         if(trustedTimeStampServers == null)
-            trustedTimeStampServers = new HashSet<>();
-        trustedTimeStampServers.add(trustedTimeStampIssuer);
+            trustedTimeStampServers = new HashMap<>();
+        trustedTimeStampServers.put(trustedTimeStampIssuer.getSerialNumber().longValue(), trustedTimeStampIssuer);
     }
 
-    public Set<X509Certificate> getTrustedTimeStampServers() {
+    public Map<Long, X509Certificate> getTrustedTimeStampServers() {
         return trustedTimeStampServers;
     }
 

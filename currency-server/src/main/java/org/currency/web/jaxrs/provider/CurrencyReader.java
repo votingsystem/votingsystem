@@ -1,8 +1,8 @@
 package org.currency.web.jaxrs.provider;
 
-import org.votingsystem.model.SignedDocument;
 import org.currency.web.ejb.CurrencySignatureEJB;
 import org.votingsystem.http.MediaType;
+import org.votingsystem.model.SignedDocument;
 import org.votingsystem.util.FileUtils;
 
 import javax.inject.Inject;

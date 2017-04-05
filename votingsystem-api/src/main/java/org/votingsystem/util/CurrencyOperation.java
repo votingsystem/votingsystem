@@ -48,8 +48,8 @@ public enum CurrencyOperation implements SystemOperation {
 
     @JsonProperty("QR_INFO")
     QR_INFO("/api/currency-qr/info"),
-    @JsonProperty("REGISTER")
-    REGISTER("/api/user/register"),
+    @JsonProperty("REGISTER_DEVICE")
+    REGISTER_DEVICE("/api/cert-issuer/register-device"),
     @JsonProperty("SESSION_CERTIFICATION")
     SESSION_CERTIFICATION("/api/cert-issuer/session-csr"),
     @JsonProperty("SESSION_CERTIFICATION_DATA")

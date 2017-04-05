@@ -1,23 +1,20 @@
 package org.currency.web.jaxrs;
 
-import org.votingsystem.crypto.cms.CMSSignedMessage;
 import org.currency.web.ejb.DeviceEJB;
 import org.currency.web.http.CurrencyPrincipal;
 import org.currency.web.managed.SocketPushEvent;
+import org.currency.web.util.AuthRole;
 import org.currency.web.websocket.SessionManager;
+import org.votingsystem.crypto.cms.CMSSignedMessage;
 import org.votingsystem.dto.*;
 import org.votingsystem.dto.indentity.SessionCertificationDto;
+import org.votingsystem.ejb.SignerInfoService;
 import org.votingsystem.model.*;
-import org.votingsystem.socket.SocketOperation;
 import org.votingsystem.throwable.ValidationException;
 import org.votingsystem.util.Constants;
 import org.votingsystem.util.CurrencyOperation;
 import org.votingsystem.util.JSON;
 import org.votingsystem.util.NifUtils;
-import org.currency.web.util.AuthRole;
-import org.votingsystem.dto.*;
-import org.votingsystem.ejb.SignerInfoService;
-import org.votingsystem.model.*;
 
 import javax.annotation.security.RolesAllowed;
 import javax.ejb.TransactionAttribute;

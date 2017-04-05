@@ -1,18 +1,18 @@
 package org.currency.web.ejb;
 
 import eu.europa.esig.dss.InMemoryDocument;
-import org.votingsystem.crypto.SignatureParams;
-import org.votingsystem.model.SignedDocument;
-import org.votingsystem.util.Messages;
-import org.votingsystem.crypto.SignedDocumentType;
 import org.currency.web.websocket.SessionManager;
+import org.votingsystem.crypto.SignatureParams;
+import org.votingsystem.crypto.SignedDocumentType;
 import org.votingsystem.dto.MessageDto;
 import org.votingsystem.dto.ResponseDto;
 import org.votingsystem.ejb.SignatureService;
 import org.votingsystem.model.Device;
+import org.votingsystem.model.SignedDocument;
 import org.votingsystem.model.User;
 import org.votingsystem.socket.SocketRequest;
 import org.votingsystem.throwable.ValidationException;
+import org.votingsystem.util.Messages;
 import org.votingsystem.xml.XML;
 
 import javax.ejb.Stateless;

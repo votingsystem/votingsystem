@@ -4,31 +4,28 @@ import org.currency.web.ejb.BankEJB;
 import org.currency.web.ejb.ConfigCurrencyServer;
 import org.currency.web.ejb.TransactionEJB;
 import org.currency.web.ejb.UserEJB;
+import org.currency.web.util.AuthRole;
 import org.currency.web.websocket.SessionManager;
-import org.votingsystem.crypto.PEMUtils;
-import org.votingsystem.dto.ResultListDto;
-import org.votingsystem.dto.UserDto;
-import org.votingsystem.dto.currency.RegisterDto;
-import org.votingsystem.ejb.SignatureService;
-import org.votingsystem.http.MediaType;
-import org.votingsystem.model.CMSDocument;
-import org.votingsystem.model.SignedDocument;
-import org.votingsystem.model.User;
-import org.votingsystem.model.currency.Bank;
-import org.votingsystem.model.currency.BankInfo;
-import org.votingsystem.util.DateUtils;
-import org.votingsystem.util.JSON;
-import org.votingsystem.util.Messages;
 import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 import org.iban4j.Iban;
-import org.currency.web.util.AuthRole;
 import org.votingsystem.dto.ResponseDto;
+import org.votingsystem.dto.ResultListDto;
+import org.votingsystem.dto.UserDto;
+import org.votingsystem.ejb.SignatureService;
+import org.votingsystem.http.MediaType;
 import org.votingsystem.model.Device;
+import org.votingsystem.model.SignedDocument;
+import org.votingsystem.model.User;
+import org.votingsystem.model.currency.Bank;
+import org.votingsystem.model.currency.BankInfo;
+import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.Interval;
+import org.votingsystem.util.JSON;
+import org.votingsystem.util.Messages;
 
 import javax.annotation.security.PermitAll;
 import javax.annotation.security.RolesAllowed;
@@ -237,20 +234,6 @@ public class UserResourceEJB {
         //TODO
         return Response.ok().entity(JSON.getMapper().writeValueAsBytes(
                 SessionManager.getInstance().getConnectedUsersDto())).build();
-    }
-
-    @PermitAll
-    @Path("/register")
-    @POST @Produces(javax.ws.rs.core.MediaType.APPLICATION_JSON)
-    public Response register(@Context HttpServletRequest req, CMSDocument cmsMessage) throws Exception {
-        //TODO
-        log.info(" signer CertificateCA: " + cmsMessage.getBody());
-        RegisterDto registerDto = cmsMessage.getSignedContent(RegisterDto.class);
-
-        User signer = cmsMessage.getSignatures().iterator().next().getSigner();
-        log.info(" signer CertificateCA: " + signer.getCertificateCA());
-
-        return Response.ok().entity("User registration OK - data: " + cmsMessage.getCmsMessage().getSignedContentStr()).build();
     }
 
 }

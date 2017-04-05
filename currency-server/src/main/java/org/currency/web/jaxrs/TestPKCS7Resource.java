@@ -1,15 +1,15 @@
 package org.currency.web.jaxrs;
 
-import org.votingsystem.crypto.cms.CMSSignedMessage;
-import org.votingsystem.ejb.CmsEJB;
-import org.votingsystem.model.SignedDocument;
 import org.votingsystem.crypto.PEMUtils;
+import org.votingsystem.crypto.cms.CMSSignedMessage;
 import org.votingsystem.dto.MessageDto;
 import org.votingsystem.dto.ResponseDto;
+import org.votingsystem.ejb.CmsEJB;
 import org.votingsystem.ejb.Config;
 import org.votingsystem.http.HttpResponse;
 import org.votingsystem.http.MediaType;
 import org.votingsystem.model.CMSDocument;
+import org.votingsystem.model.SignedDocument;
 
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
