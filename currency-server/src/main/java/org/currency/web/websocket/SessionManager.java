@@ -106,7 +106,7 @@ public class SessionManager {
     }
 
     public void remove(Session session) {
-        log.info("remove - session id: " + session.getId());
+        log.info("removed session id: " + session.getId());
         Device device = null;
         if( (device = (Device) session.getUserProperties().get(DEVICE_KEY)) != null)
             deviceSessionMap.remove(device.getId());
@@ -170,10 +170,12 @@ public class SessionManager {
         return brokenSessionSet;
     }
 
-    public boolean sendMessageByTargetDeviceId(MessageDto messageDto) throws JsonProcessingException {
+    public boolean sendMessageByTargetDeviceUUID(MessageDto messageDto) throws JsonProcessingException {
         Session deviceSession = deviceSessionMap.get(messageDto.getDeviceToUUID());
-        if(deviceSession == null) return false;
-        else return sendMessage(JSON.getMapper().writeValueAsString(messageDto), deviceSession.getId());
+        if(deviceSession == null)
+            return false;
+        else
+            return sendMessage(JSON.getMapper().writeValueAsString(messageDto), deviceSession.getId());
     }
 
     public Session getDeviceSession(String deviceUUID) throws JsonProcessingException {

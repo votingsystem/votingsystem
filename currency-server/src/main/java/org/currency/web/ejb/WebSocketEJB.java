@@ -44,7 +44,7 @@ public class WebSocketEJB {
         switch(socketRequest.getDto().getSocketOperation()) {
             //Device (authenticated or not) sends message knowing target device UUID. Target device must be authenticated.
             case MSG_TO_DEVICE:
-                if(SessionManager.getInstance().sendMessageByTargetDeviceId(socketRequest.getDto())) {//message send OK
+                if(SessionManager.getInstance().sendMessageByTargetDeviceUUID(socketRequest.getDto())) {//message send OK
                     socketRequest.getSession().getBasicRemote().sendText(XML.getMapper().writeValueAsString(
                             socketRequest.getDto().getServerResponse(ResponseDto.SC_WS_MESSAGE_SEND_OK, null)));
                 } else socketRequest.getSession().getBasicRemote().sendText(XML.getMapper().writeValueAsString(

@@ -59,7 +59,7 @@ public class PageBean implements Serializable {
         HttpServletRequest req = (HttpServletRequest) FacesContext.getCurrentInstance().getExternalContext().getRequest();
         String qrCodeURL = req.getContextPath() + "/api/qr?cht=qr&chs=200x200&chl=" +
                 QRUtils.SYSTEM_ENTITY_KEY + "=" + config.getEntityId() + ";" +
-                QRUtils.OPERATION_KEY + "=" + QRUtils.GET_BROWSER_CERTIFICATE + ";" +
+                QRUtils.OPERATION_KEY + "=" + QRUtils.GEN_BROWSER_CERTIFICATE + ";" +
                 QRUtils.UUID_KEY + "=" + req.getSession().getAttribute(Constants.USER_UUID) + ";";
         return qrCodeURL;
     }

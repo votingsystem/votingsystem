@@ -3,21 +3,17 @@ package org.currency.test.misc;
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
 import org.votingsystem.dto.QRMessageDto;
-import org.votingsystem.dto.QRResponseDto;
 import org.votingsystem.dto.ResponseDto;
 import org.votingsystem.dto.indentity.SessionCertificationDto;
-import org.votingsystem.dto.voting.ElectionDto;
 import org.votingsystem.http.HttpConn;
 import org.votingsystem.http.MediaType;
 import org.votingsystem.qr.QRUtils;
 import org.votingsystem.testlib.BaseTest;
 import org.votingsystem.util.CurrencyOperation;
 import org.votingsystem.util.JSON;
-import org.votingsystem.util.OperationType;
 import org.votingsystem.xml.XML;
 
 import java.util.ArrayList;
-import java.util.Base64;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -58,7 +54,7 @@ public class QRTest extends BaseTest {
         switch (reqContentType) {
             case MediaType.JSON:
                 switch (qrMessageDto.getOperation()) {
-                    case QRUtils.GET_BROWSER_CERTIFICATE:
+                    case QRUtils.GEN_BROWSER_CERTIFICATE:
                         SessionCertificationDto sessionCertificationDto = JSON.getMapper().readValue(
                                 responseDto.getMessageBytes(), SessionCertificationDto.class);
                         buildSessionCertificates(sessionCertificationDto);
@@ -67,7 +63,7 @@ public class QRTest extends BaseTest {
                 break;
             case MediaType.XML:
                 switch (qrMessageDto.getOperation()) {
-                    case QRUtils.GET_BROWSER_CERTIFICATE:
+                    case QRUtils.GEN_BROWSER_CERTIFICATE:
                         SessionCertificationDto sessionCertificationDto = XML.getMapper().readValue(
                                 responseDto.getMessageBytes(), SessionCertificationDto.class);
                         break;

@@ -1,27 +1,22 @@
 package org.currency.test.misc;
 
-import org.bouncycastle.cert.X509CRLHolder;
 import org.bouncycastle.cert.X509CertificateHolder;
 import org.bouncycastle.cms.SignerInformationVerifier;
 import org.bouncycastle.cms.jcajce.JcaSimpleSignerInfoVerifierBuilder;
 import org.bouncycastle.tsp.TimeStampToken;
 import org.bouncycastle.util.Selector;
 import org.bouncycastle.util.Store;
-import org.currency.test.android.RegisterDeviceTest;
 import org.votingsystem.crypto.cms.CMSSignedMessage;
-import org.votingsystem.dto.CMSDto;
 import org.votingsystem.model.Signature;
 import org.votingsystem.model.User;
 import org.votingsystem.testlib.BaseTest;
 import org.votingsystem.throwable.ValidationException;
 import org.votingsystem.util.Constants;
 
-import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**

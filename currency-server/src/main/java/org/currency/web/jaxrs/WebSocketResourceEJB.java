@@ -22,10 +22,10 @@ import java.util.logging.Logger;
  * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
 @Stateless
-@Path("/msg")
-public class MessageResourceEJB {
+@Path("/web-socket")
+public class WebSocketResourceEJB {
 
-    private static final Logger log = Logger.getLogger(MessageResourceEJB.class.getName());
+    private static final Logger log = Logger.getLogger(WebSocketResourceEJB.class.getName());
 
     @Inject private BeanManager beanManager;
 

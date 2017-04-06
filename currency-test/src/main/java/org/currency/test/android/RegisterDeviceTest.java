@@ -4,14 +4,12 @@ import org.currency.test.Constants;
 import org.votingsystem.crypto.PEMUtils;
 import org.votingsystem.crypto.cms.CMSSignedMessage;
 import org.votingsystem.dto.OperationCheckerDto;
-import org.votingsystem.dto.OperationTypeDto;
+import org.votingsystem.dto.ResponseDto;
 import org.votingsystem.dto.currency.RegisterDto;
 import org.votingsystem.http.HttpConn;
-import org.votingsystem.dto.ResponseDto;
 import org.votingsystem.http.MediaType;
 import org.votingsystem.testlib.BaseTest;
 import org.votingsystem.util.CurrencyOperation;
-import org.votingsystem.util.JSON;
 
 import java.security.cert.X509Certificate;
 import java.util.logging.Logger;

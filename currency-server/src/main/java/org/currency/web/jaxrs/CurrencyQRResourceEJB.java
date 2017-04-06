@@ -44,14 +44,14 @@ public class CurrencyQRResourceEJB {
                          @FormParam("operation") String operation) throws Exception {
         if(operation != null) {
             switch (operation) {
-                case QRUtils.GET_BROWSER_CERTIFICATE:
+                case QRUtils.GEN_BROWSER_CERTIFICATE:
                     HttpSession httpSession = HttpSessionManager.getInstance().getHttpSession(UUID);
                     if(httpSession != null) {
-                        SessionCertificationDto browserPublicKeyObject = (SessionCertificationDto) httpSession.
+                        SessionCertificationDto browserPublickey = (SessionCertificationDto) httpSession.
                                 getAttribute(Constants.BROWSER_PLUBLIC_KEY);
-                        if(browserPublicKeyObject != null) {
+                        if(browserPublickey != null) {
                             return Response.ok().entity(JSON.getMapper().writeValueAsBytes(
-                                    browserPublicKeyObject)).build();
+                                    browserPublickey)).build();
                         } else httpSession.invalidate();
                     }
                     return Response.status(Response.Status.NOT_FOUND).entity(
@@ -68,20 +68,6 @@ public class CurrencyQRResourceEJB {
         else
             return Response.status(Response.Status.NOT_FOUND).entity(
                     Messages.currentInstance().get("itemNotFoundErrorMsg")).build();
-    }
-
-    @POST @Path("/browser-certificate")
-    @Produces(MediaType.TEXT_XML)
-    public Response browserCertificate(@Context HttpServletRequest req, String userUUID) throws Exception {
-        HttpSession httpSession = HttpSessionManager.getInstance().getHttpSession(userUUID);
-        if(httpSession == null)
-            return Response.status(Response.Status.NOT_FOUND).entity("Session not found - userUUID: " + userUUID).build();
-        SessionCertificationDto csrRequest = (SessionCertificationDto) httpSession.getAttribute(Constants.BROWSER_PLUBLIC_KEY);
-        if(csrRequest != null)
-            return HttpResponse.getResponse(req, Response.Status.OK.getStatusCode(), csrRequest);
-        else
-            return HttpResponse.getResponse(req, Response.Status.NOT_FOUND.getStatusCode(),
-                    Messages.currentInstance().get("itemNotFoundErrorMsg"));
     }
 
 }

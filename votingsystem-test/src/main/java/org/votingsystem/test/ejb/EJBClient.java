@@ -21,18 +21,14 @@ import java.util.logging.Logger;
  */
 public class EJBClient extends BaseTest {
 
-
     private static final Logger log =  Logger.getLogger(EJBClient.class.getName());
-
-
-    public static void main(String[] args) throws Exception {
-
-        new EJBClient().run();
-    }
 
     private final Context context;
     private EJBAdminRemoteIdProvider idProviderRemote;
 
+    public static void main(String[] args) throws Exception {
+        new EJBClient().run();
+    }
 
     public EJBClient() throws NamingException {
         super();
@@ -146,7 +142,6 @@ public class EJBClient extends BaseTest {
     private void lookupRemoteBeans() throws NamingException {
         idProviderRemote =  (EJBAdminRemoteIdProvider) context.lookup(
                 "ejb:/votingsystem-idprovider/AdminRemoteEJB!" + EJBAdminRemoteIdProvider.class.getName());
-
     }
 
     private void showWelcomeMessage() {

@@ -6,6 +6,7 @@ import org.votingsystem.dto.MessageDto;
 import org.votingsystem.dto.ResponseDto;
 import org.votingsystem.socket.SocketRequest;
 import org.votingsystem.util.Constants;
+import org.votingsystem.util.JSON;
 import org.votingsystem.util.Messages;
 import org.votingsystem.xml.XML;
 
@@ -32,7 +33,7 @@ public class SocketEndpoint {
         MessageDto messageDto = null;
         try {
             if (session.isOpen()) {
-                messageDto = XML.getMapper().readValue(msg, MessageDto.class);
+                messageDto = JSON.getMapper().readValue(msg, MessageDto.class);
                 Messages.setCurrentInstance(
                         Locale.forLanguageTag(messageDto.getLocale()), Constants.BUNDLE_BASE_NAME);
                 webSocketBean.processRequest(new SocketRequest(messageDto, msg).setSession(session));

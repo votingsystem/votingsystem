@@ -1,10 +1,10 @@
 package org.currency.test.android.xml;
 
+import org.kxml2.kdom.Element;
+import org.votingsystem.dto.AddressDto;
 import org.votingsystem.dto.indentity.SessionCertificationDto;
 import org.votingsystem.testlib.util.XMLUtils;
 import org.votingsystem.util.CountryEurope;
-import org.kxml2.kdom.Element;
-import org.votingsystem.dto.AddressDto;
 import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;

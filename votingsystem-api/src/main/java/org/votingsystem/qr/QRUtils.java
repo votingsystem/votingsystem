@@ -40,7 +40,7 @@ public class QRUtils {
     public static final String UUID_KEY                = "uid";
 
 
-    public static final String GET_BROWSER_CERTIFICATE = "0";
+    public static final String GEN_BROWSER_CERTIFICATE = "0";
     public static final String MESSAGE_INFO            = "1";
     public static final String CURRENCY_SEND           = "2";
 

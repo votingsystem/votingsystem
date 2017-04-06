@@ -74,29 +74,6 @@ public class DeviceResourceEJB {
         return Response.ok().entity("session closed").build();
     }
 
-    @RolesAllowed(AuthRole.USER)
-    @Path("/authenticated-device")
-    @POST @Produces(MediaType.APPLICATION_JSON)
-    public Response authenticatedDevice(SignedDocument signedDocument, @Context HttpServletRequest req) throws Exception {
-        User sessionUser = ((CurrencyPrincipal)req.getUserPrincipal()).getUser();
-        User signer = signedDocument.getFirstSignature().getSigner();
-        if(!signer.getNumId().equals(sessionUser.getNumId())) 
-            throw new ValidationException("signer NIF doesn't match session NIF");
-        DeviceDto dto = new DeviceDto(sessionUser.getDevice());
-        return Response.ok().entity(JSON.getMapper().writeValueAsBytes(dto)).build();
-    }
-
-    @Path("/authenticate")
-    @POST @Produces(MediaType.APPLICATION_JSON)
-    public Response authenticated(SignedDocument signedDocument, @Context HttpServletRequest req) throws Exception {
-        User sessionUser = ((CurrencyPrincipal)req.getUserPrincipal()).getUser();
-        User signer = signedDocument.getFirstSignature().getSigner();
-        if(!signer.getNumId().equals(sessionUser.getNumId()))
-            throw new ValidationException("signer NIF doesn't match session NIF");
-        DeviceDto dto = new DeviceDto(sessionUser.getDevice());
-        return Response.ok().entity(JSON.getMapper().writeValueAsBytes(dto)).build();
-    }
-
     @Path("/id/{id}")
     @GET @Produces(MediaType.APPLICATION_JSON)
     public Response getById(@PathParam("id") Long deviceId) throws Exception {
@@ -169,8 +146,8 @@ public class DeviceResourceEJB {
     }
 
     /**
-     * Called from browser to provide the public key that the mobile uses to encrypt the message with the browser
-     * session certificate
+     * Called from the browser to provide the public key that encrypts the message the mobile sends to the browser with the
+     * 'browser session certificate'
      * @param req
      * @param csrRequestBytes
      * @return
@@ -184,6 +161,18 @@ public class DeviceResourceEJB {
         return Response.ok().entity("OK").build();
     }
 
+    /**
+     * Called from the mobile with the browser and mobile certificates in a PKCS7 document signed by the user and the
+     * Id provider. Once validated the request, the server sends a push message to the browser with the certificate and the private
+     * key (encrypted with the public key previously provided by the browser)
+     *
+     * @param cmsMessage
+     * @param browserUUID
+     * @param socketMsg
+     * @param req
+     * @return
+     * @throws Exception
+     */
     @POST @Path("/session-certification-data")
     @TransactionAttribute(REQUIRES_NEW)
     public Response sessionCertificationData(@FormParam("cmsMessage") String cmsMessage,
@@ -221,6 +210,18 @@ public class DeviceResourceEJB {
     public Response initMobileSession(CMSDocument signedDocument, @Context HttpServletRequest req) throws Exception {
         deviceEJB.initMobileSession(signedDocument, req.getSession());
         return  Response.ok().entity("OK - init-mobile-session").build();
+    }
+
+    @RolesAllowed(AuthRole.USER)
+    @Path("/authenticated-device")
+    @POST @Produces(MediaType.APPLICATION_JSON)
+    public Response authenticatedDevice(SignedDocument signedDocument, @Context HttpServletRequest req) throws Exception {
+        User sessionUser = ((CurrencyPrincipal)req.getUserPrincipal()).getUser();
+        User signer = signedDocument.getFirstSignature().getSigner();
+        if(!signer.getNumId().equals(sessionUser.getNumId()))
+            throw new ValidationException("signer NIF doesn't match session NIF");
+        DeviceDto dto = new DeviceDto(sessionUser.getDevice());
+        return Response.ok().entity(JSON.getMapper().writeValueAsBytes(dto)).build();
     }
 
 }

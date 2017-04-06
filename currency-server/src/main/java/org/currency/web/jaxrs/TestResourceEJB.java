@@ -19,8 +19,6 @@ import org.votingsystem.dto.currency.TransactionDto;
 import org.votingsystem.model.CMSDocument;
 import org.votingsystem.model.SignedDocument;
 import org.votingsystem.model.User;
-import org.votingsystem.model.currency.CurrencyAccount;
-import org.votingsystem.model.currency.Tag;
 import org.votingsystem.model.currency.Transaction;
 import org.votingsystem.throwable.ValidationException;
 import org.votingsystem.util.*;
@@ -29,7 +27,6 @@ import javax.annotation.security.RolesAllowed;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
-import javax.persistence.Query;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -65,6 +62,15 @@ public class TestResourceEJB {
     @Inject private BalancesEJB balanceBean;
     @Inject private ConfigCurrencyServer config;
 
+    @GET @Path("/")
+    @Produces(MediaType.TEXT_PLAIN)
+    public Response rootPath(@Context HttpServletRequest req, @Context HttpServletResponse resp) throws Exception {
+        Map result = new HashMap<>();
+        result.put("UUID", UUID.randomUUID().toString());
+        result.put("test", "test1, españa acentuación");
+        AuditLogger.logReport(result);
+        return Response.ok().entity(" - OK - ").build();
+    }
 
     @GET @Path("/sessionId")
     @Produces(MediaType.TEXT_PLAIN)
@@ -154,19 +160,6 @@ public class TestResourceEJB {
         return Response.ok().entity("OK").build();
     }
 
-    @GET @Path("/testQuery")
-    public Response testQuery(@Context HttpServletRequest req, @Context HttpServletResponse resp)
-            throws JsonProcessingException, ValidationException {
-        Query query = em.createQuery("select SUM(c.balance), tag, c.currencyCode from CurrencyAccount c JOIN c.tag tag where c.state =:state " +
-                "group by tag, c.currencyCode").setParameter("state", CurrencyAccount.State.ACTIVE);
-         List<Object[]> resultList = query.getResultList();
-        for(Object[] result : resultList) {
-            log.info("" + result[0] + ((Tag)result[1]).getName() + result[2]);
-        }
-
-        return Response.ok().entity("OK").build();
-    }
-
     @POST @Path("/testPost")
     public Response testPost(@Context HttpServletRequest req, String postData, @Context HttpServletResponse resp)
             throws JsonProcessingException, ValidationException {
@@ -174,34 +167,24 @@ public class TestResourceEJB {
     }
 
     @POST @Path("/xml-signed-document")
-    public Response testCMS(SignedDocument signedDocument, @Context HttpServletRequest req,
+    public Response xmlSigned(SignedDocument signedDocument, @Context HttpServletRequest req,
                             @Context HttpServletResponse res) throws JsonProcessingException, ValidationException {
         log.info("xml-signed-document: " + signedDocument);
         return Response.ok().entity(signedDocument.getBody()).build();
     }
 
-    @POST @Path("/cms-document")
-    public Response closeSession(SignedDocument signedDocument, @Context HttpServletRequest req,
+    @POST @Path("/signed-doc")
+    public Response signedDoc(SignedDocument signedDocument, @Context HttpServletRequest req,
                                  @Context HttpServletResponse res) throws Exception {
         log.info("cms-document: " + signedDocument);
         return Response.ok().entity(signedDocument.getBody()).build();
     }
 
-    @POST @Path("/cms-document")
-    public Response closeSession(CMSDocument cmsDocument, @Context HttpServletRequest req,
+    @POST @Path("/cms-doc")
+    public Response cmsDoc(CMSDocument cmsDocument, @Context HttpServletRequest req,
                                  @Context HttpServletResponse res) throws Exception {
         log.info("cmsDocument: " + cmsDocument);
         return Response.ok().entity(cmsDocument.getBody()).build();
-    }
-
-    @GET @Path("/")
-    @Produces(MediaType.TEXT_PLAIN)
-    public Response mainMethod(@Context HttpServletRequest req, @Context HttpServletResponse resp) throws Exception {
-        Map result = new HashMap<>();
-        result.put("UUID", UUID.randomUUID().toString());
-        result.put("test", "test1, españa acentuación");
-        AuditLogger.logReport(result);
-        return Response.ok().entity(" - OK - ").build();
     }
 
     @GET @Path("/checkLocale")
@@ -263,13 +246,6 @@ public class TestResourceEJB {
     @GET @Path("/newWeek")
     public Response newWeek() throws Exception {
         auditBean.initWeekPeriod(LocalDateTime.now());
-        /*Query query = dao.getEM().createQuery("select t from Transaction t where t.type  in :inList")
-                .setParameter("inList", Arrays.asList(Transaction.Type.CURRENCY_PERIOD_INIT,
-                Transaction.Type.CURRENCY_PERIOD_INIT_TIME_LIMITED));
-        List<Transaction> resultList =  query.getResultList();
-        for(Transaction transaction : resultList) {
-            dao.getEM().remove(transaction);
-        }*/
         return Response.ok().entity("OK").build();
     }
 
