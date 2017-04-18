@@ -91,7 +91,7 @@
             if (this.readyState == 4) {
                 if(403 === this.status) {
                     vs.alert("${msg.errorLbl}", "${msg.sessionExpiredMsg}");
-                    vs.setDisConnected();
+                    vs.sessionClosed();
                 } else callback(this.responseText, this.status);
             }
         };

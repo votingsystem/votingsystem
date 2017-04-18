@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 import static javax.persistence.GenerationType.IDENTITY;
 
 @Entity
-@Table(name="Image")
+@Table(name="IMAGE")
 public class Image extends EntityBase implements Serializable {
 
 	 private static final long serialVersionUID = 1L;

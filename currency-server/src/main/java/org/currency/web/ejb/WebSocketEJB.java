@@ -10,8 +10,10 @@ import org.votingsystem.ejb.SignatureService;
 import org.votingsystem.model.Device;
 import org.votingsystem.model.SignedDocument;
 import org.votingsystem.model.User;
+import org.votingsystem.socket.SocketOperation;
 import org.votingsystem.socket.SocketRequest;
 import org.votingsystem.throwable.ValidationException;
+import org.votingsystem.util.JSON;
 import org.votingsystem.util.Messages;
 import org.votingsystem.xml.XML;
 
@@ -41,15 +43,24 @@ public class WebSocketEJB {
         User signer = null;
         MessageDto responseDto = null;
         Device browserDevice = null;
-        switch(socketRequest.getDto().getSocketOperation()) {
+        SocketOperation socketOperation = socketRequest.getDto().getSocketOperation();
+        switch(socketOperation) {
             //Device (authenticated or not) sends message knowing target device UUID. Target device must be authenticated.
             case MSG_TO_DEVICE:
-                if(SessionManager.getInstance().sendMessageByTargetDeviceUUID(socketRequest.getDto())) {//message send OK
-                    socketRequest.getSession().getBasicRemote().sendText(XML.getMapper().writeValueAsString(
-                            socketRequest.getDto().getServerResponse(ResponseDto.SC_WS_MESSAGE_SEND_OK, null)));
-                } else socketRequest.getSession().getBasicRemote().sendText(XML.getMapper().writeValueAsString(
+                String deviceToUUID = socketRequest.getDto().getDeviceToUUID();
+                if(deviceToUUID != null) {
+                    if(SessionManager.getInstance().sendMessageByTargetDeviceUUID(socketRequest.getDto())) {//message send OK
+                        socketRequest.getSession().getBasicRemote().sendText(XML.getMapper().writeValueAsString(
+                                socketRequest.getDto().getServerResponse(ResponseDto.SC_WS_MESSAGE_SEND_OK, null,
+                                        config.getEntityId())));
+                        return;
+                    }
+                }
+                log.severe("Target device UUID: " + deviceToUUID + " not found");
+                socketRequest.getSession().getBasicRemote().sendText(JSON.getMapper().writeValueAsString(
                         socketRequest.getDto().getServerResponse(ResponseDto.SC_WS_CONNECTION_NOT_FOUND,
-                                Messages.currentInstance().get("webSocketDeviceSessionNotFoundErrorMsg"))));
+                                Messages.currentInstance().get("webSocketDeviceSessionNotFoundErrorMsg"),
+                                config.getEntityId())));
                 break;
             case CLOSE_SESSION: {
                 SignatureParams signatureParams = new SignatureParams(null, User.Type.ID_CARD_USER,

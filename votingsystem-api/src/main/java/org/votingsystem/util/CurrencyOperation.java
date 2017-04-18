@@ -50,10 +50,10 @@ public enum CurrencyOperation implements SystemOperation {
     QR_INFO("/api/currency-qr/info"),
     @JsonProperty("REGISTER_DEVICE")
     REGISTER_DEVICE("/api/cert-issuer/register-device"),
-    @JsonProperty("SESSION_CERTIFICATION")
-    SESSION_CERTIFICATION("/api/cert-issuer/session-csr"),
-    @JsonProperty("SESSION_CERTIFICATION_DATA")
-    SESSION_CERTIFICATION_DATA("/api/session/verify-device-certification");
+    @JsonProperty("GET_SESSION_CERTIFICATION")
+    GET_SESSION_CERTIFICATION("/api/cert-issuer/mobile-browser-session"),
+    @JsonProperty("VALIDATE_SESSION_CERTIFICATES")
+    VALIDATE_SESSION_CERTIFICATES("/api/session/validate-mobile-browser-session-certificates");
 
     private String url;
 

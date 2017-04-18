@@ -2,6 +2,7 @@ package org.votingsystem.dto.indentity;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import org.votingsystem.dto.AddressDto;
@@ -16,6 +17,7 @@ import org.votingsystem.dto.UserDto;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class SessionCertificationDto {
 
+    @JsonProperty("Operation")
     @JacksonXmlProperty(localName = "Operation")
     private OperationTypeDto operation;
 
@@ -26,11 +28,11 @@ public class SessionCertificationDto {
     private String signerCertPEM;
 
     private String browserCsr;
-    private String browserCsrSigned;
+    private String browserCertificate;
     private String browserUUID;
 
     private String mobileCsr;
-    private String mobileCsrSigned;
+    private String mobileCertificate;
     private String mobileUUID;
 
     private String privateKeyPEM;
@@ -94,12 +96,12 @@ public class SessionCertificationDto {
         return this;
     }
 
-    public String getMobileCsrSigned() {
-        return mobileCsrSigned;
+    public String getMobileCertificate() {
+        return mobileCertificate;
     }
 
-    public SessionCertificationDto setMobileCsrSigned(String mobileCsrSigned) {
-        this.mobileCsrSigned = mobileCsrSigned;
+    public SessionCertificationDto setMobileCertificate(String mobileCertificate) {
+        this.mobileCertificate = mobileCertificate;
         return this;
     }
 
@@ -112,12 +114,12 @@ public class SessionCertificationDto {
         return this;
     }
 
-    public String getBrowserCsrSigned() {
-        return browserCsrSigned;
+    public String getBrowserCertificate() {
+        return browserCertificate;
     }
 
-    public SessionCertificationDto setBrowserCsrSigned(String browserCsrSigned) {
-        this.browserCsrSigned = browserCsrSigned;
+    public SessionCertificationDto setBrowserCertificate(String browserCertificate) {
+        this.browserCertificate = browserCertificate;
         return this;
     }
 

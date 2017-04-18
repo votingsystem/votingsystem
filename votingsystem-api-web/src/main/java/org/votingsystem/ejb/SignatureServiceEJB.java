@@ -112,7 +112,7 @@ public class SignatureServiceEJB implements SignatureService {
         SignatureParams signatureParams = null;
         if(checkerDto.getOperation().isCurrencyOperation()) {
             switch ((CurrencyOperation)checkerDto.getOperation().getType()) {
-                case SESSION_CERTIFICATION:
+                case GET_SESSION_CERTIFICATION:
                     signatureParams = new SignatureParams(checkerDto.getOperation().getEntityId(),
                             User.Type.IDENTITY_SERVER, SignedDocumentType.SESSION_CERTIFICATION_RECEIPT)
                             .setWithTimeStampValidation(true);

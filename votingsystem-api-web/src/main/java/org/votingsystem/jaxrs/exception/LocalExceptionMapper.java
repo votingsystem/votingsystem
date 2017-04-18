@@ -9,6 +9,7 @@ import org.votingsystem.util.Messages;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.ws.rs.NotFoundException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -34,7 +35,10 @@ public class LocalExceptionMapper implements ExceptionMapper<Exception> {
 
     @Override
     public Response toResponse(Exception exception) {
-        log.log(Level.SEVERE, exception.getClass().getName() + " - " + exception.getMessage(), exception);
+        if(exception instanceof NotFoundException)
+            log.log(Level.SEVERE, exception.getClass().getName() + " - " + exception.getMessage());
+        else
+            log.log(Level.SEVERE, exception.getClass().getName() + " - " + exception.getMessage(), exception);
         String reqContentType = HttpRequest.getContentType(req, true);
         if(req.getRequestURI().contains("/api/test")) {
             StringWriter sw = new StringWriter();

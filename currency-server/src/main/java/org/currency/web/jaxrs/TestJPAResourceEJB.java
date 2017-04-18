@@ -2,6 +2,7 @@ package org.currency.web.jaxrs;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import org.currency.web.ejb.ConfigCurrencyServer;
+import org.votingsystem.model.Certificate;
 import org.votingsystem.model.currency.CurrencyAccount;
 import org.votingsystem.model.currency.Tag;
 import org.votingsystem.model.currency.Transaction;
@@ -33,7 +34,6 @@ public class TestJPAResourceEJB {
     private EntityManager em;
     @Inject private ConfigCurrencyServer config;
 
-
     @GET @Path("/sum-balance")
     public Response sumBalance(@Context HttpServletRequest req, @Context HttpServletResponse resp)
             throws JsonProcessingException, ValidationException {
@@ -43,7 +43,6 @@ public class TestJPAResourceEJB {
         for(Object[] result : resultList) {
             log.info("" + result[0] + ((Tag)result[1]).getName() + result[2]);
         }
-
         return Response.ok().entity("OK").build();
     }
 

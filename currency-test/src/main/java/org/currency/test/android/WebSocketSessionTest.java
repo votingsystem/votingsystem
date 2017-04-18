@@ -26,16 +26,12 @@ public class WebSocketSessionTest extends BaseTest {
     private static final Logger log = Logger.getLogger(WebSocketSessionTest.class.getName());
 
     private static final boolean IS_DEBUG_SESSION = true;
-    private static final String WEBSOCKET_SERVER = "wss://votingsystem.ddns.net/currency-server/websocket/service";
-    //private static final String WEBSOCKET_SERVER = "webSocket://votingsystem.ddns.net:8080/currency-server/websocket/service";
 
     private WebSocket webSocket;
     private OkHttpClient httpClient;
 
     public static void main(String[] args) throws Exception {
-        //new WebSocketInitSessionTest().initSession();
         WebSocketSessionTest webSocketSessionTest = new WebSocketSessionTest();
-        webSocketSessionTest.initSession();
         webSocketSessionTest.run();
         //System.exit(0);
     }
@@ -48,12 +44,15 @@ public class WebSocketSessionTest extends BaseTest {
             //httpClient = new OkHttpClient.Builder().readTimeout(0,  TimeUnit.MILLISECONDS).build();
             httpClient = new OkHttpClient.Builder().build();
         }
-        Request request = new Request.Builder().url(WEBSOCKET_SERVER).build();
+        Request request = new Request.Builder().url(org.votingsystem.util.Constants.CURRENCY_SOCKET_SERVICE).build();
         webSocket = httpClient.newWebSocket(request, new AppWebSocketListener());
     }
 
     private void run() throws Exception {
-        showMessage(" --- connected to web socket server: " + WEBSOCKET_SERVER);
+        initSession();
+        String commands = Arrays.asList(Command.values()).stream().map(c -> c.toString().toLowerCase()).reduce(
+                (t, u) -> t + ", " + u).get();
+        log.severe("Commands:" + commands + " - Enter 'quit' to exit the application");
         while (true) {
             final String stringCommand = IOUtils.readLine("> ");
             try {
@@ -82,18 +81,15 @@ public class WebSocketSessionTest extends BaseTest {
         OperationTypeDto operationType = new OperationTypeDto(SocketOperation.MSG_TO_DEVICE,
                 org.currency.test.Constants.CURRENCY_SERVICE_ENTITY_ID);
         messageDto.setOperation(operationType).setDate(ZonedDateTime.now());
-        messageDto.setMessage("Hello from encryptd connection");
+        messageDto.setMessage(message);
         messageDto.setUUID(UUID.randomUUID().toString());
         webSocket.send(JSON.getMapper().writeValueAsString(messageDto));
     }
 
-    private void showMessage(String message) {
+    private void logMessage(String message) {
         System.out.println("------------------------------------------------------");
         System.out.println(message);
         System.out.println("------------------------------------------------------");
-        String commands = Arrays.asList(Command.values()).stream().map(c -> c.toString().toLowerCase()).reduce(
-                (t, u) -> t + ", " + u).get();
-        System.out.println("Commands:" + commands);
     }
 
     private enum Command {
@@ -111,20 +107,20 @@ public class WebSocketSessionTest extends BaseTest {
     public final class AppWebSocketListener extends WebSocketListener {
 
         @Override public void onOpen(WebSocket webSocket, Response response) {
-            showMessage("Conected to server : " + WEBSOCKET_SERVER);
+            log.info("Connected to server : " + org.votingsystem.util.Constants.CURRENCY_SOCKET_SERVICE);
         }
 
         @Override public void onMessage(WebSocket webSocket, String text) {
-            showMessage("Message from server: " + text);
+            log.info("Message from server: " + text);
         }
 
         @Override public void onMessage(WebSocket webSocket, ByteString bytes) {
-            showMessage("ByteString message from server: " + bytes.hex());
+            log.info("ByteString message from server: " + bytes.hex());
         }
 
         @Override public void onClosing(WebSocket webSocket, int code, String reason) {
             webSocket.close(1000, null);
-            showMessage("WebSocket Connection CLOSED code: " + code + " - reason: " + reason);
+            log.info("WebSocket Connection CLOSED code: " + code + " - reason: " + reason);
         }
 
         @Override public void onFailure(WebSocket webSocket, Throwable t, Response response) {

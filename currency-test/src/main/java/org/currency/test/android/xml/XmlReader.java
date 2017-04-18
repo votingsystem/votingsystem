@@ -19,10 +19,10 @@ public class XmlReader {
         SessionCertificationDto userCertificationRequest = new SessionCertificationDto();
         Element certRequestElement = XMLUtils.parse(xmlBytes).getRootElement();
         userCertificationRequest.setBrowserCsr(XMLUtils.getTextChild(certRequestElement, "browserCsr"));
-        userCertificationRequest.setBrowserCsrSigned(XMLUtils.getTextChild(certRequestElement, "browserCsrSigned"));
+        userCertificationRequest.setBrowserCertificate(XMLUtils.getTextChild(certRequestElement, "browserCsrSigned"));
 
         userCertificationRequest.setMobileCsr(XMLUtils.getTextChild(certRequestElement, "mobileCsr"));
-        userCertificationRequest.setMobileCsrSigned(XMLUtils.getTextChild(certRequestElement, "mobileCsrSigned"));
+        userCertificationRequest.setMobileCertificate(XMLUtils.getTextChild(certRequestElement, "mobileCsrSigned"));
 
         userCertificationRequest.setUserUUID(XMLUtils.getTextChild(certRequestElement, "userUUID"));
         userCertificationRequest.setToken(XMLUtils.getTextChild(certRequestElement, "token"));

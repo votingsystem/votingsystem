@@ -10,6 +10,7 @@ import org.votingsystem.crypto.MockDNIe;
 import org.votingsystem.crypto.PEMUtils;
 import org.votingsystem.crypto.cms.CMSSignedMessage;
 import org.votingsystem.dto.*;
+import org.votingsystem.dto.indentity.PublickeyDto;
 import org.votingsystem.dto.indentity.SessionCertificationDto;
 import org.votingsystem.http.HttpConn;
 import org.votingsystem.http.MediaType;
@@ -36,7 +37,7 @@ public class GenerateSessionCertificates extends BaseTest {
 
     private static final Logger log = Logger.getLogger(GenerateSessionCertificates.class.getName());
 
-    private static final String QR_CODE = "eid=https://voting.ddns.net/currency-server;op=0;uid=2f38674d-ab16-418f-8b0b-39ae84d14412;";
+    private static final String QR_CODE = "eid=https://voting.ddns.net/currency-server;op=0;uid=f0d6a4c5-a766-43f8-900e-fc64f23f5264;";
 
     private static CMSSignedMessage sessionCertification;
 
@@ -55,30 +56,32 @@ public class GenerateSessionCertificates extends BaseTest {
         try {
             MockDNIe mockDNIe = new MockDNIe("08888888D");
             CMSSignatureBuilder signatureService = new CMSSignatureBuilder(mockDNIe);
-            User user = User.FROM_CERT(mockDNIe.getX509Certificate(), User.Type.CURRENCY_SERVER);
+            User user = User.FROM_CERT(mockDNIe.getX509Certificate(), User.Type.USER);
             String mobileUUID = UUID.randomUUID().toString();
             CertificationRequest mobileCsrReq = CertificationRequest.getUserRequest(
-                    user.getNumId(), user.getEmail(), user.getPhone(), "test-application",
+                    user.getNumId(), user.getEmail(), user.getPhone(), "mobile-session",
                     mobileUUID, user.getName(), user.getSurname(), Device.Type.MOBILE);
 
             String browserUUID = UUID.randomUUID().toString();
             CertificationRequest browserCsrReq = CertificationRequest.getUserRequest(
-                    user.getNumId(), user.getEmail(), user.getPhone(), "test-application",
+                    user.getNumId(), user.getEmail(), user.getPhone(), "browser-session",
                     browserUUID, user.getName(), user.getSurname(), Device.Type.BROWSER);
 
             SessionCertificationDto sessionCertDto = new SessionCertificationDto(new UserDto(user),
                     new String(mobileCsrReq.getCsrPEM()), mobileUUID,
                     new String(browserCsrReq.getCsrPEM()), browserUUID).setOperation(
-                    new OperationTypeDto(CurrencyOperation.SESSION_CERTIFICATION, null));
-
+                    new OperationTypeDto(CurrencyOperation.GET_SESSION_CERTIFICATION, Constants.CURRENCY_SERVICE_ENTITY_ID));
+            sessionCertDto.setOperation(new OperationTypeDto(CurrencyOperation.GET_SESSION_CERTIFICATION,
+                    Constants.CURRENCY_SERVICE_ENTITY_ID));
             byte[] requestBytes = JSON.getMapper().writeValueAsBytes(sessionCertDto);
 
-            CMSSignedMessage cmsSignedMessage = signatureService.signDataWithTimeStamp(requestBytes, Constants.TIMESTAMP_SERVICE_URL);
+            CMSSignedMessage cmsSignedMessage = signatureService.signDataWithTimeStamp(requestBytes,
+                    Constants.TIMESTAMP_SERVICE_URL);
             byte[] signedMessageBytes = cmsSignedMessage.toPEM();
             log.info("cmsSignedMessage: " + new String(signedMessageBytes));
 
             ResponseDto response = HttpConn.getInstance().doPostRequest(signedMessageBytes, MediaType.PKCS7_SIGNED,
-                    CurrencyOperation.SESSION_CERTIFICATION.getUrl(Constants.ID_PROVIDER_ENTITY_ID));
+                    CurrencyOperation.GET_SESSION_CERTIFICATION.getUrl(Constants.ID_PROVIDER_ENTITY_ID));
             if(ResponseDto.SC_OK != response.getStatusCode()) {
                 log.info("status: " + response.getStatusCode() + " - response message: " + response.getMessage());
                 System.exit(0);
@@ -89,7 +92,7 @@ public class GenerateSessionCertificates extends BaseTest {
 
             SessionInfo sessionInfo = new SessionInfo(Constants.ID_PROVIDER_ENTITY_ID, mobileCsrReq, browserCsrReq);
             sessionInfo.loadIssuedCerts(certificationResponse);
-            log.info("BrowserCsrSigned: " + certificationResponse.getBrowserCsrSigned());
+            log.info("BrowserCsrSigned: " + certificationResponse.getBrowserCertificate());
 
             result = sessionInfo.buildBrowserCertificationDto();
             log.info("sessionCertificationDto: " + JSON.getMapper().writeValueAsString(result));
@@ -110,15 +113,15 @@ public class GenerateSessionCertificates extends BaseTest {
             log.info("status: " + responseDto.getStatusCode() + " - responseDto: " + responseDto.getMessage());
             System.exit(0);
         }
-        SessionCertificationDto browserPublicKey = JSON.getMapper().readValue(responseDto.getMessageBytes(),
-                SessionCertificationDto.class);
+        PublickeyDto browserPublicKey = JSON.getMapper().readValue(responseDto.getMessageBytes(), PublickeyDto.class);
         PublicKey publicKey = PEMUtils.fromPEMToRSAPublicKey(browserPublicKey.getPublicKeyPEM());
 
         MessageDto messageDto = new MessageDto();
-        messageDto.setSocketOperation(SocketOperation.MSG_TO_DEVICE).setDeviceToUUID(qrMessageDto.getUUID());
+        messageDto.setOperation(new OperationTypeDto(SocketOperation.MSG_TO_DEVICE, qrMessageDto.getSystemEntityID()))
+                .setDeviceToUUID(qrMessageDto.getUUID());
 
         MessageDto messageContent = new MessageDto();
-        messageContent.setOperation(new OperationTypeDto(CurrencyOperation.SESSION_CERTIFICATION, null)).setMessage("");
+        messageContent.setOperation(new OperationTypeDto(CurrencyOperation.GET_SESSION_CERTIFICATION, null)).setMessage("");
 
         String base64Data = Base64.getEncoder().encodeToString(
                 JSON.getMapper().writeValueAsString(certificationDto).getBytes());
@@ -132,7 +135,7 @@ public class GenerateSessionCertificates extends BaseTest {
         urlParameters.add(new BasicNameValuePair("cmsMessage", new String(sessionCertification.toPEM())));
         urlParameters.add(new BasicNameValuePair("socketMsg", JSON.getMapper().writeValueAsString(messageDto)));
         responseDto = HttpConn.getInstance().doPostForm(
-                CurrencyOperation.SESSION_CERTIFICATION_DATA.getUrl(Constants.CURRENCY_SERVICE_ENTITY_ID), urlParameters);
+                CurrencyOperation.VALIDATE_SESSION_CERTIFICATES.getUrl(Constants.CURRENCY_SERVICE_ENTITY_ID), urlParameters);
         log.info("message: " + responseDto.getMessage());
     }
 

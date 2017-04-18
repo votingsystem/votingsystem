@@ -17,6 +17,8 @@ public class Constants {
 
     public static final String OCSP_DNIE_URL = "http://ocsp.dnie.es";
 
+    public static final String CURRENCY_SOCKET_SERVICE = "wss://voting.ddns.net/currency-server/websocket/service";
+
     public static final String VOTING_SYSTEM_BASE_OID                  = "0.0.0.0.0.0.0.0.0.";
     public static final String VOTE_OID                                = VOTING_SYSTEM_BASE_OID + 0;
     public static final String REPRESENTATIVE_VOTE_OID                 = VOTING_SYSTEM_BASE_OID + 1;

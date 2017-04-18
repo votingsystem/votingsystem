@@ -7,7 +7,6 @@ import org.bouncycastle.operator.OperatorCreationException;
 import org.bouncycastle.tsp.TSPException;
 import org.bouncycastle.tsp.TimeStampToken;
 import org.bouncycastle.util.Selector;
-import org.bouncycastle.util.Store;
 import org.votingsystem.crypto.Encryptor;
 import org.votingsystem.crypto.SignedDocumentType;
 import org.votingsystem.crypto.cms.CMSGenerator;
@@ -97,6 +96,8 @@ public class CmsEJB {
                         cmsSignedMessage.getContentDigestStr()));
 
             OperationCheckerDto operationDto = cmsSignedMessage.getSignedContent(OperationCheckerDto.class);
+            if(operationDto.getOperation() == null)
+                throw new ValidationException("Request without operation type");
             log.info("operation: " + operationDto.getOperation().getType());
 
             User.Type userType = User.Type.USER;
@@ -105,7 +106,7 @@ public class CmsEJB {
                     case REGISTER_DEVICE:
                         documentType = SignedDocumentType.DEVICE_REGISTER;
                         break;
-                    case SESSION_CERTIFICATION:
+                    case GET_SESSION_CERTIFICATION:
                         userType = User.Type.ENTITY;
                         break;
                 }

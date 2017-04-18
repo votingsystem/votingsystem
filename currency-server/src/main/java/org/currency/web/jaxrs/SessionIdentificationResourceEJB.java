@@ -7,9 +7,11 @@ import org.currency.web.util.AuthRole;
 import org.currency.web.websocket.SessionManager;
 import org.votingsystem.crypto.cms.CMSSignedMessage;
 import org.votingsystem.dto.*;
+import org.votingsystem.dto.indentity.PublickeyDto;
 import org.votingsystem.dto.indentity.SessionCertificationDto;
 import org.votingsystem.ejb.SignerInfoService;
 import org.votingsystem.model.*;
+import org.votingsystem.socket.SocketOperation;
 import org.votingsystem.throwable.ValidationException;
 import org.votingsystem.util.Constants;
 import org.votingsystem.util.CurrencyOperation;
@@ -73,6 +75,7 @@ public class SessionIdentificationResourceEJB {
         req.getSession().removeAttribute(Constants.USER_KEY);
         return Response.ok().entity("session closed").build();
     }
+
     /**
      * Called from the browser to provide the public key that encrypts the message the mobile sends to the browser with the
      * 'browser session certificate'
@@ -81,17 +84,17 @@ public class SessionIdentificationResourceEJB {
      * @return
      * @throws Exception
      */
-    @POST @Path("/browser-init-publickey")
+    @POST @Path("/put-publickey")
     @Produces(MediaType.TEXT_PLAIN)
-    public Response browserPublickey(@Context HttpServletRequest req, byte[] csrRequestBytes) throws Exception {
-        SessionCertificationDto certDto = JSON.getMapper().readValue(csrRequestBytes, SessionCertificationDto.class);
-        req.getSession().setAttribute(Constants.BROWSER_PLUBLIC_KEY, certDto);
+    public Response publickey(@Context HttpServletRequest req, byte[] csrRequestBytes) throws Exception {
+        PublickeyDto publickeyDto = JSON.getMapper().readValue(csrRequestBytes, PublickeyDto.class);
+        req.getSession().setAttribute(Constants.BROWSER_PLUBLIC_KEY, publickeyDto);
         return Response.ok().entity("OK").build();
     }
 
     /**
      * Called from the mobile with the browser and mobile certificates in a PKCS7 document signed by the user and the
-     * Id provider. Once validated the request, the server sends a push message to the browser with the certificate and the private
+     * Id Provider. Once validated the request, the server sends a push message to the browser with the certificate and the private
      * key (encrypted with the public key previously provided by the browser)
      *
      * @param cmsMessage
@@ -101,7 +104,7 @@ public class SessionIdentificationResourceEJB {
      * @return
      * @throws Exception
      */
-    @POST @Path("/verify-device-certification")
+    @POST @Path("/validate-mobile-browser-session-certificates")
     @TransactionAttribute(REQUIRES_NEW)
     public Response sessionCertificationData(@FormParam("cmsMessage") String cmsMessage,
             @FormParam("browserUUID") String browserUUID,
@@ -110,31 +113,19 @@ public class SessionIdentificationResourceEJB {
         deviceEJB.sessionCertification(cmsSignedMessage);
 
         MessageDto message = JSON.getMapper().readValue(socketMsg, MessageDto.class);
-        switch (message.getSocketOperation()) {
-            case MSG_TO_DEVICE:
-                if(SessionManager.getInstance().hasSession(message.getDeviceToUUID())) {
-                    SessionManager.getInstance().sendMessage(socketMsg, message.getDeviceToUUID());
-                } else {
-                    SocketPushEvent pushEvent = new SocketPushEvent(socketMsg,
-                            SocketPushEvent.Type.TO_USER).setUserUUID(message.getDeviceToUUID());
-                    beanManager.fireEvent(pushEvent);
-                }
-                break;
-            default:
-                log.info("unprocessed socket operation: " + message.getSocketOperation());
-        }
+        SocketPushEvent pushEvent = new SocketPushEvent(socketMsg, message.getDeviceToUUID(),
+                SocketPushEvent.Type.TO_USER);
+        beanManager.fireEvent(pushEvent);
         return  Response.ok().entity("OK").build();
     }
 
     @POST @Path("/init-browser")
-    @TransactionAttribute(REQUIRES_NEW)
     public Response initBrowserSession(CMSDocument signedDocument, @Context HttpServletRequest req) throws Exception {
         deviceEJB.initBrowserSession(signedDocument, req.getSession());
         return  Response.ok().entity("OK - init-browser-session").build();
     }
 
     @POST @Path("/init-mobile")
-    @TransactionAttribute(REQUIRES_NEW)
     public Response initMobileSession(CMSDocument signedDocument, @Context HttpServletRequest req) throws Exception {
         deviceEJB.initMobileSession(signedDocument, req.getSession());
         return  Response.ok().entity("OK - init-mobile-session").build();

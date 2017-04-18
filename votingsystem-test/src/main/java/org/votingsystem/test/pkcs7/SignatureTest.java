@@ -80,10 +80,9 @@ public class SignatureTest extends BaseTest {
 
     public static void main(String[] args) throws Exception {
         SignatureTest signatureTest = new SignatureTest();
-        //CMSSignedMessage cmsSignedMessage = signatureTest.sign();
-        //signatureTest.validate(cmsSignedMessage.toPEM());
-        //signatureTest.sendToServer(cmsSignedMessage.toPEM(), "https://voting.ddns.net/currency-server/api/test/cms-document");
-        //signatureTest.sendToServer(cmsSignedMessage.toPEM(), "https://voting.ddns.net/currency-server/api/device/init-browser-session");
+        CMSSignedMessage cmsSignedMessage = signatureTest.sign();
+        signatureTest.validate(cmsSignedMessage.toPEM());
+        signatureTest.sendToServer(cmsSignedMessage.toPEM(), "https://voting.ddns.net/currency-server/api/test-pkcs7/sign");
         signatureTest.readPem();
         System.exit(0);
     }

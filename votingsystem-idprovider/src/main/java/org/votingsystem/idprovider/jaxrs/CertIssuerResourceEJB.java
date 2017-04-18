@@ -39,26 +39,16 @@ public class CertIssuerResourceEJB {
 
     private static final Logger log = Logger.getLogger(CertIssuerResourceEJB.class.getName());
 
-    @Inject private CertIssuerEJB certIssuer;
-    @Inject
-    CmsEJB cmsBean;
+    @Inject CertIssuerEJB certIssuer;
+    @Inject CmsEJB cmsBean;
     @Inject SignatureService signatureService;
 
-    @POST @Path("/session-csr")
-    public Response sessionCsrXML(@Context HttpServletRequest req, @Context HttpServletResponse res) throws Exception {
-        String reqContentType = HttpRequest.getContentType(req, false);
-        SignedDocument signedDocument = null;
-        if(MediaType.PKCS7_SIGNED.equals(reqContentType)) {
-            CMSSignedMessage cmsSignedMessage = CMSSignedMessage.FROM_PEM(req.getInputStream());
-            signedDocument = cmsBean.validateCMS(cmsSignedMessage, null).getCmsDocument();
-        } else {
-            signedDocument = signatureService.validateXAdESAndSave(FileUtils.getBytesFromStream(req.getInputStream()));
-        }
+    @POST @Path("/mobile-browser-session")
+    public Response mobileBrowserSession(@Context HttpServletRequest req, CMSDocument signedDocument) throws Exception {
         SignedDocument response = certIssuer.signSessionCSR(signedDocument);
         return Response.ok().type(javax.ws.rs.core.MediaType.APPLICATION_XML_TYPE).entity(response.getBody()).build();
     }
 
-    @Transactional
     @PermitAll
     @Path("/register-device")
     @POST @Produces(javax.ws.rs.core.MediaType.APPLICATION_JSON)
@@ -77,4 +67,5 @@ public class CertIssuerResourceEJB {
         registerDto.setIssuedCertificate(new String(issuedCert));
         return Response.ok().entity(JSON.getMapper().writeValueAsBytes(registerDto)).build();
     }
+
 }

@@ -71,11 +71,11 @@ public class DateTest {
         String dateStr2 = "2016-12-24 09:05:09.458 GMT-01:00";
         String xmlDate = "2016-12-24T11:45:18.797+08:00";
 
-        log.info("=======dateStr1: " + dateStr1 + " - date: " + dateFormat.parse(dateStr1));
+        log.info("dateStr1: " + dateStr1 + " - date: " + dateFormat.parse(dateStr1));
         Date date2 = dateFormat.parse(dateStr2);
-        log.info("=======dateStr2: " + dateStr2 + " - date: " +date2 );
-        log.info("=======xmlDate formatted: " + xmlDateFormat.format(new Date()));
-        log.info("=======xmlDate: " + xmlDate + " - date: " + xmlDateFormat.parse(xmlDate) );
+        log.info("dateStr2: " + dateStr2 + " - date: " + date2 );
+        log.info("xmlDate formatted: " + xmlDateFormat.format(new Date()));
+        log.info("xmlDate: " + xmlDate + " - date: " + xmlDateFormat.parse(xmlDate) );
     }
 
     public static void serializeXML() throws Exception {

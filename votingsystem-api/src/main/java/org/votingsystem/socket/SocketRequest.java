@@ -15,9 +15,10 @@ public class SocketRequest {
 
     public SocketRequest() {}
 
-    public SocketRequest(MessageDto socketMessage, String body) {
+    public SocketRequest(MessageDto socketMessage, String body, Session session) {
         this.socketMessage = socketMessage;
         this.body = body;
+        this.session = session;
     }
 
     public MessageDto getDto() {

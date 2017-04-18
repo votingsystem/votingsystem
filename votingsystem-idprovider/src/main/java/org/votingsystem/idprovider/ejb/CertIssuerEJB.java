@@ -385,12 +385,16 @@ public class CertIssuerEJB {
                 .setSignedDocument(signedDocument);
 
         SessionCertificationDto csrResponse = csrRequest.setOperation(new OperationTypeDto(
-                CurrencyOperation.SESSION_CERTIFICATION, config.getEntityId())).setUser(new UserDto(signer))
-                .setBrowserCsrSigned(new String(PEMUtils.getPEMEncoded(browserCert)))
-                .setMobileCsrSigned(new String(PEMUtils.getPEMEncoded(mobileCert)))
+                CurrencyOperation.GET_SESSION_CERTIFICATION, config.getEntityId())).setUser(new UserDto(signer))
+                .setBrowserCertificate(new String(PEMUtils.getPEMEncoded(browserCert)))
+                .setMobileCertificate(new String(PEMUtils.getPEMEncoded(mobileCert)))
                 .setSignerCertPEM(new String(PEMUtils.getPEMEncoded(signerCertificate)));
         em.persist(browserCertificate);
         em.persist(mobileCertificate);
+
+        SessionCertification sessionCertification = new SessionCertification(signer, mobileCertificate,
+                browserCertificate, signedDocument);
+        em.persist(sessionCertification);
 
         SignatureParams signatureParams = new SignatureParams(config.getEntityId(), User.Type.IDENTITY_SERVER,
                 SignedDocumentType.SESSION_CERTIFICATION_RECEIPT).setWithTimeStampValidation(true);

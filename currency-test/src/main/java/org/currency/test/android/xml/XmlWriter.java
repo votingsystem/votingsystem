@@ -38,9 +38,9 @@ public class XmlWriter {
             browserCsr.addChild(Node.TEXT, certRequest.getBrowserCsr());
             certificationRequestElement.addChild(Node.ELEMENT, browserCsr);
         }
-        if(certRequest.getBrowserCsrSigned() != null) {
+        if(certRequest.getBrowserCertificate() != null) {
             Element browserCsrSigned = doc.createElement("", "browserCsrSigned");
-            browserCsrSigned.addChild(Node.TEXT, certRequest.getBrowserCsrSigned());
+            browserCsrSigned.addChild(Node.TEXT, certRequest.getBrowserCertificate());
             certificationRequestElement.addChild(Node.ELEMENT, browserCsrSigned);
         }
         if(certRequest.getMobileCsr() != null) {
@@ -48,9 +48,9 @@ public class XmlWriter {
             mobileCsr.addChild(Node.TEXT, certRequest.getMobileCsr());
             certificationRequestElement.addChild(Node.ELEMENT, mobileCsr);
         }
-        if(certRequest.getMobileCsrSigned() != null) {
+        if(certRequest.getMobileCertificate() != null) {
             Element mobileCsrSigned = doc.createElement("", "mobileCsrSigned");
-            mobileCsrSigned.addChild(Node.TEXT, certRequest.getMobileCsrSigned());
+            mobileCsrSigned.addChild(Node.TEXT, certRequest.getMobileCertificate());
             certificationRequestElement.addChild(Node.ELEMENT, mobileCsrSigned);
         }
         if(certRequest.getUserUUID() != null) {

@@ -10,6 +10,7 @@
         <class>org.votingsystem.model.Device</class>
         <class>org.votingsystem.model.voting.Election</class>
         <class>org.votingsystem.model.voting.ElectionOption</class>
+        <class>org.votingsystem.model.SessionCertification</class>
         <class>org.votingsystem.model.Signature</class>
         <class>org.votingsystem.model.SignedDocument</class>
         <class>org.votingsystem.model.User</class>
@@ -18,7 +19,7 @@
         <class>org.votingsystem.model.XAdESDocument</class>
         <exclude-unlisted-classes>true</exclude-unlisted-classes>
         <properties>
-
+            <property name="javax.persistence.schema-generation.database.action" value="drop-and-create"/>
             <!--
             <property name="javax.persistence.schema-generation.database.action" value="drop-and-create"/>
             <property name="hibernate.show_sql" value="true"/>

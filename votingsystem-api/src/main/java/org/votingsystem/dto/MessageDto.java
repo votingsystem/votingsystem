@@ -33,8 +33,6 @@ public class MessageDto {
 
     private static Logger log = Logger.getLogger(MessageDto.class.getName());
 
-    private SocketOperation socketOperation;
-
     @JacksonXmlProperty(localName = "Operation")
     private OperationTypeDto operation;
     private Step step;
@@ -59,7 +57,7 @@ public class MessageDto {
     private ZonedDateTime date;
     private DeviceDto device;
     private String UUID;
-    private String locale = Locale.getDefault().getDisplayLanguage();
+    private String locale = Locale.getDefault().toLanguageTag();
 
     @JsonIgnore
     private User user;
@@ -69,12 +67,13 @@ public class MessageDto {
 
     public MessageDto() {}
 
-    public MessageDto getServerResponse(Integer statusCode, String message){
+    public MessageDto getServerResponse(Integer statusCode, String message, String entityId){
         MessageDto socketMessageDto = new MessageDto();
         socketMessageDto.setStatusCode(statusCode);
-        socketMessageDto.setSocketOperation(SocketOperation.MSG_FROM_SERVER);
+        socketMessageDto.setOperation(new OperationTypeDto(SocketOperation.MSG_TO_DEVICE, entityId));
         socketMessageDto.setOperation(this.operation);
         socketMessageDto.setMessage(message);
+        socketMessageDto.setDate(ZonedDateTime.now());
         socketMessageDto.setUUID(UUID);
         return socketMessageDto;
     }
@@ -82,7 +81,7 @@ public class MessageDto {
     public MessageDto getResponse(Integer statusCode, String message, String deviceFromUUID,
                   String base64Data, OperationTypeDto operation) throws Exception {
         MessageDto socketMessageDto = new MessageDto();
-        socketMessageDto.setSocketOperation(SocketOperation.MSG_TO_DEVICE);
+        socketMessageDto.setOperation(operation);
         socketMessageDto.setStatusCode(ResponseDto.SC_PROCESSING);
         socketMessageDto.setDeviceToUUID(this.deviceFromUUID);
         MessageDto encryptedDto = new MessageDto();
@@ -124,15 +123,6 @@ public class MessageDto {
 
     public MessageDto setStep(Step step) {
         this.step = step;
-        return this;
-    }
-
-    public SocketOperation getSocketOperation() {
-        return socketOperation;
-    }
-
-    public MessageDto setSocketOperation(SocketOperation socketOperation) {
-        this.socketOperation = socketOperation;
         return this;
     }
 
@@ -287,12 +277,12 @@ public class MessageDto {
         return this;
     }
 
-    public static MessageDto getCurrencyWalletChangeRequest(String deviceFromName, String deviceFromUUID,
-            String userFromName, DeviceDto deviceTo, List<Currency> currencyList) throws Exception {
+    public static MessageDto getCurrencyWalletChangeRequest(String userFromName, String deviceFromName,
+            String deviceFromUUID, DeviceDto deviceTo, List<Currency> currencyList, String entityId) throws Exception {
         WebSocketSession socketSession = AppContext.getInstance().checkWebSocketSession(deviceTo, currencyList,
-                new OperationTypeDto(CurrencyOperation.CURRENCY_WALLET_CHANGE, null));
+                new OperationTypeDto(CurrencyOperation.CURRENCY_WALLET_CHANGE, entityId));
         MessageDto socketMessageDto = new MessageDto();
-        socketMessageDto.setSocketOperation(SocketOperation.MSG_TO_DEVICE);
+        socketMessageDto.setOperation(new OperationTypeDto(SocketOperation.MSG_TO_DEVICE, entityId));
         socketMessageDto.setStatusCode(ResponseDto.SC_PROCESSING);
         socketMessageDto.setTimeLimited(true);
         socketMessageDto.setUUID(socketSession.getUUID());
@@ -307,11 +297,11 @@ public class MessageDto {
     }
 
     public static MessageDto getMessageToDevice(String deviceFromName, String deviceFromUUID, DeviceDto deviceTo,
-                                                String message) throws Exception {
+            String message, String entityId) throws Exception {
         WebSocketSession socketSession = AppContext.getInstance().checkWebSocketSession(deviceTo, null,
                 new OperationTypeDto(CurrencyOperation.MSG_TO_DEVICE, null));
         MessageDto socketMessageDto = new MessageDto();
-        socketMessageDto.setSocketOperation(SocketOperation.MSG_TO_DEVICE);
+        socketMessageDto.setOperation(new OperationTypeDto(SocketOperation.MSG_TO_DEVICE, entityId));
         socketMessageDto.setStatusCode(ResponseDto.SC_PROCESSING);
         socketMessageDto.setDeviceToUUID(deviceTo.getUUID());
         socketMessageDto.setDeviceToName(deviceTo.getDeviceName());
@@ -351,9 +341,9 @@ public class MessageDto {
 
     //method to respond a received message
     public MessageDto getMessageResponse(String deviceFromName, String deviceFromUUID, String deviceToName,
-                                         String message) throws Exception {
+                                         String message, String entityId) throws Exception {
         MessageDto socketMessageDto = new MessageDto();
-        socketMessageDto.setSocketOperation(SocketOperation.MSG_TO_DEVICE);
+        socketMessageDto.setOperation(new OperationTypeDto(SocketOperation.MSG_TO_DEVICE, entityId));
         socketMessageDto.setStatusCode(ResponseDto.SC_PROCESSING);
         WebSocketSession socketSession = AppContext.getInstance().getWSSession(UUID);
         socketMessageDto.setDeviceToUUID(deviceFromUUID);
@@ -391,6 +381,16 @@ public class MessageDto {
                     PEMUtils.fromPEMToRSAPublicKey(device.getPublicKeyPEM()));
             socketMessageDto.setEncryptedMessage(new String(encryptedCMS_PEM));
         } else log.log(Level.SEVERE, "Missing target public key info");
+    }
+
+    @JsonIgnore
+    public SocketOperation getSocketOperation() throws Exception {
+        try {
+            return SocketOperation.valueOf(operation.getType().toString());
+        } catch (Exception ex) {
+            log.severe("INVALID socket operation: " + operation.getType());
+        }
+        return null;
     }
 
     @JsonIgnore

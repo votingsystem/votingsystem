@@ -85,18 +85,18 @@ public class SessionInfo implements Serializable {
 
     public void loadIssuedCerts(SessionCertificationDto certificationDto) {
         sessionCertification = certificationDto;
-        mobileCsrReq.setSignedCsr(certificationDto.getMobileCsrSigned().getBytes());
-        browserCsrReq.setSignedCsr(certificationDto.getBrowserCsrSigned().getBytes());
+        mobileCsrReq.setSignedCsr(certificationDto.getMobileCertificate().getBytes());
+        browserCsrReq.setSignedCsr(certificationDto.getBrowserCertificate().getBytes());
     }
 
     public SessionCertificationDto buildBrowserCertificationDto() throws Exception {
         SessionCertificationDto sessionCertificationDto = new SessionCertificationDto();
-        sessionCertificationDto.setOperation(new OperationTypeDto(CurrencyOperation.SESSION_CERTIFICATION, entityId))
+        sessionCertificationDto.setOperation(new OperationTypeDto(CurrencyOperation.GET_SESSION_CERTIFICATION, entityId))
                 .setPrivateKeyPEM(new String(PEMUtils.getPEMEncoded(browserCsrReq.getPrivateKey())))
                 .setMobileUUID(sessionCertification.getMobileUUID())
-                .setMobileCsrSigned(sessionCertification.getMobileCsrSigned())
+                .setMobileCertificate(sessionCertification.getMobileCertificate())
                 .setBrowserUUID(sessionCertification.getBrowserUUID())
-                .setBrowserCsrSigned(sessionCertification.getBrowserCsrSigned())
+                .setBrowserCertificate(sessionCertification.getBrowserCertificate())
                 .setUser(sessionCertification.getUser());
         return sessionCertificationDto;
     }

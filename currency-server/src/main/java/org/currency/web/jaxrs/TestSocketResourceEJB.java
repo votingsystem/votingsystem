@@ -36,9 +36,9 @@ public class TestSocketResourceEJB {
     @Produces(MediaType.TEXT_PLAIN)
     public Response singleUser(@Context HttpServletRequest req, @Context HttpServletResponse res,
                                @QueryParam("userUUID") String userUUID) throws Exception {
-        ResponseDto response = new ResponseDto().setMessage("singleUser TO_USER").setType(CurrencyOperation.SESSION_CERTIFICATION);
-        SocketPushEvent pushEvent = new SocketPushEvent(JSON.getMapper().writeValueAsString(response),
-                SocketPushEvent.Type.TO_USER).setUserUUID(userUUID);
+        ResponseDto response = new ResponseDto().setMessage("singleUser TO_USER").setType(CurrencyOperation.GET_SESSION_CERTIFICATION);
+        SocketPushEvent pushEvent = new SocketPushEvent(JSON.getMapper().writeValueAsString(response), userUUID,
+                SocketPushEvent.Type.TO_USER);
         beanManager.fireEvent(pushEvent);
         HttpSession session = req.getSession();
         log.info("session.getId: " + session.getId());

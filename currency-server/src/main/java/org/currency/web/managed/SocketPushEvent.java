@@ -16,6 +16,12 @@ public class SocketPushEvent {
         this.type = type;
     }
 
+    public SocketPushEvent(String message, String userUUID, Type type) {
+        this.message = message;
+        this.userUUID = userUUID;
+        this.type = type;
+    }
+
     public String getMessage() {
         return message;
     }

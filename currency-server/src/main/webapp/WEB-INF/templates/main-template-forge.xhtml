@@ -58,7 +58,7 @@
                     <h3 class="modal-title" id="alertCaption" style="color:#b71c1c;"></h3>
                 </div>
                 <div id="alertDialogQRImgDiv" style="margin: 0 auto; text-align: center; display: none;padding: 0 0 15px 0;">
-                    <div id="alertDialogQRId" style="font-size: 1.8em;color: #a5d6a7;"></div>
+                    <div id="alertDialogQRId" style="font-size: 1.8em;color: #d50000;"></div>
                     <img id="alertDialogQRImg" src=""/>
                 </div>
                 <div id="alertDialogMsgDiv" class="modal-body" style="font-size: 1.3em; display: block; margin-right: 20px;word-wrap: break-word;">
@@ -148,7 +148,7 @@
                                     <li class="custom-button">
                                         <span data-toggle="dropdown" aria-expanded="false" style="margin: 0 10px 0 0;vertical-align: baseline;
                                                 overflow: hidden;white-space: nowrap;">
-                                            <i class="fa fa-user"></i><span id="authenticatedUserName" style="margin: 0 0 0 3px;"></span>
+                                            <i class="fa fa-user"></i><span id="userName" style="margin: 0 0 0 3px;"></span>
                                         </span>
                                         <ul class="dropdown-menu dropdown-usermenu pull-right">
                                             <li onclick="closeSession()">
@@ -188,8 +188,8 @@
         var sessionId = vs.getCookie("JSESSIONID");
         console.log("sessionId: " + sessionId + " - userUUID: " + vs.userUUID);
 
-        vs.setDisConnected = function() {
-            setUserAuthenticated(false);
+        vs.sessionClosed = function() {
+            setSessionState(false);
             localStorage.setItem('pkiSessionData', null);
         };
 
@@ -199,10 +199,10 @@
             console.log("pageBean.getAccessCodeQR: #{pageBean.getAccessCodeQR()}")
         }
 
-        function setUserAuthenticated(isUserAuthenticated, userName) {
-            if(isUserAuthenticated) {
+        function setSessionState(isSessionOpen, userName) {
+            if(isSessionOpen) {
                 if(userName)
-                    document.querySelector("#authenticatedUserName").innerHTML = userName;
+                    document.querySelector("#userName").innerHTML = userName;
                 document.querySelector("#accessCodeButtonDiv").style.display = 'none';
                 document.querySelector("#authenticatedUserButtonDiv").style.display = 'block';
             } else {
@@ -218,7 +218,7 @@
                 vs.httpPost(vs.entityId + "/api/device/close-session", function (responseText, status) {
                     console.log("status: " + status + " - responseText: " + responseText);
                     if(200 === status) {
-                        vs.setDisConnected();
+                        vs.sessionClosed();
                         window.location.href = vs.entityId;
                     }
                 }, cmsSignedMessage, "application/pkcs7-signature");
@@ -228,33 +228,24 @@
         function serviceUpdated(updateMessage) {
             var jsonMessage = toJSON(updateMessage);
             console.log("serviceUpdated - jsonMessage: ", jsonMessage);
-            var operationType;
-            if(jsonMessage.operation)
-                operationType = jsonMessage.operation.type;
-            else
-                operationType = jsonMessage.socketOperation;
+            var operationType = jsonMessage.operation.type;
             switch (operationType) {
                 case "MSG_TO_DEVICE":
                     if(vs.rsaUtil)
                         vs.rsaUtil.decryptMessage(jsonMessage);
                     switch (jsonMessage.operation.type) {
-                        case "SESSION_CERTIFICATION":
+                        case "GET_SESSION_CERTIFICATION":
                             var sessionCertification = toJSON(decodeURIComponent(escape(window.atob(jsonMessage.base64Data))));
                             console.log("session-certification: ", sessionCertification);
-                            vs.rsaUtil = new RSAUtil(null, sessionCertification.privateKeyPEM, sessionCertification.browserCsrSigned);
+                            vs.rsaUtil = new RSAUtil(null, sessionCertification.privateKeyPEM, sessionCertification.browserCertificate);
                             vs.userUUID = sessionCertification.browserUUID;
                             console.log("rsaUtil: ", vs.rsaUtil);
-
-                            sessionCertification.privateKeyPEM = vs.rsaUtil.privateKeyPEM;
-                            sessionCertification.x509CertificatePEM = vs.rsaUtil.x509CertificatePEM;
-
                             pkiSessionDataMap[vs.userUUID] = sessionCertification;
-
                             sessionCertification.userFullName = sessionCertification.user.givenName + " " + sessionCertification.user.surName;
                             localStorage.setItem('pkiSessionData', JSON.stringify(pkiSessionDataMap));
-                            setUserAuthenticated(true, sessionCertification.userFullName);
+                            setSessionState(true, sessionCertification.userFullName);
 
-                            var msgDto = {operation:{type:"SESSION_CERTIFICATION"}, httpSessionId:sessionId, userUUID:vs.userUUID};
+                            var msgDto = {operation:{type:"GET_SESSION_CERTIFICATION"}, httpSessionId:sessionId, userUUID:vs.userUUID};
 
                             console.log("=========== msgDto: ", msgDto);
 
@@ -294,13 +285,13 @@
         if(Object.keys(pkiSessionDataMap).length === 0) {
             vs.rsaUtil = new RSAUtil(1024);
             var browserPublicKey = {publicKeyPEM:vs.rsaUtil.publicKeyPEM, userUUID:vs.userUUID};
-            vs.httpPost("#{request.contextPath}/api/device/browser-publickey", function(responseText, status) {
-                console.log("#{request.contextPath}/api/device/browser-publickey responseText: " + responseText + " - status: " + status);
+            vs.httpPost("#{request.contextPath}/api/session/put-publickey", function(responseText, status) {
+                console.log("#{request.contextPath}/api/session/put-publickey - " + responseText + " - status: " + status);
             }, JSON.stringify(browserPublicKey));
         } else {
             var sessionData = pkiSessionDataMap[vs.userUUID];
             vs.rsaUtil = new RSAUtil(null, sessionData.privateKeyPEM, sessionData.x509CertificatePEM);
-            setUserAuthenticated(true, sessionData.userFullName);
+            setSessionState(true, sessionData.userFullName);
         }
 
         //]]>

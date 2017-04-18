@@ -20,6 +20,7 @@
         <class>org.votingsystem.model.currency.CurrencyAccount</class>
         <class>org.votingsystem.model.currency.CurrencyRequestBatch</class>
         <class>org.votingsystem.model.currency.CurrencyBatch</class>
+        <class>org.votingsystem.model.SessionCertification</class>
         <class>org.votingsystem.model.currency.Transaction</class>
         <class>org.votingsystem.model.XAdESDocument</class>
         <exclude-unlisted-classes>true</exclude-unlisted-classes>
