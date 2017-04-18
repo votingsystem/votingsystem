@@ -10,8 +10,8 @@ import org.bouncycastle.operator.DigestCalculatorProvider;
 import org.bouncycastle.operator.OperatorCreationException;
 import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
 import org.bouncycastle.operator.jcajce.JcaDigestCalculatorProviderBuilder;
-import org.votingsystem.util.Constants;
 import org.votingsystem.model.Certificate;
+import org.votingsystem.util.Constants;
 
 import java.io.IOException;
 import java.security.MessageDigest;

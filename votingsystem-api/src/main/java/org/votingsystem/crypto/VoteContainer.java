@@ -1,10 +1,10 @@
 package org.votingsystem.crypto;
 
 import org.votingsystem.dto.indentity.IdentityRequestDto;
-import org.votingsystem.dto.voting.ElectionDto;
-import org.votingsystem.dto.voting.VoteDto;
 import org.votingsystem.dto.metadata.SystemEntityDto;
+import org.votingsystem.dto.voting.ElectionDto;
 import org.votingsystem.dto.voting.ElectionOptionDto;
+import org.votingsystem.dto.voting.VoteDto;
 import org.votingsystem.http.SystemEntityType;
 import org.votingsystem.util.Constants;
 import org.votingsystem.util.OperationType;

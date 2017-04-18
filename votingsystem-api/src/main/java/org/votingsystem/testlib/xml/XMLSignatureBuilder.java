@@ -8,15 +8,15 @@ import org.bouncycastle.tsp.TimeStampRequest;
 import org.bouncycastle.tsp.TimeStampRequestGenerator;
 import org.bouncycastle.tsp.TimeStampResponse;
 import org.bouncycastle.tsp.TimeStampToken;
-import org.votingsystem.http.ContentType;
-import org.votingsystem.http.HttpConn;
-import org.votingsystem.testlib.util.XMLUtils;
 import org.kxml2.kdom.Document;
 import org.kxml2.kdom.Element;
 import org.kxml2.kdom.Node;
 import org.votingsystem.crypto.HashUtils;
 import org.votingsystem.crypto.MockDNIe;
 import org.votingsystem.dto.ResponseDto;
+import org.votingsystem.http.ContentType;
+import org.votingsystem.http.HttpConn;
+import org.votingsystem.testlib.util.XMLUtils;
 import org.votingsystem.util.Constants;
 
 import java.io.IOException;

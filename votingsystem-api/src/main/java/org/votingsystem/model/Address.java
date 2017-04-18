@@ -1,9 +1,9 @@
 package org.votingsystem.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import org.votingsystem.dto.AddressDto;
 import org.votingsystem.model.converter.LocalDateTimeAttributeConverter;
 import org.votingsystem.util.CountryEurope;
-import org.votingsystem.dto.AddressDto;
 
 import javax.persistence.*;
 import java.io.Serializable;

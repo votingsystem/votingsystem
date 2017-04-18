@@ -7,10 +7,10 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
-import org.votingsystem.throwable.ValidationException;
 import org.votingsystem.dto.Dto;
 import org.votingsystem.model.voting.Election;
 import org.votingsystem.model.voting.ElectionOption;
+import org.votingsystem.throwable.ValidationException;
 import org.votingsystem.util.OperationType;
 
 import java.time.LocalDateTime;

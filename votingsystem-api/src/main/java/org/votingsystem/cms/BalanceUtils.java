@@ -1,8 +1,8 @@
 package org.votingsystem.cms;
 
+import org.votingsystem.dto.currency.IncomesDto;
 import org.votingsystem.model.currency.Transaction;
 import org.votingsystem.util.CurrencyCode;
-import org.votingsystem.dto.currency.IncomesDto;
 
 import java.math.BigDecimal;
 import java.util.Collection;

@@ -1,7 +1,6 @@
 package org.votingsystem.model;
 
 import org.votingsystem.crypto.cms.CMSSignedMessage;
-import org.votingsystem.xml.XML;
 
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;

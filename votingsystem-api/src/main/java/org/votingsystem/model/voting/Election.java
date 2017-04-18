@@ -4,13 +4,13 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import org.votingsystem.crypto.CertUtils;
 import org.votingsystem.dto.metadata.MetaInfDto;
 import org.votingsystem.dto.voting.ElectionDto;
+import org.votingsystem.dto.voting.ElectionOptionDto;
 import org.votingsystem.model.Certificate;
 import org.votingsystem.model.EntityBase;
 import org.votingsystem.model.SignedDocument;
 import org.votingsystem.model.User;
 import org.votingsystem.model.converter.LocalDateTimeAttributeConverter;
 import org.votingsystem.model.converter.MetaInfConverter;
-import org.votingsystem.dto.voting.ElectionOptionDto;
 
 import javax.persistence.*;
 import java.io.Serializable;

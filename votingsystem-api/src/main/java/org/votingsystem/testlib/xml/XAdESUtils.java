@@ -2,12 +2,12 @@ package org.votingsystem.testlib.xml;
 
 import eu.europa.esig.dss.DigestAlgorithm;
 import org.bouncycastle.util.encoders.Base64;
-import org.votingsystem.crypto.HashUtils;
-import org.votingsystem.testlib.util.XMLUtils;
-import org.votingsystem.util.Constants;
 import org.kxml2.kdom.Document;
 import org.kxml2.kdom.Element;
 import org.kxml2.kdom.Node;
+import org.votingsystem.crypto.HashUtils;
+import org.votingsystem.testlib.util.XMLUtils;
+import org.votingsystem.util.Constants;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;

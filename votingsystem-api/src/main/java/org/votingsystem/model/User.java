@@ -7,12 +7,12 @@ import org.bouncycastle.asn1.x500.style.BCStyle;
 import org.bouncycastle.cert.jcajce.JcaX509CertificateHolder;
 import org.bouncycastle.cms.SignerInformation;
 import org.bouncycastle.tsp.TimeStampToken;
-import org.votingsystem.dto.CertExtensionDto;
-import org.votingsystem.model.converter.LocalDateTimeAttributeConverter;
-import org.votingsystem.util.IdDocument;
 import org.votingsystem.crypto.CertUtils;
 import org.votingsystem.crypto.cms.CMSUtils;
+import org.votingsystem.dto.CertExtensionDto;
+import org.votingsystem.model.converter.LocalDateTimeAttributeConverter;
 import org.votingsystem.util.Constants;
+import org.votingsystem.util.IdDocument;
 import org.votingsystem.util.JSON;
 
 import javax.persistence.*;

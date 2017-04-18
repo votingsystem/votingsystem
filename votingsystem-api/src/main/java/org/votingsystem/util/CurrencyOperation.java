@@ -42,9 +42,9 @@ public enum CurrencyOperation implements SystemOperation {
     @JsonProperty("GET_TRANSACTION")
     GET_TRANSACTION("/api/transaction"),
     @JsonProperty("INIT_BROWSER_SESSION")
-    INIT_BROWSER_SESSION("/api/device/init-browser-session"),
+    INIT_BROWSER_SESSION("/api/session/init-browser"),
     @JsonProperty("INIT_MOBILE_SESSION")
-    INIT_MOBILE_SESSION("/api/device/init-mobile-session"),
+    INIT_MOBILE_SESSION("/api/session/init-mobile"),
 
     @JsonProperty("QR_INFO")
     QR_INFO("/api/currency-qr/info"),
@@ -53,7 +53,7 @@ public enum CurrencyOperation implements SystemOperation {
     @JsonProperty("SESSION_CERTIFICATION")
     SESSION_CERTIFICATION("/api/cert-issuer/session-csr"),
     @JsonProperty("SESSION_CERTIFICATION_DATA")
-    SESSION_CERTIFICATION_DATA("/api/device/session-certification-data");
+    SESSION_CERTIFICATION_DATA("/api/session/verify-device-certification");
 
     private String url;
 

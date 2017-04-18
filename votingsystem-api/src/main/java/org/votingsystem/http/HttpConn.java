@@ -31,7 +31,6 @@ import org.apache.http.protocol.HttpContext;
 import org.apache.http.ssl.SSLContextBuilder;
 import org.apache.http.ssl.SSLContexts;
 import org.apache.http.util.EntityUtils;
-import org.votingsystem.throwable.*;
 import org.votingsystem.dto.ResponseDto;
 import org.votingsystem.throwable.*;
 import org.votingsystem.util.JSON;

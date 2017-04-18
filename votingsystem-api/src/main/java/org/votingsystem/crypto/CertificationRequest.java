@@ -9,7 +9,6 @@ import org.bouncycastle.pkcs.PKCS10CertificationRequest;
 import org.bouncycastle.pkcs.PKCS10CertificationRequestBuilder;
 import org.bouncycastle.pkcs.jcajce.JcaPKCS10CertificationRequestBuilder;
 import org.votingsystem.dto.CertExtensionDto;
-import org.votingsystem.xades.XAdESSignature;
 import org.votingsystem.dto.currency.CurrencyCertExtensionDto;
 import org.votingsystem.dto.currency.TagDto;
 import org.votingsystem.dto.voting.CertVoteExtensionDto;
@@ -18,6 +17,7 @@ import org.votingsystem.throwable.CertificateRequestException;
 import org.votingsystem.util.Constants;
 import org.votingsystem.util.CurrencyCode;
 import org.votingsystem.util.JSON;
+import org.votingsystem.xades.XAdESSignature;
 
 import javax.security.auth.x500.X500Principal;
 import java.io.IOException;

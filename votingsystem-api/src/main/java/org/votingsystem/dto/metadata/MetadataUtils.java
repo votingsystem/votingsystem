@@ -1,8 +1,8 @@
 package org.votingsystem.dto.metadata;
 
 import org.votingsystem.dto.UserDto;
-import org.votingsystem.util.Country;
 import org.votingsystem.http.SystemEntityType;
+import org.votingsystem.util.Country;
 
 import java.io.IOException;
 import java.security.cert.CertificateEncodingException;

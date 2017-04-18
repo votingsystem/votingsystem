@@ -4,13 +4,12 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import org.bouncycastle.pkcs.PKCS10CertificationRequest;
-import org.votingsystem.model.SignedDocument;
-import org.votingsystem.throwable.ValidationException;
-import org.votingsystem.util.*;
 import org.votingsystem.crypto.CertUtils;
 import org.votingsystem.crypto.PEMUtils;
+import org.votingsystem.model.SignedDocument;
 import org.votingsystem.model.currency.CurrencyBatch;
 import org.votingsystem.model.currency.Tag;
+import org.votingsystem.throwable.ValidationException;
 import org.votingsystem.util.*;
 import org.votingsystem.xml.XML;
 

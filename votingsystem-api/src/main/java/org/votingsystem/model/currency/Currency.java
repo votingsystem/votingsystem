@@ -1,20 +1,20 @@
 package org.votingsystem.model.currency;
 
-import org.votingsystem.model.EntityBase;
-import org.votingsystem.model.SignedDocument;
-import org.votingsystem.model.converter.LocalDateTimeAttributeConverter;
-import org.votingsystem.util.DateUtils;
 import org.votingsystem.crypto.CertUtils;
 import org.votingsystem.crypto.CertificationRequest;
 import org.votingsystem.crypto.HashUtils;
 import org.votingsystem.dto.currency.CurrencyCertExtensionDto;
 import org.votingsystem.dto.currency.CurrencyDto;
 import org.votingsystem.model.Certificate;
+import org.votingsystem.model.EntityBase;
+import org.votingsystem.model.SignedDocument;
 import org.votingsystem.model.User;
+import org.votingsystem.model.converter.LocalDateTimeAttributeConverter;
 import org.votingsystem.throwable.CertificateRequestException;
 import org.votingsystem.throwable.ValidationException;
 import org.votingsystem.util.Constants;
 import org.votingsystem.util.CurrencyCode;
+import org.votingsystem.util.DateUtils;
 
 import javax.persistence.*;
 import java.io.Serializable;

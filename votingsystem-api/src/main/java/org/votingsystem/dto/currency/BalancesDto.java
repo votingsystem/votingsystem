@@ -3,8 +3,8 @@ package org.votingsystem.dto.currency;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import org.votingsystem.dto.UserDto;
-import org.votingsystem.util.CurrencyCode;
 import org.votingsystem.model.currency.Tag;
+import org.votingsystem.util.CurrencyCode;
 import org.votingsystem.util.Interval;
 
 import java.math.BigDecimal;

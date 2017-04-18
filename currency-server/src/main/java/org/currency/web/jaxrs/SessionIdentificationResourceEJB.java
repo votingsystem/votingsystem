@@ -43,10 +43,10 @@ import static javax.ejb.TransactionAttributeType.REQUIRES_NEW;
 /**
  * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-@Path("/device")
-public class DeviceResourceEJB {
+@Path("/session")
+public class SessionIdentificationResourceEJB {
 
-    private static final Logger log = Logger.getLogger(DeviceResourceEJB.class.getName());
+    private static final Logger log = Logger.getLogger(SessionIdentificationResourceEJB.class.getName());
 
     @PersistenceContext
     private EntityManager em;
@@ -54,78 +54,25 @@ public class DeviceResourceEJB {
     @Inject private BeanManager beanManager;
     @Inject private DeviceEJB deviceEJB;
 
-    @Path("/uuid/{uuid}")
-    @GET @Produces(MediaType.APPLICATION_JSON)
-    public Response getById(@PathParam("uuid") Long UUID) throws Exception {
-        List<Device> devicelist = em.createQuery("select d from Device d where d.UUID =:UUID")
-                .setParameter("UUID", UUID).getResultList();
-        if(devicelist.isEmpty()) return Response.status(Response.Status.NOT_FOUND).entity(
-                "ERROR - Device not found - id:" + UUID).build();
-        DeviceDto dto = new DeviceDto(devicelist.iterator().next());
-        return Response.ok().entity(JSON.getMapper().writeValueAsBytes(dto)).build();
+    @Transactional
+    @POST @Path("/close")
+    public Response closeSession(CMSDocument signedDocument, @Context HttpServletRequest req,
+                                 @Context HttpServletResponse resp) throws Exception {
+        User user = ((CurrencyPrincipal)req.getUserPrincipal()).getUser();
+        User signer = signedDocument.getFirstSignature().getSigner();
+        List<Certificate> certList = em.createQuery("select c from Certificate c where c.UUID=:UUID")
+                .setParameter("UUID", signer.getNumId()).getResultList();
+        if(certList.isEmpty())
+            return Response.status(Response.Status.NOT_FOUND).entity("Certificate not found - UUID: " + signer.getNumId()).build();
+        signer = certList.iterator().next().getSigner();
+        if(!user.getNumId().equals(signer.getNumId()))
+            throw new ValidationException("signer it's not session owner");
+        OperationDto requestDto = JSON.getMapper().readValue(signedDocument.getCmsMessage().getSignedContentStr(), OperationDto.class);
+        if(requestDto.getOperation().getType() != CurrencyOperation.CLOSE_SESSION) throw new ValidationException(format(
+                "bad message type, expected ''{0}'' found ''{1}''", CurrencyOperation.CLOSE_SESSION, requestDto.getOperation()));
+        req.getSession().removeAttribute(Constants.USER_KEY);
+        return Response.ok().entity("session closed").build();
     }
-
-    @Path("/nif/{nif}/list")
-    @GET @Produces(MediaType.APPLICATION_JSON)
-    public Response list(@PathParam("nif") String nifStr) throws Exception {
-        String nif = NifUtils.validate(nifStr);
-        Query query = em.createQuery("select d from Device d where d.user.numId =:numId").setParameter("numId", nif);
-        List<Device> deviceList = query.getResultList();
-        List<DeviceDto> resultList = new ArrayList<>();
-        for(Device device : deviceList) {
-            resultList.add(new DeviceDto(device));
-        }
-        ResultListDto<DeviceDto> resultListDto = new ResultListDto<DeviceDto>(resultList, 0, resultList.size(),
-                Long.valueOf(resultList.size()));
-        return Response.ok().entity(JSON.getMapper().writeValueAsBytes(resultListDto)).build();
-    }
-
-    @Path("/nif/{nif}/connected")
-    @GET @Produces(MediaType.APPLICATION_JSON)
-    public Response connected(@PathParam("nif") String nifStr) throws Exception {
-        String nif = NifUtils.validate(nifStr);
-        List<User> userList = em.createQuery("select u from User u where u.numId=:numId")
-                .setParameter("numId", nif).getResultList();
-        if(userList.isEmpty()) return Response.status(Response.Status.NOT_FOUND).entity(
-                "ERROR - User not found - nif:" + nif).build();
-        User user = userList.iterator().next();
-        Set<Device> deviceSet = SessionManager.getInstance().getUserDeviceSet(user.getId());
-        Set<DeviceDto> deviceSetDto = new HashSet<>();
-        for(Device device : deviceSet) {
-            deviceSetDto.add(new DeviceDto(device));
-        }
-        return Response.ok().entity(JSON.getMapper().writeValueAsBytes(UserDto.DEVICES(user, deviceSetDto, null))).build();
-    }
-
-    @Path("/id/{deviceUUID}/connected")
-    @GET @Produces(MediaType.APPLICATION_JSON)
-    public Response connectedDevice(@PathParam("deviceUUID") String deviceUUID,
-            @DefaultValue("false") @QueryParam("getAllDevicesFromOwner") boolean getAllDevicesFromOwner) throws Exception {
-        Set<DeviceDto> deviceSetDto = new HashSet<>();
-        Session session = SessionManager.getInstance().getDeviceSession(deviceUUID);
-        User user = null;
-        Device device = null;
-        if(session != null) {
-            user = (User) session.getUserProperties().get("user");
-            device = (Device) session.getUserProperties().get("device");
-            if(device != null) deviceSetDto.add(new DeviceDto(device));
-        }
-        if(getAllDevicesFromOwner) {
-            if(user == null) {
-                List<User> userList = em.createQuery("select d.user from Device d where d.UUID =:UUID")
-                        .setParameter("UUID", deviceUUID).getResultList();
-                user = userList.iterator().next();
-            }
-            if(user == null) return Response.status(Response.Status.NOT_FOUND).entity(
-                    "ERROR - User not found for device with UUID:" + deviceUUID).build();
-            Set<Device> deviceSet = SessionManager.getInstance().getUserDeviceSet(user.getId());
-            for(Device dev : deviceSet) {
-                if(dev == null || !dev.getId().equals(dev.getId())) deviceSetDto.add(new DeviceDto(dev));
-            }
-        }
-        return Response.ok().entity(JSON.getMapper().writeValueAsBytes(UserDto.DEVICES(user, deviceSetDto, null))).build();
-    }
-
     /**
      * Called from the browser to provide the public key that encrypts the message the mobile sends to the browser with the
      * 'browser session certificate'
@@ -134,7 +81,7 @@ public class DeviceResourceEJB {
      * @return
      * @throws Exception
      */
-    @POST @Path("/browser-publickey")
+    @POST @Path("/browser-init-publickey")
     @Produces(MediaType.TEXT_PLAIN)
     public Response browserPublickey(@Context HttpServletRequest req, byte[] csrRequestBytes) throws Exception {
         SessionCertificationDto certDto = JSON.getMapper().readValue(csrRequestBytes, SessionCertificationDto.class);
@@ -154,7 +101,7 @@ public class DeviceResourceEJB {
      * @return
      * @throws Exception
      */
-    @POST @Path("/session-certification-data")
+    @POST @Path("/verify-device-certification")
     @TransactionAttribute(REQUIRES_NEW)
     public Response sessionCertificationData(@FormParam("cmsMessage") String cmsMessage,
             @FormParam("browserUUID") String browserUUID,
@@ -179,14 +126,14 @@ public class DeviceResourceEJB {
         return  Response.ok().entity("OK").build();
     }
 
-    @POST @Path("/init-browser-session")
+    @POST @Path("/init-browser")
     @TransactionAttribute(REQUIRES_NEW)
     public Response initBrowserSession(CMSDocument signedDocument, @Context HttpServletRequest req) throws Exception {
         deviceEJB.initBrowserSession(signedDocument, req.getSession());
         return  Response.ok().entity("OK - init-browser-session").build();
     }
 
-    @POST @Path("/init-mobile-session")
+    @POST @Path("/init-mobile")
     @TransactionAttribute(REQUIRES_NEW)
     public Response initMobileSession(CMSDocument signedDocument, @Context HttpServletRequest req) throws Exception {
         deviceEJB.initMobileSession(signedDocument, req.getSession());

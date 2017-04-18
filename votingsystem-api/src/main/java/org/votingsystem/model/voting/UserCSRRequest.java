@@ -2,6 +2,7 @@ package org.votingsystem.model.voting;
 
 import org.votingsystem.model.*;
 import org.votingsystem.model.converter.LocalDateTimeAttributeConverter;
+
 import javax.persistence.*;
 import java.io.Serializable;
 import java.time.LocalDateTime;

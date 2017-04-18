@@ -4,9 +4,9 @@ import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import com.fasterxml.jackson.databind.node.TextNode;
-import org.votingsystem.util.SystemOperation;
 import org.votingsystem.util.CurrencyOperation;
 import org.votingsystem.util.OperationType;
+import org.votingsystem.util.SystemOperation;
 
 import java.io.IOException;
 import java.util.logging.Logger;

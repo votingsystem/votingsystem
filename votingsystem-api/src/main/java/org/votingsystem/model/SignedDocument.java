@@ -2,9 +2,9 @@ package org.votingsystem.model;
 
 import eu.europa.esig.dss.DSSDocument;
 import org.apache.commons.io.output.ByteArrayOutputStream;
-import org.votingsystem.model.converter.LocalDateTimeAttributeConverter;
 import org.votingsystem.crypto.SignedDocumentType;
 import org.votingsystem.dto.metadata.MetaInfDto;
+import org.votingsystem.model.converter.LocalDateTimeAttributeConverter;
 import org.votingsystem.model.converter.MetaInfConverter;
 import org.votingsystem.util.Constants;
 import org.votingsystem.xml.XML;

@@ -6,8 +6,8 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
-import org.votingsystem.dto.UserDto;
 import org.votingsystem.dto.OperationTypeDto;
+import org.votingsystem.dto.UserDto;
 import org.votingsystem.http.SystemEntityType;
 
 import java.time.LocalDateTime;

@@ -3,8 +3,8 @@ package org.votingsystem.dto.metadata;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
-import org.votingsystem.util.Country;
 import org.votingsystem.dto.AddressDto;
+import org.votingsystem.util.Country;
 
 import java.util.logging.Logger;
 
