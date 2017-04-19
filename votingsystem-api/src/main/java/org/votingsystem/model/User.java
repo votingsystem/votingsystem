@@ -506,6 +506,7 @@ public class User extends EntityBase implements Serializable {
 
     public static User getUser(X500Name subject) {
         User result = new User();
+        String unasignedAttributes = null;
         for(RDN rdn : subject.getRDNs()) {
             AttributeTypeAndValue attributeTypeAndValue = rdn.getFirst();
             if(BCStyle.SERIALNUMBER.getId().equals(attributeTypeAndValue.getType().getId())) {
@@ -518,8 +519,16 @@ public class User extends EntityBase implements Serializable {
                 result.setCn(attributeTypeAndValue.getValue().toString());
             } else if(BCStyle.C.getId().equals(attributeTypeAndValue.getType().getId())) {
                 result.setCountry(attributeTypeAndValue.getValue().toString());
-            } else log.info("oid: " + attributeTypeAndValue.getType().getId() + " - value: " + attributeTypeAndValue.getValue().toString());
+            } else {
+                if(unasignedAttributes == null)
+                    unasignedAttributes = "oid: " + attributeTypeAndValue.getType().getId() + ", value: " +
+                            attributeTypeAndValue.getValue().toString();
+                else unasignedAttributes = " - oid: " + attributeTypeAndValue.getType().getId() + ", value: " +
+                        attributeTypeAndValue.getValue().toString();
+            }
         }
+        if(unasignedAttributes != null)
+            log.fine("unasignedAttributes: " + unasignedAttributes);
         return result;
     }
 

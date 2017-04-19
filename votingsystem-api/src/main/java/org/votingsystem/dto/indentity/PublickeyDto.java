@@ -2,11 +2,7 @@ package org.votingsystem.dto.indentity;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
-import org.votingsystem.dto.AddressDto;
-import org.votingsystem.dto.OperationTypeDto;
-import org.votingsystem.dto.UserDto;
 
 /**
  * Licence: https://github.com/votingsystem/votingsystem/wiki/Licencia
@@ -17,13 +13,13 @@ import org.votingsystem.dto.UserDto;
 public class PublickeyDto {
 
     private String publicKeyPEM;
-    private String userUUID;
+    private String sessionUUID;
 
     public PublickeyDto() { }
 
-    public PublickeyDto(String publicKeyPEM, String userUUID) {
+    public PublickeyDto(String publicKeyPEM, String sessionUUID) {
         this.publicKeyPEM = publicKeyPEM;
-        this.userUUID = userUUID;
+        this.sessionUUID = sessionUUID;
     }
 
     public String getPublicKeyPEM() {
@@ -35,11 +31,11 @@ public class PublickeyDto {
         return this;
     }
 
-    public String getUserUUID() {
-        return userUUID;
+    public String getSessionUUID() {
+        return sessionUUID;
     }
 
-    public void setUserUUID(String userUUID) {
-        this.userUUID = userUUID;
+    public void setSessionUUID(String sessionUUID) {
+        this.sessionUUID = sessionUUID;
     }
 }

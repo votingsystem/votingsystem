@@ -24,9 +24,6 @@ public class XmlReader {
         userCertificationRequest.setMobileCsr(XMLUtils.getTextChild(certRequestElement, "mobileCsr"));
         userCertificationRequest.setMobileCertificate(XMLUtils.getTextChild(certRequestElement, "mobileCsrSigned"));
 
-        userCertificationRequest.setUserUUID(XMLUtils.getTextChild(certRequestElement, "userUUID"));
-        userCertificationRequest.setToken(XMLUtils.getTextChild(certRequestElement, "token"));
-
         Element addressElement = XMLUtils.getElement(certRequestElement,"address");
         if(addressElement != null) {
             AddressDto address = new AddressDto();

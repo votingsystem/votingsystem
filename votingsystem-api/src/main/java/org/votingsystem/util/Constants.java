@@ -35,7 +35,7 @@ public class Constants {
     public static final String DATA_DIGEST_ALGORITHM         = "SHA256";
 
     public static final String QR_OPERATIONS       = "QR_OPERATIONS_KEY";
-    public static final String USER_UUID           = "USER_UUID_KEY";
+    public static final String SESSION_UUID        = "SESSION_UUID_KEY";
     public static final String CSR                 = "CSR_KEY";
     public static final String USER_KEY            = "USER_KEY";
     public static final String BROWSER_PLUBLIC_KEY = "BROWSER_PLUBLIC_KEY";

@@ -33,7 +33,6 @@
             function createPKCS7MessageSession() {
                 var messageDto = {operation:{type:"CLOSE_SESSION"}, uuid:vs.getUUID()};
                 vs.rsaUtil.sign(JSON.stringify(messageDto), function(cmsSignedMessage) {
-                    var cmsSignedMessage = forge.pkcs7.messageToPem(cmsSignedMessage);
                     console.log("message signed with session keys:", cmsSignedMessage)
                 });
             }

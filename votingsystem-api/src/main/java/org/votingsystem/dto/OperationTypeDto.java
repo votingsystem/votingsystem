@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
+import org.votingsystem.throwable.ValidationException;
 import org.votingsystem.util.CurrencyOperation;
 import org.votingsystem.util.OperationType;
 import org.votingsystem.util.SystemOperation;
@@ -61,6 +62,14 @@ public class OperationTypeDto<T> {
     public OperationTypeDto setEntityId(String entityId) {
         this.entityId = entityId;
         return this;
+    }
+
+    public void validate(SystemOperation type, String entityId) throws ValidationException {
+        if(this.entityId == null || this.type == null || !this.entityId.equals(entityId) ||
+                !this.type.toString().equals(type.toString())) {
+            throw new ValidationException("Expected Operation - type: " + type + " - entityId: " + entityId +
+                    " - found: " + this.type + " - " + this.entityId);
+        }
     }
 
 }

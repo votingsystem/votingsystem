@@ -44,7 +44,7 @@ public class Certificate implements Serializable {
     public static final String FIND_BY_SERIALNUMBER_AND_SUBJECT_DN = "Certificate.findBySerialNumberAndSubjectDN";
     public static final String FIND_BY_SIGNER_STATE_AND_TYPE = "Certificate.findBySignerAndStateAndType";
 
-    public enum State {OK, ERROR, CANCELED, CONSUMED, LAPSED, UNKNOWN, SESSION_FINISHED}
+    public enum State {OK, ERROR, CANCELED, CONSUMED, LAPSED, UNKNOWN, SESSION_CLOSED}
 
     public enum Type {
         VOTE, USER, USER_ID_CARD, CERTIFICATE_AUTHORITY, CERTIFICATE_AUTHORITY_ID_CARD, BROWSER_SESSION, MOBILE_SESSION,

@@ -83,17 +83,24 @@ public class DeviceEJB {
 
     @TransactionAttribute(REQUIRES_NEW)
     public void initDeviceSession(CMSDocument signedDocument, HttpSession httpSession) throws Exception {
+        OperationDto operation = JSON.getMapper().readValue(signedDocument.getCMS().getSignedContentStr(), OperationDto.class);
+        operation.getOperation().validate(CurrencyOperation.INIT_DEVICE_SESSION, config.getEntityId());
         signedDocument.setSignedDocumentType(SignedDocumentType.DEVICE_SESSION);
         em.merge(signedDocument);
-        OperationDto operation = JSON.getMapper().readValue(signedDocument.getCMS().getSignedContentStr(), OperationDto.class);
-        if(!operation.getOperation().getEntityId().equals(config.getEntityId()) ||
-                !CurrencyOperation.INIT_DEVICE_SESSION.toString().equals(operation.getOperation().getType().toString())) {
-            throw new ValidationException("Expected Operation type: INIT_DEVICE_SESSION - " + config.getEntityId() +
-                    " found: " + operation.getOperation().getType() + " - " + operation.getOperation().getEntityId());
-        }
-        String previousUserUUID = (String) httpSession.getAttribute(Constants.USER_UUID);
-        HttpSessionManager.getInstance().updateSession(previousUserUUID, operation.getUserUUID(),
+        String previousSessionUUID = (String) httpSession.getAttribute(Constants.SESSION_UUID);
+        HttpSessionManager.getInstance().updateSession(previousSessionUUID, operation.getSessionUUID(),
                 operation.getHttpSessionId(), signedDocument.getFirstSignature().getSigner());
     }
 
+    @TransactionAttribute(REQUIRES_NEW)
+    public void closeDeviceSession(CMSDocument signedDocument, HttpSession httpSession) throws Exception {
+        OperationDto operation = JSON.getMapper().readValue(signedDocument.getCMS().getSignedContentStr(), OperationDto.class);
+        operation.getOperation().validate(CurrencyOperation.CLOSE_SESSION, config.getEntityId());
+        signedDocument.setSignedDocumentType(SignedDocumentType.CLOSE_SESSION);
+        em.merge(signedDocument);
+        httpSession.invalidate();
+
+        em.merge(signedDocument.getSignatures().iterator().next().getSignerCertificate().setState(
+                Certificate.State.SESSION_CLOSED));
+    }
 }

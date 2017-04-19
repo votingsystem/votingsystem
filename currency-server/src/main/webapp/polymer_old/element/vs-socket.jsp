@@ -122,7 +122,7 @@
             disconnect:function () {
                 var socketMessageDto = {operation:"CLOSE_SESSION", uuid:vs.getUUID()}
                 function signCallback(cmsSignedMessage) {
-                    socketMessageDto.cmsMessagePEM = forge.pkcs7.messageToPem(cmsSignedMessage);
+                    socketMessageDto.cmsMessagePEM = cmsSignedMessage;
                     this.websocket.send(JSON.stringify(socketMessageDto))
                 }
                 vs.rsaUtil.sign(JSON.stringify(socketMessageDto), signCallback.bind(this))

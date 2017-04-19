@@ -2,12 +2,9 @@ package org.currency.test;
 
 import org.votingsystem.dto.ResponseDto;
 import org.votingsystem.http.HttpConn;
-import org.votingsystem.http.MediaType;
 import org.votingsystem.testlib.BaseTest;
 import org.votingsystem.util.CurrencyOperation;
-import org.votingsystem.util.OperationType;
 
-import java.util.Locale;
 import java.util.logging.Logger;
 
 

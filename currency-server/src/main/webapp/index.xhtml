@@ -6,10 +6,9 @@
     </ui:define>
     <ui:define name="content">
         <div style="width: 1000px; margin: 30px auto;">
-            <button onclick="signAndSend()">TEST</button>
-            <button onclick="printKeys()">RSA</button>
-            <button onclick="postData()">POST</button>
-
+            <button onclick="signAndSend()">signAndSend</button>
+            <button onclick="printPKISessionData()">pkiSessionData on console</button>
+            <br/>
             <a href="https://voting.ddns.net/currency-server/res/sb2/pages/notifications.html" style="margin: 0 20px 0 20px;">sb2</a>
             <a href="https://voting.ddns.net/currency-server/res/gtl/production/index.html">gtl</a>
         </div>
@@ -17,31 +16,16 @@
             //<![CDATA[
                 vs.setMainPageCaption("#{msg.appTitle}");
 
-                function postData() {
-                    //vs.httpPost = function(url, callback, request, contentType, headersMap)
-                    vs.httpPost("https://voting.ddns.net/currency-server/api/test/testPost", function (responseText, status) {
-                        console.log("status: " + status + " - responseText: " + responseText);
-                    }, "test string");
-                }
-
-                function printKeys() {
+                function printPKISessionData() {
                     console.log("pkiSessionData: " + localStorage.getItem('pkiSessionData'))
                 }
 
                 function signAndSend() {
-                    console.log("signAndSend");
                     var socketMsgDto = {operation:{type:"CLOSE_SESSION"}, uuid:vs.getUUID()};
-                    vs.rsaUtil.sign(JSON.stringify(socketMsgDto), function(cmsSignedMessage) {
-                        console.log("cmsSignedMessage: ", cmsSignedMessage);
-
-                        var pemMessage = forge.pkcs7.messageToPem(cmsSignedMessage);
-                        console.log("pemMessage:", pemMessage)
-
-                        //function(url, callback, request, contentType, headersMap)
-                        vs.httpPost(vs.entityId + "/api/test-pkcs7/sign", function (responseText, status) {
+                    vs.rsaUtil.signAndSend(socketMsgDto, vs.entityId + "/api/test-pkcs7/sign",
+                        function (responseText, status) {
                             console.log("status: " + status + " - responseText: " + responseText);
-                        }, pemMessage, "application/json;application/pkcs7-signature");
-                    })
+                        });
                 }
             // ]]>
         </script>

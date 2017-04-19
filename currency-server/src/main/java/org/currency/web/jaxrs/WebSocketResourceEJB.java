@@ -35,7 +35,7 @@ public class WebSocketResourceEJB {
         if(SessionManager.getInstance().hasSession(deviceUUID)) {
             SessionManager.getInstance().sendMessage(message, deviceUUID);
         } else {
-            SocketPushEvent pushEvent = new SocketPushEvent(message, SocketPushEvent.Type.TO_USER).setUserUUID(deviceUUID);
+            SocketPushEvent pushEvent = new SocketPushEvent(message, SocketPushEvent.Type.TO_USER).setSessionUUID(deviceUUID);
             beanManager.fireEvent(pushEvent);
         }
         return  Response.ok().entity("OK").type(MediaType.PKCS7_SIGNED).build();
@@ -51,7 +51,7 @@ public class WebSocketResourceEJB {
                     SessionManager.getInstance().sendMessage(new String(requestBytes), message.getDeviceToUUID());
                 } else {
                     SocketPushEvent pushEvent = new SocketPushEvent(new String(requestBytes),
-                            SocketPushEvent.Type.TO_USER).setUserUUID(message.getDeviceToUUID());
+                            SocketPushEvent.Type.TO_USER).setSessionUUID(message.getDeviceToUUID());
                     beanManager.fireEvent(pushEvent);
                 }
                 break;

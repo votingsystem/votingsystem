@@ -183,10 +183,10 @@
     </div>
     <script>
         //<![CDATA[
-        vs.userUUID = "#{socketBean.getUserUUID()}";
+        vs.sessionUUID = "#{socketBean.getSessionUUID()}";
 
         var sessionId = vs.getCookie("JSESSIONID");
-        console.log("sessionId: " + sessionId + " - userUUID: " + vs.userUUID);
+        console.log("sessionId: " + sessionId + " - sessionUUID: " + vs.sessionUUID);
 
         vs.sessionClosed = function() {
             setSessionState(false);
@@ -194,8 +194,8 @@
         };
 
         function showAccessCode() {
-            var userUUID = "#{socketBean.getUserUUID()}";
-            vs.showQR('#{msg.readQRMsg}', userUUID.substring(0, 4).toUpperCase(), '#{pageBean.getAccessCodeQR()}')
+            var sessionUUID = "#{socketBean.getSessionUUID()}";
+            vs.showQR('#{msg.readQRMsg}', sessionUUID.substring(0, 4).toUpperCase(), '#{pageBean.getAccessCodeQR()}')
             console.log("pageBean.getAccessCodeQR: #{pageBean.getAccessCodeQR()}")
         }
 
@@ -212,16 +212,14 @@
         }
 
         function closeSession() {
-            var socketMsgDto = {operation:{type:"CLOSE_SESSION"}, httpSessionId:sessionId, userUUID:vs.userUUID};
-            vs.rsaUtil.sign(JSON.stringify(socketMsgDto), function(cmsSignedMessage) {
-                var cmsSignedMessage = forge.pkcs7.messageToPem(cmsSignedMessage);
-                vs.httpPost(vs.entityId + "/api/device/close-session", function (responseText, status) {
-                    console.log("status: " + status + " - responseText: " + responseText);
-                    if(200 === status) {
-                        vs.sessionClosed();
-                        window.location.href = vs.entityId;
-                    }
-                }, cmsSignedMessage, "application/pkcs7-signature");
+            var msgDto = {operation:{type:"CLOSE_SESSION", entityId:vs.entityId}, httpSessionId:sessionId,
+                sessionUUID:vs.sessionUUID, uuid:vs.getUUID()};
+            vs.rsaUtil.signAndSend(msgDto, vs.entityId + "/api/session/close", function(responseText, status) {
+                console.log("status: " + status + " - responseText: " + responseText);
+                if(200 === status) {
+                    vs.sessionClosed();
+                    window.location.href = vs.entityId;
+                }
             });
         }
 
@@ -238,24 +236,22 @@
                             var sessionCertification = toJSON(decodeURIComponent(escape(window.atob(jsonMessage.base64Data))));
                             console.log("session-certification: ", sessionCertification);
                             vs.rsaUtil = new RSAUtil(null, sessionCertification.privateKeyPEM, sessionCertification.browserCertificate);
-                            vs.userUUID = sessionCertification.browserUUID;
+                            vs.sessionUUID = sessionCertification.browserUUID;
                             console.log("rsaUtil: ", vs.rsaUtil);
-                            pkiSessionDataMap[vs.userUUID] = sessionCertification;
+                            pkiSessionDataMap[vs.sessionUUID] = sessionCertification;
                             sessionCertification.userFullName = sessionCertification.user.givenName + " " + sessionCertification.user.surName;
                             localStorage.setItem('pkiSessionData', JSON.stringify(pkiSessionDataMap));
                             setSessionState(true, sessionCertification.userFullName);
 
                             var msgDto = {operation:{type:"INIT_DEVICE_SESSION", entityId:vs.entityId},
-                                httpSessionId:sessionId, userUUID:vs.userUUID};
+                                httpSessionId:sessionId, sessionUUID:vs.sessionUUID};
 
                             console.log("/api/session/init-device-session - msgDto: ", msgDto);
 
-                            vs.rsaUtil.sign(JSON.stringify(msgDto), function(cmsSignedMessage) {
-                                var cmsSignedMessage = forge.pkcs7.messageToPem(cmsSignedMessage);
-                                vs.httpPost(vs.entityId + "/api/session/init-device-session", function (responseText, status) {
+                            vs.rsaUtil.signAndSend(msgDto, vs.entityId + "/api/session/init-device-session",
+                                function (responseText, status) {
                                     console.log("status: " + status + " - responseText: " + responseText);
-                                }, cmsSignedMessage, "application/pkcs7-signature");
-                            });
+                                });
                             $('#alertDialog').modal('toggle');
                             break;
                     }
@@ -275,7 +271,7 @@
         if(!pkiSessionDataMap)
             pkiSessionDataMap = {};
 
-        if(pkiSessionDataMap[vs.userUUID] == null) {
+        if(pkiSessionDataMap[vs.sessionUUID] == null) {
             pkiSessionDataMap = {}
             localStorage.setItem('pkiSessionData', null);
             console.log("deleted previous sessions");
@@ -285,19 +281,19 @@
 
         if(Object.keys(pkiSessionDataMap).length === 0) {
             vs.rsaUtil = new RSAUtil(1024);
-            var browserPublicKey = {publicKeyPEM:vs.rsaUtil.publicKeyPEM, userUUID:vs.userUUID};
+            var browserPublicKey = {publicKeyPEM:vs.rsaUtil.publicKeyPEM, sessionUUID:vs.sessionUUID};
             vs.httpPost("#{request.contextPath}/api/currency-qr/put-publickey", function(responseText, status) {
                 console.log("#{request.contextPath}/api/currency-qr/put-publickey - " + responseText + " - status: " + status);
             }, JSON.stringify(browserPublicKey));
         } else {
-            var sessionData = pkiSessionDataMap[vs.userUUID];
-            vs.rsaUtil = new RSAUtil(null, sessionData.privateKeyPEM, sessionData.x509CertificatePEM);
+            var sessionData = pkiSessionDataMap[vs.sessionUUID];
+            vs.rsaUtil = new RSAUtil(null, sessionData.privateKeyPEM, sessionData.browserCertificate);
             setSessionState(true, sessionData.userFullName);
         }
 
         //]]>
     </script>
     <script src="#{request.contextPath}/res/js/custom.min.js"></script>
-    <o:socket channel="testChannel" user="#{socketBean.getUserUUID()}" onmessage="serviceUpdated"/>
+    <o:socket channel="testChannel" user="#{socketBean.getSessionUUID()}" onmessage="serviceUpdated"/>
 </h:body>
 </html>

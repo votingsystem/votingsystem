@@ -7,7 +7,7 @@ public class SocketPushEvent {
     public enum Type {ALL_USERS, TO_USER, TO_GROUP}
 
     private final Type type;
-    private String userUUID;
+    private String sessionUUID;
     private final String message;
     private Set<String> userSet;
 
@@ -16,9 +16,9 @@ public class SocketPushEvent {
         this.type = type;
     }
 
-    public SocketPushEvent(String message, String userUUID, Type type) {
+    public SocketPushEvent(String message, String sessionUUID, Type type) {
         this.message = message;
-        this.userUUID = userUUID;
+        this.sessionUUID = sessionUUID;
         this.type = type;
     }
 
@@ -39,12 +39,12 @@ public class SocketPushEvent {
         return this;
     }
 
-    public String getUserUUID() {
-        return userUUID;
+    public String getSessionUUID() {
+        return sessionUUID;
     }
 
-    public SocketPushEvent setUserUUID(String userUUID) {
-        this.userUUID = userUUID;
+    public SocketPushEvent setSessionUUID(String sessionUUID) {
+        this.sessionUUID = sessionUUID;
         return this;
     }
 

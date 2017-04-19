@@ -89,14 +89,14 @@ RSAUtil.prototype.sign = function(contentToSign, callback) {
             authenticatedAttributes: authenticatedAttributes 
         });
         cmsSignedMessage.sign()
+        cmsSignedMessage = forge.pkcs7.messageToPem(cmsSignedMessage);
         callback(cmsSignedMessage);
     }.bind(this))
 }
 
-RSAUtil.prototype.signAndPost = function(url, contentToSign, callback) {
+RSAUtil.prototype.signAndSend = function(contentToSign, url, callback) {
     this.sign(contentToSign, function (cmsSignedMessage) {
-        var cmsSignedMessagePEM = forge.pkcs7.messageToPem(cmsSignedMessage);
-        vs.postHTTP(url, callback , cmsSignedMessagePEM, vs.MediaType.JSON_SIGNED)
+        vs.httpPost(url, callback , cmsSignedMessage, "application/pkcs7-signature");
     })
 }
 

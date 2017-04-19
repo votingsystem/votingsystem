@@ -16,20 +16,6 @@ public class XmlWriter {
 
     private static final Logger log = Logger.getLogger(XmlWriter.class.getName());
 
-/*
-    private AddressDto address;
-
-    private String browserCsr;
-    private String browserCsrSigned;
-
-    private String mobileCsr;
-    private String mobileCsrSigned;
-
-    private String token;
-    private String userUUID;
-
-*/
-
     public static byte[] write(SessionCertificationDto certRequest) throws Exception {
         Document doc = new Document();
         Element certificationRequestElement = doc.createElement("", "CertificationRequest");
@@ -52,16 +38,6 @@ public class XmlWriter {
             Element mobileCsrSigned = doc.createElement("", "mobileCsrSigned");
             mobileCsrSigned.addChild(Node.TEXT, certRequest.getMobileCertificate());
             certificationRequestElement.addChild(Node.ELEMENT, mobileCsrSigned);
-        }
-        if(certRequest.getUserUUID() != null) {
-            Element userUUIDElement = doc.createElement("", "userUUID");
-            userUUIDElement.addChild(Node.TEXT, certRequest.getUserUUID());
-            certificationRequestElement.addChild(Node.ELEMENT, userUUIDElement);
-        }
-        if(certRequest.getToken() != null) {
-            Element tokenElement = doc.createElement("", "token");
-            tokenElement.addChild(Node.TEXT, certRequest.getToken());
-            certificationRequestElement.addChild(Node.ELEMENT, tokenElement);
         }
         if(certRequest.getAddress() != null) {
             certificationRequestElement.addChild(Node.ELEMENT, getAddressElement(certRequest.getAddress()));

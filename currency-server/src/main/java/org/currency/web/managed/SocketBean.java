@@ -35,9 +35,9 @@ public class SocketBean implements Serializable {
         testChannel.send(message, userUUIDList);
     }
 
-    public String getUserUUID() {
+    public String getSessionUUID() {
         HttpServletRequest req = (HttpServletRequest) FacesContext.getCurrentInstance().getExternalContext().getRequest();
-        return (String) req.getSession().getAttribute(Constants.USER_UUID);
+        return (String) req.getSession().getAttribute(Constants.SESSION_UUID);
     }
 
     public void onPushEvent(@Observes SocketPushEvent event) {
@@ -47,7 +47,7 @@ public class SocketBean implements Serializable {
                 broadcast(event.getMessage());
                 break;
             case TO_USER:
-                sendMessageToUser(event.getMessage(), event.getUserUUID());
+                sendMessageToUser(event.getMessage(), event.getSessionUUID());
                 break;
             case TO_GROUP:
                 sendMessageToGroup(event.getMessage(), event.getUserSet());

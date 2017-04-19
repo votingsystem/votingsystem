@@ -39,7 +39,7 @@ public class HttpSessionManager implements HttpSessionListener {
     @Override
     public void sessionCreated(HttpSessionEvent sessionEvent) {
         String userUUID = UUID.randomUUID().toString();
-        sessionEvent.getSession().setAttribute(Constants.USER_UUID, userUUID);
+        sessionEvent.getSession().setAttribute(Constants.SESSION_UUID, userUUID);
         log.info("session id: " + sessionEvent.getSession().getId() + " - userUUID: " + userUUID);
         userSessionMap.put(userUUID, sessionEvent.getSession());
         sessionIdMap.put(sessionEvent.getSession().getId(), sessionEvent.getSession());
@@ -48,18 +48,10 @@ public class HttpSessionManager implements HttpSessionListener {
     @Override
     public void sessionDestroyed(HttpSessionEvent sessionEvent) {
         log.severe("session id: " + sessionEvent.getSession().getId() + " - userUUID: " +
-                sessionEvent.getSession().getAttribute(Constants.USER_UUID));
+                sessionEvent.getSession().getAttribute(Constants.SESSION_UUID));
         try {
-            User user = (User) sessionEvent.getSession().getAttribute(Constants.USER_KEY);
-            if(user != null) {
-                Device device = user.getDevice();
-                if(device != null && device.getCertificate() != null) {
-                    em.merge(device.getCertificate().setState(Certificate.State.SESSION_FINISHED));
-                    log.info("certificate id: " + device.getCertificate().getId() + " - state: " +
-                            device.getCertificate().getState());
-                }
-            }
-            String userUUID = (String)sessionEvent.getSession().getAttribute(Constants.USER_UUID);
+            //User user = (User) sessionEvent.getSession().getAttribute(Constants.USER_KEY);
+            String userUUID = (String)sessionEvent.getSession().getAttribute(Constants.SESSION_UUID);
             userSessionMap.remove(userUUID);
             sessionIdMap.remove(sessionEvent.getSession().getId());
         } catch (Exception ex) {
@@ -83,7 +75,7 @@ public class HttpSessionManager implements HttpSessionListener {
         return userSessionMap.keySet();
     }
 
-    public Map<String, String> getUserUUIDSessionIdMap() {
+    public Map<String, String> getSessionUUIDSessionIdMap() {
         Map<String,String> result = new HashMap<>();
         for(Map.Entry<String, HttpSession> entry : userSessionMap.entrySet()) {
             result.put(entry.getValue().getId(), entry.getKey());
@@ -94,7 +86,7 @@ public class HttpSessionManager implements HttpSessionListener {
     public void updateSession(String previousUserUUID, String newUserUUID, String httpSessionId, User user) {
         log.info("httpSession id: " + httpSessionId + " - previousUserUUID: " + previousUserUUID + " - newUserUUID: " + newUserUUID);
         HttpSession httpSession = sessionIdMap.get(httpSessionId);
-        httpSession.setAttribute(Constants.USER_UUID, newUserUUID);
+        httpSession.setAttribute(Constants.SESSION_UUID, newUserUUID);
         httpSession.setAttribute(Constants.USER_KEY, user);
         userSessionMap.remove(previousUserUUID);
         userSessionMap.put(newUserUUID, httpSession);

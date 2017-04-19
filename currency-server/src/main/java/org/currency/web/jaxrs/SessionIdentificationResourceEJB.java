@@ -1,5 +1,7 @@
 package org.currency.web.jaxrs;
 
+import org.currency.web.ejb.ConfigCurrencyServer;
+import org.currency.web.ejb.ConfigEJB;
 import org.currency.web.ejb.DeviceEJB;
 import org.currency.web.http.CurrencyPrincipal;
 import org.currency.web.managed.SocketPushEvent;
@@ -7,15 +9,11 @@ import org.currency.web.util.AuthRole;
 import org.votingsystem.crypto.cms.CMSSignedMessage;
 import org.votingsystem.dto.DeviceDto;
 import org.votingsystem.dto.MessageDto;
-import org.votingsystem.dto.OperationDto;
 import org.votingsystem.ejb.SignerInfoService;
 import org.votingsystem.model.CMSDocument;
-import org.votingsystem.model.Certificate;
 import org.votingsystem.model.SignedDocument;
 import org.votingsystem.model.User;
 import org.votingsystem.throwable.ValidationException;
-import org.votingsystem.util.Constants;
-import org.votingsystem.util.CurrencyOperation;
 import org.votingsystem.util.JSON;
 
 import javax.annotation.security.PermitAll;
@@ -35,10 +33,8 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import java.util.List;
 import java.util.logging.Logger;
 
-import static java.text.MessageFormat.format;
 import static javax.ejb.TransactionAttributeType.REQUIRES_NEW;
 
 /**
@@ -55,24 +51,11 @@ public class SessionIdentificationResourceEJB {
     @Inject private BeanManager beanManager;
     @Inject private DeviceEJB deviceEJB;
 
-    @PermitAll
     @Transactional
     @POST @Path("/close")
     public Response closeSession(CMSDocument signedDocument, @Context HttpServletRequest req,
                                  @Context HttpServletResponse resp) throws Exception {
-        User user = ((CurrencyPrincipal)req.getUserPrincipal()).getUser();
-        User signer = signedDocument.getFirstSignature().getSigner();
-        List<Certificate> certList = em.createQuery("select c from Certificate c where c.UUID=:UUID")
-                .setParameter("UUID", signer.getNumId()).getResultList();
-        if(certList.isEmpty())
-            return Response.status(Response.Status.NOT_FOUND).entity("Certificate not found - UUID: " + signer.getNumId()).build();
-        signer = certList.iterator().next().getSigner();
-        if(!user.getNumId().equals(signer.getNumId()))
-            throw new ValidationException("signer it's not session owner");
-        OperationDto requestDto = JSON.getMapper().readValue(signedDocument.getCmsMessage().getSignedContentStr(), OperationDto.class);
-        if(requestDto.getOperation().getType() != CurrencyOperation.CLOSE_SESSION) throw new ValidationException(format(
-                "bad message type, expected ''{0}'' found ''{1}''", CurrencyOperation.CLOSE_SESSION, requestDto.getOperation()));
-        req.getSession().removeAttribute(Constants.USER_KEY);
+        deviceEJB.closeDeviceSession(signedDocument, req.getSession());
         return Response.ok().entity("session closed").build();
     }
 
@@ -96,6 +79,7 @@ public class SessionIdentificationResourceEJB {
             @FormParam("socketMsg") String socketMsg, @Context HttpServletRequest req) throws Exception {
         CMSSignedMessage cmsSignedMessage = CMSSignedMessage.FROM_PEM(cmsMessage.getBytes());
         deviceEJB.sessionCertification(cmsSignedMessage);
+
         MessageDto message = JSON.getMapper().readValue(socketMsg, MessageDto.class);
         SocketPushEvent pushEvent = new SocketPushEvent(socketMsg, message.getDeviceToUUID(),
                 SocketPushEvent.Type.TO_USER);

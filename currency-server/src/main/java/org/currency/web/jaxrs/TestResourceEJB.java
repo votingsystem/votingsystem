@@ -76,20 +76,19 @@ public class TestResourceEJB {
     @Produces(MediaType.TEXT_PLAIN)
     public Response sessionId(@Context HttpServletRequest req, @Context HttpServletResponse res) throws Exception {
         HttpSession session = req.getSession();
-        log.info("session.getId: " + session.getId() + " --- user uuid: " + req.getSession().getAttribute(Constants.USER_UUID));
+        log.info("session.getId: " + session.getId() + " --- user uuid: " + req.getSession().getAttribute(Constants.SESSION_UUID));
         return Response.ok().entity("sessionId: " + session.getId() + " - user uuid: " +
-                req.getSession().getAttribute(Constants.USER_UUID)).build() ;
+                req.getSession().getAttribute(Constants.SESSION_UUID)).build() ;
     }
 
     @GET @Path("/invalidateSession")
     @Produces(MediaType.TEXT_PLAIN)
     public Response invalidateSession(@Context HttpServletRequest req, @Context HttpServletResponse res) throws Exception {
         HttpSession session = req.getSession();
-        log.info("session id: " + session.getId() + " - userUUID: " +
-                req.getSession().getAttribute(Constants.USER_UUID));
+        String msg = "Invalidated session id: " + session.getId() + " - userUUID: " +
+                req.getSession().getAttribute(Constants.SESSION_UUID);
         session.invalidate();
-        return Response.ok().entity("Invalidated session id: " + session.getId() + " - userUUID: " +
-                req.getSession().getAttribute(Constants.USER_UUID)).build() ;
+        return Response.ok().entity(msg).build() ;
     }
 
     @GET @Path("/sessions")
@@ -103,7 +102,7 @@ public class TestResourceEJB {
     @Produces(MediaType.APPLICATION_JSON)
     public Response getSessionsMap(@Context HttpServletRequest req, @Context HttpServletResponse res) throws Exception {
         return Response.ok().entity(
-                JSON.getMapper().writeValueAsBytes(HttpSessionManager.getInstance().getUserUUIDSessionIdMap())).build() ;
+                JSON.getMapper().writeValueAsBytes(HttpSessionManager.getInstance().getSessionUUIDSessionIdMap())).build() ;
     }
 
     @GET @Path("/addToRealm")

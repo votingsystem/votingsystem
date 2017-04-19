@@ -107,7 +107,7 @@
                         alert("#{msg.quitConfirmMsg}", "#{msg.messageLbl}", function() {
                             var operation = {operation:'CLOSE_SESSION', UUID:vs.getUUID(),
                                 httpSessionId:vs.getCookie("JSESSIONID")}
-                            vs.rsaUtil.signAndPost(vs.contextURL + "/rest/device/closeSession", operation, function(responseText){
+                            vs.rsaUtil.signAndSend(operation, vs.contextURL + "/rest/device/closeSession", function(responseText){
                                 vs.setDisConnected();
                             })
                         })

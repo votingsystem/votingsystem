@@ -35,9 +35,6 @@ public class SessionCertificationDto {
     private String mobileUUID;
 
     private String privateKeyPEM;
-    private String publicKeyPEM;
-    private String token;
-    private String userUUID;
 
 
     public SessionCertificationDto() { }
@@ -55,10 +52,9 @@ public class SessionCertificationDto {
         this.operation = operationType;
     }
 
-    public SessionCertificationDto(AddressDto address, String browserCsr, String token) {
+    public SessionCertificationDto(AddressDto address, String browserCsr) {
         this.address = address;
         this.browserCsr = browserCsr;
-        this.token = token;
     }
 
     public AddressDto getAddress() {
@@ -67,23 +63,6 @@ public class SessionCertificationDto {
 
     public void setAddress(AddressDto address) {
         this.address = address;
-    }
-
-    public String getToken() {
-        return token;
-    }
-
-    public void setToken(String token) {
-        this.token = token;
-    }
-
-    public String getUserUUID() {
-        return userUUID;
-    }
-
-    public SessionCertificationDto setUserUUID(String userUUID) {
-        this.userUUID = userUUID;
-        return this;
     }
 
     public String getMobileCsr() {
@@ -182,15 +161,6 @@ public class SessionCertificationDto {
 
     public SessionCertificationDto setPrivateKeyPEM(String privateKeyPEM) {
         this.privateKeyPEM = privateKeyPEM;
-        return this;
-    }
-
-    public String getPublicKeyPEM() {
-        return publicKeyPEM;
-    }
-
-    public SessionCertificationDto setPublicKeyPEM(String publicKeyPEM) {
-        this.publicKeyPEM = publicKeyPEM;
         return this;
     }
 

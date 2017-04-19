@@ -371,10 +371,6 @@ vs.QROperationCode = {
     GET_AES_PARAMS:7
 }
 
-vs.MediaType = {
-    JSON_SIGNED:"application/json;application/pkcs7-signature"
-}
-
 vs.encryptAES = function(textToEncrypt, aesparamsDto) {
     var cipher = forge.cipher.createCipher('AES-CBC', aesparamsDto.key);
     cipher.start({iv: aesparamsDto.iv});

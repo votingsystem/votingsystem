@@ -2,7 +2,6 @@ package org.votingsystem.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 
 /**
@@ -19,7 +18,7 @@ public class OperationDto<T> {
     private String deviceId;
     private String httpSessionId;
     private String base64Data;
-    private String userUUID;
+    private String sessionUUID;
     private String UUID;
 
     public OperationDto() {}
@@ -87,12 +86,12 @@ public class OperationDto<T> {
         return this;
     }
 
-    public String getUserUUID() {
-        return userUUID;
+    public String getSessionUUID() {
+        return sessionUUID;
     }
 
-    public OperationDto setUserUUID(String userUUID) {
-        this.userUUID = userUUID;
+    public OperationDto setSessionUUID(String sessionUUID) {
+        this.sessionUUID = sessionUUID;
         return this;
     }
 
