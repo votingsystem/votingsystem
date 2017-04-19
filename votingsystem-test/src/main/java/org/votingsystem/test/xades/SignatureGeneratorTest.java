@@ -83,7 +83,7 @@ public class SignatureGeneratorTest extends BaseTest {
 
     public void sendToServer(byte[] signedXML) {
         ResponseDto response = HttpConn.getInstance().doPostRequest(signedXML, MediaType.XML,
-                "https://voting.ddns.net/currency-server/api/test/currency-document1");
+                "https://voting.ddns.net/currency-server/api/test/xml-signed-document");
         log.info("statusCode: " + response.getStatusCode() + " - " + response.getMessage());
     }
 
