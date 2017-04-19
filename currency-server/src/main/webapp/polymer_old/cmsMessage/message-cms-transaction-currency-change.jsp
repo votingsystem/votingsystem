@@ -42,7 +42,7 @@
     </template>
     <script>
         Polymer({
-            is:'message-cms-transaction-currency-change',
+            is:'message-currency-transaction-currency-change',
             properties: {
                 cmsMessageContent: {type:Object},
                 isClientToolConnected: {type:Boolean, value: false},

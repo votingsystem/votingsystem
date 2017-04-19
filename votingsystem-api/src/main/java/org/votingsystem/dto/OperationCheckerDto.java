@@ -12,7 +12,6 @@ import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class OperationCheckerDto {
 
-    @JsonProperty("Operation")
     @JacksonXmlProperty(localName = "Operation")
     private OperationTypeDto operation;
 

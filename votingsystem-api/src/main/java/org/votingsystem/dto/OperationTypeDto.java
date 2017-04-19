@@ -18,10 +18,8 @@ import org.votingsystem.util.SystemOperation;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class OperationTypeDto<T> {
 
-    @JsonProperty("Type")
     @JacksonXmlProperty(localName = "Type", isAttribute = true)
     private SystemOperation type;
-    @JsonProperty("EntityId")
     @JacksonXmlProperty(localName = "EntityId", isAttribute = true)
     private String entityId;
 

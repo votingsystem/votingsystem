@@ -1,5 +1,6 @@
 package org.votingsystem.test.android.xml;
 
+import org.kxml2.kdom.Element;
 import org.votingsystem.dto.QRResponseDto;
 import org.votingsystem.dto.ResponseDto;
 import org.votingsystem.dto.ResultListDto;
@@ -12,7 +13,6 @@ import org.votingsystem.http.SystemEntityType;
 import org.votingsystem.model.voting.Election;
 import org.votingsystem.testlib.android.util.DateUtils;
 import org.votingsystem.testlib.util.XMLUtils;
-import org.kxml2.kdom.Element;
 import org.votingsystem.util.OperationType;
 import org.xmlpull.v1.XmlPullParserException;
 

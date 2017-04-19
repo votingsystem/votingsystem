@@ -1,11 +1,11 @@
 package org.votingsystem.test.android.xml;
 
-import org.votingsystem.dto.indentity.IdentityRequestDto;
-import org.votingsystem.dto.voting.VoteDto;
-import org.votingsystem.testlib.util.XMLUtils;
 import org.kxml2.kdom.Document;
 import org.kxml2.kdom.Element;
 import org.kxml2.kdom.Node;
+import org.votingsystem.dto.indentity.IdentityRequestDto;
+import org.votingsystem.dto.voting.VoteDto;
+import org.votingsystem.testlib.util.XMLUtils;
 
 /**
  * Licence: https://github.com/votingsystem/votingsystem/wiki/Licencia

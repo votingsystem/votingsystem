@@ -7,9 +7,9 @@ import org.bouncycastle.cert.ocsp.*;
 import org.bouncycastle.operator.DigestCalculatorProvider;
 import org.bouncycastle.operator.jcajce.JcaDigestCalculatorProviderBuilder;
 import org.votingsystem.crypto.PEMUtils;
+import org.votingsystem.dto.ResponseDto;
 import org.votingsystem.http.HttpConn;
 import org.votingsystem.util.FileUtils;
-import org.votingsystem.dto.ResponseDto;
 
 import java.io.ByteArrayInputStream;
 import java.security.Security;

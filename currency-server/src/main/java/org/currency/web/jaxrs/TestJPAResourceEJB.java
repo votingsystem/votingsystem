@@ -2,7 +2,6 @@ package org.currency.web.jaxrs;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import org.currency.web.ejb.ConfigCurrencyServer;
-import org.votingsystem.model.Certificate;
 import org.votingsystem.model.currency.CurrencyAccount;
 import org.votingsystem.model.currency.Tag;
 import org.votingsystem.model.currency.Transaction;

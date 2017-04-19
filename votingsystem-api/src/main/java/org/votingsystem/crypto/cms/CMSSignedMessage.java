@@ -143,9 +143,9 @@ public class CMSSignedMessage extends CMSSignedData {
     public static CMSSignedMessage FROM_PEM(byte[] pemBytes) throws Exception {
         PEMParser PEMParser = new PEMParser(new InputStreamReader(new ByteArrayInputStream(pemBytes)));
         ContentInfo contentInfo = (ContentInfo) PEMParser.readObject();
-        if (!contentInfo.getContentType().equals(CMSObjectIdentifiers.envelopedData)) {
+        /*if (!contentInfo.getContentType().equals(CMSObjectIdentifiers.envelopedData)) {
             log.info("CMSObjectIdentifiers - envelopedData");
-        }
+        }*/
         return new CMSSignedMessage(contentInfo.getEncoded());
     }
 

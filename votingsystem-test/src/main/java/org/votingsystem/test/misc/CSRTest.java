@@ -2,10 +2,9 @@ package org.votingsystem.test.misc;
 
 import org.bouncycastle.pkcs.PKCS10CertificationRequest;
 import org.votingsystem.crypto.*;
-import org.votingsystem.util.FileUtils;
-import org.votingsystem.crypto.*;
-import  org.votingsystem.testlib.BaseTest;
+import org.votingsystem.testlib.BaseTest;
 import org.votingsystem.util.Constants;
+import org.votingsystem.util.FileUtils;
 
 import java.io.File;
 import java.security.cert.X509Certificate;

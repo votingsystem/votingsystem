@@ -1,11 +1,11 @@
 package org.votingsystem.test.misc;
 
+import org.votingsystem.dto.QRMessageDto;
 import org.votingsystem.dto.QRResponseDto;
+import org.votingsystem.dto.ResponseDto;
 import org.votingsystem.dto.voting.ElectionDto;
 import org.votingsystem.http.HttpConn;
-import org.votingsystem.dto.QRMessageDto;
-import org.votingsystem.dto.ResponseDto;
-import  org.votingsystem.testlib.BaseTest;
+import org.votingsystem.testlib.BaseTest;
 import org.votingsystem.util.JSON;
 import org.votingsystem.util.OperationType;
 import org.votingsystem.xml.XML;

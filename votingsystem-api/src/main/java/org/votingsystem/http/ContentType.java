@@ -19,7 +19,7 @@ public enum ContentType {
     MESSAGE(MediaType.MESSAGE, "vs"),
     MULTIPART_SIGNED("multipart/signed", null),
     MULTIPART_ENCRYPTED(MediaType.MULTIPART_ENCRYPTED, null),
-    TEXT("text/plain", "txt"),
+    TEXT(MediaType.TEXT_PLAIN, "txt"),
     HTML("text/html", "html"),
     TEXT_STREAM("text/plain", "txt"),
     TIMESTAMP_QUERY("application/timestamp-query", null),

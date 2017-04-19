@@ -34,6 +34,7 @@ import org.apache.http.util.EntityUtils;
 import org.votingsystem.dto.ResponseDto;
 import org.votingsystem.throwable.*;
 import org.votingsystem.util.JSON;
+import org.votingsystem.xml.XML;
 
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLContext;
@@ -267,13 +268,7 @@ public class HttpConn {
                     resContentType + " - connManager stats: " + connManager.getTotalStats().toString());
             log.info("----------------------------------------");
             byte[] responseBytes = EntityUtils.toByteArray(response.getEntity());
-            if(responseDto.SC_OK == response.getStatusLine().getStatusCode()) {
-                responseDto = new ResponseDto(response.getStatusLine().getStatusCode(),
-                        responseBytes, resContentType);
-            } else {
-                responseDto = new ResponseDto(response.getStatusLine().getStatusCode(),
-                        responseBytes, resContentType);
-            }
+            responseDto = new ResponseDto(response.getStatusLine().getStatusCode(), responseBytes, resContentType);
         } catch(Exception ex) {
             log.log(Level.SEVERE, ex.getMessage(), ex);
             responseDto = new ResponseDto(responseDto.SC_ERROR, ex.getMessage());
@@ -433,7 +428,7 @@ public class HttpConn {
             throw new Exception("Empty request map");
         HttpPost httpPost = null;
         CloseableHttpResponse response = null;
-        ContentType resContentType = null;
+        String resContentType = null;
         try {
             httpPost = new HttpPost(targetURL);
             Set<String> fileNames = fileMap.keySet();
@@ -444,8 +439,8 @@ public class HttpConn {
             httpPost.setEntity(reqEntity);
             response = httpClient.execute(httpPost, httpContext);
             Header header = response.getFirstHeader("Content-Type");
-            if(header != null) 
-                resContentType = ContentType.getByName(header.getValue());
+            if(header != null)
+                resContentType = header.getValue();
             log.info("----------------------------------------");
             log.info(response.getStatusLine().toString() + " - resContentType: " + resContentType +
                     " - connManager stats: " + connManager.getTotalStats().toString());

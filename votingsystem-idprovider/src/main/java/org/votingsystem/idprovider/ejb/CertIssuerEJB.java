@@ -395,7 +395,7 @@ public class CertIssuerEJB {
         SessionCertification sessionCertification = new SessionCertification(signer, mobileCertificate,
                 browserCertificate, signedDocument);
         em.persist(sessionCertification);
-
+        log.info("sessionCertification id: " + sessionCertification.getId());
         SignatureParams signatureParams = new SignatureParams(config.getEntityId(), User.Type.IDENTITY_SERVER,
                 SignedDocumentType.SESSION_CERTIFICATION_RECEIPT).setWithTimeStampValidation(true);
         SignedDocument response = null;

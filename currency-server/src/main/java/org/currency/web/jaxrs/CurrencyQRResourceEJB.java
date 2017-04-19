@@ -1,10 +1,9 @@
 package org.currency.web.jaxrs;
 
 import org.currency.web.http.HttpSessionManager;
-import org.votingsystem.dto.indentity.SessionCertificationDto;
+import org.votingsystem.dto.indentity.PublickeyDto;
 import org.votingsystem.ejb.Config;
 import org.votingsystem.ejb.QRSessionsEJB;
-import org.votingsystem.http.HttpResponse;
 import org.votingsystem.qr.QRRequestBundle;
 import org.votingsystem.qr.QRUtils;
 import org.votingsystem.util.Constants;
@@ -47,7 +46,7 @@ public class CurrencyQRResourceEJB {
                 case QRUtils.GEN_BROWSER_CERTIFICATE:
                     HttpSession httpSession = HttpSessionManager.getInstance().getHttpSession(UUID);
                     if(httpSession != null) {
-                        SessionCertificationDto browserPublickey = (SessionCertificationDto) httpSession.
+                        PublickeyDto browserPublickey = (PublickeyDto) httpSession.
                                 getAttribute(Constants.BROWSER_PLUBLIC_KEY);
                         if(browserPublickey != null) {
                             return Response.ok().entity(JSON.getMapper().writeValueAsBytes(
@@ -68,6 +67,22 @@ public class CurrencyQRResourceEJB {
         else
             return Response.status(Response.Status.NOT_FOUND).entity(
                     Messages.currentInstance().get("itemNotFoundErrorMsg")).build();
+    }
+
+    /**
+     * Called from the browser to provide the public key that encrypts the message the mobile sends to the browser with the
+     * 'browser session certificate' and the private key
+     * @param req
+     * @param csrRequestBytes
+     * @return
+     * @throws Exception
+     */
+    @POST @Path("/put-publickey")
+    @Produces(MediaType.TEXT_PLAIN)
+    public Response publickey(@Context HttpServletRequest req, byte[] csrRequestBytes) throws Exception {
+        PublickeyDto publickeyDto = JSON.getMapper().readValue(csrRequestBytes, PublickeyDto.class);
+        req.getSession().setAttribute(Constants.BROWSER_PLUBLIC_KEY, publickeyDto);
+        return Response.ok().entity("OK").build();
     }
 
 }

@@ -1,27 +1,11 @@
 package org.votingsystem.test.pkcs7;
 
-import org.apache.http.NameValuePair;
-import org.apache.http.message.BasicNameValuePair;
-import org.votingsystem.crypto.cms.CMSSignedMessage;
-import org.votingsystem.dto.indentity.SessionCertificationDto;
-import org.votingsystem.http.HttpConn;
-import org.votingsystem.test.Constants;
 import org.votingsystem.crypto.Encryptor;
 import org.votingsystem.crypto.PEMUtils;
-import org.votingsystem.dto.MessageDto;
-import org.votingsystem.dto.OperationTypeDto;
-import org.votingsystem.dto.QRMessageDto;
-import org.votingsystem.dto.ResponseDto;
-import org.votingsystem.socket.SocketOperation;
-import  org.votingsystem.testlib.BaseTest;
-import org.votingsystem.util.CurrencyOperation;
-import org.votingsystem.util.JSON;
+import org.votingsystem.crypto.cms.CMSSignedMessage;
+import org.votingsystem.testlib.BaseTest;
 
 import java.security.PrivateKey;
-import java.security.PublicKey;
-import java.util.ArrayList;
-import java.util.Base64;
-import java.util.List;
 import java.util.logging.Logger;
 
 public class EncryptTest extends BaseTest {

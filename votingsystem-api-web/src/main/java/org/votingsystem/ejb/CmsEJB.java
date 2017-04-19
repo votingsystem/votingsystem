@@ -97,7 +97,7 @@ public class CmsEJB {
 
             OperationCheckerDto operationDto = cmsSignedMessage.getSignedContent(OperationCheckerDto.class);
             if(operationDto.getOperation() == null)
-                throw new ValidationException("Request without operation type");
+                throw new ValidationException("Request without operation type: " + cmsSignedMessage.getSignedContentStr());
             log.info("operation: " + operationDto.getOperation().getType());
 
             User.Type userType = User.Type.USER;
@@ -105,9 +105,6 @@ public class CmsEJB {
                 switch ((CurrencyOperation)operationDto.getOperation().getType()) {
                     case REGISTER_DEVICE:
                         documentType = SignedDocumentType.DEVICE_REGISTER;
-                        break;
-                    case GET_SESSION_CERTIFICATION:
-                        userType = User.Type.ENTITY;
                         break;
                 }
             }
@@ -119,7 +116,6 @@ public class CmsEJB {
 
             for(Signature signature : cmsDto.getSignatures()) {
                 em.persist(signature.setDocument(cmsDocument));
-                log.info("signature: " + signature.getId());
             }
             cmsDocument.setSignatures(cmsDto.getSignatures());
             cmsDto.setCmsDocument(cmsDocument);
@@ -152,24 +148,10 @@ public class CmsEJB {
         return cmsDto;
     }
 
-
     public void validateToken(TimeStampToken timeStampToken) throws TSPException, ValidationException, OperatorCreationException {
-        Collection matches = timeStampToken.getCertificates().getMatches(new Selector(){
-            public boolean match(Object obj) {
-                X509CertificateHolder crl = (X509CertificateHolder)obj;
-                log.info("crl: " + crl + " - SerialNumber: " + crl.getSerialNumber());
-                boolean idExists = config.getTrustedTimeStampServers().keySet().stream().anyMatch(
-                        serNumb -> serNumb == crl.getSerialNumber().longValue());
-                return idExists;
-            }
-            public Object clone() {
-                return this;
-            }
-        });
-        if(matches.size() > 0) {
-            X509CertificateHolder certificateHolder = (X509CertificateHolder) matches.iterator().next();
-            X509Certificate timeStampServerCertificate = config.getTrustedTimeStampServers().get(
-                    certificateHolder.getSerialNumber().longValue());
+        X509Certificate timeStampServerCertificate = config.getTrustedTimeStampServers().get(
+                timeStampToken.getSID().getSerialNumber().longValue());
+        if(timeStampServerCertificate != null) {
             SignerInformationVerifier timeStampSignerInfoVerifier =  new JcaSimpleSignerInfoVerifierBuilder()
                     .setProvider(Constants.PROVIDER).build(timeStampServerCertificate);
             timeStampToken.validate(timeStampSignerInfoVerifier);

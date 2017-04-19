@@ -82,25 +82,16 @@ public class DeviceEJB {
     }
 
     @TransactionAttribute(REQUIRES_NEW)
-    public void initBrowserSession(CMSDocument signedDocument, HttpSession httpSession) throws Exception {
-        signedDocument.setSignedDocumentType(SignedDocumentType.BROWSER_SESSION);
+    public void initDeviceSession(CMSDocument signedDocument, HttpSession httpSession) throws Exception {
+        signedDocument.setSignedDocumentType(SignedDocumentType.DEVICE_SESSION);
         em.merge(signedDocument);
         OperationDto operation = JSON.getMapper().readValue(signedDocument.getCMS().getSignedContentStr(), OperationDto.class);
+        if(!operation.getOperation().getEntityId().equals(config.getEntityId()) ||
+                !CurrencyOperation.INIT_DEVICE_SESSION.toString().equals(operation.getOperation().getType().toString())) {
+            throw new ValidationException("Expected Operation type: INIT_DEVICE_SESSION - " + config.getEntityId() +
+                    " found: " + operation.getOperation().getType() + " - " + operation.getOperation().getEntityId());
+        }
         String previousUserUUID = (String) httpSession.getAttribute(Constants.USER_UUID);
-        httpSession.setAttribute(Constants.USER_UUID, operation.getUserUUID());
-        httpSession.setAttribute(Constants.USER_KEY, signedDocument.getFirstSignature().getSigner());
-        HttpSessionManager.getInstance().updateSession(previousUserUUID, operation.getUserUUID(),
-                operation.getHttpSessionId(), signedDocument.getFirstSignature().getSigner());
-    }
-
-    @TransactionAttribute(REQUIRES_NEW)
-    public void initMobileSession(CMSDocument signedDocument, HttpSession httpSession) throws Exception {
-        signedDocument.setSignedDocumentType(SignedDocumentType.MOBILE_SESSION);
-        em.merge(signedDocument);
-        OperationDto operation = JSON.getMapper().readValue(signedDocument.getCMS().getSignedContentStr(), OperationDto.class);
-        String previousUserUUID = (String) httpSession.getAttribute(Constants.USER_UUID);
-        httpSession.setAttribute(Constants.USER_UUID, operation.getUserUUID());
-        httpSession.setAttribute(Constants.USER_KEY, signedDocument.getFirstSignature().getSigner());
         HttpSessionManager.getInstance().updateSession(previousUserUUID, operation.getUserUUID(),
                 operation.getHttpSessionId(), signedDocument.getFirstSignature().getSigner());
     }

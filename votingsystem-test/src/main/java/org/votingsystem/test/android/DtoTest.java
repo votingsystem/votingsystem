@@ -1,17 +1,17 @@
 package org.votingsystem.test.android;
 
+import org.votingsystem.dto.ResponseDto;
 import org.votingsystem.dto.ResultListDto;
+import org.votingsystem.dto.voting.ElectionDto;
+import org.votingsystem.dto.voting.ElectionOptionDto;
 import org.votingsystem.dto.voting.VoteDto;
 import org.votingsystem.http.HttpConn;
 import org.votingsystem.http.MediaType;
 import org.votingsystem.test.Constants;
 import org.votingsystem.test.android.xml.XmlReader;
-import org.votingsystem.xml.XML;
-import org.votingsystem.dto.ResponseDto;
-import org.votingsystem.dto.voting.ElectionDto;
-import org.votingsystem.dto.voting.ElectionOptionDto;
-import  org.votingsystem.testlib.BaseTest;
+import org.votingsystem.testlib.BaseTest;
 import org.votingsystem.util.OperationType;
+import org.votingsystem.xml.XML;
 
 import java.util.logging.Logger;
 

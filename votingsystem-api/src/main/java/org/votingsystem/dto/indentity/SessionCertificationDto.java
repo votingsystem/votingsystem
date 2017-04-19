@@ -17,7 +17,6 @@ import org.votingsystem.dto.UserDto;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class SessionCertificationDto {
 
-    @JsonProperty("Operation")
     @JacksonXmlProperty(localName = "Operation")
     private OperationTypeDto operation;
 

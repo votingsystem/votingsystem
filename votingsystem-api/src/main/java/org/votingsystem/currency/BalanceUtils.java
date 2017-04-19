@@ -1,4 +1,4 @@
-package org.votingsystem.cms;
+package org.votingsystem.currency;
 
 import org.votingsystem.dto.currency.IncomesDto;
 import org.votingsystem.model.currency.Transaction;

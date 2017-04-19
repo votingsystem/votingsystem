@@ -1,7 +1,7 @@
 package org.votingsystem.test.okhttp3;
 
 import okhttp3.*;
-import  org.votingsystem.testlib.BaseTest;
+import org.votingsystem.testlib.BaseTest;
 
 import java.util.List;
 import java.util.logging.Logger;

@@ -71,7 +71,7 @@ public class LocalExceptionMapper implements ExceptionMapper<Exception> {
             try {
                 if(reqContentType.contains("json") || reqContentType.contains("application/pkcs7-signature")){
                     return Response.status(appCode.getStatusCode()).entity(JSON.getMapper().writeValueAsBytes(
-                                    new ResponseDto(appCode, message))).build();
+                                    new ResponseDto(appCode, message))).type(org.votingsystem.http.MediaType.JSON).build();
                 } else if(reqContentType.contains("html")) {
                     res.setStatus(appCode.getStatusCode());
                     req.getSession().setAttribute("responseDto", new ResponseDto(ResponseDto.SC_ERROR,
@@ -80,7 +80,7 @@ public class LocalExceptionMapper implements ExceptionMapper<Exception> {
                 } else {
                     return Response.status(Response.Status.BAD_REQUEST).entity(
                             new XmlMapper().writerWithDefaultPrettyPrinter().writeValueAsBytes(
-                                    new ResponseDto(appCode, message))).build();
+                                    new ResponseDto(appCode, message))).type(org.votingsystem.http.MediaType.XML).build();
                 }
             } catch (Exception ex) {
                 log.log(Level.SEVERE, ex.getMessage(), exception);

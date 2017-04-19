@@ -12,7 +12,7 @@ import org.currency.web.util.AuthRole;
 import org.currency.web.websocket.SessionManager;
 import org.iban4j.CountryCode;
 import org.iban4j.Iban;
-import org.votingsystem.cms.MapUtils;
+import org.votingsystem.currency.MapUtils;
 import org.votingsystem.dto.currency.BalancesDto;
 import org.votingsystem.dto.currency.IncomesDto;
 import org.votingsystem.dto.currency.TransactionDto;
@@ -176,11 +176,11 @@ public class TestResourceEJB {
     @POST @Path("/signed-doc")
     public Response signedDoc(SignedDocument signedDocument, @Context HttpServletRequest req,
                                  @Context HttpServletResponse res) throws Exception {
-        log.info("cms-document: " + signedDocument);
+        log.info("currency-document: " + signedDocument);
         return Response.ok().entity(signedDocument.getBody()).build();
     }
 
-    @POST @Path("/cms-doc")
+    @POST @Path("/currency-doc")
     public Response cmsDoc(CMSDocument cmsDocument, @Context HttpServletRequest req,
                                  @Context HttpServletResponse res) throws Exception {
         log.info("cmsDocument: " + cmsDocument);

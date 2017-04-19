@@ -1,4 +1,4 @@
-package org.votingsystem.cms;
+package org.votingsystem.currency;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import org.votingsystem.crypto.EncryptedBundle;

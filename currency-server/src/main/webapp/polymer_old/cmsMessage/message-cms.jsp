@@ -61,7 +61,7 @@
     </template>
     <script>
         Polymer({
-            is:'message-cms',
+            is:'message-currency',
             properties: {
                 cmsMessageContent:{type:Object, value:{}, observer:'cmsMessageContentChanged'},
                 isClientToolConnected: {type:Boolean, value: false}

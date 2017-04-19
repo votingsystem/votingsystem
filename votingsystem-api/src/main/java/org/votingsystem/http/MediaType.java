@@ -18,5 +18,6 @@ public class MediaType {
     public static final String TIMESTAMP_QUERY = "application/timestamp-query";
     public static final String TIMESTAMP_RESPONSE = "application/timestamp-response";
     public static final String OCSP_REQUEST = "application/ocsp-request";
+    public static final String TEXT_PLAIN = "text/plain";
 
 }

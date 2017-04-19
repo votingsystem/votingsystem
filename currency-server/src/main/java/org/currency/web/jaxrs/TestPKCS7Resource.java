@@ -44,7 +44,7 @@ public class TestPKCS7Resource {
         return  Response.ok().entity("OK").type(MediaType.PKCS7_SIGNED).build();
     }
 
-    @POST @Path("/cms")
+    @POST @Path("/currency")
     public Response testCMS(@Context HttpServletRequest req, @Context HttpServletResponse res,
                             CMSDocument signedDocument) throws Exception {
         log.info("signedDocument: " + signedDocument.getBody());

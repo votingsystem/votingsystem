@@ -3,11 +3,11 @@ package org.votingsystem.crypto;
 import org.votingsystem.util.FileUtils;
 
 import java.io.File;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -49,4 +49,12 @@ public class CertificateUtils {
         } else return Collections.emptyList();
 
     }
+
+    public static String getHash(X509Certificate x509Certificate) throws NoSuchAlgorithmException, CertificateEncodingException {
+        MessageDigest md = MessageDigest.getInstance("SHA-1");
+        byte[] der = x509Certificate.getEncoded();
+        md.update(der);
+        return Base64.getEncoder().encodeToString(md.digest());
+    }
+
 }

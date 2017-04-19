@@ -91,8 +91,8 @@
       var cmsMessageViewer
       page('*/cmsMessagePEM/id*', function(data) {
           vs.route = 'userDashboard';
-          Polymer.Base.importHref('./cmsMessagePEM/message-cms-viewer.vsp', function(e) {
-              if(!cmsMessageViewer) cmsMessageViewer = document.createElement('message-cms-viewer');
+          Polymer.Base.importHref('./cmsMessagePEM/message-currency-viewer.vsp', function(e) {
+              if(!cmsMessageViewer) cmsMessageViewer = document.createElement('message-currency-viewer');
               cmsMessageViewer.url = data.path
               vs.loadMainContent(cmsMessageViewer)
           });

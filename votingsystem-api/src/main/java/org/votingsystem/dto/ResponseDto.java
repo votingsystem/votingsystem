@@ -13,8 +13,10 @@ import org.votingsystem.util.AppCode;
 import org.votingsystem.util.JSON;
 import org.votingsystem.util.OperationType;
 import org.votingsystem.util.SystemOperation;
+import org.votingsystem.xml.XML;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
@@ -363,6 +365,23 @@ public class ResponseDto<T> implements Serializable {
         Map actionMap = new HashMap<>();
         actionMap.put("", action);
         return EXCEPTION(controller, actionMap, exception, rootCause);
+    }
+
+    public ResponseDto getErrorResponse() throws IOException {
+        ResponseDto responseDto = null;
+        if(contentType == null)
+            return new ResponseDto(statusCode, messageBytes, contentType);
+        switch (contentType) {
+            case JSON:
+                responseDto = JSON.getMapper().readValue(messageBytes, ResponseDto.class);
+                break;
+            case XML:
+                responseDto = XML.getMapper().readValue(messageBytes, ResponseDto.class);
+                break;
+            default:
+                responseDto = new ResponseDto(statusCode, messageBytes, contentType);
+        }
+        return responseDto;
     }
 
 }

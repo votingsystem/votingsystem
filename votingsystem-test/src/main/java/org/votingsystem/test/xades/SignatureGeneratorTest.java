@@ -13,12 +13,12 @@ import org.votingsystem.http.HttpConn;
 import org.votingsystem.http.MediaType;
 import org.votingsystem.http.SystemEntityType;
 import org.votingsystem.test.Constants;
-import  org.votingsystem.testlib.BaseTest;
+import org.votingsystem.testlib.BaseTest;
 import org.votingsystem.testlib.xml.SignatureValidator;
 import org.votingsystem.testlib.xml.XmlSignature;
+import org.votingsystem.util.OperationType;
 import org.votingsystem.xades.XAdESSignature;
 import org.votingsystem.xml.XML;
-import org.votingsystem.util.OperationType;
 
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -83,7 +83,7 @@ public class SignatureGeneratorTest extends BaseTest {
 
     public void sendToServer(byte[] signedXML) {
         ResponseDto response = HttpConn.getInstance().doPostRequest(signedXML, MediaType.XML,
-                "https://voting.ddns.net/currency-server/api/test/cms-document1");
+                "https://voting.ddns.net/currency-server/api/test/currency-document1");
         log.info("statusCode: " + response.getStatusCode() + " - " + response.getMessage());
     }
 

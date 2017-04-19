@@ -500,7 +500,8 @@ public class User extends EntityBase implements Serializable {
         LocalDateTime date = LocalDateTime.now();
         setDateCreated(date);
         setLastUpdated(date);
-        setUUID(java.util.UUID.randomUUID().toString());
+        if(UUID == null)
+            setUUID(java.util.UUID.randomUUID().toString());
     }
 
     public static User getUser(X500Name subject) {

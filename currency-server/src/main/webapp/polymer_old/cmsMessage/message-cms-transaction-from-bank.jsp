@@ -63,7 +63,7 @@
     </template>
     <script>
         Polymer({
-            is:'message-cms-transaction-from-bank',
+            is:'message-currency-transaction-from-bank',
             properties: {
                 cmsMessageContent: {type:Object},
                 isClientToolConnected: {type:Boolean, value: false},

@@ -29,7 +29,6 @@ import java.util.List;
 import java.util.UUID;
 import java.util.logging.Logger;
 
-
 /**
  * Licence: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
@@ -37,7 +36,7 @@ public class GenerateSessionCertificates extends BaseTest {
 
     private static final Logger log = Logger.getLogger(GenerateSessionCertificates.class.getName());
 
-    private static final String QR_CODE = "eid=https://voting.ddns.net/currency-server;op=0;uid=f0d6a4c5-a766-43f8-900e-fc64f23f5264;";
+    private static final String QR_CODE = "eid=https://voting.ddns.net/currency-server;op=0;uid=9e86e9cf-acfe-4225-af02-635583843a14;";
 
     private static CMSSignedMessage sessionCertification;
 
@@ -78,17 +77,19 @@ public class GenerateSessionCertificates extends BaseTest {
             CMSSignedMessage cmsSignedMessage = signatureService.signDataWithTimeStamp(requestBytes,
                     Constants.TIMESTAMP_SERVICE_URL);
             byte[] signedMessageBytes = cmsSignedMessage.toPEM();
-            log.info("cmsSignedMessage: " + new String(signedMessageBytes));
+            //log.info("cmsSignedMessage: " + new String(signedMessageBytes));
 
             ResponseDto response = HttpConn.getInstance().doPostRequest(signedMessageBytes, MediaType.PKCS7_SIGNED,
                     CurrencyOperation.GET_SESSION_CERTIFICATION.getUrl(Constants.ID_PROVIDER_ENTITY_ID));
             if(ResponseDto.SC_OK != response.getStatusCode()) {
+                response = response.getErrorResponse();
                 log.info("status: " + response.getStatusCode() + " - response message: " + response.getMessage());
                 System.exit(0);
             }
             sessionCertification = CMSSignedMessage.FROM_PEM(response.getMessageBytes());
             SessionCertificationDto certificationResponse = JSON.getMapper().readValue(
                     sessionCertification.getSignedContentStr(), SessionCertificationDto.class);
+
 
             SessionInfo sessionInfo = new SessionInfo(Constants.ID_PROVIDER_ENTITY_ID, mobileCsrReq, browserCsrReq);
             sessionInfo.loadIssuedCerts(certificationResponse);
@@ -110,6 +111,7 @@ public class GenerateSessionCertificates extends BaseTest {
         ResponseDto responseDto = HttpConn.getInstance().doPostForm(
                 CurrencyOperation.QR_INFO.getUrl(Constants.CURRENCY_SERVICE_ENTITY_ID), urlParameters);
         if(ResponseDto.SC_OK != responseDto.getStatusCode()) {
+            responseDto = responseDto.getErrorResponse();
             log.info("status: " + responseDto.getStatusCode() + " - responseDto: " + responseDto.getMessage());
             System.exit(0);
         }
@@ -121,7 +123,8 @@ public class GenerateSessionCertificates extends BaseTest {
                 .setDeviceToUUID(qrMessageDto.getUUID());
 
         MessageDto messageContent = new MessageDto();
-        messageContent.setOperation(new OperationTypeDto(CurrencyOperation.GET_SESSION_CERTIFICATION, null)).setMessage("");
+        messageContent.setOperation(new OperationTypeDto(CurrencyOperation.GET_SESSION_CERTIFICATION,
+                qrMessageDto.getSystemEntityID())).setMessage("");
 
         String base64Data = Base64.getEncoder().encodeToString(
                 JSON.getMapper().writeValueAsString(certificationDto).getBytes());

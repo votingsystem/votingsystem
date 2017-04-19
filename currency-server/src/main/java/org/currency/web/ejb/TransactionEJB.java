@@ -2,7 +2,7 @@ package org.currency.web.ejb;
 
 import com.google.common.collect.Sets;
 import org.currency.web.util.AuditLogger;
-import org.votingsystem.cms.BalanceUtils;
+import org.votingsystem.currency.BalanceUtils;
 import org.votingsystem.dto.ResultListDto;
 import org.votingsystem.dto.currency.IncomesDto;
 import org.votingsystem.dto.currency.TransactionDto;

@@ -2,16 +2,16 @@ package org.votingsystem.test;
 
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
-import org.votingsystem.http.HttpConn;
 import org.votingsystem.crypto.MockDNIe;
 import org.votingsystem.dto.ResponseDto;
 import org.votingsystem.dto.voting.CertVoteExtensionDto;
+import org.votingsystem.http.HttpConn;
 import org.votingsystem.http.MediaType;
-import  org.votingsystem.testlib.BaseTest;
-import org.votingsystem.testlib.xml.SignatureAlgorithm;
-import org.votingsystem.testlib.xml.XMLSignatureBuilder;
-import org.votingsystem.testlib.xml.XAdESUtils;
+import org.votingsystem.testlib.BaseTest;
 import org.votingsystem.testlib.util.XMLUtils;
+import org.votingsystem.testlib.xml.SignatureAlgorithm;
+import org.votingsystem.testlib.xml.XAdESUtils;
+import org.votingsystem.testlib.xml.XMLSignatureBuilder;
 import org.votingsystem.util.JSON;
 import org.votingsystem.util.OperationType;
 

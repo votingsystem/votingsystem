@@ -1,6 +1,7 @@
 package org.votingsystem.ejb;
 
 import org.votingsystem.crypto.CertUtils;
+import org.votingsystem.crypto.CertificateUtils;
 import org.votingsystem.crypto.SignatureParams;
 import org.votingsystem.dto.CertExtensionDto;
 import org.votingsystem.dto.voting.CertVoteExtensionDto;
@@ -20,6 +21,7 @@ import javax.ejb.TransactionAttribute;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
+import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.cert.CertificateEncodingException;
@@ -151,7 +153,13 @@ public class SignerInfoEJB implements SignerInfoService {
                             dbSignerList = em.createQuery("select s from User s where s.numId=:numId and s.documentType=:typeId")
                                     .setParameter("numId", deviceData.getNumId())
                                     .setParameter("typeId", IdDocument.NIF).getResultList();
-                        } else throw new SignerValidationException("Missing user identification data");
+                        } else {
+                            String certHash = CertificateUtils.getHash(signerX509Cert);
+                            dbSignerList = em.createQuery("select s from User s where s.UUID=:UUID")
+                                    .setParameter("UUID", certHash).getResultList();
+                            if(dbSignerList.isEmpty())
+                                signer.setType(User.Type.ENTITY).setUUID(certHash);
+                        };
                     } else {
                         dbSignerList = em.createQuery("select s from User s where s.numId=:numId and s.documentType=:typeId")
                                 .setParameter("numId", signer.getNumId())

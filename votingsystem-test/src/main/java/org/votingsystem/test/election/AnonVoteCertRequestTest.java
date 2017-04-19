@@ -1,13 +1,13 @@
 package org.votingsystem.test.election;
 
 import org.apache.commons.collections.map.HashedMap;
+import org.votingsystem.dto.QRMessageDto;
 import org.votingsystem.dto.QRResponseDto;
+import org.votingsystem.dto.ResponseDto;
 import org.votingsystem.http.HttpConn;
+import org.votingsystem.testlib.BaseTest;
 import org.votingsystem.util.Constants;
 import org.votingsystem.util.JSON;
-import org.votingsystem.dto.QRMessageDto;
-import org.votingsystem.dto.ResponseDto;
-import  org.votingsystem.testlib.BaseTest;
 import org.votingsystem.util.OperationType;
 
 import java.util.Map;

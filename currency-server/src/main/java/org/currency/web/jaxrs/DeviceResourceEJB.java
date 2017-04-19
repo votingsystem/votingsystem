@@ -1,34 +1,23 @@
 package org.currency.web.jaxrs;
 
 import org.currency.web.ejb.DeviceEJB;
-import org.currency.web.http.CurrencyPrincipal;
-import org.currency.web.managed.SocketPushEvent;
-import org.currency.web.util.AuthRole;
 import org.currency.web.websocket.SessionManager;
-import org.votingsystem.crypto.cms.CMSSignedMessage;
-import org.votingsystem.dto.*;
-import org.votingsystem.dto.indentity.SessionCertificationDto;
+import org.votingsystem.dto.DeviceDto;
+import org.votingsystem.dto.ResultListDto;
+import org.votingsystem.dto.UserDto;
 import org.votingsystem.ejb.SignerInfoService;
-import org.votingsystem.model.*;
-import org.votingsystem.throwable.ValidationException;
-import org.votingsystem.util.Constants;
-import org.votingsystem.util.CurrencyOperation;
+import org.votingsystem.model.Device;
+import org.votingsystem.model.User;
 import org.votingsystem.util.JSON;
 import org.votingsystem.util.NifUtils;
 
-import javax.annotation.security.RolesAllowed;
-import javax.ejb.TransactionAttribute;
 import javax.enterprise.inject.spi.BeanManager;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.transaction.Transactional;
 import javax.websocket.Session;
 import javax.ws.rs.*;
-import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.ArrayList;
@@ -36,9 +25,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.logging.Logger;
-
-import static java.text.MessageFormat.format;
-import static javax.ejb.TransactionAttributeType.REQUIRES_NEW;
 
 /**
  * License: https://github.com/votingsystem/votingsystem/wiki/Licencia

@@ -41,10 +41,8 @@ public enum CurrencyOperation implements SystemOperation {
     GET_TAG("/api/tag"),
     @JsonProperty("GET_TRANSACTION")
     GET_TRANSACTION("/api/transaction"),
-    @JsonProperty("INIT_BROWSER_SESSION")
-    INIT_BROWSER_SESSION("/api/session/init-browser"),
-    @JsonProperty("INIT_MOBILE_SESSION")
-    INIT_MOBILE_SESSION("/api/session/init-mobile"),
+    @JsonProperty("INIT_DEVICE_SESSION")
+    INIT_DEVICE_SESSION("/api/session/init-device-session"),
 
     @JsonProperty("QR_INFO")
     QR_INFO("/api/currency-qr/info"),

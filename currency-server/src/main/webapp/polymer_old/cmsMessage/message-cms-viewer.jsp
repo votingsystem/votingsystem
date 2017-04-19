@@ -6,7 +6,7 @@
     </template>
     <script>
         Polymer({
-            is:'message-cms-viewer',
+            is:'message-currency-viewer',
             properties: {
                 cmsMessageDto:{type:Object, value:{}, observer:'cmsMessageChanged'},
                 MESSAGE_CMS:{type:Object, value:null},
@@ -19,22 +19,22 @@
             },
             cmsMessageChanged: function() {
                 switch (this.cmsMessageDto.viewer) {
-                    case "message-cms":
+                    case "message-currency":
                         break;
-                    case "message-cms-transaction-from-bank":
+                    case "message-currency-transaction-from-bank":
                         if(!this.FROM_BANK) {
-                            Polymer.Base.importHref(vs.contextURL + '/cmsMessagePEM/message-cms-transaction-from-bank.vsp', function(e) {
-                                console.log(this.tagName + " - message-cms-transaction-from-bank: " + this.FROM_BANK)
-                                this.FROM_BANK = document.createElement('message-cms-transaction-from-bank');
+                            Polymer.Base.importHref(vs.contextURL + '/cmsMessagePEM/message-currency-transaction-from-bank.vsp', function(e) {
+                                console.log(this.tagName + " - message-currency-transaction-from-bank: " + this.FROM_BANK)
+                                this.FROM_BANK = document.createElement('message-currency-transaction-from-bank');
                                 this.loadMainContent(this.FROM_BANK)
                             }.bind(this));
                         } else this.loadMainContent(this.FROM_BANK)
                         break;
-                    case "message-cms-transaction-currency-request":
+                    case "message-currency-transaction-currency-request":
                         break;
-                    case "message-cms-transaction":
+                    case "message-currency-transaction":
                         break;
-                    case "message-cms-transaction-currency-change":
+                    case "message-currency-transaction-currency-change":
                         break;
                 }
             },

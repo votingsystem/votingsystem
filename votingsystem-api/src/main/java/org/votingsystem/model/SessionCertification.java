@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 import static javax.persistence.GenerationType.IDENTITY;
 
 @Entity
-@Table(name="GET_SESSION_CERTIFICATION")
+@Table(name="SESSION_CERTIFICATION")
 public class SessionCertification extends EntityBase implements Serializable {
 
 	private static final long serialVersionUID = 1L;

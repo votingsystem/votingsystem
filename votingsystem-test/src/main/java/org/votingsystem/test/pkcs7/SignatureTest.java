@@ -4,12 +4,12 @@ import org.votingsystem.crypto.MockDNIe;
 import org.votingsystem.crypto.cms.CMSSignedMessage;
 import org.votingsystem.dto.OperationDto;
 import org.votingsystem.dto.OperationTypeDto;
+import org.votingsystem.dto.ResponseDto;
 import org.votingsystem.http.HttpConn;
 import org.votingsystem.http.MediaType;
-import org.votingsystem.util.JSON;
-import org.votingsystem.dto.ResponseDto;
-import  org.votingsystem.testlib.BaseTest;
+import org.votingsystem.testlib.BaseTest;
 import org.votingsystem.util.CurrencyOperation;
+import org.votingsystem.util.JSON;
 
 import java.util.UUID;
 import java.util.logging.Logger;
@@ -77,13 +77,16 @@ public class SignatureTest extends BaseTest {
             "-----END PKCS7-----";
 
 
-
     public static void main(String[] args) throws Exception {
+        //CMSSignedMessage cmsSignedMessage = CMSSignedMessage.FROM_PEM(forge_pkcs7PEM);
         SignatureTest signatureTest = new SignatureTest();
         CMSSignedMessage cmsSignedMessage = signatureTest.sign();
-        signatureTest.validate(cmsSignedMessage.toPEM());
-        signatureTest.sendToServer(cmsSignedMessage.toPEM(), "https://voting.ddns.net/currency-server/api/test-pkcs7/sign");
-        signatureTest.readPem();
+        cmsSignedMessage = CMSSignedMessage.FROM_PEM(cmsSignedMessage.toPEM());
+        log.info("isValidSignature: " + cmsSignedMessage.isValidSignature() + " - contentDigest: " +
+                cmsSignedMessage.getContentDigestStr());
+        ResponseDto response = HttpConn.getInstance().doPostRequest(cmsSignedMessage.toPEM(), MediaType.PKCS7_SIGNED,
+                "https://voting.ddns.net/currency-server/api/test-pkcs7/sign");
+        log.severe("statusCode: " + response.getStatusCode() + " - message: " + response.getMessage());
         System.exit(0);
     }
 
@@ -91,15 +94,9 @@ public class SignatureTest extends BaseTest {
         super();
     }
 
-    public void readPem() throws Exception {
-        CMSSignedMessage cmsSignedMessage = CMSSignedMessage.FROM_PEM(forge_pkcs7PEM);
-        log.info("isValidSignature: " + cmsSignedMessage.isValidSignature());
-    }
-
-
     public CMSSignedMessage sign() throws Exception {
         CMSSignatureBuilder signatureService = new CMSSignatureBuilder(new MockDNIe("08888888D"));
-        OperationTypeDto operationType = new OperationTypeDto(CurrencyOperation.INIT_BROWSER_SESSION, null);
+        OperationTypeDto operationType = new OperationTypeDto(CurrencyOperation.INIT_DEVICE_SESSION, null);
         OperationDto operation = new OperationDto();
         operation.setOperation(operationType);
         operation.setUUID(UUID.randomUUID().toString());
@@ -110,24 +107,4 @@ public class SignatureTest extends BaseTest {
         return cmsSignedMessage;
     }
 
-    public void validate(byte[] cmsPEMBytes) throws Exception {
-        CMSSignedMessage cmsSignedMessage = CMSSignedMessage.FROM_PEM(cmsPEMBytes);
-        log.info("isValidSignature: " + cmsSignedMessage.isValidSignature() + " - contentDigest: " +
-                cmsSignedMessage.getContentDigestStr());
-    }
-
-    public void sendToServer(byte[] cmsPEMBytes, String serviceURL) throws Exception {
-        CMSSignedMessage cmsSignedMessage = CMSSignedMessage.FROM_PEM(cmsPEMBytes);
-        log.info("isValidSignature: " + cmsSignedMessage.isValidSignature());
-        //doPostRequest(byte[] byteArray, String contentType, String targetURL)
-        ResponseDto response = HttpConn.getInstance().doPostRequest(cmsPEMBytes, MediaType.PKCS7_SIGNED, serviceURL);
-        log.info("status: " + response.getStatusCode() + " - message: " + response.getMessage());
-    }
-
 }
-
-
-
-
-
-

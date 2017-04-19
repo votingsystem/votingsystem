@@ -4,6 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.votingsystem.util.FileUtils;
 import org.votingsystem.xml.XMLValidator;
+
 import java.net.URL;
 
 /**

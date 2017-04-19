@@ -1,6 +1,6 @@
 package org.currency.web.ejb;
 
-import org.votingsystem.cms.BalanceUtils;
+import org.votingsystem.currency.BalanceUtils;
 import org.votingsystem.dto.currency.BalancesDto;
 import org.votingsystem.dto.currency.TransactionDto;
 import org.votingsystem.ejb.SignatureService;

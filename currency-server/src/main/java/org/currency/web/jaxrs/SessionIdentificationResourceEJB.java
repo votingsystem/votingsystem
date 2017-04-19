@@ -4,39 +4,38 @@ import org.currency.web.ejb.DeviceEJB;
 import org.currency.web.http.CurrencyPrincipal;
 import org.currency.web.managed.SocketPushEvent;
 import org.currency.web.util.AuthRole;
-import org.currency.web.websocket.SessionManager;
 import org.votingsystem.crypto.cms.CMSSignedMessage;
-import org.votingsystem.dto.*;
-import org.votingsystem.dto.indentity.PublickeyDto;
-import org.votingsystem.dto.indentity.SessionCertificationDto;
+import org.votingsystem.dto.DeviceDto;
+import org.votingsystem.dto.MessageDto;
+import org.votingsystem.dto.OperationDto;
 import org.votingsystem.ejb.SignerInfoService;
-import org.votingsystem.model.*;
-import org.votingsystem.socket.SocketOperation;
+import org.votingsystem.model.CMSDocument;
+import org.votingsystem.model.Certificate;
+import org.votingsystem.model.SignedDocument;
+import org.votingsystem.model.User;
 import org.votingsystem.throwable.ValidationException;
 import org.votingsystem.util.Constants;
 import org.votingsystem.util.CurrencyOperation;
 import org.votingsystem.util.JSON;
-import org.votingsystem.util.NifUtils;
 
+import javax.annotation.security.PermitAll;
 import javax.annotation.security.RolesAllowed;
 import javax.ejb.TransactionAttribute;
 import javax.enterprise.inject.spi.BeanManager;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
-import javax.persistence.Query;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.transaction.Transactional;
-import javax.websocket.Session;
-import javax.ws.rs.*;
+import javax.ws.rs.FormParam;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.logging.Logger;
 
 import static java.text.MessageFormat.format;
@@ -56,6 +55,7 @@ public class SessionIdentificationResourceEJB {
     @Inject private BeanManager beanManager;
     @Inject private DeviceEJB deviceEJB;
 
+    @PermitAll
     @Transactional
     @POST @Path("/close")
     public Response closeSession(CMSDocument signedDocument, @Context HttpServletRequest req,
@@ -77,22 +77,6 @@ public class SessionIdentificationResourceEJB {
     }
 
     /**
-     * Called from the browser to provide the public key that encrypts the message the mobile sends to the browser with the
-     * 'browser session certificate'
-     * @param req
-     * @param csrRequestBytes
-     * @return
-     * @throws Exception
-     */
-    @POST @Path("/put-publickey")
-    @Produces(MediaType.TEXT_PLAIN)
-    public Response publickey(@Context HttpServletRequest req, byte[] csrRequestBytes) throws Exception {
-        PublickeyDto publickeyDto = JSON.getMapper().readValue(csrRequestBytes, PublickeyDto.class);
-        req.getSession().setAttribute(Constants.BROWSER_PLUBLIC_KEY, publickeyDto);
-        return Response.ok().entity("OK").build();
-    }
-
-    /**
      * Called from the mobile with the browser and mobile certificates in a PKCS7 document signed by the user and the
      * Id Provider. Once validated the request, the server sends a push message to the browser with the certificate and the private
      * key (encrypted with the public key previously provided by the browser)
@@ -104,6 +88,7 @@ public class SessionIdentificationResourceEJB {
      * @return
      * @throws Exception
      */
+    @PermitAll
     @POST @Path("/validate-mobile-browser-session-certificates")
     @TransactionAttribute(REQUIRES_NEW)
     public Response sessionCertificationData(@FormParam("cmsMessage") String cmsMessage,
@@ -111,7 +96,6 @@ public class SessionIdentificationResourceEJB {
             @FormParam("socketMsg") String socketMsg, @Context HttpServletRequest req) throws Exception {
         CMSSignedMessage cmsSignedMessage = CMSSignedMessage.FROM_PEM(cmsMessage.getBytes());
         deviceEJB.sessionCertification(cmsSignedMessage);
-
         MessageDto message = JSON.getMapper().readValue(socketMsg, MessageDto.class);
         SocketPushEvent pushEvent = new SocketPushEvent(socketMsg, message.getDeviceToUUID(),
                 SocketPushEvent.Type.TO_USER);
@@ -119,15 +103,10 @@ public class SessionIdentificationResourceEJB {
         return  Response.ok().entity("OK").build();
     }
 
-    @POST @Path("/init-browser")
-    public Response initBrowserSession(CMSDocument signedDocument, @Context HttpServletRequest req) throws Exception {
-        deviceEJB.initBrowserSession(signedDocument, req.getSession());
-        return  Response.ok().entity("OK - init-browser-session").build();
-    }
-
-    @POST @Path("/init-mobile")
-    public Response initMobileSession(CMSDocument signedDocument, @Context HttpServletRequest req) throws Exception {
-        deviceEJB.initMobileSession(signedDocument, req.getSession());
+    @PermitAll
+    @POST @Path("/init-device-session")
+    public Response initDeviceSession(CMSDocument signedDocument, @Context HttpServletRequest req) throws Exception {
+        deviceEJB.initDeviceSession(signedDocument, req.getSession());
         return  Response.ok().entity("OK - init-mobile-session").build();
     }
 

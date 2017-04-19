@@ -16,7 +16,6 @@ import org.votingsystem.util.CurrencyOperation;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class RegisterDto {
 
-    @JsonProperty("Operation")
     private OperationTypeDto operation;
     private AddressDto address;
     private UserDto user;

@@ -2,18 +2,18 @@ package org.votingsystem.test.election;
 
 import eu.europa.esig.dss.token.AbstractSignatureTokenConnection;
 import eu.europa.esig.dss.token.JKSSignatureToken;
-import org.votingsystem.dto.QRResponseDto;
-import org.votingsystem.dto.voting.ElectionDto;
-import org.votingsystem.http.HttpConn;
-import org.votingsystem.test.Constants;
-import org.votingsystem.xades.XAdESSignature;
 import org.votingsystem.crypto.TSPHttpSource;
 import org.votingsystem.dto.QRMessageDto;
+import org.votingsystem.dto.QRResponseDto;
 import org.votingsystem.dto.ResponseDto;
+import org.votingsystem.dto.voting.ElectionDto;
+import org.votingsystem.http.HttpConn;
 import org.votingsystem.http.MediaType;
-import  org.votingsystem.testlib.BaseTest;
+import org.votingsystem.test.Constants;
+import org.votingsystem.testlib.BaseTest;
 import org.votingsystem.util.JSON;
 import org.votingsystem.util.OperationType;
+import org.votingsystem.xades.XAdESSignature;
 import org.votingsystem.xml.XML;
 
 import java.util.Base64;
