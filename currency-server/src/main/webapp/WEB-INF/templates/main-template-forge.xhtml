@@ -19,7 +19,9 @@
     <script src="#{request.contextPath}/res/gtl/vendors/validator/validator.min.js"></script>
     <link href="#{request.contextPath}/res/css/gl-custom.css" rel="stylesheet"/>
 
-    <script type="text/javascript" src="#{request.contextPath}/res/js/utils_js.vsp"></script>
+
+    <ui:include src="/res/js/utils-js.xhtml" />
+
     <script type="text/javascript" src="#{request.contextPath}/res/js/utils.js"></script>
 
     <script type="text/javascript" src="#{request.contextPath}/res/forge/js/util.js"></script>
@@ -78,58 +80,7 @@
                         </a>
                     </div>
                     <div class="clearfix"></div>
-                    <!-- sidebar menu -->
-                    <div id="sidebar-menu" class="main_menu_side hidden-print main_menu">
-                        <div class="menu_section">
-                            <ul class="nav side-menu">
-                                <li>
-                                    <a href="#{request.contextPath}/election/elections.xhtml?state=ACTIVE">
-                                        <i class="fa fa-user"></i>#{msg.locateUserLbl}</a>
-                                </li>
-                                <li>
-                                    <a><i class="fa fa-cogs"></i>#{msg.reportsSectionLbl} <span class="fa fa-chevron-down"></span></a>
-                                    <ul class="nav child_menu">
-                                        <li>
-                                            <a href="#{request.contextPath}/dashBoardLbl">#{msg.dashBoardLbl}</a>
-                                        </li>
-                                        <li>
-                                            <a href="#{request.contextPath}/bankListLbl">#{msg.bankListLbl}</a>
-                                        </li>
-                                        <li>
-                                            <a href="#{request.contextPath}/currencyIssued">#{msg.currencyIssued}</a>
-                                        </li>
-                                        <li>
-                                            <a href="#{request.contextPath}/systemBalanceLbl">#{msg.systemBalanceLbl}</a>
-                                        </li>
-                                        <li>
-                                            <a href="#{request.contextPath}/currentWeekLbl">#{msg.currentWeekLbl}</a>
-                                        </li>
-                                        <li>
-                                            <a href="#{request.contextPath}/validationToolMsg">#{msg.validationToolMsg}</a>
-                                        </li>
-                                    </ul>
-                                </li>
-                                <li>
-                                    <a><i class="fa fa-info"></i>#{msg.docsLbl} <span class="fa fa-chevron-down"></span></a>
-                                    <ul class="nav child_menu">
-                                        <li>
-                                            <a href="#{request.contextPath}/docs/incomes.xhtml">#{msg.incomesLbl}</a>
-                                        </li>
-                                        <li>
-                                            <a href="#{request.contextPath}/docs/accounts.xhtml">#{msg.accountsLbl}</a>
-                                        </li>
-                                        <li>
-                                            <a href="#{request.contextPath}/docs/messages.xhtml">#{msg.messageLbl}s</a>
-                                        </li>
-                                        <li>
-                                            <a href="https://github.com/votingsystem/votingsystem" target="_blank">#{msg.proyectLbl}</a>
-                                        </li>
-                                    </ul>
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
-                    <!-- /sidebar menu -->
+                    <ui:include src="sidebar-menu.xhtml" />
                 </div>
             </div>
 
@@ -184,14 +135,8 @@
     <script>
         //<![CDATA[
         vs.sessionUUID = "#{socketBean.getSessionUUID()}";
-
         var sessionId = vs.getCookie("JSESSIONID");
         console.log("sessionId: " + sessionId + " - sessionUUID: " + vs.sessionUUID);
-
-        vs.sessionClosed = function() {
-            setSessionState(false);
-            localStorage.setItem('pkiSessionData', null);
-        };
 
         function showAccessCode() {
             var sessionUUID = "#{socketBean.getSessionUUID()}";
@@ -208,6 +153,8 @@
             } else {
                 document.querySelector("#accessCodeButtonDiv").style.display = 'block';
                 document.querySelector("#authenticatedUserButtonDiv").style.display = 'none';
+                localStorage.setItem('pkiSessionData', null);
+                window.location.href = vs.entityId;
             }
         }
 
@@ -215,11 +162,8 @@
             var msgDto = {operation:{type:"CLOSE_SESSION", entityId:vs.entityId}, httpSessionId:sessionId,
                 sessionUUID:vs.sessionUUID, uuid:vs.getUUID()};
             vs.rsaUtil.signAndSend(msgDto, vs.entityId + "/api/session/close", function(responseText, status) {
-                console.log("status: " + status + " - responseText: " + responseText);
-                if(200 === status) {
-                    vs.sessionClosed();
-                    window.location.href = vs.entityId;
-                }
+                if(200 === status)
+                    setSessionState(false);
             });
         }
 
@@ -234,10 +178,8 @@
                     switch (jsonMessage.operation.type) {
                         case "GET_SESSION_CERTIFICATION":
                             var sessionCertification = toJSON(decodeURIComponent(escape(window.atob(jsonMessage.base64Data))));
-                            console.log("session-certification: ", sessionCertification);
                             vs.rsaUtil = new RSAUtil(null, sessionCertification.privateKeyPEM, sessionCertification.browserCertificate);
                             vs.sessionUUID = sessionCertification.browserUUID;
-                            console.log("rsaUtil: ", vs.rsaUtil);
                             pkiSessionDataMap[vs.sessionUUID] = sessionCertification;
                             sessionCertification.userFullName = sessionCertification.user.givenName + " " + sessionCertification.user.surName;
                             localStorage.setItem('pkiSessionData', JSON.stringify(pkiSessionDataMap));
@@ -277,14 +219,12 @@
             console.log("deleted previous sessions");
         }
 
-        console.log("pkiSessionDataMap: ", pkiSessionDataMap);
-
         if(Object.keys(pkiSessionDataMap).length === 0) {
             vs.rsaUtil = new RSAUtil(1024);
             var browserPublicKey = {publicKeyPEM:vs.rsaUtil.publicKeyPEM, sessionUUID:vs.sessionUUID};
             vs.httpPost("#{request.contextPath}/api/currency-qr/put-publickey", function(responseText, status) {
                 console.log("#{request.contextPath}/api/currency-qr/put-publickey - " + responseText + " - status: " + status);
-            }, JSON.stringify(browserPublicKey));
+            }, browserPublicKey);
         } else {
             var sessionData = pkiSessionDataMap[vs.sessionUUID];
             vs.rsaUtil = new RSAUtil(null, sessionData.privateKeyPEM, sessionData.browserCertificate);
