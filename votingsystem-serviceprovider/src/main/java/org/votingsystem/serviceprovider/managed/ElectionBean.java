@@ -8,10 +8,10 @@ import org.votingsystem.dto.metadata.SystemEntityDto;
 import org.votingsystem.ejb.Config;
 import org.votingsystem.ejb.TrustedServicesEJB;
 import org.votingsystem.http.SystemEntityType;
-import org.votingsystem.util.Messages;
-import org.votingsystem.xml.XML;
 import org.votingsystem.model.voting.Election;
+import org.votingsystem.util.Messages;
 import org.votingsystem.util.OperationType;
+import org.votingsystem.xml.XML;
 
 import javax.enterprise.context.RequestScoped;
 import javax.faces.context.FacesContext;

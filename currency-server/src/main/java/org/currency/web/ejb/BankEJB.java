@@ -11,6 +11,7 @@ import org.votingsystem.model.SignedDocument;
 import org.votingsystem.model.User;
 import org.votingsystem.model.currency.Bank;
 import org.votingsystem.model.currency.BankInfo;
+import org.votingsystem.throwable.InsufficientPrivilegesException;
 import org.votingsystem.util.NifUtils;
 
 import javax.ejb.Stateless;
@@ -51,7 +52,9 @@ public class BankEJB {
         BankDto request = signedDocument.getSignedContent(BankDto.class);
         request.validatePublishRequest();
         Iban IBAN = Iban.valueOf(request.getIBAN());
-        signerInfoService.checkIfAdmin(signer.getX509Certificate());
+        if(!config.isAdmin(signer))
+                throw new InsufficientPrivilegesException("User " + signer.getNumIdAndType() +
+                " hasn't admin privileges to register a bank");
         Iterator<X509Certificate> certIterator = PEMUtils.fromPEMToX509CertCollection(
                 request.getCertChainPEM().getBytes()).iterator();
         X509Certificate cert = certIterator.next();
@@ -60,7 +63,7 @@ public class BankEJB {
             additionalCerts.add(certIterator.next());
         }
         CertUtils.verifyCertificateChain(cert, additionalCerts);
-        Bank bank = Bank.getUser(cert);
+        Bank bank = Bank.FROM_CERT(Bank.class, cert, User.Type.BANK);
 
         PKIXCertPathValidatorResult validatorResult = CertUtils.verifyCertificate(
                 config.getTrustedCertAnchors(), false, Arrays.asList(bank.getX509Certificate()));
@@ -82,7 +85,7 @@ public class BankEJB {
             bankDB.setTimeStampToken(bank.getTimeStampToken());
             bank = bankDB;
         }
-        signerInfoService.loadCertInfo(bank, null);
+        signerInfoService.checkSigner(bank, User.Type.BANK, config.getEntityId());
         config.createIBAN(bank);
         log.info("Bank id: " + bank.getId() + " - " + cert.getSubjectDN().toString());
         return bank;

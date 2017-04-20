@@ -36,7 +36,7 @@ public class GenerateSessionCertificates extends BaseTest {
 
     private static final Logger log = Logger.getLogger(GenerateSessionCertificates.class.getName());
 
-    private static final String QR_CODE = "eid=https://voting.ddns.net/currency-server;op=0;uid=f8a247f0-4327-44c6-8d7f-746dfbf50cd4;";
+    private static final String QR_CODE = "eid=https://voting.ddns.net/currency-server;op=0;uid=025f3d19-7c5f-453f-a0e7-f52afce270e9;";
 
     private static CMSSignedMessage sessionCertification;
 

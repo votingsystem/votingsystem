@@ -7,19 +7,20 @@ import eu.europa.esig.dss.token.JKSSignatureToken;
 import eu.europa.esig.dss.tsl.TrustedListsCertificateSource;
 import eu.europa.esig.dss.x509.CertificateToken;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.votingsystem.crypto.KeyGenerator;
+import org.votingsystem.crypto.PEMUtils;
 import org.votingsystem.dto.metadata.MetadataDto;
 import org.votingsystem.dto.metadata.MetadataUtils;
 import org.votingsystem.ejb.Config;
 import org.votingsystem.ejb.MetadataService;
 import org.votingsystem.ejb.TrustedServicesEJB;
 import org.votingsystem.http.HttpConn;
-import org.votingsystem.util.Messages;
-import org.votingsystem.crypto.KeyGenerator;
-import org.votingsystem.crypto.PEMUtils;
 import org.votingsystem.http.SystemEntityType;
 import org.votingsystem.model.Certificate;
+import org.votingsystem.model.User;
 import org.votingsystem.model.voting.Election;
 import org.votingsystem.util.Constants;
+import org.votingsystem.util.Messages;
 import org.votingsystem.util.OperationType;
 import org.votingsystem.util.StringUtils;
 
@@ -84,6 +85,7 @@ public class ConfigEJB implements Config, ConfigServiceProvider, Serializable {
     private TrustedListsCertificateSource trustedCertSource;
     private Map<Long, Certificate> trustedCACertsMap = new HashMap<>();
     private Map<String, MetadataDto> entityMap;
+    private Map<String, User> adminMap = new HashMap<>();
     private MetadataDto metadata;
     private Map<Long, X509Certificate> trustedTimeStampServers;
     private Set<TrustAnchor> trustedCertAnchors;
@@ -95,6 +97,14 @@ public class ConfigEJB implements Config, ConfigServiceProvider, Serializable {
             org.apache.xml.security.Init.init();
             KeyGenerator.INSTANCE.init(Constants.SIG_NAME, Constants.PROVIDER, Constants.KEY_SIZE, Constants.ALGORITHM_RNG);
             HttpConn.init(HttpConn.HTTPS_POLICY.ALL, null);
+
+            //TODO load certs from config dir
+            Set<X509Certificate> adminCerts = new HashSet<>();
+            for(X509Certificate adminCert : adminCerts) {
+                User admin = User.FROM_CERT(adminCert, User.Type.USER);
+                adminMap.put(admin.getNumIdAndType(), admin);
+            }
+
             entityMap = new ConcurrentHashMap<>();
 
             applicationDirPath = System.getProperty("voting_provider_server_dir");
@@ -280,6 +290,11 @@ public class ConfigEJB implements Config, ConfigServiceProvider, Serializable {
         } catch (Exception ex) {
             throw new RuntimeException(Messages.currentInstance().get("invalidMetadataMsg") + " - " + ex.getMessage());
         }
+    }
+
+    @Override
+    public boolean isAdmin(User user) {
+        return adminMap.containsKey(user.getNumIdAndType());
     }
 
     public void addTrustedTimeStampIssuer(X509Certificate trustedTimeStampIssuer) {

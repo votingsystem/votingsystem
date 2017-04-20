@@ -1,10 +1,10 @@
 package org.currency.web.http;
 
-import org.currency.web.ejb.CurrencySignatureEJB;
+import org.currency.web.ejb.ConfigCurrencyServer;
 import org.currency.web.util.AuthRole;
 
 import javax.annotation.Priority;
-import javax.inject.Inject;
+import javax.ejb.EJB;
 import javax.ws.rs.Priorities;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerRequestFilter;
@@ -20,14 +20,14 @@ public class AuthenticationFilter implements ContainerRequestFilter {
 
     private static final Logger log = Logger.getLogger(AuthenticationFilter.class.getName());
 
-    @Inject
-    CurrencySignatureEJB signerInfoService;
+    @EJB
+    ConfigCurrencyServer config;
 
     @Override
     public void filter(ContainerRequestContext requestContext) throws IOException {
         CurrencyPrincipal principal = (CurrencyPrincipal) requestContext.getSecurityContext().getUserPrincipal();
         if(principal != null) {
-            if(signerInfoService.isAdmin(principal.getUser().getNumId())) {
+            if(config.isAdmin(principal.getUser())) {
                 requestContext.setSecurityContext(new SecurityContext() {
 
                     @Override public Principal getUserPrincipal() {

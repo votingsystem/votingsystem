@@ -106,12 +106,6 @@ RSAUtil.prototype.decryptMessage = function(messageJSON) {
 
     if(decryptedMsg.content && decryptedMsg.content.data) {
         var encryptedContentJSON = toJSON(decryptedMsg.content.data);
-
-
-        console.log("encryptedContentJSON: ", encryptedContentJSON);
-
-        if(encryptedContentJSON.socketOperation != null)
-            messageJSON.socketOperation = encryptedContentJSON.socketOperation;
         if(encryptedContentJSON.operation != null)
             messageJSON.operation = encryptedContentJSON.operation;
         if(encryptedContentJSON.step != null)

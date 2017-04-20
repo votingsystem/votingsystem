@@ -3,7 +3,10 @@ package org.votingsystem.crypto.cms;
 import com.fasterxml.jackson.core.type.TypeReference;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.ASN1OctetString;
-import org.bouncycastle.asn1.cms.*;
+import org.bouncycastle.asn1.cms.Attribute;
+import org.bouncycastle.asn1.cms.AttributeTable;
+import org.bouncycastle.asn1.cms.CMSAttributes;
+import org.bouncycastle.asn1.cms.ContentInfo;
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle.cert.X509CertificateHolder;
 import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter;
@@ -124,37 +127,24 @@ public class CMSSignedMessage extends CMSSignedData {
         return Base64.getEncoder().encodeToString(messageDigest.digest((byte[]) getSignedContent().getContent()));
     }
 
-    public Collection checkSignerCert(X509Certificate x509Cert) throws Exception {
-        Store certs = getCertificates();
-        X509CertificateHolder holder = new X509CertificateHolder(x509Cert.getEncoded());
-        SignerId signerId = new SignerId(holder.getIssuer(), x509Cert.getSerialNumber());
-        return certs.getMatches(signerId);
-    }
-
     public static CMSSignedMessage FROM_PEM(String pkcs7PEMData) throws Exception {
         PEMParser PEMParser = new PEMParser(new InputStreamReader(new ByteArrayInputStream(pkcs7PEMData.getBytes())));
         ContentInfo contentInfo = (ContentInfo) PEMParser.readObject();
-        if (!contentInfo.getContentType().equals(CMSObjectIdentifiers.envelopedData)) {
-            log.info("CMSObjectIdentifiers - envelopedData");
-        }
+        /*if (!contentInfo.getContentType().equals(CMSObjectIdentifiers.envelopedData)) {
+            log.info("CMSObjectIdentifiers - contentInfo not envelopedData");
+        }*/
         return new CMSSignedMessage(contentInfo.getEncoded());
     }
 
     public static CMSSignedMessage FROM_PEM(byte[] pemBytes) throws Exception {
         PEMParser PEMParser = new PEMParser(new InputStreamReader(new ByteArrayInputStream(pemBytes)));
         ContentInfo contentInfo = (ContentInfo) PEMParser.readObject();
-        /*if (!contentInfo.getContentType().equals(CMSObjectIdentifiers.envelopedData)) {
-            log.info("CMSObjectIdentifiers - envelopedData");
-        }*/
         return new CMSSignedMessage(contentInfo.getEncoded());
     }
 
     public static CMSSignedMessage FROM_PEM(InputStream inputStream) throws Exception {
         PEMParser PEMParser = new PEMParser(new InputStreamReader(inputStream));
         ContentInfo contentInfo = (ContentInfo) PEMParser.readObject();
-        if (!contentInfo.getContentType().equals(CMSObjectIdentifiers.envelopedData)) {
-            log.info("CMSObjectIdentifiers - envelopedData");
-        }
         return new CMSSignedMessage(contentInfo.getEncoded());
     }
 
@@ -198,10 +188,10 @@ public class CMSSignedMessage extends CMSSignedData {
             Store certs = getCertificates();
             SignerInformationStore signerInfos = getSignerInfos();
             Set<X509Certificate> signerCerts = new HashSet<>();
-            log.info("num. signers: " + signerInfos.size());
             Iterator it = signerInfos.getSigners().iterator();
             Date firstSignature = null;
             signatures = new HashSet<>();
+            int signerNumber = 1;
             while (it.hasNext()) {
                 SignerInformation signer = (SignerInformation) it.next();
                 byte[] signerDigest = org.votingsystem.crypto.cms.CMSUtils.getSignerDigest(signer);
@@ -209,7 +199,8 @@ public class CMSSignedMessage extends CMSSignedData {
                 Iterator certIt = certCollection.iterator();
                 X509Certificate cert = new JcaX509CertificateConverter().setProvider(Constants.PROVIDER).getCertificate(
                         (X509CertificateHolder) certIt.next());
-                log.info("cert: " + cert.getSubjectDN() + " - " + certCollection.size() + " match");
+                log.info(signerNumber + "/" + signerInfos.getSigners().size() + " - cert: " + cert.getSubjectDN() +
+                        " - " + certCollection.size() + " match");
                 try {
                     signer.verify(new JcaSimpleSignerInfoVerifierBuilder().setProvider(
                             Constants.PROVIDER).build(cert));
@@ -219,7 +210,7 @@ public class CMSSignedMessage extends CMSSignedData {
                 } catch (Exception ex) {
                     throw ex;
                 }
-                User user = User.FROM_X509_CERT(cert);
+                User user = User.FROM_CERT(cert, User.Type.USER);
                 user.setSignerInformation(signer);
                 TimeStampToken tsToken = org.votingsystem.crypto.cms.CMSUtils.checkTimeStampToken(signer);
                 user.setTimeStampToken(tsToken);

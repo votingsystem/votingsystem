@@ -1,9 +1,9 @@
 package org.votingsystem.serviceprovider.managed;
 
 import org.votingsystem.ejb.Config;
+import org.votingsystem.model.voting.Election;
 import org.votingsystem.qr.QRUtils;
 import org.votingsystem.util.Messages;
-import org.votingsystem.model.voting.Election;
 import org.votingsystem.util.OperationType;
 
 import javax.enterprise.context.SessionScoped;

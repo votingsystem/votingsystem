@@ -4,6 +4,7 @@ import eu.europa.esig.dss.token.AbstractSignatureTokenConnection;
 import eu.europa.esig.dss.x509.CertificateSource;
 import org.votingsystem.dto.metadata.MetadataDto;
 import org.votingsystem.model.Certificate;
+import org.votingsystem.model.User;
 
 import java.security.cert.TrustAnchor;
 import java.security.cert.X509Certificate;
@@ -25,6 +26,7 @@ public interface Config {
     public CertificateSource getTrustedCertSource();
     public Map<Long, X509Certificate> getTrustedTimeStampServers();
     public MetadataDto getMetadata();
+    public boolean isAdmin(User user);
     public void putEntityMetadata(MetadataDto metadata);
     public X509Certificate getSigningCert();
 

@@ -58,7 +58,7 @@ RSAUtil.prototype.initCSR = function(x509CertificatePEM) {
 RSAUtil.prototype.sign = function(contentToSign, callback) {
     if(typeof contentToSign !== 'string') contentToSign = JSON.stringify(contentToSign)
     vs.getTimeStampToken(contentToSign, function (timeStampTokenASN1) {
-        console.log("timeStampTokenASN1:", timeStampTokenASN1, " - contentToSign: ", contentToSign)
+        //console.log("timeStampTokenASN1:", timeStampTokenASN1, " - contentToSign: ", contentToSign)
         var cmsSignedMessage = forge.pkcs7.createSignedData();
         cmsSignedMessage.content = forge.util.createBuffer(contentToSign, 'utf8');
         cmsSignedMessage.addCertificate(this.x509Certificate);

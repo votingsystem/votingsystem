@@ -48,41 +48,12 @@
     <ui:insert name="head" />
 </h:head>
 <h:body class="nav-md">
-    <!-- Large modal -->
-    <div id="alertDialog" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true" style="z-index: 10000;">
-        <div class="modal-dialog">
-            <div class="modal-content" style="text-align: center;">
-                <div class="modal-header">
-                    <button type="button" class="close custom-button" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">
-                        <i class="fa fa-times"></i>
-                    </span>
-                    </button>
-                    <h3 class="modal-title" id="alertCaption" style="color:#b71c1c;"></h3>
-                </div>
-                <div id="alertDialogQRImgDiv" style="margin: 0 auto; text-align: center; display: none;padding: 0 0 15px 0;">
-                    <div id="alertDialogQRId" style="font-size: 1.8em;color: #d50000;"></div>
-                    <img id="alertDialogQRImg" src=""/>
-                </div>
-                <div id="alertDialogMsgDiv" class="modal-body" style="font-size: 1.3em; display: block; margin-right: 20px;word-wrap: break-word;">
-                    <p id="alertMessage"></p>
-                </div>
-            </div>
-        </div>
-    </div>
+    <ui:include src="alert-dialog.xhtml" />
 
     <div class="container body">
         <div class="main_container">
-            <div class="col-md-3 left_col">
-                <div class="left_col scroll-view">
-                    <div class="navbar nav_title">
-                        <a href="#{request.contextPath}/index.xhtml" class="site_title" style="margin: 5px 0 0 0;"><i class="fa fa-money"></i>
-                            <span style="margin: 10px 0 0 0;">#{msg.currencyLbl}</span>
-                        </a>
-                    </div>
-                    <div class="clearfix"></div>
-                    <ui:include src="sidebar-menu.xhtml" />
-                </div>
-            </div>
+
+            <ui:include src="sidebar-menu.xhtml" />
 
             <!-- top navigation -->
             <div class="top_nav">
@@ -177,13 +148,13 @@
                         vs.rsaUtil.decryptMessage(jsonMessage);
                     switch (jsonMessage.operation.type) {
                         case "GET_SESSION_CERTIFICATION":
-                            var sessionCertification = toJSON(decodeURIComponent(escape(window.atob(jsonMessage.base64Data))));
-                            vs.rsaUtil = new RSAUtil(null, sessionCertification.privateKeyPEM, sessionCertification.browserCertificate);
-                            vs.sessionUUID = sessionCertification.browserUUID;
-                            pkiSessionDataMap[vs.sessionUUID] = sessionCertification;
-                            sessionCertification.userFullName = sessionCertification.user.givenName + " " + sessionCertification.user.surName;
+                            vs.sessionCertification = toJSON(decodeURIComponent(escape(window.atob(jsonMessage.base64Data))));
+                            vs.rsaUtil = new RSAUtil(null, vs.sessionCertification.privateKeyPEM, vs.sessionCertification.browserCertificate);
+                            vs.sessionUUID = vs.sessionCertification.browserUUID;
+                            pkiSessionDataMap[vs.sessionUUID] = vs.sessionCertification;
+                            vs.sessionCertification.userFullName = vs.sessionCertification.user.givenName + " " + vs.sessionCertification.user.surName;
                             localStorage.setItem('pkiSessionData', JSON.stringify(pkiSessionDataMap));
-                            setSessionState(true, sessionCertification.userFullName);
+                            setSessionState(true, vs.sessionCertification.userFullName);
 
                             var msgDto = {operation:{type:"INIT_DEVICE_SESSION", entityId:vs.entityId},
                                 httpSessionId:sessionId, sessionUUID:vs.sessionUUID};
@@ -226,9 +197,9 @@
                 console.log("#{request.contextPath}/api/currency-qr/put-publickey - " + responseText + " - status: " + status);
             }, browserPublicKey);
         } else {
-            var sessionData = pkiSessionDataMap[vs.sessionUUID];
-            vs.rsaUtil = new RSAUtil(null, sessionData.privateKeyPEM, sessionData.browserCertificate);
-            setSessionState(true, sessionData.userFullName);
+            vs.sessionCertification = pkiSessionDataMap[vs.sessionUUID];
+            vs.rsaUtil = new RSAUtil(null, vs.sessionCertification.privateKeyPEM, vs.sessionCertification.browserCertificate);
+            setSessionState(true, vs.sessionCertification.userFullName);
         }
 
         //]]>

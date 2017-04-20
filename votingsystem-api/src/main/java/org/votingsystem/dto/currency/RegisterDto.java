@@ -2,7 +2,6 @@ package org.votingsystem.dto.currency;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import org.votingsystem.dto.AddressDto;
 import org.votingsystem.dto.OperationTypeDto;
 import org.votingsystem.dto.UserDto;

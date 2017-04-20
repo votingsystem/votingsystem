@@ -7,11 +7,8 @@ import org.bouncycastle.asn1.x500.style.BCStyle;
 import org.bouncycastle.cert.jcajce.JcaX509CertificateHolder;
 import org.bouncycastle.cms.SignerInformation;
 import org.bouncycastle.tsp.TimeStampToken;
-import org.votingsystem.crypto.CertUtils;
 import org.votingsystem.crypto.cms.CMSUtils;
-import org.votingsystem.dto.CertExtensionDto;
 import org.votingsystem.model.converter.LocalDateTimeAttributeConverter;
-import org.votingsystem.util.Constants;
 import org.votingsystem.util.IdDocument;
 import org.votingsystem.util.JSON;
 
@@ -400,15 +397,6 @@ public class User extends EntityBase implements Serializable {
         this.UUID = UUID;
     }
 
-    public boolean checkUserFromCSR(X509Certificate x509CertificateToCheck) throws CertificateEncodingException {
-        X500Name x500name = new JcaX509CertificateHolder(x509CertificateToCheck).getSubject();
-        User userToCheck = getUser(x500name);
-        if(!numId.equals(userToCheck.getNumId())) return false;
-        if(!name.equals(userToCheck.getName())) return false;
-        if(!surname.equals(userToCheck.getSurname())) return false;
-        return true;
-    }
-
     public Map getMetaInfMap() throws IOException {
         if(metaInfMap == null) {
             if(metaInf == null) {
@@ -417,32 +405,6 @@ public class User extends EntityBase implements Serializable {
             } else metaInfMap = JSON.getMapper().readValue(metaInf, HashMap.class);
         }
         return metaInfMap;
-    }
-
-    public User updateCertInfo (X509Certificate certificate) throws CertificateEncodingException {
-        X500Name x500name = new JcaX509CertificateHolder(certificate).getSubject();
-        User user = getUser(x500name);
-        setName(user.getName());
-        setSurname(user.getSurname());
-        setNumIdAndType(user.getNumId(), user.getDocumentType());
-        setCountry(user.getCountry());
-        setCn(user.getCn());
-        return this;
-    }
-
-    public static User FROM_X509_CERT(X509Certificate x509Certificate) throws CertificateEncodingException {
-        X500Name x500name = new JcaX509CertificateHolder(x509Certificate).getSubject();
-        User user = getUser(x500name);
-        user.setX509Certificate(x509Certificate);
-        try {
-            CertExtensionDto certExtensionDto = CertUtils.getCertExtensionData(CertExtensionDto.class,
-                    x509Certificate, Constants.DEVICE_OID);
-            if(certExtensionDto != null) {
-                user.setEmail(certExtensionDto.getEmail());
-                user.setPhone(certExtensionDto.getMobilePhone());
-            }
-        } catch(Exception ex) {ex.printStackTrace();}
-        return user;
     }
 
     public String getNumId() {
@@ -504,8 +466,9 @@ public class User extends EntityBase implements Serializable {
             setUUID(java.util.UUID.randomUUID().toString());
     }
 
-    public static User getUser(X500Name subject) {
-        User result = new User();
+    public static <T extends User> T getUser(Class<T> userClass, X500Name subject) throws IllegalAccessException,
+            InstantiationException {
+        T result = userClass.newInstance();
         String unasignedAttributes = null;
         for(RDN rdn : subject.getRDNs()) {
             AttributeTypeAndValue attributeTypeAndValue = rdn.getFirst();
@@ -539,38 +502,23 @@ public class User extends EntityBase implements Serializable {
      * @return
      * @throws CertificateEncodingException
      */
-    public static User FROM_CERT(X509Certificate x509Certificate, User.Type type) throws CertificateEncodingException {
+    public static User FROM_CERT(X509Certificate x509Certificate, User.Type type) throws CertificateEncodingException,
+            InstantiationException, IllegalAccessException {
         X500Name x500name = new JcaX509CertificateHolder(x509Certificate).getSubject();
-        User user = getUser(x500name, type);
+        User user = getUser(User.class, x500name).setType(type);
         user.setX509Certificate(x509Certificate);
         if(user.getName() == null)
             user.setName(x509Certificate.getSubjectDN().toString());
         return user;
     }
 
-    /**
-     *
-     * @param subject
-     * @param type
-     * @return
-     */
-    private static User getUser(X500Name subject, User.Type type) {
-        User result = new User();
-        for(RDN rdn : subject.getRDNs()) {
-            AttributeTypeAndValue attributeTypeAndValue = rdn.getFirst();
-            if(BCStyle.SERIALNUMBER.getId().equals(attributeTypeAndValue.getType().getId())) {
-                result.setDocumentType(IdDocument.NIF);
-                result.setNumId(attributeTypeAndValue.getValue().toString());
-            }
-            if(BCStyle.SURNAME.getId().equals(attributeTypeAndValue.getType().getId())) {
-                result.setSurname(attributeTypeAndValue.getValue().toString());
-            } else if(BCStyle.GIVENNAME.getId().equals(attributeTypeAndValue.getType().getId())) {
-                result.setName(attributeTypeAndValue.getValue().toString());
-            } else if(BCStyle.C.getId().equals(attributeTypeAndValue.getType().getId())) {
-                result.setCountry(attributeTypeAndValue.getValue().toString());
-            } else log.info("oid: " + attributeTypeAndValue.getType().getId() + " - value: " +
-                    attributeTypeAndValue.getValue().toString());
-        }
+    public static <T extends User> T FROM_CERT(Class<T> userClass, X509Certificate x509Certificate, User.Type type)
+            throws IllegalAccessException, InstantiationException, CertificateEncodingException {
+        X500Name x500name = new JcaX509CertificateHolder(x509Certificate).getSubject();
+        T result = getUser(userClass, x500name);
+        result.setX509Certificate(x509Certificate);
+        if(result.getName() == null)
+            result.setName(x509Certificate.getSubjectDN().toString());
         return result;
     }
 

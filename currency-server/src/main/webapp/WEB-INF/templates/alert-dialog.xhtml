@@ -1,0 +1,27 @@
+<ui:composition
+        xmlns="http://www.w3.org/1999/xhtml"
+        xmlns:ui="http://xmlns.jcp.org/jsf/facelets">
+    <!-- Large modal -->
+    <div id="alertDialog" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true" style="z-index: 10000;">
+        <div class="modal-dialog">
+            <div class="modal-content" style="text-align: center;">
+                <div class="modal-header">
+                    <button type="button" class="close custom-button" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">
+                        <i class="fa fa-times"></i>
+                    </span>
+                    </button>
+                    <h3 class="modal-title" id="alertCaption" style="color:#b71c1c;"></h3>
+                </div>
+                <div id="alertDialogQRImgDiv" style="margin: 0 auto; text-align: center; display: none;padding: 0 0 15px 0;">
+                    <div id="alertDialogQRId" style="font-size: 1.8em;color: #d50000;"></div>
+                    <img id="alertDialogQRImg" src=""/>
+                </div>
+                <div id="alertDialogMsgDiv" class="modal-body" style="font-size: 1.3em; display: block; margin-right: 20px;word-wrap: break-word;">
+                    <p id="alertMessage"></p>
+                </div>
+            </div>
+        </div>
+    </div>
+</ui:composition>
+
+

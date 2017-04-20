@@ -1,12 +1,10 @@
 package org.votingsystem.ejb;
 
-import org.bouncycastle.cert.X509CertificateHolder;
 import org.bouncycastle.cms.SignerInformationVerifier;
 import org.bouncycastle.cms.jcajce.JcaSimpleSignerInfoVerifierBuilder;
 import org.bouncycastle.operator.OperatorCreationException;
 import org.bouncycastle.tsp.TSPException;
 import org.bouncycastle.tsp.TimeStampToken;
-import org.bouncycastle.util.Selector;
 import org.votingsystem.crypto.Encryptor;
 import org.votingsystem.crypto.SignedDocumentType;
 import org.votingsystem.crypto.cms.CMSGenerator;
@@ -14,7 +12,10 @@ import org.votingsystem.crypto.cms.CMSSignedMessage;
 import org.votingsystem.crypto.cms.CMSUtils;
 import org.votingsystem.dto.CMSDto;
 import org.votingsystem.dto.OperationCheckerDto;
-import org.votingsystem.model.*;
+import org.votingsystem.model.CMSDocument;
+import org.votingsystem.model.Signature;
+import org.votingsystem.model.SignedDocument;
+import org.votingsystem.model.User;
 import org.votingsystem.throwable.ValidationException;
 import org.votingsystem.util.Constants;
 import org.votingsystem.util.CurrencyOperation;
@@ -33,7 +34,6 @@ import java.security.KeyStore;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.cert.X509Certificate;
-import java.util.Collection;
 import java.util.List;
 import java.util.Properties;
 import java.util.logging.Level;
@@ -98,7 +98,7 @@ public class CmsEJB {
             OperationCheckerDto operationDto = cmsSignedMessage.getSignedContent(OperationCheckerDto.class);
             if(operationDto.getOperation() == null)
                 throw new ValidationException("Request without operation type: " + cmsSignedMessage.getSignedContentStr());
-            log.info("operation: " + operationDto.getOperation().getType());
+            log.finest("operation: " + operationDto.getOperation().getType());
 
             User.Type userType = User.Type.USER;
             if(operationDto.getOperation().isCurrencyOperation()) {
@@ -133,7 +133,7 @@ public class CmsEJB {
             if(signer.getTimeStampToken() != null)
                 validateToken(signer.getTimeStampToken());
             else log.info("signature without timestamp - signer: " + signer.getX509Certificate().getSubjectDN());
-            signer = signerInfoService.checkSigner(signer.getX509Certificate(), userType, entityId);
+            signer = signerInfoService.checkSigner(signer, userType, entityId);
             signature.setSigner(signer).setSignerCertificate(signer.getCertificate())
                     .setCertificateCA(signer.getCertificateCA());
             if(signer.isAnonymousUser()) {

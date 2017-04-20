@@ -2,6 +2,8 @@ package org.currency.test;
 
 import org.votingsystem.dto.ResponseDto;
 import org.votingsystem.http.HttpConn;
+import org.votingsystem.model.User;
+import org.votingsystem.model.currency.Bank;
 import org.votingsystem.testlib.BaseTest;
 import org.votingsystem.util.CurrencyOperation;
 
@@ -18,9 +20,8 @@ public class Test extends BaseTest {
     }
 
     public void test() throws Exception {
-        ResponseDto response = HttpConn.getInstance().doPostRequest("test".getBytes(), null,
-                CurrencyOperation.REGISTER_DEVICE.getUrl(Constants.ID_PROVIDER_ENTITY_ID));
-        log.info("Message: " + response.getMessage());
+        Bank bank = User.FROM_CERT(Bank.class, null, null);
+        log.info("bank: " + bank.getClass().getSimpleName());
     }
 
 }

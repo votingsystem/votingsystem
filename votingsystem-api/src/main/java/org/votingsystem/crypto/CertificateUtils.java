@@ -1,5 +1,8 @@
 package org.votingsystem.crypto;
 
+import org.bouncycastle.cert.X509CertificateHolder;
+import org.bouncycastle.cms.SignerId;
+import org.bouncycastle.util.Store;
 import org.votingsystem.util.FileUtils;
 
 import java.io.File;
@@ -55,6 +58,16 @@ public class CertificateUtils {
         byte[] der = x509Certificate.getEncoded();
         md.update(der);
         return Base64.getEncoder().encodeToString(md.digest());
+    }
+
+    public static boolean equals(X509Certificate cert, X509Certificate certToCheck) throws CertificateEncodingException {
+        return Arrays.equals(cert.getEncoded(), certToCheck.getEncoded());
+    }
+
+    public static Collection findCert(X509Certificate x509Cert, Store certStore) throws Exception {
+        X509CertificateHolder holder = new X509CertificateHolder(x509Cert.getEncoded());
+        SignerId signerId = new SignerId(holder.getIssuer(), x509Cert.getSerialNumber());
+        return certStore.getMatches(signerId);
     }
 
 }

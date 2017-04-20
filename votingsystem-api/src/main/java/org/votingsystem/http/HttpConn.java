@@ -34,7 +34,6 @@ import org.apache.http.util.EntityUtils;
 import org.votingsystem.dto.ResponseDto;
 import org.votingsystem.throwable.*;
 import org.votingsystem.util.JSON;
-import org.votingsystem.xml.XML;
 
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLContext;

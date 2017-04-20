@@ -50,8 +50,4 @@ public class CurrencySignatureEJB {
         return signatureService.validateXAdESAndSave(new InMemoryDocument(signedXML), signatureParams);
     }
 
-    public boolean isAdmin(String nif) {
-        log.severe("======= nif: " + nif);
-        return false;
-    }
 }

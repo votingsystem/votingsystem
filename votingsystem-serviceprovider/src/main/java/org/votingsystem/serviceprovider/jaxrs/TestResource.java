@@ -1,18 +1,18 @@
 package org.votingsystem.serviceprovider.jaxrs;
 
-import org.votingsystem.dto.voting.ElectionDto;
-import org.votingsystem.ejb.Config;
-import org.votingsystem.ejb.SignatureService;
-import org.votingsystem.ejb.TrustedServicesEJB;
-import org.votingsystem.model.SignedDocument;
-import org.votingsystem.serviceprovider.ejb.ConfigServiceProvider;
-import org.votingsystem.util.JSON;
-import org.votingsystem.xml.XML;
 import org.omnifaces.cdi.Push;
 import org.omnifaces.cdi.PushContext;
 import org.votingsystem.dto.ResponseDto;
+import org.votingsystem.dto.voting.ElectionDto;
+import org.votingsystem.ejb.Config;
 import org.votingsystem.ejb.QRSessionsEJB;
+import org.votingsystem.ejb.SignatureService;
+import org.votingsystem.ejb.TrustedServicesEJB;
+import org.votingsystem.model.SignedDocument;
 import org.votingsystem.model.voting.Election;
+import org.votingsystem.serviceprovider.ejb.ConfigServiceProvider;
+import org.votingsystem.util.JSON;
+import org.votingsystem.xml.XML;
 
 import javax.ejb.EJB;
 import javax.ejb.Stateless;

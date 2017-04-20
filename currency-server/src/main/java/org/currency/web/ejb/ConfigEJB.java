@@ -97,6 +97,7 @@ public class ConfigEJB implements Config, ConfigCurrencyServer, Serializable {
     private TrustedListsCertificateSource trustedCertSource;
     private Map<Long, Certificate> trustedCACertsMap = new HashMap<>();
     private Map<String, MetadataDto> entityMap;
+    private Map<String, User> adminMap = new HashMap<>();
     private MetadataDto metadata;
     private Set<TrustAnchor> trustedCertAnchors;
     private Map<Long, X509Certificate> trustedTimeStampServers;
@@ -111,6 +112,14 @@ public class ConfigEJB implements Config, ConfigCurrencyServer, Serializable {
             org.apache.xml.security.Init.init();
             KeyGenerator.INSTANCE.init(Constants.SIG_NAME, Constants.PROVIDER, Constants.KEY_SIZE, Constants.ALGORITHM_RNG);
             HttpConn.init(HttpConn.HTTPS_POLICY.ALL, null);
+
+            //TODO load certs from config dir
+            Set<X509Certificate> adminCerts = new HashSet<>();
+            for(X509Certificate adminCert : adminCerts) {
+                User admin = User.FROM_CERT(adminCert, User.Type.USER);
+                adminMap.put(admin.getNumIdAndType(), admin);
+            }
+
             entityMap = new ConcurrentHashMap<>();
             applicationDirPath = System.getProperty("currency_server_dir");
             if(StringUtils.isEmpty(applicationDirPath))
@@ -307,6 +316,11 @@ public class ConfigEJB implements Config, ConfigCurrencyServer, Serializable {
         } catch (Exception ex) {
             throw new RuntimeException(Messages.currentInstance().get("invalidMetadataMsg") + " - " + ex.getMessage());
         }
+    }
+
+    @Override
+    public boolean isAdmin(User user) {
+        return adminMap.containsKey(user.getNumIdAndType());
     }
 
     @Override

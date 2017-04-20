@@ -17,6 +17,7 @@ import org.votingsystem.ejb.TrustedServicesEJB;
 import org.votingsystem.http.HttpConn;
 import org.votingsystem.http.SystemEntityType;
 import org.votingsystem.model.Certificate;
+import org.votingsystem.model.User;
 import org.votingsystem.util.Constants;
 import org.votingsystem.util.Messages;
 import org.votingsystem.util.OperationType;
@@ -65,7 +66,6 @@ public class ConfigEJB implements Config, ConfigIdProvider {
     @PersistenceContext
     private EntityManager em;
     @EJB private TrustedServicesEJB trustedServices;
-    @EJB private CertIssuerEJB certIssuer;
 
     private String entityId;
     private String timestampServiceURL;
@@ -82,7 +82,7 @@ public class ConfigEJB implements Config, ConfigIdProvider {
     private Map<String, MetadataDto> entityMap;
     private Map<Long, X509Certificate> trustedTimeStampServers;
     private String ocspServerURL;
-
+    private Map<String, User> adminMap = new HashMap<>();
 
     @PostConstruct
     public void initialize() {
@@ -91,6 +91,14 @@ public class ConfigEJB implements Config, ConfigIdProvider {
             org.apache.xml.security.Init.init();
             KeyGenerator.INSTANCE.init(Constants.SIG_NAME, Constants.PROVIDER, Constants.KEY_SIZE, Constants.ALGORITHM_RNG);
             HttpConn.init(HttpConn.HTTPS_POLICY.ALL, null);
+
+            //TODO load certs from config dir
+            Set<X509Certificate> adminCerts = new HashSet<>();
+            for(X509Certificate adminCert : adminCerts) {
+                User admin = User.FROM_CERT(adminCert, User.Type.USER);
+                adminMap.put(admin.getNumIdAndType(), admin);
+            }
+
             entityMap = new ConcurrentHashMap<>();
 
             applicationDirPath = System.getProperty("idprovider_server_dir");
@@ -256,6 +264,11 @@ public class ConfigEJB implements Config, ConfigIdProvider {
         } catch (Exception ex) {
             throw new RuntimeException(Messages.currentInstance().get("invalidMetadataMsg") + " - " + ex.getMessage());
         }
+    }
+
+    @Override
+    public boolean isAdmin(User user) {
+        return adminMap.containsKey(user.getNumIdAndType());
     }
 
     public void putEntityMetadata(MetadataDto metadata) {

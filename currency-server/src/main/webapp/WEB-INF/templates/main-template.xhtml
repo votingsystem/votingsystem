@@ -20,42 +20,13 @@
     <ui:insert name="head" />
 </h:head>
 <h:body class="nav-md">
-    <script>
-        //<![CDATA[
 
-        //]]>
-    </script>
-    <!-- Large modal -->
-    <div id="alertDialog" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true" style="z-index: 10000;">
-        <div class="modal-dialog">
-            <div class="modal-content" style="text-align: center;">
-                <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">
-                        <i class="fa fa-times"></i>
-                    </span>
-                    </button>
-                    <h4 class="modal-title" id="alertCaption"></h4>
-                </div>
-                <div class="modal-body" style="font-size: 1.2em; display: block; margin-right: 20px;word-wrap: break-word;">
-                    <p id="alertMessage"></p>
-                </div>
-            </div>
-        </div>
-    </div>
+    <ui:include src="alert-dialog.xhtml" />
 
     <div class="container body">
         <div class="main_container">
-            <div class="col-md-3 left_col">
-                <div class="left_col scroll-view">
-                    <div class="navbar nav_title">
-                        <a href="#{request.contextPath}/index.xhtml" class="site_title" style="margin: 5px 0 0 0;"><i class="fa fa-money"></i>
-                            <span style="margin: 10px 0 0 0;">#{msg.currencyLbl}</span>
-                        </a>
-                    </div>
-                    <div class="clearfix"></div>
-                    <ui:include src="sidebar-menu.xhtml" />
-                </div>
-            </div>
+
+            <ui:include src="sidebar-menu.xhtml" />
 
             <!-- top navigation -->
             <div class="top_nav">

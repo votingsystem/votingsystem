@@ -1,12 +1,15 @@
 package org.currency.web.http;
 
+import org.currency.web.ejb.ConfigEJB;
 import org.currency.web.ejb.CurrencySignatureEJB;
 import org.currency.web.util.AuthRole;
 import org.votingsystem.model.SignedDocument;
 import org.votingsystem.util.FileUtils;
 
 import javax.annotation.Priority;
+import javax.ejb.EJB;
 import javax.inject.Inject;
+import javax.ws.rs.Encoded;
 import javax.ws.rs.NotAuthorizedException;
 import javax.ws.rs.Priorities;
 import javax.ws.rs.container.ContainerRequestContext;
@@ -30,8 +33,8 @@ public class SignedAccessAuthenticationFilter implements ContainerRequestFilter 
 
     private static final Logger log = Logger.getLogger(SignedAccessAuthenticationFilter.class.getName());
 
-    @Inject
-    CurrencySignatureEJB signatureService;
+    @EJB CurrencySignatureEJB signatureService;
+    @EJB ConfigEJB config;
 
     @Override
     public void filter(ContainerRequestContext requestContext) throws IOException {
@@ -43,7 +46,7 @@ public class SignedAccessAuthenticationFilter implements ContainerRequestFilter 
             throw new NotAuthorizedException(ex.getMessage());
         }
         CurrencyPrincipal principal = new CurrencyPrincipal(signedDocument);
-        Set<String> roles = signatureService.isAdmin(signedDocument.getFirstSignature().getSigner().getNumId()) ?
+        Set<String> roles = config.isAdmin(signedDocument.getFirstSignature().getSigner()) ?
                 AuthRole.ADMIN_ROLES : AuthRole.USER_ROLES;
         try {
             requestContext.setSecurityContext(new SecurityContext() {

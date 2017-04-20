@@ -311,7 +311,7 @@ public class CertIssuerEJB {
     emailAddress=user@votingsystem.org, SERIALNUMBER=1234, SN=surname, GN=given name, GN=name given */
     public UserCSRRequest saveUserCSR(byte[] csrBytes) throws Exception {
         PKCS10CertificationRequest csr = PEMUtils.fromPEMToPKCS10CertificationRequest(csrBytes);
-        User user = User.getUser(csr.getSubject());
+        User user = User.getUser(User.class, csr.getSubject());
         CertExtensionDto certExtensionDto = CertUtils.getCertExtensionData(CertExtensionDto.class, csr, Constants.DEVICE_OID);
         DeviceDto deviceDto = new DeviceDto(user, certExtensionDto);
         Device device = checkDeviceFromCSR(deviceDto);
