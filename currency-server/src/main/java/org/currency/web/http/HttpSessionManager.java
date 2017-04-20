@@ -83,13 +83,14 @@ public class HttpSessionManager implements HttpSessionListener {
         return result;
     }
 
-    public void updateSession(String previousUserUUID, String newUserUUID, String httpSessionId, User user) {
-        log.info("httpSession id: " + httpSessionId + " - previousUserUUID: " + previousUserUUID + " - newUserUUID: " + newUserUUID);
+    public void updateSession(String previousSessionUUID, String newSessionUUID, String httpSessionId, User user) {
+        log.info("httpSession id: " + httpSessionId + " - previousSessionUUID: " + previousSessionUUID +
+                " - newSessionUUID: " + newSessionUUID);
         HttpSession httpSession = sessionIdMap.get(httpSessionId);
-        httpSession.setAttribute(Constants.SESSION_UUID, newUserUUID);
+        httpSession.setAttribute(Constants.SESSION_UUID, newSessionUUID);
         httpSession.setAttribute(Constants.USER_KEY, user);
-        userSessionMap.remove(previousUserUUID);
-        userSessionMap.put(newUserUUID, httpSession);
+        userSessionMap.remove(previousSessionUUID);
+        userSessionMap.put(newSessionUUID, httpSession);
     }
 
 }

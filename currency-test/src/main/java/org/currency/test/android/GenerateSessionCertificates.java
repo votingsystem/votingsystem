@@ -16,7 +16,6 @@ import org.votingsystem.http.HttpConn;
 import org.votingsystem.http.MediaType;
 import org.votingsystem.model.Device;
 import org.votingsystem.model.User;
-import org.votingsystem.socket.SocketOperation;
 import org.votingsystem.testlib.BaseTest;
 import org.votingsystem.testlib.pkcs7.CMSSignatureBuilder;
 import org.votingsystem.util.CurrencyOperation;
@@ -36,7 +35,7 @@ public class GenerateSessionCertificates extends BaseTest {
 
     private static final Logger log = Logger.getLogger(GenerateSessionCertificates.class.getName());
 
-    private static final String QR_CODE = "eid=https://voting.ddns.net/currency-server;op=0;uid=025f3d19-7c5f-453f-a0e7-f52afce270e9;";
+    private static final String QR_CODE = "eid=https://voting.ddns.net/currency-server;op=0;uid=f2c205ac-fa46-4360-be37-192bcecb5971;";
 
     private static CMSSignedMessage sessionCertification;
 
@@ -119,7 +118,7 @@ public class GenerateSessionCertificates extends BaseTest {
         PublicKey publicKey = PEMUtils.fromPEMToRSAPublicKey(browserPublicKey.getPublicKeyPEM());
 
         MessageDto messageDto = new MessageDto();
-        messageDto.setOperation(new OperationTypeDto(SocketOperation.MSG_TO_DEVICE, qrMessageDto.getSystemEntityID()))
+        messageDto.setOperation(new OperationTypeDto(CurrencyOperation.MSG_TO_DEVICE, qrMessageDto.getSystemEntityID()))
                 .setDeviceToUUID(qrMessageDto.getUUID());
 
         MessageDto messageContent = new MessageDto();

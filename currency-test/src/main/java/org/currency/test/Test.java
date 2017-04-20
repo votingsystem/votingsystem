@@ -6,6 +6,7 @@ import org.votingsystem.model.User;
 import org.votingsystem.model.currency.Bank;
 import org.votingsystem.testlib.BaseTest;
 import org.votingsystem.util.CurrencyOperation;
+import org.votingsystem.util.JSON;
 
 import java.util.logging.Logger;
 
@@ -20,8 +21,6 @@ public class Test extends BaseTest {
     }
 
     public void test() throws Exception {
-        Bank bank = User.FROM_CERT(Bank.class, null, null);
-        log.info("bank: " + bank.getClass().getSimpleName());
     }
 
 }

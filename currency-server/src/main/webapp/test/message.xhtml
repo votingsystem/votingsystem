@@ -34,14 +34,14 @@
 
             function sendEncryptedMessage(receiverCert, deviceUUID) {
                 var encryptedPem = vs.encryptToCMS(receiverCert,  {message:"test message"})
-                var socketOperation = {socketOperation:"MSG_TO_DEVICE", deviceFromUUID:vs.sessionUUID,
+                var msgDto = {operation:{type:"MSG_TO_DEVICE"}, deviceFromUUID:vs.sessionUUID,
                     deviceToUUID:deviceUUID, certificatePEM:vs.rsaUtil.x509CertificatePEM,
                     encryptedMessage:encryptedPem};
 
                 var msgServiceURL = vs.entityId + "/api/msg/send";
                 vs.httpPost (msgServiceURL, function (responseText, status) {
                     console.log("status: " + status + " - responseText: " + responseText)
-                }, JSON.stringify(socketOperation), "application/json");
+                }, JSON.stringify(msgDto), "application/json");
             }
 
             // ]]>

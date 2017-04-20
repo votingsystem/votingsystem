@@ -5,9 +5,9 @@ import okhttp3.*;
 import okio.ByteString;
 import org.votingsystem.dto.MessageDto;
 import org.votingsystem.dto.OperationTypeDto;
-import org.votingsystem.socket.SocketOperation;
 import org.votingsystem.testlib.BaseTest;
 import org.votingsystem.testlib.util.IOUtils;
+import org.votingsystem.util.CurrencyOperation;
 import org.votingsystem.util.JSON;
 
 import javax.net.ssl.*;
@@ -78,7 +78,7 @@ public class WebSocketSessionTest extends BaseTest {
 
     private void sendMessage(String message) throws JsonProcessingException {
         MessageDto messageDto = new MessageDto();
-        OperationTypeDto operationType = new OperationTypeDto(SocketOperation.MSG_TO_DEVICE,
+        OperationTypeDto operationType = new OperationTypeDto(CurrencyOperation.MSG_TO_DEVICE,
                 org.currency.test.Constants.CURRENCY_SERVICE_ENTITY_ID);
         messageDto.setOperation(operationType).setDate(ZonedDateTime.now());
         messageDto.setMessage(message);

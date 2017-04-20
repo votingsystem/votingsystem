@@ -4,6 +4,7 @@ import org.currency.web.managed.SocketPushEvent;
 import org.currency.web.websocket.SessionManager;
 import org.votingsystem.dto.MessageDto;
 import org.votingsystem.http.MediaType;
+import org.votingsystem.util.CurrencyOperation;
 import org.votingsystem.util.JSON;
 
 import javax.ejb.Stateless;
@@ -45,7 +46,8 @@ public class WebSocketResourceEJB {
     public Response send(@Context HttpServletRequest req, @Context HttpServletResponse res, byte[] requestBytes)
             throws Exception {
         MessageDto message = JSON.getMapper().readValue(requestBytes, MessageDto.class);
-        switch (message.getSocketOperation()) {
+        CurrencyOperation socketOperation = (CurrencyOperation)message.getOperation().getType();
+        switch (socketOperation) {
             case MSG_TO_DEVICE:
                 if(SessionManager.getInstance().hasSession(message.getDeviceToUUID())) {
                     SessionManager.getInstance().sendMessage(new String(requestBytes), message.getDeviceToUUID());
@@ -56,7 +58,7 @@ public class WebSocketResourceEJB {
                 }
                 break;
             default:
-                log.info("unprocessed socket operation: " + message.getSocketOperation());
+                log.info("unprocessed socket operation: " + socketOperation);
         }
         return  Response.ok().entity("OK").build();
     }

@@ -31,7 +31,6 @@ public class QRMessageDto<T> implements Serializable {
     @JsonIgnore private T data;
     @JsonIgnore private String originRevocationHash;
     @JsonIgnore private DeviceDto device;
-    @JsonIgnore private AESParamsDto aesParams;;
 
     private String systemEntityID;
     private String operation;
@@ -193,14 +192,6 @@ public class QRMessageDto<T> implements Serializable {
 
     public void setItemId(String itemId) {
         this.itemId = itemId;
-    }
-
-    public AESParamsDto getAesParams() {
-        return aesParams;
-    }
-
-    public void setAesParams(AESParamsDto aesParams) {
-        this.aesParams = aesParams;
     }
 
     public String getMsg() {

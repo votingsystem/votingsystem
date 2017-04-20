@@ -367,6 +367,7 @@ public class ResponseDto<T> implements Serializable {
         return EXCEPTION(controller, actionMap, exception, rootCause);
     }
 
+    @JsonIgnore
     public ResponseDto getErrorResponse() throws IOException {
         ResponseDto responseDto = null;
         if(contentType == null)

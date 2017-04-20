@@ -14,7 +14,6 @@
         <class>org.votingsystem.model.SignedDocument</class>
         <class>org.votingsystem.model.currency.Tag</class>
         <class>org.votingsystem.model.User</class>
-        <class>org.votingsystem.model.UserToken</class>
         <class>org.votingsystem.model.currency.Bank</class>
         <class>org.votingsystem.model.currency.Currency</class>
         <class>org.votingsystem.model.currency.CurrencyAccount</class>
