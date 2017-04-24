@@ -34,14 +34,13 @@ public class UserTransactionEJB {
     @PersistenceContext
     private EntityManager em;
     @Inject private ConfigCurrencyServer config;
-    @Inject private WalletEJB walletBean;
     @Inject private TransactionEJB transactionBean;
     @Inject private CurrencySignatureEJB signatureService;
 
     public ResultListDto<TransactionDto> processTransactionFromUser(TransactionDto request) throws Exception {
         validateRequest(request);
-        Map<CurrencyAccount, BigDecimal> accountFromMovements = walletBean.getAccountMovementsForTransaction(
-                request.getSigner().getIBAN(), request.getAmount(), request.getCurrencyCode());
+        Map<CurrencyAccount, BigDecimal> accountFromMovements = transactionBean.getAccountMovementsForTransaction(
+                request.getSigner(), request.getAmount(), request.getCurrencyCode());
         //Transactions from users doesn't need parent transaction
         SignedDocument signedDocument = request.getSignedDocument();
         Transaction transaction = Transaction.USER(request.getSigner(), request.getReceptor(),

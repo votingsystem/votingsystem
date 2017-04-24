@@ -2,12 +2,12 @@ package org.currency.web.servlet;
 
 import org.currency.web.ejb.ConfigCurrencyServer;
 import org.currency.web.ejb.CurrencyEJB;
+import org.currency.web.ejb.CurrencySignatureEJB;
 import org.votingsystem.crypto.SignatureParams;
 import org.votingsystem.crypto.SignedDocumentType;
 import org.votingsystem.dto.ResponseDto;
 import org.votingsystem.dto.ResultListDto;
 import org.votingsystem.dto.currency.CurrencyRequestDto;
-import org.votingsystem.ejb.SignatureService;
 import org.votingsystem.http.AnonCertMultipartRequest;
 import org.votingsystem.http.MediaType;
 import org.votingsystem.model.SignedDocument;
@@ -31,7 +31,7 @@ public class CurrencyRequestServlet extends HttpServlet {
     private final static Logger log = Logger.getLogger(CurrencyRequestServlet.class.getName());
 
     @Inject private ConfigCurrencyServer config;
-    @Inject private SignatureService signatureService;
+    @Inject private CurrencySignatureEJB signatureService;
     @Inject private CurrencyEJB currencyBean;
 
     @Override

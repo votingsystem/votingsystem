@@ -9,19 +9,24 @@ import org.votingsystem.model.currency.Currency;
 import org.votingsystem.model.currency.CurrencyAccount;
 import org.votingsystem.model.currency.Transaction;
 import org.votingsystem.throwable.ValidationException;
+import org.votingsystem.util.CurrencyCode;
 import org.votingsystem.util.Interval;
 import org.votingsystem.util.Messages;
 
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import java.math.BigDecimal;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import static javax.ejb.TransactionAttributeType.REQUIRES_NEW;
 
 /**
  * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
@@ -73,16 +78,14 @@ public class TransactionEJB {
         CurrencyAccount accountTo = null;
         if(!accounts.isEmpty())
             accountTo = accounts.iterator().next();
-        BigDecimal resultAmount =  transaction.getAmount();
+        BigDecimal transactionAmount =  transaction.getAmount();
         if(accountTo == null) {
-            //TODO
-            currencyAccountService.checkUserAccountForCurrency(transaction.getToUser(), transaction.getCurrencyCode());
-            accountTo = new CurrencyAccount(transaction.getToUser(), resultAmount, transaction.getCurrencyCode());
+            accountTo = new CurrencyAccount(transaction.getToUser(), transactionAmount, transaction.getCurrencyCode());
             em.persist(accountTo);
             log.info("new CurrencyAccount: " + accountTo.getId() + " - for IBAN:" + transaction.getToUserIBAN() +
                     " - amount:" + accountTo.getBalance());
         } else {
-            em.merge(accountTo.setBalance(accountTo.getBalance().add(resultAmount)));
+            em.merge(accountTo.setBalance(accountTo.getBalance().add(transactionAmount)));
             log.info("updateUserAccountTo - account id: " + accountTo.getId() + " - balance: " +
                     accountTo.getBalance() + " - LastUpdated: " + accountTo.getLastUpdated());
         }
@@ -173,6 +176,27 @@ public class TransactionEJB {
             default: typeDescription = transactionType;
         }
         return typeDescription;
+    }
+
+    @TransactionAttribute(REQUIRES_NEW)
+    public Map<CurrencyAccount, BigDecimal> getAccountMovementsForTransaction(User accountUser,
+                                                      BigDecimal amount, CurrencyCode currencyCode) throws Exception {
+        if(amount.compareTo(BigDecimal.ZERO) < 0) throw new ValidationException(
+                "negativeAmountRequestedErrorMsg: " +  amount.toString());
+        List<CurrencyAccount> currencyAccounts = em.createNamedQuery(
+                CurrencyAccount.FIND_BY_USER_IBAN_AND_CURRENCY_CODE_AND_STATE)
+                .setParameter("userIBAN", accountUser.getIBAN())
+                .setParameter("currencyCode", currencyCode)
+                .setParameter("state", CurrencyAccount.State.ACTIVE).getResultList();
+        if(currencyAccounts.isEmpty())
+            throw new ValidationException("User UUID: " + accountUser.getUUID() + " - hasn't account for currency code: " + currencyCode);
+        CurrencyAccount currencyAccount = currencyAccounts.iterator().next();
+        Map<CurrencyAccount, BigDecimal> result = new HashMap<>();
+        if(currencyAccount.getBalance().compareTo(amount) < 0)
+            throw new ValidationException("LOW BALANCE - request: " + amount + " " + currencyCode + " - available: " +
+                    currencyAccount.getBalance() + " " + currencyAccount.getCurrencyCode());
+        result.put(currencyAccount, amount);
+        return result;
     }
 
     public List<Transaction> getTransactionFromList(User fromUser, Interval timePeriod) {

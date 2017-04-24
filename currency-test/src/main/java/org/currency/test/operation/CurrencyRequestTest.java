@@ -4,20 +4,16 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.google.common.collect.Sets;
 import org.votingsystem.crypto.MockDNIe;
 import org.votingsystem.crypto.TSPHttpSource;
-import org.votingsystem.crypto.cms.CMSSignedMessage;
 import org.votingsystem.currency.Wallet;
 import org.votingsystem.dto.ResponseDto;
 import org.votingsystem.dto.ResultListDto;
 import org.votingsystem.dto.currency.CurrencyRequestDto;
 import org.votingsystem.dto.currency.TransactionDto;
 import org.votingsystem.http.HttpConn;
-import org.votingsystem.model.User;
 import org.votingsystem.testlib.BaseTest;
-import org.votingsystem.testlib.pkcs7.CMSSignatureBuilder;
 import org.votingsystem.util.Constants;
 import org.votingsystem.util.CurrencyCode;
 import org.votingsystem.util.CurrencyOperation;
-import org.votingsystem.util.JSON;
 import org.votingsystem.xades.XAdESSignature;
 import org.votingsystem.xml.XML;
 
@@ -46,7 +42,7 @@ public class CurrencyRequestTest extends BaseTest {
         BigDecimal totalAmount = new BigDecimal(12);
         TransactionDto transactionDto = new TransactionDto();
         transactionDto.setAmount(totalAmount);
-        transactionDto.setCurrencyCode(CurrencyCode.JPY);
+        transactionDto.setCurrencyCode(CurrencyCode.EUR);
         CurrencyRequestDto requestDto = CurrencyRequestDto.CREATE_REQUEST(transactionDto, totalAmount,
                 org.currency.test.Constants.CURRENCY_SERVICE_ENTITY_ID);
         Map<String, byte[]> fileMap = new HashMap<>();

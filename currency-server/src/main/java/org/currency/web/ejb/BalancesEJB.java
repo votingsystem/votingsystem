@@ -87,15 +87,18 @@ public class BalancesEJB {
 
     @TransactionAttribute(REQUIRES_NEW)
     public void updateSystemBalance(BigDecimal amount, CurrencyCode currencyCode) throws ValidationException {
-        List<CurrencyAccount> currencyAccounts = em.createNamedQuery(
+        List<CurrencyAccount> accounts = em.createNamedQuery(
                 CurrencyAccount.FIND_BY_USER_IBAN_AND_CURRENCY_CODE_AND_STATE)
-                .setParameter("state", CurrencyAccount.State.ACTIVE)
-                .setParameter("userIBAN", config.getSystemUser().getIBAN())
-                .setParameter("currencyCode", currencyCode).getResultList();
-        if(currencyAccounts.isEmpty()) throw new ValidationException(
-                "THERE'S NOT ACTIVE SYSTEM ACCOUNT FOR currency " + currencyCode);
-        CurrencyAccount currencyAccount = currencyAccounts.iterator().next();
-        currencyAccount.setBalance(currencyAccount.getBalance().add(amount));
+                .setParameter("userIBAN", config.getSystemUser())
+                .setParameter("currencyCode", currencyCode)
+                .setParameter("state", CurrencyAccount.State.ACTIVE).getResultList();
+        if(!accounts.isEmpty()) {
+            CurrencyAccount currencyAccount = accounts.iterator().next();
+            currencyAccount.setBalance(currencyAccount.getBalance().add(amount));
+        } else {
+            CurrencyAccount currencyAccount = new CurrencyAccount(config.getSystemUser(), amount, currencyCode);
+            em.persist(currencyAccount);
+        }
     }
 
     public BalancesDto getBalancesDto(List<Transaction> transactionList, Transaction.Source source) throws ValidationException {

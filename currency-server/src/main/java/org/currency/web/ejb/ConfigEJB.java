@@ -30,10 +30,7 @@ import org.votingsystem.util.*;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
-import javax.ejb.EJB;
-import javax.ejb.Lock;
-import javax.ejb.LockType;
-import javax.ejb.Startup;
+import javax.ejb.*;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import java.io.File;
@@ -56,6 +53,8 @@ import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.LogManager;
 import java.util.logging.Logger;
+
+import static javax.ejb.TransactionAttributeType.REQUIRES_NEW;
 
 /**
  * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
@@ -185,7 +184,7 @@ public class ConfigEJB implements Config, ConfigCurrencyServer, Serializable {
             List<User> userList = em.createNamedQuery(User.FIND_USER_BY_TYPE)
                     .setParameter("type", User.Type.CURRENCY_SERVER).getResultList();
             if(userList.isEmpty()) { //First time run;
-                systemUser = new User(User.Type.CURRENCY_SERVER, entityId);
+                systemUser = new User(User.Type.CURRENCY_SERVER, entityId).setEntityId(entityId);
                 em.persist(systemUser);
                 createIBAN(systemUser);
             }
@@ -359,11 +358,13 @@ public class ConfigEJB implements Config, ConfigCurrencyServer, Serializable {
     }
 
     @Override
+    @TransactionAttribute(REQUIRES_NEW)
     public User createIBAN(User user) throws ValidationException {
         String accountNumberStr = String.format("%010d", user.getId());
         Iban iban = new Iban.Builder().countryCode(CountryCode.ES).bankCode(bankCode).branchCode(branchCode)
                 .accountNumber(accountNumberStr).nationalCheckDigit("45").build();
         user.setIBAN(iban.toString());
+        em.merge(user);
         em.persist(new CurrencyAccount(user, BigDecimal.ZERO, CurrencyCode.EUR));
         return user;
     }

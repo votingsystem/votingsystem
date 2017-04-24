@@ -50,7 +50,6 @@ public class CurrencyEJB {
     @Inject private SignatureService signatureService;
     @Inject private UserEJB userBean;
     @Inject private CurrencyIssuerEJB csrBean;
-    @Inject private WalletEJB walletBean;
 
     public CurrencyBatchResponseDto processCurrencyBatch(SignedDocument signedDocument) throws Exception {
         CurrencyBatchDto batchDto = signedDocument.getSignedContent(CurrencyBatchDto.class);
@@ -143,8 +142,8 @@ public class CurrencyEJB {
     public ResultListDto<String> processCurrencyRequest(CurrencyRequestDto requestDto) throws Exception {
         User fromUser = requestDto.getSignedDocument().getFirstSignature().getSigner();
         //check cash available for user
-        Map<CurrencyAccount, BigDecimal> accountFromMovements = walletBean.getAccountMovementsForTransaction(
-                fromUser.getIBAN(), requestDto.getTotalAmount(), requestDto.getCurrencyCode());
+        Map<CurrencyAccount, BigDecimal> accountFromMovements = transactionBean.getAccountMovementsForTransaction(
+                fromUser, requestDto.getTotalAmount(), requestDto.getCurrencyCode());
         Set<String> currencyCertSet = csrBean.signCurrencyRequest(requestDto);
         Transaction userTransaction = Transaction.CURRENCY_REQUEST(Messages.currentInstance().get("currencyRequestLbl"),
                 accountFromMovements, requestDto, fromUser);

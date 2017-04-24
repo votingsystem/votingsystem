@@ -1,5 +1,6 @@
 package org.currency.web.ejb;
 
+import eu.europa.esig.dss.DSSDocument;
 import eu.europa.esig.dss.InMemoryDocument;
 import org.votingsystem.crypto.SignatureParams;
 import org.votingsystem.crypto.SignedDocumentType;
@@ -41,6 +42,12 @@ public class CurrencySignatureEJB {
         SignatureParams signatureParams = new SignatureParams(null, User.Type.ID_CARD_USER,
                 SignedDocumentType.SIGNED_DOCUMENT).setWithTimeStampValidation(true);
         return signatureService.validateXAdESAndSave(new InMemoryDocument(signedXML), signatureParams);
+    }
+
+    @TransactionAttribute(REQUIRES_NEW)
+    public SignedDocument validateXAdESAndSave(DSSDocument signedXML, SignatureParams signatureParams)
+            throws XAdESValidationException, DuplicatedDbItemException {
+        return signatureService.validateXAdESAndSave(signedXML, signatureParams);
     }
 
     @TransactionAttribute(REQUIRES_NEW)

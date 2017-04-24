@@ -1,6 +1,5 @@
 package org.currency.test.operation;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.google.common.collect.Sets;
 import org.currency.test.Constants;

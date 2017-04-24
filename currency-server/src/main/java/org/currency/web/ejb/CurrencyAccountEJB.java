@@ -6,7 +6,6 @@ import org.votingsystem.throwable.ValidationException;
 import org.votingsystem.util.CurrencyCode;
 
 import javax.ejb.Stateless;
-import javax.ejb.TransactionAttribute;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -16,29 +15,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static javax.ejb.TransactionAttributeType.REQUIRES_NEW;
-
 @Stateless
 public class CurrencyAccountEJB {
 
     @PersistenceContext
     private EntityManager em;
     @Inject private ConfigCurrencyServer config;
-
-    @TransactionAttribute(REQUIRES_NEW)
-    public CurrencyAccount checkUserAccountForCurrency(User user, CurrencyCode currencyCode) throws ValidationException {
-        CurrencyAccount result;
-        List<CurrencyAccount> currencyAccounts =
-                em.createNamedQuery(CurrencyAccount.FIND_BY_USER_IBAN_AND_CURRENCY_CODE_AND_STATE)
-                .setParameter("userIBAN", user.getIBAN())
-                .setParameter("currencyCode", currencyCode)
-                .setParameter("state", CurrencyAccount.State.ACTIVE).getResultList();
-        if(currencyAccounts.isEmpty()) {
-            result = new CurrencyAccount(user, BigDecimal.ZERO, currencyCode);
-            em.persist(result);
-        } else result = currencyAccounts.iterator().next();
-        return result;
-    }
 
     public Map<CurrencyCode, BigDecimal> getAccountsBalanceMap(User user) {
         List<CurrencyAccount> currencyAccounts= em.createNamedQuery(CurrencyAccount.FIND_BY_TYPE_AND_USER).setParameter(
