@@ -10,7 +10,6 @@ import org.bouncycastle.pkcs.PKCS10CertificationRequestBuilder;
 import org.bouncycastle.pkcs.jcajce.JcaPKCS10CertificationRequestBuilder;
 import org.votingsystem.dto.CertExtensionDto;
 import org.votingsystem.dto.currency.CurrencyCertExtensionDto;
-import org.votingsystem.dto.currency.TagDto;
 import org.votingsystem.dto.voting.CertVoteExtensionDto;
 import org.votingsystem.model.Device;
 import org.votingsystem.throwable.CertificateRequestException;
@@ -55,13 +54,13 @@ public class CertificationRequest implements java.io.Serializable {
     }
 
     public static CertificationRequest getVoteRequest(String indentityServiceEntity, String votingServiceEntity,
-            String electionUUID, String revocationHashBase64) throws CertificateRequestException {
+            String electionUUID, String revocationHash) throws CertificateRequestException {
         try {
             KeyPair keyPair = KeyGenerator.INSTANCE.genKeyPair();
             X500Name subject = new X500Name("CN=identityService:" + indentityServiceEntity +
                     ";votingService:" + votingServiceEntity + ", OU=electionUUID:" + electionUUID);
             CertVoteExtensionDto dto = new CertVoteExtensionDto(indentityServiceEntity, votingServiceEntity,
-                    revocationHashBase64, electionUUID);
+                    revocationHash, electionUUID);
             PKCS10CertificationRequestBuilder pkcs10Builder = new JcaPKCS10CertificationRequestBuilder(subject, keyPair.getPublic());
             pkcs10Builder.addAttribute(new  ASN1ObjectIdentifier(Constants.VOTE_OID),
                     new DERUTF8String(JSON.getMapper().writeValueAsString(dto)));
@@ -74,16 +73,14 @@ public class CertificationRequest implements java.io.Serializable {
         }
     }
 
-    public static CertificationRequest getCurrencyRequest(String currencyEntity, String revocationHashBase64,
-            BigDecimal amount, CurrencyCode currencyCode, Boolean timeLimited, String tagName) throws CertificateRequestException {
+    public static CertificationRequest getCurrencyRequest(String currencyEntity, String revocationHash,
+            BigDecimal amount, CurrencyCode currencyCode) throws CertificateRequestException {
         try {
             KeyPair keyPair = KeyGenerator.INSTANCE.genKeyPair();
-            tagName = (tagName == null)? TagDto.WILDTAG:tagName.trim();
-            X500Principal subject = new X500Principal("CN=currencyService:" + currencyEntity +
-                    ", OU=CURRENCY_VALUE:" + amount + ", OU=CURRENCY_CODE:" + currencyCode +
-                    ", OU=TAG:" + tagName + ", OU=DigitalCurrency");
-            CurrencyCertExtensionDto dto = new CurrencyCertExtensionDto(amount, currencyCode, revocationHashBase64,
-                    currencyEntity, timeLimited, tagName);
+            X500Principal subject = new X500Principal("CN=currencyEntity:" + currencyEntity +
+                    ", OU=CURRENCY_VALUE:" + amount + ", OU=CURRENCY_CODE:" + currencyCode + ", OU=DigitalCurrency");
+            CurrencyCertExtensionDto dto = new CurrencyCertExtensionDto(amount, currencyCode, revocationHash,
+                    currencyEntity);
             PKCS10CertificationRequestBuilder pkcs10Builder = new JcaPKCS10CertificationRequestBuilder(subject,
                     keyPair.getPublic());
             pkcs10Builder.addAttribute(new  ASN1ObjectIdentifier(Constants.CURRENCY_OID),

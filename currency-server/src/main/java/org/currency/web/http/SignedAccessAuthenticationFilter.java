@@ -8,8 +8,6 @@ import org.votingsystem.util.FileUtils;
 
 import javax.annotation.Priority;
 import javax.ejb.EJB;
-import javax.inject.Inject;
-import javax.ws.rs.Encoded;
 import javax.ws.rs.NotAuthorizedException;
 import javax.ws.rs.Priorities;
 import javax.ws.rs.container.ContainerRequestContext;

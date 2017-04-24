@@ -41,7 +41,7 @@ public class SignersPane extends GridPane {
         try {
             log.info("Num. signers: " + signatures.size());
             for (Signature signature : signatures) {
-                User signer = User.FROM_X509_CERT(signature.getSigningCert());
+                User signer = User.FROM_CERT(signature.getSigningCert(), User.Type.USER);
                 SignatureInfoPane signerVSPanel = new SignatureInfoPane(signature);
                 String tabName = Messages.currentInstance().get("signerLbl");
                 if(signer.getNumId() != null)

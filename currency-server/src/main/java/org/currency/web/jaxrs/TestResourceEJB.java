@@ -12,9 +12,6 @@ import org.currency.web.util.AuthRole;
 import org.currency.web.websocket.SessionManager;
 import org.iban4j.CountryCode;
 import org.iban4j.Iban;
-import org.votingsystem.currency.MapUtils;
-import org.votingsystem.dto.currency.BalancesDto;
-import org.votingsystem.dto.currency.IncomesDto;
 import org.votingsystem.dto.currency.TransactionDto;
 import org.votingsystem.model.CMSDocument;
 import org.votingsystem.model.SignedDocument;
@@ -246,29 +243,6 @@ public class TestResourceEJB {
     public Response newWeek() throws Exception {
         auditBean.initWeekPeriod(LocalDateTime.now());
         return Response.ok().entity("OK").build();
-    }
-
-    @Path("/balance")
-    @GET @Produces(MediaType.APPLICATION_JSON)
-    public Response balance() throws IOException {
-        Map<CurrencyCode, Map<String, IncomesDto>> balancesTo = new HashMap<>();
-        balancesTo.put(CurrencyCode.EUR, MapUtils.getTagMapForIncomes("HIDROGENO", new BigDecimal(880.5), new BigDecimal(700.5)));
-        balancesTo.put(CurrencyCode.EUR, MapUtils.getTagMapForIncomes("NITROGENO", new BigDecimal(100), new BigDecimal(50.5)));
-        balancesTo.put(CurrencyCode.USD, MapUtils.getTagMapForIncomes("WILDTAG", new BigDecimal(1454), new BigDecimal(400.5)));
-        balancesTo.put(CurrencyCode.USD, MapUtils.getTagMapForIncomes("NITROGENO", new BigDecimal(100), new BigDecimal(50.5)));
-
-        Map<CurrencyCode, Map<String, BigDecimal>> balancesFrom = new HashMap<>();
-        balancesFrom.put(CurrencyCode.EUR, MapUtils.getTagMapForExpenses("HIDROGENO", new BigDecimal(1080.5)));
-        balancesFrom.put(CurrencyCode.EUR, MapUtils.getTagMapForExpenses("OXIGENO", new BigDecimal(350)));
-        balancesFrom.put(CurrencyCode.USD, MapUtils.getTagMapForExpenses("WILDTAG", new BigDecimal(6000)));
-        balancesFrom.put(CurrencyCode.JPY, MapUtils.getTagMapForExpenses("WILDTAG", new BigDecimal(8000)));
-
-        BalancesDto balancesDto = new BalancesDto();
-        balancesDto.setBalancesTo(balancesTo);
-        balancesDto.setBalancesFrom(balancesFrom);
-        balancesDto.calculateCash();
-
-        return Response.ok().entity(JSON.getMapper().writeValueAsBytes(balancesDto)).build();
     }
 
 }

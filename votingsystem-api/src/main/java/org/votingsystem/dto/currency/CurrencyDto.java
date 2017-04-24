@@ -8,7 +8,6 @@ import org.bouncycastle.pkcs.PKCS10CertificationRequest;
 import org.votingsystem.crypto.CertUtils;
 import org.votingsystem.crypto.CertificationRequest;
 import org.votingsystem.model.currency.Currency;
-import org.votingsystem.model.currency.Tag;
 import org.votingsystem.throwable.ValidationException;
 import org.votingsystem.util.Constants;
 import org.votingsystem.util.CurrencyCode;
@@ -17,7 +16,6 @@ import org.votingsystem.util.ObjectUtils;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
-import java.text.MessageFormat;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.Collection;
@@ -38,13 +36,11 @@ public class CurrencyDto implements Serializable {
     private BigDecimal amount;
     private BigDecimal batchAmount;
     private CurrencyCode currencyCode;
-    private String currencyServerURL;
-    private String revocationHashBase64;
+    private String currencyEntity;
+    private String revocationHash;
     private String subject;
     private String toUserIBAN;
     private String toUserName;
-    private String tag;
-    private Boolean timeLimited;
     private String batchUUID;
     private String serializedObject;
     private ZonedDateTime notBefore;
@@ -60,12 +56,6 @@ public class CurrencyDto implements Serializable {
         if(!batchDto.getCurrencyCode().equals(currency.getCurrencyCode())) throw new ValidationException(
                 "CurrencyBatch currencyCode: " + batchDto.getCurrencyCode()
                 + " - Currency currencyCode: " + currency.getCurrencyCode());
-        if(currency.getTimeLimited() && !batchDto.getTimeLimited()) throw new ValidationException(
-                "TimeLimited currency cannot go inside NOT TimeLimited CurrencyBatch");
-        if(!Tag.WILDTAG.equals(currency.getTag().getName()) && !currency.getTag().getName().equals(
-                batchDto.getTag())) throw new ValidationException(MessageFormat.format(
-                "''{0}'' Currency  cannot go inside ''{1}'' CurrencyBatch", currency.getTag().getName(),
-                batchDto.getTag()));
         CurrencyDto currencyDto = new CurrencyDto(currency);
         currencyDto.subject = batchDto.getSubject();
         currencyDto.toUserIBAN = batchDto.getToUserIBAN();
@@ -82,60 +72,48 @@ public class CurrencyDto implements Serializable {
         CurrencyCertExtensionDto certExtensionDto = CertUtils.getCertExtensionData(CurrencyCertExtensionDto.class,
                 csrPKCS10, Constants.CURRENCY_OID);
         if(certExtensionDto == null) throw new ValidationException("error missing cert extension data");
-        currencyServerURL = certExtensionDto.getCurrencyServerURL();
-        revocationHashBase64 = certExtensionDto.getHashCertVS();
+        currencyEntity = certExtensionDto.getCurrencyEntity();
+        revocationHash = certExtensionDto.getRevocationHash();
         amount = certExtensionDto.getAmount();
         currencyCode = certExtensionDto.getCurrencyCode();
-        tag = certExtensionDto.getTag();
-        CurrencyDto certSubjectDto = getCertSubjectDto(subjectDN, revocationHashBase64);
-        if(!certSubjectDto.getCurrencyServerURL().equals(currencyServerURL))
-                throw new ValidationException("currencyServerURL: " + currencyServerURL + " - certSubject: " + subjectDN);
+        CurrencyDto certSubjectDto = getCertSubjectDto(subjectDN, revocationHash);
+        if(!certSubjectDto.getCurrencyEntity().equals(currencyEntity))
+                throw new ValidationException("currencyEntity: " + currencyEntity + " - certSubject: " + subjectDN);
         if(certSubjectDto.getAmount().compareTo(amount) != 0)
             throw new ValidationException("amount: " + amount + " - certSubject: " + subjectDN);
         if(!certSubjectDto.getCurrencyCode().equals(currencyCode))
             throw new ValidationException("currencyCode: " + currencyCode + " - certSubject: " + subjectDN);
-        if(!certSubjectDto.getTag().equals(tag)) throw new ValidationException("tag: " + tag + " - certSubject: " + subjectDN);
     }
 
     public CurrencyDto(Currency currency) {
         this.id = currency.getId();
-        this.revocationHashBase64 = currency.getRevocationHash();
+        this.revocationHash = currency.getRevocationHash();
         this.amount = currency.getAmount();
         this.currencyCode = currency.getCurrencyCode();
-        this.tag = currency.getTag().getName();
-        this.timeLimited = currency.getTimeLimited();
         this.dateCreated = ZonedDateTime.of(currency.getDateCreated(), ZoneId.systemDefault());
         this.notBefore = ZonedDateTime.of(currency.getValidFrom(), ZoneId.systemDefault());
         this.notAfter = ZonedDateTime.of(currency.getValidTo(), ZoneId.systemDefault());
-    }
-
-    public CurrencyDto(Boolean timeLimited, String object) {
-        this.timeLimited = timeLimited;
-        this.serializedObject = object;
     }
 
     public static CurrencyDto serialize(Currency currency) throws Exception {
         CurrencyDto currencyDto = new CurrencyDto();
         currencyDto.setAmount(currency.getAmount());
         currencyDto.setCurrencyCode(currency.getCurrencyCode());
-        currencyDto.setRevocationHashBase64(currency.getRevocationHash());
-        currencyDto.setTag(currency.getTag().getName());
-        currencyDto.setTimeLimited(currency.getTimeLimited());
+        currencyDto.setRevocationHash(currency.getRevocationHash());
         //CertificationRequest instead of Currency to make it easier deserialization on Android
         currencyDto.setSerialized(ObjectUtils.serializeObjectToString(currency.getCertificationRequest()));
         return currencyDto;
     }
 
-    public static CurrencyDto getCertSubjectDto(String subjectDN, String revocationHashBase64) {
+    public static CurrencyDto getCertSubjectDto(String subjectDN, String revocationHash) {
         CurrencyDto currencyDto = new CurrencyDto();
         if (subjectDN.contains("CURRENCY_CODE:"))
             currencyDto.setCurrencyCode(CurrencyCode.valueOf(subjectDN.split("CURRENCY_CODE:")[1].split(",")[0]));
         if (subjectDN.contains("CURRENCY_VALUE:"))
             currencyDto.setAmount(new BigDecimal(subjectDN.split("CURRENCY_VALUE:")[1].split(",")[0]));
-        if (subjectDN.contains("TAG:")) currencyDto.setTag(subjectDN.split("TAG:")[1].split(",")[0]);
-        if (subjectDN.contains("currencyService:"))
-            currencyDto.setCurrencyServerURL(subjectDN.split("currencyServerURL:")[1].split(",")[0]);
-        currencyDto.setRevocationHashBase64(revocationHashBase64);
+        if (subjectDN.contains("currencyEntity:"))
+            currencyDto.setCurrencyEntity(subjectDN.split("currencyEntity:")[1].split(",")[0]);
+        currencyDto.setRevocationHash(revocationHash);
         return currencyDto;
     }
 
@@ -165,14 +143,6 @@ public class CurrencyDto implements Serializable {
         return result;
     }
 
-    public Boolean isTimeLimited() {
-        return timeLimited;
-    }
-
-    public void setTimeLimited(Boolean timeLimited) {
-        this.timeLimited = timeLimited;
-    }
-
     public String getSerialized() {
         return serializedObject;
     }
@@ -181,12 +151,12 @@ public class CurrencyDto implements Serializable {
         this.serializedObject = serializedObject;
     }
 
-    public String getRevocationHashBase64() {
-        return revocationHashBase64;
+    public String getRevocationHash() {
+        return revocationHash;
     }
 
-    public void setRevocationHashBase64(String revocationHashBase64) {
-        this.revocationHashBase64 = revocationHashBase64;
+    public void setRevocationHash(String revocationHash) {
+        this.revocationHash = revocationHash;
     }
 
     public CurrencyCode getCurrencyCode() {
@@ -197,14 +167,6 @@ public class CurrencyDto implements Serializable {
         this.currencyCode = currencyCode;
     }
 
-    public String getTag() {
-        return tag;
-    }
-
-    public void setTag(String tag) {
-        this.tag = tag;
-    }
-
     public BigDecimal getAmount() {
         return amount;
     }
@@ -213,12 +175,12 @@ public class CurrencyDto implements Serializable {
         this.amount = amount;
     }
 
-    public String getCurrencyServerURL() {
-        return currencyServerURL;
+    public String getCurrencyEntity() {
+        return currencyEntity;
     }
 
-    public void setCurrencyServerURL(String currencyServerURL) {
-        this.currencyServerURL = currencyServerURL;
+    public void setCurrencyEntity(String currencyEntity) {
+        this.currencyEntity = currencyEntity;
     }
 
     public ZonedDateTime getNotBefore() {

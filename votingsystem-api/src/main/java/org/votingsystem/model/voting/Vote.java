@@ -68,7 +68,7 @@ public class Vote extends EntityBase implements Serializable {
 
     @Transient private String voteUUID;
     @Transient private String originRevocationHash;
-    @Transient private String revocationHashBase64;
+    @Transient private String revocationHash;
     @Transient private String originHashAccessRequest;
     @Transient private String hashAccessRequestBase64;
     @Transient private String votingServiceEntity;
@@ -201,12 +201,12 @@ public class Vote extends EntityBase implements Serializable {
 		this.certificate = certificate;
 	}
 
-    public String getRevocationHashBase64() {
-        return revocationHashBase64;
+    public String getRevocationHash() {
+        return revocationHash;
     }
 
-    public void setRevocationHashBase64(String revocationHashBase64) {
-        this.revocationHashBase64 = revocationHashBase64;
+    public void setRevocationHash(String revocationHash) {
+        this.revocationHash = revocationHash;
     }
 
     public Set<X509Certificate> getServerCerts() {
@@ -270,7 +270,7 @@ public class Vote extends EntityBase implements Serializable {
         this.electionUUID = certExtensionDto.getElectionUUID();
         this.identityServiceEntity = certExtensionDto.getIdentityServiceEntity();
         this.votingServiceEntity = certExtensionDto.getVotingServiceEntity();
-        this.revocationHashBase64 = certExtensionDto.getRevocationHashBase64();
+        this.revocationHash = certExtensionDto.getRevocationHash();
         return this;
     }
 

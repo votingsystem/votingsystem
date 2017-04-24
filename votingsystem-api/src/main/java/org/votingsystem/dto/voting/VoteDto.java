@@ -27,8 +27,8 @@ public class VoteDto {
     private OperationType operation;
     @JacksonXmlProperty(localName = "State")
     private Vote.State state;
-    @JacksonXmlProperty(localName = "RevocationHashBase64")
-    private String revocationHashBase64;
+    @JacksonXmlProperty(localName = "RevocationHash")
+    private String revocationHash;
     @JacksonXmlProperty(localName = "IndentityServiceEntity")
     private String indentityServiceEntity;
     @JacksonXmlProperty(localName = "VotingServiceEntity")
@@ -88,12 +88,12 @@ public class VoteDto {
     }
 
 
-    public String getRevocationHashBase64() {
-        return revocationHashBase64;
+    public String getRevocationHash() {
+        return revocationHash;
     }
 
-    public VoteDto setRevocationHashBase64(String revocationHashBase64) {
-        this.revocationHashBase64 = revocationHashBase64;
+    public VoteDto setRevocationHash(String revocationHash) {
+        this.revocationHash = revocationHash;
         return this;
     }
 
@@ -160,9 +160,9 @@ public class VoteDto {
         if(!electionUUID.equals(certVoteExtension.getElectionUUID()))
             throw new IllegalArgumentException("Expected electionUUID: " + electionUUID +
                     " - found in cert vote extension: " + certVoteExtension.getElectionUUID());
-        if(!revocationHashBase64.equals(certVoteExtension.getRevocationHashBase64()))
-            throw new IllegalArgumentException("Expected revocation hash: " + revocationHashBase64 +
-                    " - found in cert vote extension: " + certVoteExtension.getRevocationHashBase64());
+        if(!revocationHash.equals(certVoteExtension.getRevocationHash()))
+            throw new IllegalArgumentException("Expected revocation hash: " + revocationHash +
+                    " - found in cert vote extension: " + certVoteExtension.getRevocationHash());
     }
 
     public TimeStampToken getTimeStampToken() {

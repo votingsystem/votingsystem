@@ -27,6 +27,8 @@ public class Constants {
     public static final String DEVICE_OID                              = VOTING_SYSTEM_BASE_OID + 4;
     public static final String ANON_CERT_OID                           = VOTING_SYSTEM_BASE_OID + 5;
 
+    //Duration in years of the issued currencies
+    public static final int CURRENY_ISSUED_LIVE_IN_YEARS     = 3;
     public static final int KEY_SIZE                         = 2048;
     public static final String SIG_NAME                      = "RSA";
     public static final String ALGORITHM_RNG                 = "SHA1PRNG";
@@ -54,6 +56,7 @@ public class Constants {
     public static String CANCEL_BUNDLE_FILE_NAME                  = "cancellation-bundle";
 
     public static final String CSR_FILE_NAME                      = "csr" + ":" + ContentType.TEXT.getName();
+    public static final String CSR_CURRENCY_FILE_NAME             = "csr" + ":" + MediaType.XML;
     public static final String CERT_FILE_NAME                     = "cert" + ":" + ContentType.TEXT.getName();
     public static final String ANON_CERTIFICATE_REQUEST_FILE_NAME = "anon-cert-request" + ":" + MediaType.XML;
     public static final String CURRENCY_REQUEST_FILE_NAME         = "currency-request" + ":" + MediaType.XML;

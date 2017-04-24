@@ -18,7 +18,9 @@ public enum CurrencyOperation implements SystemOperation {
     @JsonProperty("TRANSACTION_FROM_BANK")
     TRANSACTION_FROM_BANK(null),
     @JsonProperty("CURRENCY_REQUEST")
-    CURRENCY_REQUEST("/api/currency/request"),
+    CURRENCY_REQUEST("/currency/request"),
+    @JsonProperty("BUNDLE_STATE")
+    BUNDLE_STATE("/api/currency/bundleState"),
     @JsonProperty("GET_METADATA")
     GET_METADATA("/api/metadata"),
     @JsonProperty("CURRENCY_SEND")

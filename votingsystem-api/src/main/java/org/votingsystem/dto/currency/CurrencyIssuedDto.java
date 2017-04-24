@@ -2,8 +2,12 @@ package org.votingsystem.dto.currency;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import org.votingsystem.model.currency.Currency;
+import org.votingsystem.util.CurrencyCode;
 
-import java.util.List;
+import java.math.BigDecimal;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
@@ -12,51 +16,50 @@ import java.util.List;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class CurrencyIssuedDto {
 
-    private List<TagDto> okList;
-    private List<TagDto> expendedList;
-    private List<TagDto> lapsedList;
-    private List<TagDto> errorList;
+    private Map<CurrencyCode, BigDecimal> active = new HashMap<>();
+    private Map<CurrencyCode, BigDecimal> expended = new HashMap<>();
+    private Map<CurrencyCode, BigDecimal> lapsed = new HashMap<>();
 
 
     public CurrencyIssuedDto() {}
 
-    public CurrencyIssuedDto(List<TagDto> okList, List<TagDto> expendedList, List<TagDto> lapsedList,
-                     List<TagDto> errorList) {
-        this.okList = okList;
-        this.expendedList = expendedList;
-        this.lapsedList = lapsedList;
-        this.errorList = errorList;
+    public CurrencyIssuedDto(Map<CurrencyCode, BigDecimal> active, Map<CurrencyCode, BigDecimal> expended,
+                             Map<CurrencyCode, BigDecimal> lapsed) {
+        this.active = active;
+        this.expended = expended;
+        this.lapsed = lapsed;
     }
 
-    public List<TagDto> getOkList() {
-        return okList;
+    public Map<CurrencyCode, BigDecimal> getActive() {
+        return active;
     }
 
-    public void setOkList(List<TagDto> okList) {
-        this.okList = okList;
+    public Map<CurrencyCode, BigDecimal> getExpended() {
+        return expended;
     }
 
-    public List<TagDto> getExpendedList() {
-        return expendedList;
+    public Map<CurrencyCode, BigDecimal> getLapsed() {
+        return lapsed;
     }
 
-    public void setExpendedList(List<TagDto> expendedList) {
-        this.expendedList = expendedList;
+    public void addCurrency(BigDecimal amount, CurrencyCode currencyCode, Currency.State state) {
+        switch (state) {
+            case EXPENDED:
+                addCurrencyToMap(amount, currencyCode, expended);
+                break;
+            case OK:
+                addCurrencyToMap(amount, currencyCode, active);
+                break;
+            case LAPSED:
+                addCurrencyToMap(amount, currencyCode, lapsed);
+                break;
+        }
     }
 
-    public List<TagDto> getLapsedList() {
-        return lapsedList;
-    }
+    private void addCurrencyToMap(BigDecimal amount, CurrencyCode currencyCode, Map<CurrencyCode, BigDecimal> map) {
+        if(map.containsKey(currencyCode)) {
+            map.put(currencyCode, map.get(currencyCode).add(amount));
+        } else map.put(currencyCode, amount);
 
-    public void setLapsedList(List<TagDto> lapsedList) {
-        this.lapsedList = lapsedList;
-    }
-
-    public List<TagDto> getErrorList() {
-        return errorList;
-    }
-
-    public void setErrorList(List<TagDto> errorList) {
-        this.errorList = errorList;
     }
 }

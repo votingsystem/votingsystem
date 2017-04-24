@@ -9,7 +9,6 @@ import org.iban4j.UnsupportedCountryException;
 import org.votingsystem.dto.metadata.MetadataDto;
 import org.votingsystem.model.Certificate;
 import org.votingsystem.model.User;
-import org.votingsystem.model.currency.Tag;
 import org.votingsystem.throwable.ValidationException;
 
 import java.io.IOException;
@@ -31,8 +30,6 @@ public interface ConfigCurrencyServer {
 
     public String validateIBAN(String IBAN) throws IbanFormatException, InvalidCheckDigitException,
             UnsupportedCountryException;
-
-    public Tag getTag(String tagName) throws ValidationException;
 
     public User getSystemUser();
 

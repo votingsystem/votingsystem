@@ -37,7 +37,7 @@ public class DtoTest extends BaseTest {
     public static void voteTest() throws Exception {
         VoteDto vote = new VoteDto();
         ElectionOptionDto electionOptionDto = new ElectionOptionDto("content", null);
-        vote.setRevocationHashBase64("RevocationHashBase64")
+        vote.setRevocationHash("RevocationHash")
                 .setOptionSelected(electionOptionDto)
                 .setIndentityServiceEntity("IndentityServiceEntity").setVotingServiceEntity("VotingServiceEntity")
                 .setOperation(OperationType.SEND_VOTE);

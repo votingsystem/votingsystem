@@ -83,7 +83,7 @@ public class VoteTest extends BaseTest {
                 org.votingsystem.test.Constants.VOTING_SERVICE_ENTITY_ID, SystemEntityType.VOTING_SERVICE_PROVIDER);
         identityRequest.setIndentityServiceEntity(identityEntity).setCallbackServiceEntityId(callbackEntity);
         identityRequest.setUUID(electionDto.getUUID()).setType(OperationType.ANON_VOTE_CERT_REQUEST);
-        identityRequest.setRevocationHashBase64(voteContainer.getRevocationHashBase64());
+        identityRequest.setRevocationHash(voteContainer.getRevocationHash());
 
         byte[] xmlRequest = XmlWriter.write(identityRequest);
         String textToSign = XMLUtils.prepareRequestToSign(xmlRequest);

@@ -43,8 +43,8 @@ public class ReportFiles {
         return result;
     }
 
-    public File getTagReceiptFile(String tagName) {
-        return new File(getBaseDir().getAbsolutePath() + "/tag_" + tagName + ".xml");
+    public File getCurrencyReceiptFile(String currencyCode) {
+        return new File(getBaseDir().getAbsolutePath() + "/currency_" + currencyCode + ".xml");
     }
 
     public File getBaseDir() {

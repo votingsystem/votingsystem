@@ -61,7 +61,7 @@ public class XmlReader {
                     SystemEntityType.getByName(callbackServiceElement.getAttributeValue(null, "Type")));
             request.setCallbackServiceEntityId(callbackService);
         }
-        request.setRevocationHashBase64(XMLUtils.getTextChild(mainElement, "RevocationHashBase64"));
+        request.setRevocationHash(XMLUtils.getTextChild(mainElement, "RevocationHash"));
         request.setUUID(XMLUtils.getTextChild(mainElement, "UUID"));
         return request;
     }
@@ -138,7 +138,7 @@ public class XmlReader {
         VoteDto vote = new VoteDto();
         Element voteElement = XMLUtils.parse(xmlBytes).getRootElement();
         vote.setOperation(OperationType.valueOf(XMLUtils.getTextChild(voteElement, "Operation")));
-        vote.setRevocationHashBase64(XMLUtils.getTextChild(voteElement, "RevocationHashBase64"));
+        vote.setRevocationHash(XMLUtils.getTextChild(voteElement, "RevocationHash"));
         vote.setIndentityServiceEntity(XMLUtils.getTextChild(voteElement, "IndentityServiceEntity"));
         vote.setVotingServiceEntity(XMLUtils.getTextChild(voteElement, "VotingServiceEntity"));
         if(voteElement.getElement(null, "OptionSelected") != null) {

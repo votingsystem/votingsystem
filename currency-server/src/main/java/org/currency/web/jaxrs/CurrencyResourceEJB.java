@@ -8,10 +8,9 @@ import org.currency.web.ejb.UserEJB;
 import org.votingsystem.dto.ResponseDto;
 import org.votingsystem.dto.currency.CurrencyIssuedDto;
 import org.votingsystem.dto.currency.CurrencyStateDto;
-import org.votingsystem.dto.currency.TagDto;
 import org.votingsystem.ejb.SignatureService;
 import org.votingsystem.http.MediaType;
-import org.votingsystem.model.currency.Tag;
+import org.votingsystem.model.currency.Currency;
 import org.votingsystem.util.CurrencyCode;
 import org.votingsystem.util.JSON;
 import org.votingsystem.util.Messages;
@@ -71,8 +70,8 @@ public class CurrencyResourceEJB {
     public Response state(@Context HttpServletRequest req, @Context HttpServletResponse res, String revocationHash)
             throws Exception {
         List<org.votingsystem.model.currency.Currency> currencyList = em.createQuery(
-                "select c from Currency c where c.revocationHashBase64 =:revocationHashBase64")
-                .setParameter("revocationHashBase64", revocationHash).getResultList();
+                "select c from Currency c where c.revocationHash =:revocationHash")
+                .setParameter("revocationHash", revocationHash).getResultList();
         if(currencyList.isEmpty()) return Response.status(ResponseDto.SC_NOT_FOUND).entity(
                 Messages.currentInstance().get("currencyNotFoundErrorMsg"))
                 .type(javax.ws.rs.core.MediaType.TEXT_PLAIN + ";charset=utf-8").build();
@@ -110,36 +109,18 @@ public class CurrencyResourceEJB {
     }
 
     private CurrencyIssuedDto getCurrencyIssuedDto(CurrencyCode currencyCode) {
-        List<org.votingsystem.model.currency.Currency.State> inState = Arrays.asList(org.votingsystem.model.currency.Currency.State.OK, org.votingsystem.model.currency.Currency.State.EXPENDED, org.votingsystem.model.currency.Currency.State.LAPSED,
-                org.votingsystem.model.currency.Currency.State.ERROR);
-        Query query = em.createQuery("select SUM(c.amount), tag, c.currencyCode, c.state from Currency c " +
-                "JOIN c.tag tag where c.state in :inState and c.currencyCode =:currencyCode group by tag, " +
-                "c.currencyCode, c.state").setParameter("inState", inState)
+        List<org.votingsystem.model.currency.Currency.State> inState = Arrays.asList(
+                Currency.State.OK, Currency.State.EXPENDED, Currency.State.LAPSED);
+        Query query = em.createQuery("select SUM(c.amount), c.currencyCode, c.state from Currency c " +
+                "where c.state in :inState and c.currencyCode =:currencyCode group by c.currencyCode, c.state")
+                .setParameter("inState", inState)
                 .setParameter("currencyCode", currencyCode);
         List<Object[]> resultList = query.getResultList();
-        List<TagDto> okListDto = new ArrayList<>();
-        List<TagDto> expendedListDto = new ArrayList<>();
-        List<TagDto> lapsedListDto = new ArrayList<>();
-        List<TagDto> errorListDto = new ArrayList<>();
+        CurrencyIssuedDto resultDto = new CurrencyIssuedDto();
         for(Object[] result : resultList) {
-            org.votingsystem.model.currency.Currency.State state = (org.votingsystem.model.currency.Currency.State) result[3];
-            TagDto tagVSDto = TagDto.CURRENCY_DATA((BigDecimal) result[0], (CurrencyCode) result[2], (Tag) result[1]);
-            switch (state) {
-                case EXPENDED:
-                    expendedListDto.add(tagVSDto);
-                    break;
-                case OK:
-                    okListDto.add(tagVSDto);
-                    break;
-                case LAPSED:
-                    lapsedListDto.add(tagVSDto);
-                    break;
-                case ERROR:
-                    errorListDto.add(tagVSDto);
-                    break;
-            }
+            resultDto.addCurrency((BigDecimal) result[0], (CurrencyCode) result[1], (Currency.State) result[2]);
         }
-        return new CurrencyIssuedDto(okListDto, expendedListDto, lapsedListDto, errorListDto);
+        return resultDto;
     }
 
 }

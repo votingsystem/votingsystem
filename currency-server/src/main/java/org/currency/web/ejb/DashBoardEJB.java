@@ -36,16 +36,6 @@ public class DashBoardEJB {
          query = em.createNamedQuery(Transaction.COUNT_BY_TYPE_AND_DATE_CREATED_BETWEEN)
                  .setParameter("dateFrom", timePeriod.getDateFrom().toLocalDateTime())
                  .setParameter("dateTo", timePeriod.getDateTo().toLocalDateTime())
-                 .setParameter("type", Transaction.Type.CURRENCY_PERIOD_INIT);
-         dto.setNumTransCurrencyInitPeriod((long) query.getSingleResult());
-         query = em.createNamedQuery(Transaction.COUNT_BY_TYPE_AND_DATE_CREATED_BETWEEN)
-                 .setParameter("dateFrom", timePeriod.getDateFrom().toLocalDateTime())
-                 .setParameter("dateTo", timePeriod.getDateTo().toLocalDateTime())
-                 .setParameter("type", Transaction.Type.CURRENCY_PERIOD_INIT_TIME_LIMITED);
-         dto.setNumTransCurrencyInitPeriodTimeLimited((long) query.getSingleResult());
-         query = em.createNamedQuery(Transaction.COUNT_BY_TYPE_AND_DATE_CREATED_BETWEEN)
-                 .setParameter("dateFrom", timePeriod.getDateFrom().toLocalDateTime())
-                 .setParameter("dateTo", timePeriod.getDateTo().toLocalDateTime())
                  .setParameter("type", Transaction.Type.CURRENCY_REQUEST);
          dto.setNumTransCurrencyRequest((long) query.getSingleResult());
          query = em.createNamedQuery(Transaction.COUNT_BY_TYPE_AND_DATE_CREATED_BETWEEN)
@@ -58,11 +48,6 @@ public class DashBoardEJB {
                  .setParameter("dateTo", timePeriod.getDateTo().toLocalDateTime())
                  .setParameter("type", Transaction.Type.CURRENCY_CHANGE);
          dto.setNumTransCurrencyChange((long)query.getSingleResult());
-         query = em.createNamedQuery(Transaction.COUNT_BY_TYPE_AND_DATE_CREATED_BETWEEN)
-                 .setParameter("dateFrom", timePeriod.getDateFrom().toLocalDateTime())
-                 .setParameter("dateTo", timePeriod.getDateTo().toLocalDateTime())
-                 .setParameter("type", Transaction.Type.CANCELLATION);
-         dto.setNumTransCancellation((long) query.getSingleResult());
          return dto;
     }
 

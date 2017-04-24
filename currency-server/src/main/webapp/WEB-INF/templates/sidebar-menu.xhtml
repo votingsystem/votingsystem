@@ -1,65 +1,68 @@
 <ui:composition
         xmlns="http://www.w3.org/1999/xhtml"
         xmlns:ui="http://xmlns.jcp.org/jsf/facelets">
-    <div class="col-md-3 left_col">
-        <div class="left_col scroll-view">
-            <div class="navbar nav_title">
-                <a href="#{request.contextPath}/index.xhtml" class="site_title" style="margin: 5px 0 0 0;"><i class="fa fa-money"></i>
-                    <span style="margin: 10px 0 0 0;">#{msg.currencyLbl}</span>
-                </a>
-            </div>
-            <div class="clearfix"></div>
-            <div id="sidebar-menu" class="main_menu_side hidden-print main_menu">
-                <div class="menu_section">
-                    <ul class="nav side-menu">
+    <div class="navbar-default sidebar" role="navigation">
+        <div class="sidebar-nav navbar-collapse">
+            <ul class="nav" id="side-menu">
+                <li class="sidebar-search">
+                    <div class="input-group custom-search-form">
+                        <input type="text" class="form-control" placeholder="Search..."/>
+                        <span class="input-group-btn">
+                            <button class="btn btn-default" type="button">
+                                <i class="fa fa-search"></i>
+                            </button>
+                        </span>
+                    </div>
+                    <!-- /input-group -->
+                </li>
+                <li>
+                    <a href="index.html"><i class="fa fa-dashboard fa-fw"></i> Panel de control</a>
+                </li>
+                <li>
+                    <a href="#"><i class="fa fa-bar-chart-o fa-fw"></i> #{msg.reportsSectionLbl}<span class="fa arrow"></span></a>
+                    <ul class="nav nav-second-level">
                         <li>
-                            <a href="#{request.contextPath}/election/elections.xhtml?state=ACTIVE">
-                                <i class="fa fa-user"></i>#{msg.locateUserLbl}</a>
+                            <a href="#{request.contextPath}/dashBoardLbl">#{msg.dashBoardLbl}</a>
                         </li>
                         <li>
-                            <a><i class="fa fa-cogs"></i>#{msg.reportsSectionLbl} <span class="fa fa-chevron-down"></span></a>
-                            <ul class="nav child_menu">
-                                <li>
-                                    <a href="#{request.contextPath}/dashBoardLbl">#{msg.dashBoardLbl}</a>
-                                </li>
-                                <li>
-                                    <a href="#{request.contextPath}/bankListLbl">#{msg.bankListLbl}</a>
-                                </li>
-                                <li>
-                                    <a href="#{request.contextPath}/currencyIssued">#{msg.currencyIssued}</a>
-                                </li>
-                                <li>
-                                    <a href="#{request.contextPath}/systemBalanceLbl">#{msg.systemBalanceLbl}</a>
-                                </li>
-                                <li>
-                                    <a href="#{request.contextPath}/currentWeekLbl">#{msg.currentWeekLbl}</a>
-                                </li>
-                                <li>
-                                    <a href="#{request.contextPath}/validationToolMsg">#{msg.validationToolMsg}</a>
-                                </li>
-                            </ul>
+                            <a href="#{request.contextPath}/bankListLbl">#{msg.bankListLbl}</a>
                         </li>
                         <li>
-                            <a><i class="fa fa-info"></i>#{msg.docsLbl} <span class="fa fa-chevron-down"></span></a>
-                            <ul class="nav child_menu">
-                                <li>
-                                    <a href="#{request.contextPath}/docs/incomes.xhtml">#{msg.incomesLbl}</a>
-                                </li>
-                                <li>
-                                    <a href="#{request.contextPath}/docs/accounts.xhtml">#{msg.accountsLbl}</a>
-                                </li>
-                                <li>
-                                    <a href="#{request.contextPath}/docs/messages.xhtml">#{msg.messageLbl}s</a>
-                                </li>
-                                <li>
-                                    <a href="https://github.com/votingsystem/votingsystem" target="_blank">#{msg.proyectLbl}</a>
-                                </li>
-                            </ul>
+                            <a href="#{request.contextPath}/currencyIssued">#{msg.currencyIssued}</a>
+                        </li>
+                        <li>
+                            <a href="#{request.contextPath}/systemBalanceLbl">#{msg.systemBalanceLbl}</a>
+                        </li>
+                        <li>
+                            <a href="#{request.contextPath}/currentWeekLbl">#{msg.currentWeekLbl}</a>
+                        </li>
+                        <li>
+                            <a href="#{request.contextPath}/validationToolMsg">#{msg.validationToolMsg}</a>
                         </li>
                     </ul>
-                </div>
-            </div>
+                    <!-- /.nav-second-level -->
+                </li>
+                <li>
+                    <a href="#"><i class="fa fa-info fa-fw"></i> #{msg.docsLbl}<span class="fa arrow"></span></a>
+                    <ul class="nav nav-second-level">
+                        <li>
+                            <a href="#{request.contextPath}/docs/incomes.xhtml">#{msg.incomesLbl}</a>
+                        </li>
+                        <li>
+                            <a href="#{request.contextPath}/docs/accounts.xhtml">#{msg.accountsLbl}</a>
+                        </li>
+                        <li>
+                            <a href="#{request.contextPath}/docs/messages.xhtml">#{msg.messageLbl}s</a>
+                        </li>
+                        <li>
+                            <a href="https://github.com/votingsystem/votingsystem" target="_blank">#{msg.proyectLbl}</a>
+                        </li>
+                    </ul>
+                </li>
+
+            </ul>
         </div>
+        <!-- /.sidebar-collapse -->
     </div>
 </ui:composition>
 

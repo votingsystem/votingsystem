@@ -25,8 +25,6 @@ public class Tag extends EntityBase implements Serializable {
 
     public static final String FIND_BY_NAME = "Tag.findByName";
 
-    public static final String WILDTAG = "WILDTAG";
-
     @Id @GeneratedValue(strategy=IDENTITY)
     @Column(name="ID", unique=true, nullable=false)
     private Long id;

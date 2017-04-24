@@ -25,13 +25,15 @@ import org.votingsystem.http.SystemEntityType;
 import org.votingsystem.model.Certificate;
 import org.votingsystem.model.User;
 import org.votingsystem.model.currency.CurrencyAccount;
-import org.votingsystem.model.currency.Tag;
 import org.votingsystem.throwable.ValidationException;
 import org.votingsystem.util.*;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
-import javax.ejb.*;
+import javax.ejb.EJB;
+import javax.ejb.Lock;
+import javax.ejb.LockType;
+import javax.ejb.Startup;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import java.io.File;
@@ -54,8 +56,6 @@ import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.LogManager;
 import java.util.logging.Logger;
-
-import static javax.ejb.TransactionAttributeType.REQUIRES_NEW;
 
 /**
  * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
@@ -184,16 +184,10 @@ public class ConfigEJB implements Config, ConfigCurrencyServer, Serializable {
 
             List<User> userList = em.createNamedQuery(User.FIND_USER_BY_TYPE)
                     .setParameter("type", User.Type.CURRENCY_SERVER).getResultList();
-            if(userList.isEmpty()) { //First time run
-                createtag(Tag.WILDTAG);
+            if(userList.isEmpty()) { //First time run;
                 systemUser = new User(User.Type.CURRENCY_SERVER, entityId);
                 em.persist(systemUser);
                 createIBAN(systemUser);
-                File tagsFile = new File(applicationDirPath + File.separator + "default-tags.txt");
-                String[] defaultTags = FileUtils.getStringFromFile(tagsFile).split(",");
-                for(String tag: defaultTags) {
-                    createtag(tag.trim());
-                }
             }
         } catch (Exception ex) {
             log.log(Level.SEVERE, ex.getMessage(), ex);
@@ -233,27 +227,6 @@ public class ConfigEJB implements Config, ConfigCurrencyServer, Serializable {
     }
 
     @PreDestroy private void shutdown() { log.info(" --------- shutdown ---------");}
-
-    public Tag getTag(String tagName) throws ValidationException {
-        if(tagName.toLowerCase().equals(Messages.currentInstance().get("wildTagLbl").toLowerCase()))
-            tagName = Tag.WILDTAG;
-        List<Tag> tagList = em.createNamedQuery(Tag.FIND_BY_NAME).setParameter("name", tagName.toLowerCase()).getResultList();
-        if(tagList.isEmpty())
-            throw new ValidationException(tagName + " is not a valid tag");
-        return tagList.iterator().next();
-    }
-
-    @TransactionAttribute(REQUIRES_NEW)
-    public Tag createtag(String tagName) {
-        Tag tag = new Tag(StringUtils.removeAccents(tagName).toLowerCase());
-        em.persist(tag);
-        if(!Tag.WILDTAG.equals(tagName)) {
-            for(CurrencyCode currencyCode : CurrencyCode.values()) {
-                em.persist(new CurrencyAccount(systemUser, BigDecimal.ZERO, currencyCode, tag));
-            }
-        }
-        return tag;
-    }
 
     public String getIBAN(Long userId, String bankCodeStr, String branchCodeStr) {
         String accountNumberStr = String.format("%010d", userId);
@@ -391,7 +364,7 @@ public class ConfigEJB implements Config, ConfigCurrencyServer, Serializable {
         Iban iban = new Iban.Builder().countryCode(CountryCode.ES).bankCode(bankCode).branchCode(branchCode)
                 .accountNumber(accountNumberStr).nationalCheckDigit("45").build();
         user.setIBAN(iban.toString());
-        em.persist(new CurrencyAccount(user, BigDecimal.ZERO, CurrencyCode.EUR, getTag(Tag.WILDTAG)));
+        em.persist(new CurrencyAccount(user, BigDecimal.ZERO, CurrencyCode.EUR));
         return user;
     }
 

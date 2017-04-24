@@ -20,7 +20,6 @@ public class CurrencyAccountDto {
     private String IBAN;
     private BigDecimal amount;
     private LocalDateTime lastUpdated;
-    private TagDto tag;
 
     public CurrencyAccountDto() {}
 
@@ -30,8 +29,6 @@ public class CurrencyAccountDto {
         this.setIBAN(currencyAccount.getIBAN());
         this.setAmount(currencyAccount.getBalance());
         this.setLastUpdated(currencyAccount.getLastUpdated());
-        if(currencyAccount.getTag() != null)
-            this.setTag(new TagDto(currencyAccount.getTag()));
     }
 
     public Long getId() {
@@ -72,14 +69,6 @@ public class CurrencyAccountDto {
 
     public void setLastUpdated(LocalDateTime lastUpdated) {
         this.lastUpdated = lastUpdated;
-    }
-
-    public TagDto getTag() {
-        return tag;
-    }
-
-    public void setTag(TagDto tag) {
-        this.tag = tag;
     }
 
 }

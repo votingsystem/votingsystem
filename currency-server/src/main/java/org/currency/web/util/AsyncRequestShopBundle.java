@@ -2,7 +2,6 @@ package org.currency.web.util;
 
 import org.votingsystem.dto.currency.TransactionDto;
 import org.votingsystem.model.currency.Currency;
-import org.votingsystem.model.currency.Tag;
 
 import javax.ws.rs.container.AsyncResponse;
 import java.util.Base64;
@@ -31,11 +30,10 @@ public class AsyncRequestShopBundle {
         this.asyncResponse = asyncResponse;
     }
 
-    public String addRevocationHash(String currencyServerURL, String revocationHash) throws Exception {
+    public String addRevocationHash(String currencyEntity, String revocationHash) throws Exception {
         if(currencyMap == null) currencyMap = new HashMap<>();
-        Currency currency =  new  Currency(currencyServerURL,
-                transactionDto.getAmount(), transactionDto.getCurrencyCode(),
-                transactionDto.isTimeLimited(), revocationHash, new Tag(transactionDto.getTagName()));
+        Currency currency =  new  Currency(currencyEntity, transactionDto.getAmount(), transactionDto.getCurrencyCode(),
+                revocationHash);
         currencyMap.put(revocationHash, currency);
         return new String(currency.getCertificationRequest().getCsrPEM());
     }

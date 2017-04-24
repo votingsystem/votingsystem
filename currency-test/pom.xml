@@ -210,7 +210,7 @@
     </build>
     <properties>
         <version.java>1.8</version.java>
-        <version.votingsystem>0.9.0</version.votingsystem>
+        <version.votingsystem>0.9.1</version.votingsystem>
         <junit.version>4.11</junit.version>
         <version.dss>4.7.0</version.dss>
         <version.hibernate>5.0.10.Final</version.hibernate>

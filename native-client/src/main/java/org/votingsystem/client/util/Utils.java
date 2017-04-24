@@ -99,11 +99,6 @@ public class Utils {
         });
     }
 
-
-    public static String getTagForDescription(String tagName) {
-        return Messages.currentInstance().get("forLbl") + " " + MsgUtils.getTagDescription(tagName);
-    }
-
     public static void addTextLimiter(final TextInputControl tf, final int maxLength) {
         tf.textProperty().addListener(new ChangeListener<String>() {
             @Override

@@ -15,10 +15,4 @@ public class MsgUtils {
             return message.length() > 300 ? message.substring(0, 300) + "..." : message;
     }
 
-    public static String getTagDescription(String tagName) {
-        if(Tag.WILDTAG.equals(tagName)) return Messages.currentInstance().get("wildTagLbl").toLowerCase();
-        else return tagName.toLowerCase();
-
-    }
-
 }

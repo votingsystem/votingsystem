@@ -25,7 +25,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 @WebServlet("/currency/request")
-@MultipartConfig(location="/tmp", fileSizeThreshold=1024*1024, maxFileSize=1024*1024*50, maxRequestSize=1024*1024*5*50)
+@MultipartConfig(location="D:\\temp", fileSizeThreshold=1024*1024, maxFileSize=1024*1024*50, maxRequestSize=1024*1024*5*50)
 public class CurrencyRequestServlet extends HttpServlet {
 
     private final static Logger log = Logger.getLogger(CurrencyRequestServlet.class.getName());
@@ -47,9 +47,8 @@ public class CurrencyRequestServlet extends HttpServlet {
             SignatureParams signatureParams = new SignatureParams(null, User.Type.ID_CARD_USER,
                     SignedDocumentType.CURRENCY_REQUEST).setWithTimeStampValidation(true);
             signedDocument = signatureService.validateXAdESAndSave(request.getDssDocument(), signatureParams);
-            CurrencyRequestDto requestDto = CurrencyRequestDto.validateRequest(request.getCSRBytes(),
+            CurrencyRequestDto requestDto = CurrencyRequestDto.validateRequest(request.getRequestCSRSet(),
                     signedDocument, config.getEntityId());
-            requestDto.setTag(config.getTag(requestDto.getTag().getName()));
             ResultListDto<String> dto = currencyBean.processCurrencyRequest(requestDto);
             res.setContentType(MediaType.JSON);
             res.getOutputStream().write(JSON.getMapper().writeValueAsBytes(dto));

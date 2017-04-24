@@ -21,27 +21,26 @@ import java.util.Collection;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class CurrencyStateDto {
 
-    private String revocationHashBase64;
+    private String revocationHash;
     private String batchUUID;
     private Currency.State state;
     private Currency.Type type;
     private String currencyCert;
     private CurrencyCode currencyCode;
     private String leftOverCert;
-    private String tag;
     private BigDecimal amount;
     private String currencyChangeCert;
     private ZonedDateTime dateCreated;
 
     public CurrencyStateDto() {}
 
-    public CurrencyStateDto(String revocationHashBase64, Currency.State state) {
-        this.revocationHashBase64 = revocationHashBase64;
+    public CurrencyStateDto(String revocationHash, Currency.State state) {
+        this.revocationHash = revocationHash;
         this.state = state;
     }
 
     public CurrencyStateDto(Currency currency) throws Exception {
-        revocationHashBase64 = currency.getRevocationHash();
+        revocationHash = currency.getRevocationHash();
         if(currency.getCurrencyBatch() != null)
             batchUUID = currency.getCurrencyBatch().getBatchUUID();
         if(currency.getContent() != null) {
@@ -54,7 +53,6 @@ public class CurrencyStateDto {
         currencyCode = currency.getCurrencyCode();
         state = currency.getState();
         type = currency.getType();
-        tag = currency.getTag().getName();
         this.dateCreated = ZonedDateTime.of(currency.getDateCreated(), ZoneId.systemDefault());
     }
 
@@ -73,12 +71,12 @@ public class CurrencyStateDto {
         }
     }
 
-    public String getRevocationHashBase64() {
-        return revocationHashBase64;
+    public String getRevocationHash() {
+        return revocationHash;
     }
 
-    public void setRevocationHashBase64(String revocationHashBase64) {
-        this.revocationHashBase64 = revocationHashBase64;
+    public void setRevocationHash(String revocationHash) {
+        this.revocationHash = revocationHash;
     }
 
     public Currency.State getState() {
@@ -144,14 +142,6 @@ public class CurrencyStateDto {
 
     public void setAmount(BigDecimal amount) {
         this.amount = amount;
-    }
-
-    public String getTag() {
-        return tag;
-    }
-
-    public void setTag(String tag) {
-        this.tag = tag;
     }
 
     public String getBatchUUID() {

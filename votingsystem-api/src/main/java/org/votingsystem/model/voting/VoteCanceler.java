@@ -37,10 +37,10 @@ public class VoteCanceler extends EntityBase implements Serializable {
     @Enumerated(EnumType.STRING)
     @Column(name="STATE", nullable=false)
     private State state;
-    @Column(name="CERT_REVOCATION_HASH_BASE64") private String certRevocationHashBase64;
-    @Column(name="ORIGIN_CERT_REVOCATION_HASH_BASE64") private String originCertRevocationHashBase64;
-    @Column(name="ANON_CERT_REQUEST_REVOCATION_HASH_BASE64") private String anonCertRequestRevocationHashBase64;
-    @Column(name="ORIGIN_ANON_CERT_REQUEST_REVOCATION_HASH_BASE64") private String originAnonCertRequestRevocationHashBase64;
+    @Column(name="CERT_REVOCATION_HASH_BASE64") private String certRevocationHash;
+    @Column(name="ORIGIN_CERT_REVOCATION_HASH_BASE64") private String originCertRevocationHash;
+    @Column(name="ANON_CERT_REQUEST_REVOCATION_HASH_BASE64") private String anonCertRequestRevocationHash;
+    @Column(name="ORIGIN_ANON_CERT_REQUEST_REVOCATION_HASH_BASE64") private String originAnonCertRequestRevocationHash;
     @ManyToOne(fetch=FetchType.LAZY)
     @JoinColumn(name="ELECTION", nullable=false)
     private Election election;
@@ -54,15 +54,15 @@ public class VoteCanceler extends EntityBase implements Serializable {
     public VoteCanceler() {}
 
     public VoteCanceler(SignedDocument signedDocument, AnonVoteCertRequest accessRequest, State state,
-				String originAnonCertRequestRevocationHashBase64, String anonCertRequestRevocationHashBase64,
-				String originCertRevocationHashBase64, String certRevocationHashBase64, Vote vote) {
+				String originAnonCertRequestRevocationHash, String anonCertRequestRevocationHash,
+				String originCertRevocationHash, String certRevocationHash, Vote vote) {
         this.signedDocument = signedDocument;
         this.accessRequest = accessRequest;
         this.state = state;
-        this.originAnonCertRequestRevocationHashBase64 = originAnonCertRequestRevocationHashBase64;
-        this.anonCertRequestRevocationHashBase64 = anonCertRequestRevocationHashBase64;
-        this.originCertRevocationHashBase64 = originCertRevocationHashBase64;
-        this.certRevocationHashBase64 = certRevocationHashBase64;
+        this.originAnonCertRequestRevocationHash = originAnonCertRequestRevocationHash;
+        this.anonCertRequestRevocationHash = anonCertRequestRevocationHash;
+        this.originCertRevocationHash = originCertRevocationHash;
+        this.certRevocationHash = certRevocationHash;
         this.election = vote.getElection();
         this.vote = vote;
     }
@@ -107,38 +107,38 @@ public class VoteCanceler extends EntityBase implements Serializable {
 		this.accessRequest = accessRequest;
 	}
 
-	public String getCertRevocationHashBase64() {
-		return certRevocationHashBase64;
+	public String getCertRevocationHash() {
+		return certRevocationHash;
 	}
 
-	public void setCertRevocationHashBase64(String certRevocationHashBase64) {
-		this.certRevocationHashBase64 = certRevocationHashBase64;
+	public void setCertRevocationHash(String certRevocationHash) {
+		this.certRevocationHash = certRevocationHash;
 	}
 
-	public String getOriginCertRevocationHashBase64() {
-		return originCertRevocationHashBase64;
+	public String getOriginCertRevocationHash() {
+		return originCertRevocationHash;
 	}
 
-	public void setOriginCertRevocationHashBase64(
-			String originCertRevocationHashBase64) {
-		this.originCertRevocationHashBase64 = originCertRevocationHashBase64;
+	public void setOriginCertRevocationHash(
+			String originCertRevocationHash) {
+		this.originCertRevocationHash = originCertRevocationHash;
 	}
 
 	public String getAccessRequestHashBase64() {
-		return anonCertRequestRevocationHashBase64;
+		return anonCertRequestRevocationHash;
 	}
 
 	public void setAccessRequestHashBase64(String hashAccessRequestBase64) {
-		this.anonCertRequestRevocationHashBase64 = hashAccessRequestBase64;
+		this.anonCertRequestRevocationHash = hashAccessRequestBase64;
 	}
 
-	public String getOriginAnonCertRequestRevocationHashBase64() {
-		return originAnonCertRequestRevocationHashBase64;
+	public String getOriginAnonCertRequestRevocationHash() {
+		return originAnonCertRequestRevocationHash;
 	}
 
-	public void setOriginAnonCertRequestRevocationHashBase64(
-			String originAnonCertRequestRevocationHashBase64) {
-		this.originAnonCertRequestRevocationHashBase64 = originAnonCertRequestRevocationHashBase64;
+	public void setOriginAnonCertRequestRevocationHash(
+			String originAnonCertRequestRevocationHash) {
+		this.originAnonCertRequestRevocationHash = originAnonCertRequestRevocationHash;
 	}
 
 	public Vote getVote() {

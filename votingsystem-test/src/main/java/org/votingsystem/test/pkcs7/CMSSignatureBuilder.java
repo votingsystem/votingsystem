@@ -66,7 +66,7 @@ public class CMSSignatureBuilder {
             else certificateCollectionPEM = FileUtils.concat(certificateCollectionPEM, PEMUtils.getPEMEncoded (certificateChain[i]));
         }
         x509Certificate = (X509Certificate) keyStore.getCertificate(keyAlias);
-        user = User.FROM_X509_CERT(x509Certificate);
+        user = User.FROM_CERT(x509Certificate, User.Type.USER);
         privateKey = (PrivateKey)keyStore.getKey(keyAlias, password.toCharArray());
         encryptor = new Encryptor(x509Certificate, privateKey);
     }

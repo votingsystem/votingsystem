@@ -11,17 +11,17 @@ public class CsrResponse {
     private String message;
     private PublicKey publicKey;
     private byte[] issuedCert;
-    private String revocationHashBase64;
+    private String revocationHash;
 
     public CsrResponse(int statusCode, String message) {
         this.statusCode = statusCode;
         this.message = message;
     }
 
-    public CsrResponse(PublicKey publicKey, byte[] issuedCert, String revocationHashBase64) {
+    public CsrResponse(PublicKey publicKey, byte[] issuedCert, String revocationHash) {
         this.publicKey = publicKey;
         this.issuedCert = issuedCert;
-        this.revocationHashBase64 = revocationHashBase64;
+        this.revocationHash = revocationHash;
     }
 
     public PublicKey getPublicKey() {
@@ -32,8 +32,8 @@ public class CsrResponse {
         return issuedCert;
     }
 
-    public String getRevocationHashBase64() {
-        return revocationHashBase64;
+    public String getRevocationHash() {
+        return revocationHash;
     }
 
     public void setIssuedCert(byte[] issuedCert) {

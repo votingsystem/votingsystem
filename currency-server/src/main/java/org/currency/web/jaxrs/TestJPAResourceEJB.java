@@ -36,8 +36,8 @@ public class TestJPAResourceEJB {
     @GET @Path("/sum-balance")
     public Response sumBalance(@Context HttpServletRequest req, @Context HttpServletResponse resp)
             throws JsonProcessingException, ValidationException {
-        Query query = em.createQuery("select SUM(c.balance), tag, c.currencyCode from CurrencyAccount c JOIN c.tag tag where c.state =:state " +
-                "group by tag, c.currencyCode").setParameter("state", CurrencyAccount.State.ACTIVE);
+        Query query = em.createQuery("select SUM(c.balance), c.currencyCode from CurrencyAccount c where c.state =:state " +
+                "group by c.currencyCode").setParameter("state", CurrencyAccount.State.ACTIVE);
          List<Object[]> resultList = query.getResultList();
         for(Object[] result : resultList) {
             log.info("" + result[0] + ((Tag)result[1]).getName() + result[2]);
@@ -47,10 +47,8 @@ public class TestJPAResourceEJB {
 
     @GET @Path("/transactions")
     public Response transactions() throws Exception {
-        Query query = em.createQuery("select t from Transaction t where t.type  in :inList")
-                .setParameter("inList", Arrays.asList(Transaction.Type.CURRENCY_PERIOD_INIT,
-                Transaction.Type.CURRENCY_PERIOD_INIT_TIME_LIMITED));
-        List<Transaction> resultList =  query.getResultList();
+        List<Transaction> resultList = em.createQuery("select t from Transaction t where t.type  in :inList")
+                .setParameter("inList", Arrays.asList(Transaction.Type.CURRENCY_CHANGE)).getResultList();
         for(Transaction transaction : resultList) {
             em.remove(transaction);
         }

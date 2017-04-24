@@ -7,61 +7,69 @@
     <meta name="viewport" content="width=device-width, initial-scale=1"/>
     <link rel="shortcut icon" type="image/png" href="#{request.contextPath}/res/img/icon_16/fa-money.png" />
     <title>#{msg.currencyLbl}</title>
-    <link href="#{request.contextPath}/res/gtl/vendors/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet"/>
-    <link href="#{request.contextPath}/res/gtl/vendors/font-awesome/css/font-awesome.min.css" rel="stylesheet"/>
-    <script src="#{request.contextPath}/res/gtl/vendors/jquery/dist/jquery.min.js"></script>
-    <!-- FastClick -->
-    <script src="#{request.contextPath}/res/gtl/vendors/fastclick/lib/fastclick.js"></script>
-    <script src="#{request.contextPath}/res/gtl/vendors/bootstrap/dist/js/bootstrap.min.js"></script>
-    <script src="#{request.contextPath}/res/gtl/vendors/fastclick/lib/fastclick.js"></script>
-    <script src="#{request.contextPath}/res/gtl/vendors/nprogress/nprogress.js"></script>
-    <script src="#{request.contextPath}/res/gtl/vendors/validator/validator.min.js"></script>
-    <link href="#{request.contextPath}/res/css/gl-custom.css" rel="stylesheet"/>
+    <link href="#{request.contextPath}/res/sb2/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet"/>
+    <link href="#{request.contextPath}/res/sb2/vendor/metisMenu/metisMenu.min.css" rel="stylesheet"/>
+    <link href="#{request.contextPath}/res/sb2/dist/css/sb-admin-2.css" rel="stylesheet"/>
+    <link href="#{request.contextPath}/res/sb2/vendor/font-awesome/css/font-awesome.min.css" rel="stylesheet" type="text/css"/>
     <ui:insert name="head" />
 </h:head>
 <h:body class="nav-md">
 
     <ui:include src="alert-dialog.xhtml" />
 
-    <div class="container body">
-        <div class="main_container">
+    <div id="wrapper">
+        <nav class="navbar navbar-default navbar-static-top" role="navigation" style="margin-bottom: 0">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="#{request.contextPath}/index.xhtml">#{msg.currencyLbl}</a>
+            </div>
 
+            <ul class="nav navbar-top-links navbar-right">
+                <li class="dropdown">
+                    <a class="dropdown-toggle" data-toggle="dropdown" href="#">
+                        <i class="fa fa-user fa-fw"></i> #{msg.accessLbl}
+                    </a>
+                </li>
+                <li class="dropdown">
+                    <a class="dropdown-toggle" data-toggle="dropdown" href="#">
+                        <i class="fa fa-user fa-fw"></i> <i class="fa fa-caret-down"></i>
+                    </a>
+                    <ul class="dropdown-menu dropdown-user">
+                        <li><a href="#"><i class="fa fa-user fa-fw"></i> User Profile</a>
+                        </li>
+                        <li><a href="#"><i class="fa fa-gear fa-fw"></i> Settings</a>
+                        </li>
+                        <li class="divider"></li>
+                        <li><a href="login.html"><i class="fa fa-sign-out fa-fw"></i> Logout</a>
+                        </li>
+                    </ul>
+                </li>
+            </ul>
+            <!-- /.navbar-top-links -->
             <ui:include src="sidebar-menu.xhtml" />
+            <!-- /.navbar-static-side -->
+        </nav>
 
-            <!-- top navigation -->
-            <div class="top_nav">
-                <div class="nav_menu" style="display: block;">
-                    <nav role="navigation">
-                        <div class="nav toggle" style="padding: 8px 0 0 0;">
-                            <a id="menu_toggle" style="color: #f2f2f2;"><i class="fa fa-bars"></i></a>
-                        </div>
-                        <div style="display: flex; flex-direction: row;color: #f2f2f2;">
-                            <div id="mainPageCaption" style="width: 100%; text-align: center;font-size: 1.8em;">
-                            </div>
-                            <div style="margin: 0 10px 0 0;vertical-align: baseline;align-self: center;cursor: pointer;" onclick="vs.alert('caqption', 'message')">
-                                #{msg.accessLbl}
-                            </div>
-                        </div>
-                    </nav>
+        <div id="page-wrapper">
+            <div class="row">
+                <div class="col-lg-12">
+                    <h1 class="page-header" id="mainPageCaption">Pruebas</h1>
                 </div>
             </div>
-            <!-- /top navigation -->
-
-            <!-- page content -->
-            <div class="right_col" role="main">
-                <div class="">
-                    <div class="row">
-                        <div class="col-md-12 col-sm-12 col-xs-12">
-                            <div class="dashboard_graph x_panel">
-                                <ui:insert name="content"/>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            <ui:insert name="content"/>
         </div>
+
     </div>
 
-    <script src="#{request.contextPath}/res/js/custom.min.js"></script>
+    <script src="#{request.contextPath}/res/sb2/vendor/jquery/jquery.min.js"></script>
+    <script src="#{request.contextPath}/res/sb2/vendor/bootstrap/js/bootstrap.min.js"></script>
+    <script src="#{request.contextPath}/res/sb2/vendor/metisMenu/metisMenu.min.js"></script>
+
+    <script src="#{request.contextPath}/res/sb2/dist/js/sb-admin-2.js"></script>
 </h:body>
 </html>

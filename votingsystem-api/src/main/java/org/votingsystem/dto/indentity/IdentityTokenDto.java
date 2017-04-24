@@ -33,8 +33,8 @@ public class IdentityTokenDto {
     private UserDto user;
     @JacksonXmlProperty(localName = "IndentityServiceEntity")
     private SystemEntityDto indentityServiceEntity;
-    @JacksonXmlProperty(localName = "RevocationHashBase64")
-    private String revocationHashBase64;
+    @JacksonXmlProperty(localName = "RevocationHash")
+    private String revocationHash;
     @JacksonXmlProperty(localName = "UUID")
     private String UUID;
     @JacksonXmlProperty(localName = "Base64Data")
@@ -67,12 +67,12 @@ public class IdentityTokenDto {
         return this;
     }
 
-    public String getRevocationHashBase64() {
-        return revocationHashBase64;
+    public String getRevocationHash() {
+        return revocationHash;
     }
 
-    public void setRevocationHashBase64(String revocationHashBase64) {
-        this.revocationHashBase64 = revocationHashBase64;
+    public void setRevocationHash(String revocationHash) {
+        this.revocationHash = revocationHash;
     }
 
     public UserDto getUser() {

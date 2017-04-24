@@ -22,8 +22,8 @@ public class  IdentityRequestDto {
     private ZonedDateTime date;
     @JacksonXmlProperty(localName = "Type", isAttribute = true)
     private OperationType type;
-    @JacksonXmlProperty(localName = "RevocationHashBase64")
-    private String revocationHashBase64;;
+    @JacksonXmlProperty(localName = "RevocationHash")
+    private String revocationHash;;
     @JacksonXmlProperty(localName = "IndentityServiceEntity")
     private SystemEntityDto indentityServiceEntity;
     @JacksonXmlProperty(localName = "CallbackServiceEntity")
@@ -66,12 +66,12 @@ public class  IdentityRequestDto {
         return this;
     }
 
-    public String getRevocationHashBase64() {
-        return revocationHashBase64;
+    public String getRevocationHash() {
+        return revocationHash;
     }
 
-    public IdentityRequestDto setRevocationHashBase64(String revocationHashBase64) {
-        this.revocationHashBase64 = revocationHashBase64;
+    public IdentityRequestDto setRevocationHash(String revocationHash) {
+        this.revocationHash = revocationHash;
         return this;
     }
 

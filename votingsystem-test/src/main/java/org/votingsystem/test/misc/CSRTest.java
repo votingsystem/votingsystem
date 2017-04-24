@@ -36,10 +36,10 @@ public class CSRTest extends BaseTest {
         MockDNIe adminCert = new MockDNIe(org.votingsystem.test.Constants.ADMIN_KEYSTORE, org.votingsystem.test.Constants.ADMIN_KEYSTORE_PASSWORD);
         String electionUUID = UUID.randomUUID().toString();
         String originRevocationHash = UUID.randomUUID().toString();
-        String revocationHashBase64 = HashUtils.getHashBase64(originRevocationHash.getBytes(), Constants.DATA_DIGEST_ALGORITHM);
+        String revocationHash = HashUtils.getHashBase64(originRevocationHash.getBytes(), Constants.DATA_DIGEST_ALGORITHM);
         CertificationRequest certificationRequest = CertificationRequest.getVoteRequest(
                 org.votingsystem.test.Constants.ID_PROVIDER_ENTITY_ID,
-                org.votingsystem.test.Constants.VOTING_SERVICE_ENTITY_ID, electionUUID, revocationHashBase64);
+                org.votingsystem.test.Constants.VOTING_SERVICE_ENTITY_ID, electionUUID, revocationHash);
 
         PKCS10CertificationRequest csr = PEMUtils.fromPEMToPKCS10CertificationRequest(certificationRequest.getCsrPEM());
 

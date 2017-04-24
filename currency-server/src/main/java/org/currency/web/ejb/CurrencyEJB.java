@@ -1,12 +1,13 @@
 package org.currency.web.ejb;
 
-import org.apache.commons.io.IOUtils;
-import org.currency.web.util.ReportFiles;
 import org.votingsystem.crypto.PEMUtils;
 import org.votingsystem.crypto.SignatureParams;
 import org.votingsystem.crypto.SignedDocumentType;
 import org.votingsystem.dto.ResultListDto;
-import org.votingsystem.dto.currency.*;
+import org.votingsystem.dto.currency.CurrencyBatchDto;
+import org.votingsystem.dto.currency.CurrencyBatchResponseDto;
+import org.votingsystem.dto.currency.CurrencyRequestDto;
+import org.votingsystem.dto.currency.CurrencyStateDto;
 import org.votingsystem.ejb.SignatureService;
 import org.votingsystem.model.SignedDocument;
 import org.votingsystem.model.User;
@@ -15,25 +16,24 @@ import org.votingsystem.model.currency.CurrencyAccount;
 import org.votingsystem.model.currency.CurrencyBatch;
 import org.votingsystem.model.currency.Transaction;
 import org.votingsystem.throwable.ValidationException;
-import org.votingsystem.util.*;
+import org.votingsystem.util.Constants;
+import org.votingsystem.util.CurrencyOperation;
+import org.votingsystem.util.Messages;
 
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.math.BigDecimal;
-import java.security.cert.X509Certificate;
 import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
-import java.util.*;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
-import static java.text.MessageFormat.format;
 
 /**
  * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
@@ -56,23 +56,19 @@ public class CurrencyEJB {
         CurrencyBatchDto batchDto = signedDocument.getSignedContent(CurrencyBatchDto.class);
         Set<Currency> validatedCurrencySet = new HashSet<>();
         CurrencyBatch currencyBatch = batchDto.validateRequest(LocalDateTime.now());
-        currencyBatch.setTag(config.getTag(batchDto.getTag()));
         for(Currency currency : batchDto.getCurrencyList()) {
             validatedCurrencySet.add(validateBatchItem(currency));
         }
         ZonedDateTime validTo = null;
-        if(currencyBatch.getTimeLimited() == true) {
-            Interval timePeriod = DateUtils.getCurrentWeekPeriod();
-            validTo = timePeriod.getDateTo();
-        }
         if(batchDto.getOperation() == CurrencyOperation.CURRENCY_CHANGE) {
             //return processAnonymousCurrencyBatch(batchDto, currencyBatch, validatedCurrencySet, validTo);
             Currency leftOver = null;
-            if(batchDto.getLeftOverPKCS10() != null) {
-                leftOver = csrBean.signCurrencyRequest(batchDto.getLeftOverPKCS10(), Currency.Type.LEFT_OVER, currencyBatch);
+            if(batchDto.getLeftOverCsr() != null) {
+                leftOver = csrBean.signCurrencyRequest(batchDto.getLeftOverCsr(), Currency.Type.LEFT_OVER, currencyBatch,
+                        Constants.CURRENY_ISSUED_LIVE_IN_YEARS);
             }
-            Currency currencyChange = csrBean.signCurrencyRequest(batchDto.getCurrencyChangePKCS10(),
-                    Currency.Type.CHANGE, currencyBatch);
+            Currency currencyChange = csrBean.signCurrencyRequest(batchDto.getCurrencyChangeCsr(),
+                    Currency.Type.CHANGE, currencyBatch, Constants.CURRENY_ISSUED_LIVE_IN_YEARS);
 
             SignatureParams signatureParams = new SignatureParams(config.getEntityId(), User.Type.CURRENCY_SERVER,
                     SignedDocumentType.CURRENCY_CHANGE_RECEIPT).setWithTimeStampValidation(false);
@@ -82,8 +78,7 @@ public class CurrencyEJB {
             currencyBatch.setCurrencyChange(currencyChange);
             currencyBatch.setValidatedCurrencySet(validatedCurrencySet);
             em.persist(currencyBatch.setSignedDocument(receipt).setState(CurrencyBatch.State.OK));
-            Transaction transaction = Transaction.CURRENCY_CHANGE(currencyBatch, validTo.toLocalDateTime(), receipt,
-                    currencyBatch.getTag());
+            Transaction transaction = Transaction.CURRENCY_CHANGE(currencyBatch, receipt);
             em.persist(transaction);
             transactionBean.updateCurrencyAccounts(transaction.setCurrencyBatch(currencyBatch));
             for(Currency currency : validatedCurrencySet) {
@@ -99,9 +94,9 @@ public class CurrencyEJB {
                     " has wrong receptor IBAN '" + batchDto.getToUserIBAN());
             currencyBatch.setToUser(userList.iterator().next());
             String leftOverCert = null;
-            if(batchDto.getLeftOverPKCS10() != null) {
-                Currency leftOver = csrBean.signCurrencyRequest(batchDto.getLeftOverPKCS10(), Currency.Type.LEFT_OVER,
-                        currencyBatch);
+            if(batchDto.getLeftOverCsr() != null) {
+                Currency leftOver = csrBean.signCurrencyRequest(batchDto.getLeftOverCsr(), Currency.Type.LEFT_OVER,
+                        currencyBatch, Constants.CURRENY_ISSUED_LIVE_IN_YEARS);
                 currencyBatch.setLeftOver(leftOver);
                 leftOverCert = new String(PEMUtils.getPEMEncoded(leftOver.getX509AnonymousCert()));
             }
@@ -110,8 +105,7 @@ public class CurrencyEJB {
             SignedDocument receipt = signatureService.signXAdESAndSave(signedDocument.getBody().getBytes(), signatureParams);
             em.persist(currencyBatch.setSignedDocument(receipt).setState(CurrencyBatch.State.OK));
             log.info("currencyBatch:" + currencyBatch.getId() + " - receipt:" + receipt.getId());
-            Transaction transaction = Transaction.CURRENCY_SEND(currencyBatch, currencyBatch.getToUser(),
-                    validTo.toLocalDateTime(), receipt, currencyBatch.getTag());
+            Transaction transaction = Transaction.CURRENCY_SEND(currencyBatch, currencyBatch.getToUser(), receipt);
             em.persist(transactionBean);
             currencyBatch.setValidatedCurrencySet(validatedCurrencySet);
             transactionBean.updateCurrencyAccounts(transaction.setCurrencyBatch(currencyBatch));
@@ -129,10 +123,10 @@ public class CurrencyEJB {
         log.info("======= TODO");
         /*CMSSignedMessage cmsMessage = currency.getSignedDocument();
         List<Currency> currencyList = em.createQuery(
-                "SELECT c FROM Currency c WHERE c.serialNumber =:serialNumber and c.revocationHashBase64=:revocationHashBase64 and c.state=:state")
+                "SELECT c FROM Currency c WHERE c.serialNumber =:serialNumber and c.revocationHash=:revocationHash and c.state=:state")
                 .setParameter("serialNumber", currency.getX509AnonymousCert().getSerialNumber().longValue())
                 .setParameter("state", Currency.State.OK)
-                .setParameter("revocationHashBase64", currency.getRevocationHash()).getResultList();
+                .setParameter("revocationHash", currency.getRevocationHash()).getResultList();
         if(currencyList.isEmpty()) throw new ValidationException(
                 Messages.currentInstance().get("currencyRevocationHashInvalidErrorMsg", currency.getRevocationHash()));
         Currency currencyDB = currencyList.iterator().next();
@@ -150,14 +144,14 @@ public class CurrencyEJB {
         User fromUser = requestDto.getSignedDocument().getFirstSignature().getSigner();
         //check cash available for user
         Map<CurrencyAccount, BigDecimal> accountFromMovements = walletBean.getAccountMovementsForTransaction(
-                fromUser.getIBAN(), requestDto.getTag(), requestDto.getTotalAmount(), requestDto.getCurrencyCode());
+                fromUser.getIBAN(), requestDto.getTotalAmount(), requestDto.getCurrencyCode());
         Set<String> currencyCertSet = csrBean.signCurrencyRequest(requestDto);
         Transaction userTransaction = Transaction.CURRENCY_REQUEST(Messages.currentInstance().get("currencyRequestLbl"),
                 accountFromMovements, requestDto, fromUser);
         transactionBean.updateCurrencyAccounts(userTransaction);
         ResultListDto resultListDto = new ResultListDto(currencyCertSet);
         resultListDto.setMessage(Messages.currentInstance().get("withdrawalMsg", requestDto.getTotalAmount().toString(),
-                requestDto.getCurrencyCode()) + " " + Messages.currentInstance().getTagMessage(requestDto.getTag().getName()));
+                requestDto.getCurrencyCode()));
         /*CMSSignedMessage receipt = cmsBean.addSignature(requestDto.getCmsMessage().getCMS());
         em.merge(requestDto.getCmsMessage().setType(TypeVS.CURRENCY_REQUEST).setCMS(receipt));*/
         return resultListDto;
@@ -165,9 +159,9 @@ public class CurrencyEJB {
 
     public Set<CurrencyStateDto> checkBundleState(Set<String> revocationHashSet) throws Exception {
         Set<CurrencyStateDto> result = new HashSet<>();
-        Query query = em.createQuery("SELECT c FROM Currency c WHERE c.revocationHashBase64 =:revocationHashBase64");
+        Query query = em.createQuery("SELECT c FROM Currency c WHERE c.revocationHash =:revocationHash");
         for(String revocationHash : revocationHashSet) {
-            List<Currency> currencyList = query.setParameter("revocationHashBase64", revocationHash).getResultList();
+            List<Currency> currencyList = query.setParameter("revocationHash", revocationHash).getResultList();
             if(!currencyList.isEmpty()) {
                 Currency currency = currencyList.iterator().next();
                 CurrencyStateDto currencyStateDto = new CurrencyStateDto(currency);
@@ -184,61 +178,6 @@ public class CurrencyEJB {
             } else result.add(new CurrencyStateDto(revocationHash, Currency.State.UNKNOWN));
         }
         return result;
-    }
-
-    public CurrencyPeriodResultDto createPeriodBackup(Interval timePeriod) throws IOException {
-        ReportFiles reportFiles = ReportFiles.CURRENCY_PERIOD(timePeriod, config.getApplicationDataPath());
-        if(reportFiles.getReportFile().exists())
-                return JSON.getMapper().readValue(reportFiles.getReportFile(), CurrencyPeriodResultDto.class);
-
-        Map<String, Map<String, IncomesDto>> leftOverMap = new HashMap<>();
-        Map<String, Map<String, IncomesDto>> changeMap = new HashMap<>();
-        Map<String, Map<String, IncomesDto>> requestMap = new HashMap<>();
-
-        Set<String> leftOverSet = new HashSet<>();
-        Set<String> changeSet = new HashSet<>();
-        Set<String> requestSet = new HashSet<>();
-        File currencyRequestDir = new File(reportFiles.getBaseDir().getAbsolutePath() + "/request");
-        File currencyBatchDir = new File(reportFiles.getBaseDir().getAbsolutePath() + "/batch");
-
-        List<SignedDocument> resultList = em.createQuery(
-                "SELECT s FROM SignedDocument s WHERE s.signedDocumentType =:documentType")
-                .setParameter("documentType",  SignedDocumentType.CURRENCY_REQUEST).getResultList();
-
-        for(SignedDocument signedDocument : resultList) {
-            File cmsFile = new File(format("{0}/currency-request_{1}.xml", currencyRequestDir.getAbsolutePath(),
-                    signedDocument.getId()));
-            IOUtils.write(signedDocument.getBody().getBytes(), new FileOutputStream(cmsFile));
-        }
-        List<CurrencyBatch> currencyBatchList = em.createQuery("SELECT c FROM CurrencyBatch c WHERE c.state =:state and c.type =:typeVS")
-                .setParameter("typeVS",  CurrencyOperation.CURRENCY_SEND).setParameter("state", CurrencyBatch.State.OK).getResultList();
-        for(CurrencyBatch currencyBatch : currencyBatchList) {
-            File cmsFile = new File(format("{0}/currency-send_{1}.xml", currencyBatchDir.getAbsolutePath(),
-                    currencyBatch.getId()));
-            IOUtils.write(currencyBatch.getSignedDocument().getBody(), new FileOutputStream(cmsFile));
-        }
-        currencyBatchList = em.createQuery("SELECT c FROM CurrencyBatch c WHERE c.state =:state and c.type =:currencyOperation")
-                .setParameter("currencyOperation",  CurrencyOperation.CURRENCY_CHANGE)
-                .setParameter("state", CurrencyBatch.State.OK).getResultList();
-        for(CurrencyBatch currencyBatch : currencyBatchList) {
-            File cmsFile = new File(format("{0}/currency-change_{1}.xml", currencyBatchDir.getAbsolutePath(),
-                    currencyBatch.getId()));
-            IOUtils.write(currencyBatch.getSignedDocument().getBody(), new FileOutputStream(cmsFile));
-        }
-        //TODO
-        //Set<X509Certificate> systemTrustedCerts = cmsBean.getTrustedCerts();
-        Set<X509Certificate> systemTrustedCerts = null;
-        File systemTrustedCertsFile = new File(format("{0}/system-trusted-certs.pem", reportFiles.getBaseDir().getAbsolutePath()));
-        IOUtils.write(PEMUtils.getPEMEncoded(systemTrustedCerts), new FileOutputStream(systemTrustedCertsFile));
-
-        CurrencyPeriodResultDto currencyPeriodResultDto = new CurrencyPeriodResultDto();
-        currencyPeriodResultDto.setLeftOverMap(leftOverMap);
-        currencyPeriodResultDto.setChangeMap(changeMap);
-        currencyPeriodResultDto.setRequestMap(requestMap);
-        currencyPeriodResultDto.setLeftOverSet(leftOverSet);
-        currencyPeriodResultDto.setChangeSet(changeSet);
-        currencyPeriodResultDto.setRequestSet(requestSet);
-        return currencyPeriodResultDto;
     }
 
 }

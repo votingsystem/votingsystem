@@ -1,7 +1,5 @@
 package org.votingsystem.util;
 
-import org.votingsystem.model.currency.Tag;
-
 import java.text.MessageFormat;
 import java.util.Locale;
 import java.util.ResourceBundle;
@@ -71,11 +69,6 @@ public class Messages {
 
     public static void setCurrentInstance(Locale locale, String bundleBaseName) {
         setCurrentInstance(new Messages(locale, bundleBaseName));
-    }
-
-    public String getTagMessage(String tag) {
-        if(Tag.WILDTAG.equals(tag)) return get("wildTagMsg");
-        else return get("tagMsg", tag);
     }
 
 }

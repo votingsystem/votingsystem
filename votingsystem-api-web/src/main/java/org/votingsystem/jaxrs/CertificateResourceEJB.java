@@ -51,12 +51,12 @@ public class CertificateResourceEJB {
     @Path("/revocationHash")
     @POST  @Produces(javax.ws.rs.core.MediaType.TEXT_PLAIN)
     public Response revocationHash(@Context HttpServletRequest req, @Context HttpServletResponse res) throws Exception {
-        String revocationHashBase64 = FileUtils.getStringFromStream(req.getInputStream());
+        String revocationHash = FileUtils.getStringFromStream(req.getInputStream());
         List<Certificate> certificates = em.createQuery(
-                "select c from Certificate c where c.revocationHashBase64=:revocationHashBase64")
-                .setParameter("revocationHashBase64", revocationHashBase64).getResultList();
+                "select c from Certificate c where c.revocationHash=:revocationHash")
+                .setParameter("revocationHash", revocationHash).getResultList();
         if (certificates.isEmpty()) {
-            return Response.status(Response.Status.NOT_FOUND).entity("Revocation hash: " + revocationHashBase64 +
+            return Response.status(Response.Status.NOT_FOUND).entity("Revocation hash: " + revocationHash +
                     " not found").build();
         }
         X509Certificate certX509 = CertUtils.loadCertificate(certificates.iterator().next().getContent());

@@ -36,8 +36,8 @@ public class XmlWriter {
             identityRequestElement.addChild(Node.ELEMENT, indentityServiceElement);
         }
 
-        Element revocationHashElement = doc.createElement("", "RevocationHashBase64");
-        revocationHashElement.addChild(Node.TEXT, identityRequest.getRevocationHashBase64());
+        Element revocationHashElement = doc.createElement("", "RevocationHash");
+        revocationHashElement.addChild(Node.TEXT, identityRequest.getRevocationHash());
         identityRequestElement.addChild(Node.ELEMENT, revocationHashElement);
 
         Element uuidElement = doc.createElement("", "UUID");
@@ -56,8 +56,8 @@ public class XmlWriter {
         operationElement.addChild(Node.TEXT, vote.getOperation().name());
         voteElement.addChild(Node.ELEMENT, operationElement);
 
-        Element revocationHashElement = doc.createElement("", "RevocationHashBase64");
-        revocationHashElement.addChild(Node.TEXT, vote.getRevocationHashBase64());
+        Element revocationHashElement = doc.createElement("", "RevocationHash");
+        revocationHashElement.addChild(Node.TEXT, vote.getRevocationHash());
         voteElement.addChild(Node.ELEMENT, revocationHashElement);
 
         Element votingServiceEntityElement = doc.createElement("", "VotingServiceEntity");

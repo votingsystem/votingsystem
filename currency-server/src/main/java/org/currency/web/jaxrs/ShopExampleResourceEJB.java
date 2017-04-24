@@ -10,7 +10,6 @@ import org.votingsystem.ejb.SignatureService;
 import org.votingsystem.model.User;
 import org.votingsystem.model.currency.Transaction;
 import org.votingsystem.util.CurrencyCode;
-import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.JSON;
 
 import javax.ejb.Stateless;
@@ -28,7 +27,6 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import java.math.BigDecimal;
 import java.net.URI;
-import java.time.ZonedDateTime;
 import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
@@ -56,8 +54,7 @@ public class ShopExampleResourceEJB {
     public Object index(@Context ServletContext context,
                         @Context HttpServletRequest req, @Context HttpServletResponse resp) throws Exception {
         TransactionDto dto = TransactionDto.PAYMENT_REQUEST("Receptor name", User.Type.USER,
-                new BigDecimal(5), CurrencyCode.EUR, "IBANNumber12345", "shop example payment - " +
-                DateUtils.getDateStr(ZonedDateTime.now()) , "HYDROGEN");
+                new BigDecimal(5), CurrencyCode.EUR, "IBANNumber12345", "shop example payment");
         dto.setPaymentOptions(Arrays.asList(Transaction.Type.FROM_USER,
                 Transaction.Type.CURRENCY_SEND, Transaction.Type.CURRENCY_CHANGE));
         String sessionID = dto.getUUID().substring(0, 8);

@@ -8,7 +8,6 @@ import org.votingsystem.crypto.CertUtils;
 import org.votingsystem.crypto.PEMUtils;
 import org.votingsystem.model.SignedDocument;
 import org.votingsystem.model.currency.CurrencyBatch;
-import org.votingsystem.model.currency.Tag;
 import org.votingsystem.throwable.ValidationException;
 import org.votingsystem.util.*;
 import org.votingsystem.xml.XML;
@@ -38,17 +37,15 @@ public class CurrencyBatchDto {
     private String toUserName;
     private String subject;
     private CurrencyCode currencyCode;
-    private String tag;
     private String batchUUID;
-    private Boolean timeLimited = Boolean.FALSE;
     private BigDecimal batchAmount;
     private BigDecimal leftOver = BigDecimal.ZERO;
     @JsonIgnore
     private org.votingsystem.model.currency.Currency leftOverCurrency;
     @JsonIgnore
-    private PKCS10CertificationRequest leftOverPKCS10;
+    private PKCS10CertificationRequest leftOverCsr;
     @JsonIgnore
-    private PKCS10CertificationRequest currencyChangePKCS10;
+    private PKCS10CertificationRequest currencyChangeCsr;
     @JsonIgnore
     private List<org.votingsystem.model.currency.Currency> currencyList;
     @JsonIgnore
@@ -62,8 +59,6 @@ public class CurrencyBatchDto {
         this.toUserIBAN = currencyBatch.getToUser().getIBAN();
         this.batchAmount = currencyBatch.getBatchAmount();
         this.currencyCode = currencyBatch.getCurrencyCode();
-        this.tag = currencyBatch.getTag().getName();
-        this.timeLimited = currencyBatch.getTimeLimited();
         this.batchUUID  = currencyBatch.getBatchUUID();
     }
 
@@ -74,15 +69,13 @@ public class CurrencyBatchDto {
     }
 
     public static CurrencyBatchDto NEW(String subject, String toUserIBAN, BigDecimal batchAmount,
-            CurrencyCode currencyCode, Tag tag, Boolean timeLimited, List<org.votingsystem.model.currency.Currency> currencyList,
+            CurrencyCode currencyCode, List<org.votingsystem.model.currency.Currency> currencyList,
             String currencyEntityId, String timestampEntityId) throws Exception {
         CurrencyBatchDto batchDto = new CurrencyBatchDto();
         batchDto.subject = subject;
         batchDto.toUserIBAN = toUserIBAN;
         batchDto.batchAmount = batchAmount;
         batchDto.currencyCode = currencyCode;
-        batchDto.tag = tag.getName();
-        batchDto.timeLimited = timeLimited;
         batchDto.currencyList = currencyList;
         batchDto.batchUUID = UUID.randomUUID().toString();
         BigDecimal accumulated = BigDecimal.ZERO;
@@ -94,7 +87,7 @@ public class CurrencyBatchDto {
                     batchAmount, accumulated));
         } else if(batchAmount.compareTo(accumulated) != 0){
             batchDto.leftOver = accumulated.subtract(batchAmount);
-            batchDto.leftOverCurrency = new org.votingsystem.model.currency.Currency(currencyEntityId, batchDto.leftOver, currencyCode, timeLimited,tag);
+            batchDto.leftOverCurrency = new org.votingsystem.model.currency.Currency(currencyEntityId, batchDto.leftOver, currencyCode);
             batchDto.leftOverCSR = new String(batchDto.leftOverCurrency.getCertificationRequest().getCsrPEM());
         }
         batchDto.currencySet = new HashSet<>();
@@ -126,8 +119,6 @@ public class CurrencyBatchDto {
                 if(checkDate.isAfter(currency.getValidTo())) throw new ValidationException(MessageFormat.format(
                         "currency ''{0}'' is lapsed", currency.getRevocationHash()));
                 accumulated = accumulated.add(currency.getAmount());
-                if(Tag.WILDTAG.equals(currency.getTag().getName()))
-                    wildTagAccumulated = wildTagAccumulated.add(currency.getAmount());
                 currencyList.add(currency);
             } catch(Exception ex) {
                 throw new ValidationException("Error with currency : " + ex.getMessage(), ex);
@@ -137,45 +128,34 @@ public class CurrencyBatchDto {
             throw new ValidationException("CurrencyBatch without signed transactions");
         CurrencyCertExtensionDto certExtensionDto = null;
         if(leftOverCSR != null) {
-            leftOverPKCS10 = PEMUtils.fromPEMToPKCS10CertificationRequest(leftOverCSR.getBytes());
+            leftOverCsr = PEMUtils.fromPEMToPKCS10CertificationRequest(leftOverCSR.getBytes());
             certExtensionDto = CertUtils.getCertExtensionData(CurrencyCertExtensionDto.class,
-                    leftOverPKCS10, Constants.CURRENCY_OID);
+                    leftOverCsr, Constants.CURRENCY_OID);
             if(leftOver.compareTo(certExtensionDto.getAmount()) != 0) throw new ValidationException(
                     "leftOver 'amount' mismatch - request: " + leftOver + " - csr: " + certExtensionDto.getAmount());
             if(!certExtensionDto.getCurrencyCode().equals(currencyCode)) throw new ValidationException(
                     "leftOver 'currencyCode' mismatch - request: " + currencyCode + " - csr: " + certExtensionDto.getCurrencyCode());
-            if(!certExtensionDto.getTag().equals(tag)) {
-                if(wildTagAccumulated.compareTo(leftOver) < 0) throw new ValidationException(
-                    "leftOver 'tag' mismatch - request: " + tag + " - csr: " + certExtensionDto.getTag() +
-                    " - wildTagAccumulated: " + wildTagAccumulated);
-            }
             BigDecimal leftOverCalculated = accumulated.subtract(batchAmount);
             if(leftOverCalculated.compareTo(leftOver) != 0) throw new ValidationException(
                     "leftOverCalculated: " + leftOverCalculated + " - leftOver: " + leftOver);
         } else if(leftOver.compareTo(BigDecimal.ZERO) != 0) throw new ValidationException(
                 "leftOver request: " + leftOver + " without CSR");
         if(currencyChangeCSR != null) {
-            currencyChangePKCS10 = PEMUtils.fromPEMToPKCS10CertificationRequest(currencyChangeCSR.getBytes());
+            currencyChangeCsr = PEMUtils.fromPEMToPKCS10CertificationRequest(currencyChangeCSR.getBytes());
             certExtensionDto = CertUtils.getCertExtensionData(CurrencyCertExtensionDto.class,
-                    currencyChangePKCS10, Constants.CURRENCY_OID);
+                    currencyChangeCsr, Constants.CURRENCY_OID);
             if(certExtensionDto.getAmount().compareTo(this.batchAmount) != 0) throw new ValidationException(
                     "currencyChange 'amount' mismatch - request: " + this.batchAmount +
                     " - csr: " + certExtensionDto.getAmount());
             if(!certExtensionDto.getCurrencyCode().equals(currencyCode)) throw new ValidationException(
                     "currencyChange 'currencyCode' mismatch - request: " + currencyCode +
                     " - csr: " + certExtensionDto.getCurrencyCode());
-            if(!certExtensionDto.getTag().equals(tag)) throw new ValidationException(
-                    "certExtensionDto 'tag' mismatch - request: " + tag + " - csr: " + certExtensionDto.getTag());
-            if(timeLimited.booleanValue() !=  certExtensionDto.getTimeLimited().booleanValue())
-                throw new ValidationException("certExtensionDto 'timeLimited' mismatch ");
         }
         CurrencyBatch currencyBatch = new CurrencyBatch();
         currencyBatch.setType(operation);
         currencyBatch.setSubject(subject);
         currencyBatch.setBatchAmount(batchAmount);
         currencyBatch.setCurrencyCode(currencyCode);
-        currencyBatch.setTag(new Tag(tag));
-        currencyBatch.setTimeLimited(timeLimited);
         currencyBatch.setContent(content);
         currencyBatch.setBatchUUID(batchUUID);
         return currencyBatch;
@@ -196,11 +176,6 @@ public class CurrencyBatchDto {
             "ERROR - batchAmount ''{0}'' - receipt amount ''{1}''",  batchAmount, signedDto.getBatchAmount()));
         if(!signedDto.getCurrencyCode().equals(signedDto.getCurrencyCode())) throw new ValidationException(MessageFormat.format(
              "ERROR - batch currencyCode ''{0}'' - receipt currencyCode ''{1}''",  currencyCode, signedDto.getCurrencyCode()));
-        if(timeLimited.booleanValue() != signedDto.getTimeLimited().booleanValue()) throw
-                new ValidationException(MessageFormat.format(
-                "ERROR - batch timeLimited ''{0}'' - receipt timeLimited ''{1}''",  timeLimited, signedDto.getTimeLimited()));
-        if(!tag.equals(signedDto.getTag())) throw new ValidationException(MessageFormat.format(
-                "ERROR - batch tag ''{0}'' - receipt tag ''{1}''",  tag, signedDto.getTag()));
         if(!currencySet.equals(signedDto.getCurrencySet())) throw new ValidationException("ERROR - currencySet mismatch");
     }
 
@@ -217,7 +192,7 @@ public class CurrencyBatchDto {
 
     @JsonIgnore
     public void checkBatchItem(CurrencyDto batchItem) throws ValidationException {
-        String currencyData = "batchItem with hash '" + batchItem.getRevocationHashBase64() + "' ";
+        String currencyData = "batchItem with hash '" + batchItem.getRevocationHash() + "' ";
         if(!subject.equals(batchItem.getSubject())) throw new ValidationException(
                 currencyData + "expected subject " + subject + " found " + batchItem.getSubject());
         if(toUserIBAN != null) {
@@ -226,8 +201,6 @@ public class CurrencyBatchDto {
         }
         if(!currencyCode.equals(batchItem.getCurrencyCode())) throw new ValidationException(
                 currencyData + "expected currencyCode " + currencyCode + " found " + batchItem.getCurrencyCode());
-        if(!tag.equals(batchItem.getTag())) throw new ValidationException(
-                currencyData + "expected tag " + tag + " found " + batchItem.getTag());
     }
 
     public CurrencyOperation getOperation() {
@@ -270,14 +243,6 @@ public class CurrencyBatchDto {
         this.currencyCode = currencyCode;
     }
 
-    public String getTag() {
-        return tag;
-    }
-
-    public void setTag(String tag) {
-        this.tag = tag;
-    }
-
     public String getBatchUUID() {
         return batchUUID;
     }
@@ -318,14 +283,6 @@ public class CurrencyBatchDto {
         this.toUserName = toUserName;
     }
 
-    public Boolean getTimeLimited() {
-        return timeLimited;
-    }
-
-    public void setTimeLimited(Boolean timeLimited) {
-        this.timeLimited = timeLimited;
-    }
-
     public String getLeftOverCSR() {
         return leftOverCSR;
     }
@@ -334,12 +291,12 @@ public class CurrencyBatchDto {
         this.leftOverCSR = leftOverCSR;
     }
 
-    public PKCS10CertificationRequest getLeftOverPKCS10() {
-        return leftOverPKCS10;
+    public PKCS10CertificationRequest getLeftOverCsr() {
+        return leftOverCsr;
     }
 
-    public void setLeftOverPKCS10(PKCS10CertificationRequest leftOverPKCS10) {
-        this.leftOverPKCS10 = leftOverPKCS10;
+    public void setLeftOverCsr(PKCS10CertificationRequest leftOverCsr) {
+        this.leftOverCsr = leftOverCsr;
     }
 
     public org.votingsystem.model.currency.Currency getLeftOverCurrency() {
@@ -358,12 +315,12 @@ public class CurrencyBatchDto {
         this.currencyChangeCSR = currencyChangeCSR;
     }
 
-    public PKCS10CertificationRequest getCurrencyChangePKCS10() {
-        return currencyChangePKCS10;
+    public PKCS10CertificationRequest getCurrencyChangeCsr() {
+        return currencyChangeCsr;
     }
 
-    public void setCurrencyChangePKCS10(PKCS10CertificationRequest currencyChangePKCS10) {
-        this.currencyChangePKCS10 = currencyChangePKCS10;
+    public void setCurrencyChangeCsr(PKCS10CertificationRequest currencyChangeCsr) {
+        this.currencyChangeCsr = currencyChangeCsr;
     }
 
     public byte[] getContent() {

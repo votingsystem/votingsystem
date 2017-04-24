@@ -184,13 +184,13 @@ public class CertIssuerEJB {
 
     @TransactionAttribute(REQUIRES_NEW)
     public Certificate signCSR(User user, PKCS10CertificationRequest csr, String organizationalUnit, LocalDateTime dateBegin,
-               LocalDateTime dateFinish, Certificate.Type certificateType, String revocationHashBase64) throws Exception {
+               LocalDateTime dateFinish, Certificate.Type certificateType, String revocationHash) throws Exception {
         X509Certificate issuedCert = CertUtils.signCSR(csr, organizationalUnit, certIssuerPrivateKey,
                 certIssuerSigningCert, dateBegin, dateFinish, config.getOcspServerURL());
         Certificate result = null;
         switch (certificateType) {
             case VOTE:
-                result = Certificate.VOTE(revocationHashBase64, issuedCert, config.getCACertificate(
+                result = Certificate.VOTE(revocationHash, issuedCert, config.getCACertificate(
                         certIssuerSigningCert.getSerialNumber().longValue()));
                 break;
             case USER:
@@ -240,7 +240,7 @@ public class CertIssuerEJB {
                     idRequest.getIndentityServiceEntity().getId());
         if(idRequest.getCallbackServiceEntityId() == null)
             throw new ValidationException("missing callback service entity");
-        if(idRequest.getRevocationHashBase64() == null)
+        if(idRequest.getRevocationHash() == null)
             throw new ValidationException("missing revocation hash");
 
         Election election = electionsEJB.getElection(idRequest.getUUID(), idRequest.getCallbackServiceEntityId().getId());
@@ -249,12 +249,12 @@ public class CertIssuerEJB {
                     " - election dates: [" + election.getDateBegin() + " - " + election.getDateFinish() + "]");
         }
         List<AnonVoteCertRequest> anonVoteCertRequests = em.createQuery(
-                "select a from AnonVoteCertRequest a where a.revocationHashBase64 =:revocationHashBase64 " +
+                "select a from AnonVoteCertRequest a where a.revocationHash =:revocationHash " +
                         "and a.election.uuid=:electionUUID").setParameter("electionUUID", idRequest.getUUID())
-                .setParameter("revocationHashBase64", idRequest.getRevocationHashBase64()).getResultList();
+                .setParameter("revocationHash", idRequest.getRevocationHash()).getResultList();
         if (!anonVoteCertRequests.isEmpty()) {
             throw new ValidationException("ERROR - RevocationHash:" +
-                    idRequest.getRevocationHashBase64() + " - already exists on electionUUID: " + idRequest.getUUID());
+                    idRequest.getRevocationHash() + " - already exists on electionUUID: " + idRequest.getUUID());
         }
         anonVoteCertRequests = em.createQuery(
                 "select a from AnonVoteCertRequest a where a.user =:user and a.election=:election and a.state=:state")
@@ -280,19 +280,19 @@ public class CertIssuerEJB {
             throw new ValidationException("validateCSRVote - expected identity service id: " + config.getEntityId() +
                     " - found:" + certExtensionDto.getIdentityServiceEntity());
         }
-        String revocationHashBase64 = certExtensionDto.getRevocationHashBase64();
+        String revocationHash = certExtensionDto.getRevocationHash();
 
         LocalDateTime validFrom = election.getDateBegin();
         LocalDateTime validTo = election.getDateFinish();
 
-        CsrResponse csrResponse = new CsrResponse(CertUtils.getPublicKey(csr), null, revocationHashBase64);
+        CsrResponse csrResponse = new CsrResponse(CertUtils.getPublicKey(csr), null, revocationHash);
         PKCS10CertificationRequest pkcs10CertReq = PEMUtils.fromPEMToPKCS10CertificationRequest(csrBytes);
         Certificate issuedCert =  signCSR(null, pkcs10CertReq, config.getEntityId(),
-                validFrom, validTo, Certificate.Type.VOTE, csrResponse.getRevocationHashBase64());
+                validFrom, validTo, Certificate.Type.VOTE, csrResponse.getRevocationHash());
         csrResponse.setIssuedCert(PEMUtils.getPEMEncoded(issuedCert.getX509Certificate()));
 
         AnonVoteCertRequest anonVoteCertRequest = new AnonVoteCertRequest(signer, signedDocument,
-                AnonVoteCertRequest.State.OK, revocationHashBase64, election);
+                AnonVoteCertRequest.State.OK, revocationHash, election);
         em.persist(anonVoteCertRequest);
         return csrResponse;
     }

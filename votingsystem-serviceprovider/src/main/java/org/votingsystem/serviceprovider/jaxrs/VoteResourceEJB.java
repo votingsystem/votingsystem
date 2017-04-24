@@ -96,8 +96,8 @@ public class VoteResourceEJB {
     @POST @Path("/repository")
     public Response repository(@Context HttpServletRequest req, @Context HttpServletResponse res, String revocationHash)
             throws Exception {
-        List<Vote> votes = em.createQuery("select v from Vote v where v.certificate.revocationHashBase64 =:revocationHashBase64 and " +
-                "v.state=:state").setParameter("revocationHashBase64", revocationHash).setParameter(
+        List<Vote> votes = em.createQuery("select v from Vote v where v.certificate.revocationHash =:revocationHash and " +
+                "v.state=:state").setParameter("revocationHash", revocationHash).setParameter(
                 "state", Vote.State.OK).getResultList();
         if(votes.isEmpty()) {
             return Response.status(Response.Status.NOT_FOUND).entity(Messages.currentInstance().get("voteNotFoundMsg")).build();

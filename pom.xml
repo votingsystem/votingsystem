@@ -21,6 +21,6 @@
     </modules>
 
     <properties>
-        <version.votingsystem>0.9.0</version.votingsystem>
+        <version.votingsystem>0.9.1</version.votingsystem>
     </properties>
 </project>

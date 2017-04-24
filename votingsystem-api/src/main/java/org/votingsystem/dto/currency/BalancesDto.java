@@ -3,7 +3,6 @@ package org.votingsystem.dto.currency;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import org.votingsystem.dto.UserDto;
-import org.votingsystem.model.currency.Tag;
 import org.votingsystem.util.CurrencyCode;
 import org.votingsystem.util.Interval;
 
@@ -28,91 +27,53 @@ public class BalancesDto {
     private List<TransactionDto> transactionFromList;
     private List<TransactionDto> transactionToList;
 
-    private Map<CurrencyCode, Map<String, BigDecimal>> balancesFrom = new HashMap<>();
-    private Map<CurrencyCode, Map<String, IncomesDto>> balancesTo = new HashMap<>();
-    private Map<CurrencyCode, Map<String, BigDecimal>> balancesCash = new HashMap<>();
+    private Map<CurrencyCode, BigDecimal> balancesFrom = new HashMap<>();
+    private Map<CurrencyCode, BigDecimal> balancesTo = new HashMap<>();
+    private Map<CurrencyCode, BigDecimal> balancesCash = new HashMap<>();
 
     public BalancesDto() {}
 
 
-    public static BalancesDto TO(List<TransactionDto> transactionList, Map<CurrencyCode, Map<String, IncomesDto>> balances) {
+    public static BalancesDto TO(List<TransactionDto> transactionList, Map<CurrencyCode, BigDecimal> balancesTo) {
         BalancesDto dto = new BalancesDto();
         dto.setTransactionToList(transactionList);
-        dto.setBalancesTo(balances);
+        dto.setBalancesTo(balancesTo);
         return dto;
     }
 
-    public static BalancesDto FROM(List<TransactionDto> transactionList, Map<CurrencyCode, Map<String, BigDecimal>> balances) {
+    public static BalancesDto FROM(List<TransactionDto> transactionList, Map<CurrencyCode, BigDecimal> balancesFrom) {
         BalancesDto dto = new BalancesDto();
         dto.setTransactionFromList(transactionList);
-        dto.setBalancesFrom(balances);
+        dto.setBalancesFrom(balancesFrom);
         return dto;
     }
 
-    public void setTo(List<TransactionDto> transactionList, Map<CurrencyCode, Map<String, IncomesDto>> balances) {
+    public void setTo(List<TransactionDto> transactionList,Map<CurrencyCode, BigDecimal> balancesTo) {
         setTransactionToList(transactionList);
-        setBalancesTo(balances);
+        setBalancesTo(balancesTo);
     }
 
-    public void setTo(BalancesDto balancesToDto) {
-        setTransactionToList(balancesToDto.getTransactionToList());
-        setBalancesTo(balancesToDto.getBalancesTo());
+    public void setTo(BalancesDto balancesTo) {
+        setTransactionToList(balancesTo.getTransactionToList());
+        setBalancesTo(balancesTo.getBalancesTo());
     }
 
 
-    public void setFrom(List<TransactionDto> transactionList, Map<CurrencyCode, Map<String, BigDecimal>> balances) {
+    public void setFrom(List<TransactionDto> transactionList, Map<CurrencyCode, BigDecimal> balancesFrom) {
         setTransactionFromList(transactionList);
-        setBalancesFrom(balances);
+        setBalancesFrom(balancesFrom);
     }
 
     public void calculateCash() {
-        setBalancesCash(filterBalanceTo(balancesTo));
-        for(CurrencyCode currency: balancesFrom.keySet()) {
-            if(balancesCash.containsKey(currency)) {
-                for(String tag : getBalancesFrom().get(currency).keySet()) {
-                    if(getBalancesCash().get(currency).containsKey(tag)) {
-                        BigDecimal newAmount = getBalancesCash().get(currency).get(tag).subtract(getBalancesFrom().get(currency).get(tag));
-                        if(newAmount.compareTo(BigDecimal.ZERO) < 0) {
-                            getBalancesCash().get(currency).put(Tag.WILDTAG, getBalancesCash().get(currency).
-                                    get(Tag.WILDTAG).add(newAmount));
-                            getBalancesCash().get(currency).put(tag, BigDecimal.ZERO);
-                        } else  getBalancesCash().get(currency).put(tag, newAmount);
-                    } else {
-                        getBalancesCash().get(currency).put(TagDto.WILDTAG,  getBalancesCash().get(currency)
-                                .get(TagDto.WILDTAG).subtract(getBalancesFrom().get(currency).get(tag)));
-                    }
-                }
+        balancesCash = new HashMap<>(balancesTo);
+        for(CurrencyCode currencyCode: balancesFrom.keySet()) {
+            if(balancesCash.containsKey(currencyCode)) {
+                balancesCash.put(currencyCode, balancesCash.get(currencyCode).subtract(
+                        balancesFrom.get(currencyCode)));
             } else {
-                Map<String, BigDecimal> tagData = new HashMap<String, BigDecimal>(getBalancesFrom().get(currency));
-                for(String tag: tagData.keySet()) {
-                    tagData.put(tag, tagData.get(tag).negate());
-                }
+                balancesCash.put(currencyCode, balancesFrom.get(currencyCode).negate());
             }
         }
-    }
-
-    public static Map<CurrencyCode, Map<String, BigDecimal>> filterBalanceTo(Map<CurrencyCode, Map<String, IncomesDto>> balanceTo) {
-        Map<CurrencyCode, Map<String, BigDecimal>> result = new HashMap<>();
-        for(CurrencyCode currency : balanceTo.keySet()) {
-            Map<String, BigDecimal> currencyMap = new HashMap<>();
-            for(String tag : balanceTo.get(currency).keySet()) {
-                currencyMap.put(tag, balanceTo.get(currency).get(tag).getTotal());
-            }
-            result.put(currency, currencyMap);
-        }
-        return result;
-    }
-
-    public BigDecimal getTimeLimitedNotExpended(CurrencyCode currencyCode, String tagName) {
-        BigDecimal result = BigDecimal.ZERO;
-        if(balancesTo.containsKey(currencyCode) && balancesTo.get(currencyCode).containsKey(tagName)) {
-            result = balancesTo.get(currencyCode).get(tagName).getTimeLimited();
-        }
-        if(balancesFrom.containsKey(currencyCode) && balancesFrom.get(currencyCode).containsKey(tagName)) {
-            result = result.subtract(balancesFrom.get(currencyCode).get(tagName));
-        }
-        if(result.compareTo(BigDecimal.ZERO) > 0) return result;
-        else return BigDecimal.ZERO;
     }
 
     public UserDto getUser() {
@@ -156,28 +117,24 @@ public class BalancesDto {
         return this;
     }
 
-    public Map<CurrencyCode, Map<String, BigDecimal>> getBalancesCash() {
+    public Map<CurrencyCode, BigDecimal> getBalancesCash() {
         if(balancesCash == null) calculateCash();
         return balancesCash;
     }
 
-    public void setBalancesCash(Map<CurrencyCode, Map<String, BigDecimal>> balancesCash) {
-        this.balancesCash = balancesCash;
-    }
-
-    public Map<CurrencyCode, Map<String, BigDecimal>> getBalancesFrom() {
+    public Map<CurrencyCode, BigDecimal> getBalancesFrom() {
         return balancesFrom;
     }
 
-    public void setBalancesFrom(Map<CurrencyCode, Map<String, BigDecimal>> balancesFrom) {
+    public void setBalancesFrom(Map<CurrencyCode, BigDecimal> balancesFrom) {
         this.balancesFrom = balancesFrom;
     }
 
-    public Map<CurrencyCode, Map<String, IncomesDto>> getBalancesTo() {
+    public Map<CurrencyCode, BigDecimal> getBalancesTo() {
         return balancesTo;
     }
 
-    public void setBalancesTo(Map<CurrencyCode, Map<String, IncomesDto>> balancesTo) {
+    public void setBalancesTo(Map<CurrencyCode, BigDecimal> balancesTo) {
         this.balancesTo = balancesTo;
     }
 }

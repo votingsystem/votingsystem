@@ -16,39 +16,27 @@ public class CurrencyCertExtensionDto implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private String currencyServerURL;
-    private String hashCertVS;
+    private String currencyEntity;
+    private String revocationHash;
     private CurrencyCode currencyCode;
-    private String tag;
-    private Boolean timeLimited;
     private BigDecimal amount;
 
     public CurrencyCertExtensionDto() {}
 
-    public CurrencyCertExtensionDto(BigDecimal amount, CurrencyCode currencyCode, String hashCertVS, String currencyServerURL,
-                    Boolean timeLimited, String tag) {
+    public CurrencyCertExtensionDto(BigDecimal amount, CurrencyCode currencyCode, String revocationHash,
+                                    String currencyEntity) {
         this.amount = amount;
         this.currencyCode = currencyCode;
-        this.hashCertVS = hashCertVS;
-        this.currencyServerURL = currencyServerURL;
-        this.tag = tag;
-        this.timeLimited = timeLimited;
+        this.revocationHash = revocationHash;
+        this.currencyEntity = currencyEntity;
     }
 
-    public String getCurrencyServerURL() {
-        return currencyServerURL;
+    public String getRevocationHash() {
+        return revocationHash;
     }
 
-    public void setCurrencyServerURL(String currencyServerURL) {
-        this.currencyServerURL = currencyServerURL;
-    }
-
-    public String getHashCertVS() {
-        return hashCertVS;
-    }
-
-    public void setHashCertVS(String hashCertVS) {
-        this.hashCertVS = hashCertVS;
+    public void setRevocationHash(String revocationHash) {
+        this.revocationHash = revocationHash;
     }
 
     public CurrencyCode getCurrencyCode() {
@@ -59,13 +47,6 @@ public class CurrencyCertExtensionDto implements Serializable {
         this.currencyCode = currencyCode;
     }
 
-    public String getTag() {
-        return tag;
-    }
-
-    public void setTag(String tag) {
-        this.tag = tag;
-    }
 
     public BigDecimal getAmount() {
         return amount;
@@ -75,12 +56,12 @@ public class CurrencyCertExtensionDto implements Serializable {
         this.amount = amount;
     }
 
-    public Boolean getTimeLimited() {
-        return timeLimited;
+    public String getCurrencyEntity() {
+        return currencyEntity;
     }
 
-    public void setTimeLimited(Boolean timeLimited) {
-        this.timeLimited = timeLimited;
+    public void setCurrencyEntity(String currencyEntity) {
+        this.currencyEntity = currencyEntity;
     }
 
 }

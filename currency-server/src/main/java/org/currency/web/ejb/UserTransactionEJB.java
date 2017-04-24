@@ -7,7 +7,6 @@ import org.votingsystem.dto.currency.TransactionDto;
 import org.votingsystem.model.SignedDocument;
 import org.votingsystem.model.User;
 import org.votingsystem.model.currency.CurrencyAccount;
-import org.votingsystem.model.currency.Tag;
 import org.votingsystem.model.currency.Transaction;
 import org.votingsystem.throwable.ValidationException;
 import org.votingsystem.util.CurrencyOperation;
@@ -39,15 +38,15 @@ public class UserTransactionEJB {
     @Inject private TransactionEJB transactionBean;
     @Inject private CurrencySignatureEJB signatureService;
 
-    public ResultListDto<TransactionDto> processTransactionFromUser(TransactionDto request, Tag tag) throws Exception {
+    public ResultListDto<TransactionDto> processTransactionFromUser(TransactionDto request) throws Exception {
         validateRequest(request);
         Map<CurrencyAccount, BigDecimal> accountFromMovements = walletBean.getAccountMovementsForTransaction(
-                request.getSigner().getIBAN(), tag, request.getAmount(), request.getCurrencyCode());
+                request.getSigner().getIBAN(), request.getAmount(), request.getCurrencyCode());
         //Transactions from users doesn't need parent transaction
         SignedDocument signedDocument = request.getSignedDocument();
         Transaction transaction = Transaction.USER(request.getSigner(), request.getReceptor(),
                 request.getType(), accountFromMovements, request.getAmount(), request.getCurrencyCode(),
-                request.getSubject(), request.getValidTo().toLocalDateTime(), signedDocument, tag);
+                request.getSubject(), signedDocument);
         em.persist(transaction);
         transactionBean.updateCurrencyAccounts(transaction);
         signatureService.addReceipt(SignedDocumentType.TRANSACTION_FROM_USER_RECEIPT, signedDocument);

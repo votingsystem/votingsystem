@@ -73,7 +73,7 @@
     <properties>
         <java.version>1.8</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <version.votingsystem>0.9.0</version.votingsystem>
+        <version.votingsystem>0.9.1</version.votingsystem>
         <version.wildfly.maven.plugin>1.2.0.Alpha4</version.wildfly.maven.plugin>
         <version.compiler.plugin>3.5.1</version.compiler.plugin>
         <version.war.plugin>3.0.0</version.war.plugin>

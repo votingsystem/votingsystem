@@ -24,7 +24,7 @@ public class VoteContainer implements Serializable {
     private String originHashIdentityRequest;
     private String hashIdentityRequestBase64;
     private String originRevocationHash;
-    private String revocationHashBase64;
+    private String revocationHash;
     private VoteDto voteDto;
     private ElectionDto election;
     private IdentityRequestDto identityRequestDto;
@@ -40,7 +40,7 @@ public class VoteContainer implements Serializable {
         result.hashIdentityRequestBase64 = HashUtils.getHashBase64(
                 result.originHashIdentityRequest.getBytes(), Constants.DATA_DIGEST_ALGORITHM);
         result.originRevocationHash = UUID.randomUUID().toString();
-        result.revocationHashBase64 = HashUtils.getHashBase64(
+        result.revocationHash = HashUtils.getHashBase64(
                 result.originRevocationHash.getBytes(), Constants.DATA_DIGEST_ALGORITHM);
         result.election = election;
 
@@ -48,18 +48,18 @@ public class VoteContainer implements Serializable {
         identityRequestDto.setUUID(election.getUUID());
         identityRequestDto.setCallbackServiceEntityId(new SystemEntityDto(election.getEntityId(),
                 SystemEntityType.VOTING_SERVICE_PROVIDER));
-        identityRequestDto.setRevocationHashBase64(result.hashIdentityRequestBase64);
+        identityRequestDto.setRevocationHash(result.hashIdentityRequestBase64);
         identityRequestDto.setUUID(UUID.randomUUID().toString());
         result.identityRequestDto = identityRequestDto;
 
         VoteDto voteDto = new VoteDto(identityServiceId, election.getEntityId());
         voteDto.setOperation(OperationType.SEND_VOTE);
-        voteDto.setRevocationHashBase64(result.revocationHashBase64);
+        voteDto.setRevocationHash(result.revocationHash);
         voteDto.setElectionUUID(election.getUUID());
         voteDto.setOptionSelected(optionSelected);
         result.voteDto = voteDto;
         result.certificationRequest = CertificationRequest.getVoteRequest(identityServiceId, election.getEntityId(),
-                election.getUUID(), result.revocationHashBase64);
+                election.getUUID(), result.revocationHash);
         return result;
     }
 
@@ -98,8 +98,8 @@ public class VoteContainer implements Serializable {
         return originRevocationHash;
     }
 
-    public String getRevocationHashBase64() {
-        return revocationHashBase64;
+    public String getRevocationHash() {
+        return revocationHash;
     }
 
     public CertificationRequest getCertificationRequest() {

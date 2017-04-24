@@ -77,7 +77,7 @@ public class SignerInfoEJB implements SignerInfoService {
                     if(certificates.isEmpty()) {
                         CertVoteExtensionDto certExtensionDto = CertUtils.getCertExtensionData(CertVoteExtensionDto.class,
                                 x509CertSigner, Constants.VOTE_OID);
-                        Certificate certificate = Certificate.VOTE(certExtensionDto.getRevocationHashBase64(),
+                        Certificate certificate = Certificate.VOTE(certExtensionDto.getRevocationHash(),
                                 x509CertSigner, certificateCA).setCertVoteExtension(certExtensionDto);
                         em.persist(certificate);
                         signer.setCertificate(certificate).setCertificateCA(certificateCA)
@@ -104,7 +104,8 @@ public class SignerInfoEJB implements SignerInfoService {
                 em.persist(signer);
             }
             if(certificates.isEmpty()) {
-                signerCertificate = Certificate.SIGNER(signer, x509CertSigner).setAuthorityCertificate(certificateCA);
+                signerCertificate = Certificate.SIGNER(signer, x509CertSigner).setAuthorityCertificate(certificateCA)
+                        .setUUID(CertificateUtils.getHash(x509CertSigner));
                 em.persist(signerCertificate);
                 log.severe("Added new signer id: " + signer.getId() + " - certificate id: " + signerCertificate.getId() +
                         " - certificate subjectDN: " + signerCertificate.getSubjectDN() +
@@ -120,9 +121,6 @@ public class SignerInfoEJB implements SignerInfoService {
             String msg = Messages.currentInstance().get("signerCertErrorMsg", ex.getMessage());
             log.log(Level.SEVERE, msg + ((x509CertSigner != null) ? " - " + x509CertSigner.toString() : ""), ex);
             throw new SignerValidationException(msg);
-        } catch (CertificateValidationException ex) {
-            log.log(Level.SEVERE, ex.getMessage(), ex);
-            throw new SignerValidationException(ex.getMessage());
         } catch (Exception ex) {
             log.log(Level.SEVERE, ex.getMessage(), ex);
             throw new SignerValidationException(ex.getMessage());

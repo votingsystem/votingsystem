@@ -67,7 +67,7 @@ public class Certificate implements Serializable {
     private User signer;
 
     @Column(name="REVOCATION_HASH_BASE64", unique=true)
-    private String revocationHashBase64;
+    private String revocationHash;
 
     @Column(name="META_INF", columnDefinition="TEXT")
     @Convert(converter = MetaInfConverter.class)
@@ -115,12 +115,12 @@ public class Certificate implements Serializable {
         this.serialNumber = x509Cert.getSerialNumber().longValue();
     }
 
-    public static Certificate VOTE(String revocationHashBase64, X509Certificate x509Cert,
+    public static Certificate VOTE(String revocationHash, X509Certificate x509Cert,
             Certificate authorityCertificate) throws CertificateEncodingException {
         Certificate result = new Certificate(x509Cert);
         result.setIsRoot(false);
         result.setState(State.OK).setType(Type.VOTE);
-        result.setRevocationHashBase64(revocationHashBase64);
+        result.setRevocationHash(revocationHash);
         result.subjectDN = x509Cert.getSubjectDN().toString();
         result.authorityCertificate = authorityCertificate;
         return result;
@@ -221,12 +221,12 @@ public class Certificate implements Serializable {
         return id;
     }
 
-    public String getRevocationHashBase64() {
-        return revocationHashBase64;
+    public String getRevocationHash() {
+        return revocationHash;
     }
 
-    public void setRevocationHashBase64(String hashCertVSBase64) {
-        this.revocationHashBase64 = hashCertVSBase64;
+    public void setRevocationHash(String hashCertVSBase64) {
+        this.revocationHash = hashCertVSBase64;
     }
 
     public State getState() {

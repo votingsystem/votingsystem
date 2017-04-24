@@ -139,9 +139,6 @@ public class TransactionResourceEJB {
         Disjunction orDisjunction = Restrictions.or();
         if(transactionType != null) orDisjunction.add(Restrictions.eq("type", transactionType));
         if(amount != null) orDisjunction.add(Restrictions.eq("amount", amount));
-        if(tag != null) {
-            criteria.add(Restrictions.eq("tag", config.getTag(tag)));
-        }
         if(searchText != null) {
             orDisjunction.add(Restrictions.ilike("subject", "%" + searchText + "%"));
             orDisjunction.add(Restrictions.ilike("currencyCode", "%" + searchText + "%"));

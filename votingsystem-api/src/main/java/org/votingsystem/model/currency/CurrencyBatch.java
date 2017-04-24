@@ -65,12 +65,6 @@ public class CurrencyBatch extends EntityBase implements Serializable {
     @Column(name="CURRENCY_CODE") @Enumerated(EnumType.STRING)
     private CurrencyCode currencyCode;
 
-    @ManyToOne(fetch= FetchType.EAGER) @JoinColumn(name="TAG", nullable=false)
-    private Tag tag;
-
-    @Column(name="TIME_LIMITED")
-    private Boolean timeLimited = Boolean.FALSE;
-
     @OneToOne @JoinColumn(name="SIGNED_DOCUMENT_ID")
     private SignedDocument signedDocument;
 
@@ -108,14 +102,6 @@ public class CurrencyBatch extends EntityBase implements Serializable {
         return batchAmount;
     }
 
-    public Tag getTag() {
-        return tag;
-    }
-
-    public void setTag(Tag tag) {
-        this.tag = tag;
-    }
-
     public String getBatchUUID() {
         return batchUUID;
     }
@@ -151,14 +137,6 @@ public class CurrencyBatch extends EntityBase implements Serializable {
 
     public void setBatchAmount(BigDecimal batchAmount) {
         this.batchAmount = batchAmount;
-    }
-
-    public Boolean getTimeLimited() {
-        return timeLimited;
-    }
-
-    public void setTimeLimited(Boolean timeLimited) {
-        this.timeLimited = timeLimited;
     }
 
     public Currency getLeftOver() {

@@ -8,16 +8,13 @@ import org.votingsystem.dto.UserDto;
 import org.votingsystem.model.SignedDocument;
 import org.votingsystem.model.User;
 import org.votingsystem.model.currency.CurrencyAccount;
-import org.votingsystem.model.currency.Tag;
 import org.votingsystem.model.currency.Transaction;
 import org.votingsystem.throwable.ValidationException;
 import org.votingsystem.util.CurrencyCode;
 import org.votingsystem.util.CurrencyOperation;
-import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.Messages;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.HashSet;
@@ -40,7 +37,6 @@ public class TransactionDto {
     private Long userId;
     private UserDto fromUser;
     private UserDto toUser;
-    private ZonedDateTime validTo;
     private ZonedDateTime dateCreated;
     private String subject;
     private String description;
@@ -52,10 +48,8 @@ public class TransactionDto {
     private String signedDocumentBase64;
     private String UUID;
     private BigDecimal amount;
-    private Boolean timeLimited = Boolean.FALSE;
     private Integer numReceptors;
     private Transaction.Type type;
-    private Set<String> tags;
     private Set<String> toUserIBAN = null;
     private Long numChildTransactions;
 
@@ -85,17 +79,15 @@ public class TransactionDto {
         if(transaction.getToUser() != null) {
             this.toUser = UserDto.BASIC(transaction.getToUser());
         }
-        this.validTo = ZonedDateTime.of(transaction.getValidTo(), ZoneId.systemDefault());
         this.dateCreated = ZonedDateTime.of(transaction.getDateCreated(), ZoneId.systemDefault());
         this.subject = transaction.getSubject();
         this.amount = transaction.getAmount();
         this.type = transaction.getType();
         this.currencyCode = transaction.getCurrencyCode();
-        this.timeLimited = transaction.getIsTimeLimited();
     }
 
     public static TransactionDto PAYMENT_REQUEST(String toUser, User.Type userToType, BigDecimal amount,
-            CurrencyCode currencyCode, String toUserIBAN, String subject, String tagName) {
+            CurrencyCode currencyCode, String toUserIBAN, String subject) {
         TransactionDto dto = new TransactionDto();
         dto.setOperation(CurrencyOperation.TRANSACTION_INFO);
         dto.setUserToType(userToType);
@@ -104,29 +96,26 @@ public class TransactionDto {
         dto.setCurrencyCode(currencyCode);
         dto.setSubject(subject);
         dto.setToUserIBAN(Sets.newHashSet(toUserIBAN));
-        dto.setTags(Sets.newHashSet(tagName));
         dto.setDateCreated(ZonedDateTime.now());
         dto.setUUID(java.util.UUID.randomUUID().toString());
         return dto;
     }
 
     public static TransactionDto CURRENCY_SEND(String toUser, String subject, BigDecimal amount,
-                                   CurrencyCode currencyCode, String toUserIBAN, boolean isTimeLimited, String tag) {
+                                   CurrencyCode currencyCode, String toUserIBAN) {
         TransactionDto dto = new TransactionDto();
         dto.setOperation(CurrencyOperation.CURRENCY_SEND);
         dto.setSubject(subject);
         dto.setToUserName(toUser);
         dto.setAmount(amount);
         dto.setToUserIBAN(Sets.newHashSet(toUserIBAN));
-        dto.setTags(Sets.newHashSet(tag));
         dto.setCurrencyCode(currencyCode);
-        dto.setTimeLimited(isTimeLimited);
         dto.setUUID(java.util.UUID.randomUUID().toString());
         return dto;
     }
 
     public static TransactionDto BASIC(String toUser, User.Type userToType, BigDecimal amount,
-                                       CurrencyCode currencyCode, String toUserIBAN, String subject, String tag) {
+                                       CurrencyCode currencyCode, String toUserIBAN, String subject) {
         TransactionDto dto = new TransactionDto();
         dto.setUserToType(userToType);
         dto.setToUserName(toUser);
@@ -134,7 +123,6 @@ public class TransactionDto {
         dto.setCurrencyCode(currencyCode);
         dto.setSubject(subject);
         dto.setToUserIBAN(Sets.newHashSet(toUserIBAN));
-        dto.setTags(Sets.newHashSet(tag));
         dto.setUUID(java.util.UUID.randomUUID().toString());
         return dto;
     }
@@ -149,40 +137,11 @@ public class TransactionDto {
             throw new ValidationException("missing param 'currencyCode'");
         if(subject == null)
             throw new ValidationException("missing param 'subject'");
-        if(timeLimited)
-            validTo =  DateUtils.getWeekPeriod(LocalDateTime.now()).getDateTo();
-        if (tags.size() != 1) { //for now transactions can only have one tag associated
-            throw new ValidationException("invalid number of tags:" + tags.size());
-        }
     }
 
     @JsonIgnore
-    public Transaction getTransaction(Tag tag) throws Exception {
-        Transaction transaction = new Transaction();
-        transaction.setId(id);
-        transaction.setFromUserName(fromUserName);
-        transaction.setUserId(getUserId());
-        transaction.setType(type);
-        if(toUser != null) {
-            transaction.setToUser(toUser.getUser());
-        }
-        transaction.setFromUserIBAN(fromUserIBAN);
-        if(fromUser != null) {
-            transaction.setFromUser(fromUser.getUser());
-        }
-        transaction.setTag(tag);
-        transaction.setIsTimeLimited(timeLimited);
-        transaction.setSubject(subject);
-        transaction.setCurrencyCode(currencyCode);
-        transaction.setDateCreated(dateCreated.toLocalDateTime());
-        transaction.setValidTo(validTo.toLocalDateTime());
-        transaction.setAmount(amount);
-        return transaction;
-    }
-
-    @JsonIgnore
-    public Transaction getTransaction(User fromUser, User toUser, Map<CurrencyAccount, BigDecimal> accountFromMovements,
-                                  Tag tag) throws Exception {
+    public Transaction getTransaction(User fromUser, User toUser, Map<CurrencyAccount, BigDecimal> accountFromMovements)
+            throws Exception {
         Transaction transaction = new Transaction();
         transaction.setFromUser(fromUser);
         transaction.setFromUserIBAN(fromUser.getIBAN());
@@ -194,9 +153,7 @@ public class TransactionDto {
         transaction.setAmount(amount);
         transaction.setCurrencyCode(currencyCode);
         transaction.setSubject(subject);
-        transaction.setValidTo(validTo.toLocalDateTime());
         transaction.setState(Transaction.State.OK);
-        transaction.setTag(tag);
         return transaction;
     }
 
@@ -222,14 +179,6 @@ public class TransactionDto {
 
     public void setToUser(UserDto toUser) {
         this.toUser = toUser;
-    }
-
-    public ZonedDateTime getValidTo() {
-        return validTo;
-    }
-
-    public void setValidTo(ZonedDateTime validTo) {
-        this.validTo = validTo;
     }
 
     public ZonedDateTime getDateCreated() {
@@ -271,14 +220,6 @@ public class TransactionDto {
 
     public void setType(Transaction.Type type) {
         this.type = type;
-    }
-
-    public Set<String> getTags() {
-        return tags;
-    }
-
-    public void setTags(Set<String> tags) {
-        this.tags = tags;
     }
 
     public Long getNumChildTransactions() {
@@ -336,12 +277,6 @@ public class TransactionDto {
     public void setToUserList(List<User> toUserList) {
         this.toUserList = toUserList;
         this.numReceptors = toUserList.size();
-    }
-
-    @JsonIgnore
-    public String getTagName() {
-        if (tags != null && !tags.isEmpty()) return tags.iterator().next();
-        return null;
     }
 
     public Set<String> getToUserIBAN() {
@@ -451,10 +386,6 @@ public class TransactionDto {
         CurrencyBatchDto receiptDto = signedDocument.getSignedContent(CurrencyBatchDto.class);
         if(CurrencyOperation.CURRENCY_SEND != receiptDto.getOperation()) throw new ValidationException("ERROR - expected type: " +
                 CurrencyOperation.CURRENCY_SEND + " - found: " + receiptDto.getOperation());
-        if(type == Transaction.Type.TRANSACTION_INFO) {
-            if(!paymentOptions.contains(Transaction.Type.CURRENCY_SEND)) throw new ValidationException(
-                    "unexpected type: " + receiptDto.getOperation());
-        }
         Set<String> receptorsSet = Sets.newHashSet(receiptDto.getToUserIBAN());
         if(!toUserIBAN.equals(receptorsSet)) throw new ValidationException(
                 "expected toUserIBAN " + toUserIBAN + " found " + receiptDto.getToUserIBAN());
@@ -466,15 +397,12 @@ public class TransactionDto {
                 "expected UUID " + UUID + " found " + receiptDto.getBatchUUID());
         String action = isIncome ? Messages.currentInstance().get("income_lbl"): Messages.currentInstance().get("expense_lbl");
         return Messages.currentInstance().get("currency_send_receipt_ok_msg", action, receiptDto.getBatchAmount() + " " +
-                receiptDto.getCurrencyCode(), receiptDto.getTag());
+                receiptDto.getCurrencyCode());
     }
 
     private String validateFromUserReceipt(SignedDocument signedDocument, boolean isIncome) throws Exception {
         TransactionDto receiptDto = signedDocument.getSignedContent(TransactionDto.class);
-        if(type == Transaction.Type.TRANSACTION_INFO) {
-            if(!paymentOptions.contains(receiptDto.getType())) throw new ValidationException("unexpected type " +
-                    receiptDto.getType());
-        } else if(type != receiptDto.getType()) throw new ValidationException("expected type " + type + " found " +
+        if(type != receiptDto.getType()) throw new ValidationException("expected type " + type + " found " +
                 receiptDto.getType());
         if(userToType != receiptDto.getUserToType()) throw new ValidationException("expected userToType " + userToType +
                 " found " + receiptDto.getUserToType());
@@ -495,7 +423,7 @@ public class TransactionDto {
                 "expected details " + details + " found " + receiptDto.getDetails());
         String action = isIncome ? Messages.currentInstance().get("income_lbl"): Messages.currentInstance().get("expense_lbl");
         return Messages.currentInstance().get("from_user_receipt_ok_msg", action, receiptDto.getAmount() + " " +
-                receiptDto.getCurrencyCode(), receiptDto.getTagName());
+                receiptDto.getCurrencyCode());
     }
 
     private String validateCurrencyChangeReceipt(SignedDocument signedDocument, boolean isIncome) throws Exception {
@@ -503,10 +431,6 @@ public class TransactionDto {
         CurrencyBatchDto receiptDto = signedDocument.getSignedContent(CurrencyBatchDto.class);
         if(CurrencyOperation.CURRENCY_CHANGE != receiptDto.getOperation()) throw new ValidationException("ERROR - expected type: " +
                 CurrencyOperation.CURRENCY_CHANGE + " - found: " + receiptDto.getOperation());
-        if(type == Transaction.Type.TRANSACTION_INFO) {
-            if(!paymentOptions.contains(Transaction.Type.CURRENCY_CHANGE)) throw new ValidationException(
-                    "unexpected type: " + receiptDto.getOperation());
-        }
         if(amount.compareTo(receiptDto.getBatchAmount()) != 0) throw new ValidationException(
                 "expected amount " + amount + " amount " + receiptDto.getBatchAmount());
         if(!currencyCode.equals(receiptDto.getCurrencyCode())) throw new ValidationException(
@@ -517,10 +441,7 @@ public class TransactionDto {
                 Messages.currentInstance().get("expense_lbl");
 
         String result = Messages.currentInstance().get("currency_change_receipt_ok_msg", action,
-                receiptDto.getBatchAmount() + " " + receiptDto.getCurrencyCode(), receiptDto.getTag());
-        if(receiptDto.getTimeLimited()) {
-            result = result + " - " + Messages.currentInstance().get("time_remaining_lbl");
-        }
+                receiptDto.getBatchAmount() + " " + receiptDto.getCurrencyCode());
         return result;
     }
 
@@ -530,14 +451,6 @@ public class TransactionDto {
 
     public void setDetails(TransactionDetailsDto details) {
         this.details = details;
-    }
-
-    public Boolean isTimeLimited() {
-        return timeLimited;
-    }
-
-    public void setTimeLimited(Boolean timeLimited) {
-        this.timeLimited = timeLimited;
     }
 
     public String getSignedDocumentBase64() {
@@ -556,4 +469,5 @@ public class TransactionDto {
         this.signedDocument = signedDocument;
         return this;
     }
+
 }

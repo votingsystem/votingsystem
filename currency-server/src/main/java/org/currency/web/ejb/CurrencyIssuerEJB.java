@@ -12,11 +12,9 @@ import org.votingsystem.ejb.SignatureService;
 import org.votingsystem.model.Certificate;
 import org.votingsystem.model.currency.Currency;
 import org.votingsystem.model.currency.CurrencyBatch;
-import org.votingsystem.model.currency.Tag;
 import org.votingsystem.ocsp.RootCertOCSPInfo;
 import org.votingsystem.throwable.CertificateRequestException;
 import org.votingsystem.util.Constants;
-import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.Interval;
 import org.votingsystem.util.Messages;
 
@@ -85,13 +83,9 @@ public class CurrencyIssuerEJB {
 
     public Set<String> signCurrencyRequest (CurrencyRequestDto requestDto) throws CertificateRequestException {
         Interval timePeriod = null;
-        if(requestDto.getTimeLimited())
-            timePeriod = DateUtils.getCurrentWeekPeriod();
-        else {
-            ZonedDateTime dateFrom = ZonedDateTime.now().withNano(0).withSecond(0).withMinute(0).withHour(0).withDayOfYear(1);
-            ZonedDateTime dateTo = dateFrom.plus(1, ChronoUnit.YEARS);
-            timePeriod = new Interval(dateFrom, dateTo);
-        }
+        ZonedDateTime dateFrom = ZonedDateTime.now().withNano(0).withSecond(0).withMinute(0).withHour(0).withDayOfYear(1);
+        ZonedDateTime dateTo = dateFrom.plus(Constants.CURRENY_ISSUED_LIVE_IN_YEARS, ChronoUnit.YEARS);
+        timePeriod = new Interval(dateFrom, dateTo);
         Set<Currency> issuedCurrencySet = new HashSet<>();
         Set<String> issuedCertSet = new HashSet<>();
         try {
@@ -99,7 +93,7 @@ public class CurrencyIssuerEJB {
                 X509Certificate issuedCert = CertUtils.signCSR(currencyDto.getCsrPKCS10(), null, certIssuerPrivateKey,
                         certIssuerSigningCert, timePeriod.getDateFrom().toLocalDateTime(),
                         timePeriod.getDateTo().toLocalDateTime(), config.getOcspServerURL());
-                Currency currency = Currency.FROM_CERT(issuedCert, requestDto.getTag(), authorityCertificate);
+                Currency currency = Currency.FROM_CERT(issuedCert, authorityCertificate);
                 currency.setType(Currency.Type.REQUEST);
                 em.persist(currency);
                 issuedCurrencySet.add(currency);
@@ -117,33 +111,25 @@ public class CurrencyIssuerEJB {
         }
     }
 
-    public Currency signCurrencyRequest(PKCS10CertificationRequest pkcs10Req, Currency.Type type,
-                                        CurrencyBatch currencyBatch) throws CertificateRequestException {
+    public Currency signCurrencyRequest(PKCS10CertificationRequest csrReq, Currency.Type type,
+                CurrencyBatch currencyBatch, int currencyIssuedLiveInYears) throws CertificateRequestException {
         CurrencyCertExtensionDto certExtensionDto = null;
-        Tag tag = null;
         try {
-            certExtensionDto = CertUtils.getCertExtensionData(CurrencyCertExtensionDto.class,
-                    pkcs10Req, Constants.CURRENCY_OID);
-            tag = config.getTag(certExtensionDto.getTag());
+            certExtensionDto = CertUtils.getCertExtensionData(CurrencyCertExtensionDto.class, csrReq, Constants.CURRENCY_OID);
         } catch (Exception ex) {
             throw new CertificateRequestException(ex.getMessage(), ex);
         }
         if(currencyMinValue.compareTo(certExtensionDto.getAmount()) > 0)
                 throw new CertificateRequestException(Messages.currentInstance().get("currencyMinValueError",
                 currencyMinValue.toString(), certExtensionDto.getAmount().toString()));
-        Interval timePeriod = null;
-        if(certExtensionDto.getTimeLimited())
-            timePeriod = DateUtils.getCurrentWeekPeriod();
-        else {
-            ZonedDateTime dateFrom = ZonedDateTime.now().withNano(0).withSecond(0).withMinute(0).withHour(0).withDayOfYear(1);
-            ZonedDateTime dateTo = dateFrom.plus(1, ChronoUnit.YEARS);
-            timePeriod = new Interval(dateFrom, dateTo);
-        }
+        ZonedDateTime dateFrom = ZonedDateTime.now().withNano(0).withSecond(0).withMinute(0).withHour(0).withDayOfYear(1);
+        ZonedDateTime dateTo = dateFrom.plus(currencyIssuedLiveInYears, ChronoUnit.YEARS);
+        Interval timePeriod = new Interval(dateFrom, dateTo);
         try {
-            X509Certificate issuedCert = CertUtils.signCSR(pkcs10Req, null, certIssuerPrivateKey,
+            X509Certificate issuedCert = CertUtils.signCSR(csrReq, null, certIssuerPrivateKey,
                     certIssuerSigningCert, timePeriod.getDateFrom().toLocalDateTime(),
                     timePeriod.getDateTo().toLocalDateTime(), config.getOcspServerURL());
-            Currency currency = Currency.FROM_CERT(issuedCert, tag, authorityCertificate).setType(type).setCurrencyBatch(currencyBatch);
+            Currency currency = Currency.FROM_CERT(issuedCert,authorityCertificate).setType(type).setCurrencyBatch(currencyBatch);
             em.persist(currency);
             AuditLogger.logCurrencyIssued(currency);
             return currency;

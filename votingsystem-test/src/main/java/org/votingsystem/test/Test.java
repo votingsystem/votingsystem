@@ -60,16 +60,16 @@ public class Test extends BaseTest {
         log.info("response: " + response.getMessage());
     }
 
-    public static String dtoJSON(String identityServiceEntity, String votingServiceEntity, String revocationHashBase64
+    public static String dtoJSON(String identityServiceEntity, String votingServiceEntity, String revocationHash
             , String electionUUID) throws Exception {
         return "{\"identityServiceEntity\":\"" + identityServiceEntity + "\",\"votingServiceEntity\":\"" +
-                votingServiceEntity + "\"," + "\"revocationHashBase64\":\"" + revocationHashBase64 +
+                votingServiceEntity + "\"," + "\"revocationHash\":\"" + revocationHash +
                 "\",\"electionUUID\":\"" + electionUUID + "\"}";
     }
 
     public static void test() throws Exception {
         CertVoteExtensionDto dto = new CertVoteExtensionDto("indentityServiceEntity", "votingServiceEntity",
-                "revocationHashBase64", "electionUUID");
+                "revocationHash", "electionUUID");
         log.info("dto: " + JSON.getMapper().writeValueAsString(dto));
     }
 

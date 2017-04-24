@@ -1,5 +1,6 @@
 package org.votingsystem.crypto;
 
+import eu.europa.esig.dss.token.AbstractSignatureTokenConnection;
 import eu.europa.esig.dss.token.JKSSignatureToken;
 import org.votingsystem.util.Constants;
 
@@ -20,6 +21,7 @@ public class MockDNIe {
     private X509Certificate x509Certificate;
     private Certificate[] certificateChain;
     private PrivateKey privateKey;
+    private AbstractSignatureTokenConnection jksSignatureToken;
     private KeyStore keyStore;
     private String keyAlias;
     private String password;
@@ -30,6 +32,10 @@ public class MockDNIe {
         this.keyStore = KeyStore.getInstance("JKS");
         keyStore.load(res.openStream(), Constants.PASSW_DEMO.toCharArray());
         loadKeyStore(keyStore, Constants.PASSW_DEMO.toCharArray(), Constants.USER_CERT_ALIAS);
+        //InputStream inputStream = Thread.currentThread().getContextClassLoader().getResource(SIGNER_KEYSTORE).openStream();
+        AbstractSignatureTokenConnection signingToken = new JKSSignatureToken(res.openStream(),
+                org.votingsystem.util.Constants.PASSW_DEMO);
+        jksSignatureToken = signingToken;
     }
 
     public MockDNIe(KeyStore keyStore, char[] password, String keyAlias) throws UnrecoverableKeyException,
@@ -45,6 +51,7 @@ public class MockDNIe {
         x509Certificate = (X509Certificate)keyStore.getCertificate(keyAlias);
         privateKey = (PrivateKey) keyStore.getKey(keyAlias, password);
         this.password = new String(password);
+
     }
 
     public MockDNIe(PrivateKey privateKey, X509Certificate x509Certificate) {
@@ -123,5 +130,9 @@ public class MockDNIe {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public AbstractSignatureTokenConnection getJksSignatureToken() {
+        return jksSignatureToken;
     }
 }

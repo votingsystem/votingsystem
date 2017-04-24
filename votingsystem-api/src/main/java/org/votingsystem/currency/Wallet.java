@@ -52,9 +52,9 @@ public class Wallet {
         //check if duplicated
         Set<CurrencyDto> currencySetToSave = new HashSet<>();
         for(CurrencyDto currencyDto:  walletDto) {
-            if(hashSet.add(currencyDto.getRevocationHashBase64())) {
+            if(hashSet.add(currencyDto.getRevocationHash())) {
                 currencySetToSave.add(currencyDto);
-            } else log.log(Level.SEVERE, "repeated currency!!!: " + currencyDto.getRevocationHashBase64());
+            } else log.log(Level.SEVERE, "repeated currency!!!: " + currencyDto.getRevocationHash());
         }
         log.info("saving '" + currencySetToSave.size() + "' currency items");
         saveWallet(currencySetToSave);
@@ -150,4 +150,7 @@ public class Wallet {
         }
     }
 
+    public String getWalletDirPath() {
+        return walletDirPath;
+    }
 }

@@ -1,7 +1,5 @@
 package org.currency.web.http;
 
-import org.votingsystem.model.Certificate;
-import org.votingsystem.model.Device;
 import org.votingsystem.model.User;
 import org.votingsystem.util.Constants;
 

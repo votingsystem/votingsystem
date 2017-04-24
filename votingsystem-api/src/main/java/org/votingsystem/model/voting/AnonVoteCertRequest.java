@@ -31,7 +31,7 @@ public class AnonVoteCertRequest extends EntityBase implements Serializable {
     @OneToOne
     @JoinColumn(name="SIGNED_DOCUMENT_ID")
     private SignedDocument signedDocument;
-    @Column(name="REVOCATION_HASH_BASE64") private String revocationHashBase64;
+    @Column(name="REVOCATION_HASH_BASE64") private String revocationHash;
     @Column(name="META_INF") private String metaInf;
     @Column(name="DATE_CREATED", columnDefinition="TIMESTAMP")
     @Convert(converter = LocalDateTimeAttributeConverter.class)
@@ -42,12 +42,12 @@ public class AnonVoteCertRequest extends EntityBase implements Serializable {
 
     public AnonVoteCertRequest() {}
 
-    public AnonVoteCertRequest(User user, SignedDocument signedDocument, State state, String revocationHashBase64,
+    public AnonVoteCertRequest(User user, SignedDocument signedDocument, State state, String revocationHash,
                                Election election) {
         this.user = user;
         this.signedDocument = signedDocument;
         this.state = state;
-        this.revocationHashBase64 = revocationHashBase64;
+        this.revocationHash = revocationHash;
         this.election = election;
     }
 
@@ -66,10 +66,10 @@ public class AnonVoteCertRequest extends EntityBase implements Serializable {
 
     public State getState() { return state; }
 
-    public String getAccessRequestHashBase64() { return revocationHashBase64; }
+    public String getAccessRequestHashBase64() { return revocationHash; }
 
     public void setAccessRequestHashBase64( String hashAccessRequestBase64) {
-        this.revocationHashBase64 = hashAccessRequestBase64;
+        this.revocationHash = hashAccessRequestBase64;
     }
 
     public SignedDocument getSignedDocument() { return signedDocument;  }

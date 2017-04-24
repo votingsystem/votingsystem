@@ -3,10 +3,8 @@ package org.currency.web.jaxrs;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import org.currency.web.ejb.ConfigCurrencyServer;
 import org.votingsystem.dto.ResultListDto;
-import org.votingsystem.dto.currency.CurrencyAccountDto;
 import org.votingsystem.ejb.SignatureService;
 import org.votingsystem.http.MediaType;
-import org.votingsystem.model.currency.CurrencyAccount;
 import org.votingsystem.model.currency.Tag;
 import org.votingsystem.util.JSON;
 import org.votingsystem.util.StringUtils;
@@ -24,7 +22,6 @@ import javax.ws.rs.Path;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -56,20 +53,6 @@ public class TagResourceEJB {
         List<Tag> tagList = em.createQuery("select t from Tag t").getResultList();
         ResultListDto resultList = new ResultListDto(tagList);
         return Response.ok().entity(JSON.getMapper().writeValueAsBytes(resultList)).type(MediaType.JSON).build();
-    }
-
-    @GET @Path("/currencyAccountByBalanceTag")
-    public Response currencyAccountByBalanceTag(@QueryParam("tag") String tag) throws JsonProcessingException {
-        if(tag == null)
-            return Response.status(Response.Status.BAD_REQUEST).entity("missing param - tag").build();
-        List<CurrencyAccount> accountList = em.createQuery("select c from CurrencyAccount c where c.tag.name =:tag")
-                .setParameter("tag", tag).getResultList();
-        List<CurrencyAccountDto> resultList = new ArrayList<>();
-        for(CurrencyAccount account : accountList) {
-            resultList.add(new CurrencyAccountDto(account));
-        }
-        ResultListDto resultListDto = new ResultListDto(resultList);
-        return Response.ok().entity(JSON.getMapper().writeValueAsBytes(resultListDto)).type(MediaType.JSON).build();
     }
 
 }

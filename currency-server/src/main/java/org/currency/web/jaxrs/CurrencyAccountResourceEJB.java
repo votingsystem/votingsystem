@@ -8,11 +8,9 @@ import org.currency.web.util.AuthRole;
 import org.votingsystem.dto.ResultListDto;
 import org.votingsystem.dto.currency.CurrencyAccountDto;
 import org.votingsystem.dto.currency.SystemAccountsDto;
-import org.votingsystem.dto.currency.TagDto;
 import org.votingsystem.model.User;
 import org.votingsystem.model.currency.Bank;
 import org.votingsystem.model.currency.CurrencyAccount;
-import org.votingsystem.model.currency.Tag;
 import org.votingsystem.model.currency.Transaction;
 import org.votingsystem.util.CurrencyCode;
 import org.votingsystem.util.JSON;
@@ -37,7 +35,6 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.*;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
 
 /**
  * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
@@ -105,23 +102,23 @@ public class CurrencyAccountResourceEJB {
         }
         List<User.Type> notList = Arrays.asList(User.Type.CURRENCY_SERVER);
         Query query = em.createQuery(
-                "select SUM(c.balance), tag, c.currencyCode from CurrencyAccount c JOIN c.tag tag where c.state =:state " +
-                "and c.user.type not in :notList group by tag, c.currencyCode")
+                "select SUM(c.balance), c.currencyCode from CurrencyAccount c where c.state =:state " +
+                "and c.user.type not in :notList group by c.currencyCode")
                 .setParameter("state", CurrencyAccount.State.ACTIVE)
                 .setParameter("notList", notList);
         List<Object[]> resultList = query.getResultList();
-        List<TagDto> userAccounts = new ArrayList<>();
+        Map<CurrencyCode, BigDecimal> userAccounts = new HashMap<>();
         for(Object[] result : resultList) {
-            userAccounts.add(new TagDto((BigDecimal) result[0], (CurrencyCode) result[2], (Tag) result[1]));
+            userAccounts.put((CurrencyCode) result[1], (BigDecimal) result[0]);
         }
         query = em.createQuery(
-                "select SUM(t.amount), tag, t.currencyCode from Transaction t JOIN t.tag tag where t.state =:state " +
-                "and t.type =:type group by tag, t.currencyCode").setParameter("state", Transaction.State.OK)
+                "select SUM(t.amount), t.currencyCode from Transaction t where t.state =:state " +
+                "and t.type =:type group by t.currencyCode").setParameter("state", Transaction.State.OK)
                 .setParameter("type", Transaction.Type.FROM_BANK);
         resultList = query.getResultList();
-        List<TagDto> bankInputs = new ArrayList<>();
+        Map<CurrencyCode, BigDecimal> bankInputs = new HashMap<>();
         for(Object[] result : resultList) {
-            bankInputs.add(new TagDto((BigDecimal) result[0], (CurrencyCode) result[2], (Tag) result[1]));
+            bankInputs.put((CurrencyCode) result[1], (BigDecimal) result[0]);
         }
         SystemAccountsDto resultDto = new SystemAccountsDto(systemAccountsDto, userAccounts, bankInputs);
         return Response.ok().entity(JSON.getMapper().writeValueAsBytes(resultDto)).build();
@@ -134,18 +131,16 @@ public class CurrencyAccountResourceEJB {
         if(bank == null || bank.getType() != User.Type.BANK) {
             return Response.status(Response.Status.NOT_FOUND).entity("bank id: " + bankId).build();
         }
-        Query query = em.createQuery("select SUM(t.amount), tag, t.currencyCode from Transaction t " +
-                "JOIN t.tag tag where t.state =:state and t.fromUser=:bank group by tag, t.currencyCode")
+        Query query = em.createQuery("select SUM(t.amount), t.currencyCode from Transaction t " +
+                "where t.state =:state and t.fromUser=:bank group by t.currencyCode")
                 .setParameter("state", Transaction.State.OK)
                 .setParameter("bank", bank);
         List<Object[]> resultList = query.getResultList();
-        List<TagDto> tagBalanceList = new ArrayList<>();
+        Map<CurrencyCode, BigDecimal> bankInputs = new HashMap<>();
         for(Object[] result : resultList) {
-            tagBalanceList.add(new TagDto((BigDecimal) result[0], (CurrencyCode) result[2], (Tag) result[1]));
+            bankInputs.put((CurrencyCode) result[1], (BigDecimal) result[0]);
         }
-        Map<CurrencyCode, List<TagDto>> tagBalanceMap = tagBalanceList.stream()
-                .collect(Collectors.groupingBy(TagDto::getCurrencyCode));
-        Map result = ImmutableMap.of("bank", userBean.getUserDto(bank, false), "tagBalanceList", tagBalanceMap);
+        Map result = ImmutableMap.of("bank", userBean.getUserDto(bank, false), "balance", bankInputs);
         return Response.ok().entity(JSON.getMapper().writeValueAsBytes(result)).build();
     }
 

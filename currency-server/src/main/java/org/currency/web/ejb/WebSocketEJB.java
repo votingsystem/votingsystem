@@ -16,6 +16,7 @@ import org.votingsystem.util.CurrencyOperation;
 import org.votingsystem.util.JSON;
 import org.votingsystem.util.Messages;
 import org.votingsystem.xml.XML;
+
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;

@@ -38,7 +38,7 @@ public class QRMessageDto<T> implements Serializable {
     private String deviceUUID;
     private String itemId;
     private ZonedDateTime dateCreated;
-    private String revocationHashBase64;
+    private String revocationHash;
     private String publicKeyBase64;
     private String url;
     private String msg;
@@ -107,7 +107,7 @@ public class QRMessageDto<T> implements Serializable {
 
     public QRMessageDto createRequest() throws NoSuchAlgorithmException {
         this.originRevocationHash = java.util.UUID.randomUUID().toString();
-        this.revocationHashBase64 = HashUtils.getHashBase64(originRevocationHash.getBytes(), Constants.DATA_DIGEST_ALGORITHM);
+        this.revocationHash = HashUtils.getHashBase64(originRevocationHash.getBytes(), Constants.DATA_DIGEST_ALGORITHM);
         return this;
     }
 
@@ -153,12 +153,12 @@ public class QRMessageDto<T> implements Serializable {
         this.originRevocationHash = originRevocationHash;
     }
 
-    public String getRevocationHashBase64() {
-        return revocationHashBase64;
+    public String getRevocationHash() {
+        return revocationHash;
     }
 
-    public void setRevocationHashBase64(String revocationHashBase64) {
-        this.revocationHashBase64 = revocationHashBase64;
+    public void setRevocationHash(String revocationHash) {
+        this.revocationHash = revocationHash;
     }
 
     public String getUrl() {

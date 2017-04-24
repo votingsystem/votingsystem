@@ -45,11 +45,11 @@ public class CurrencyCheckResponse {
     }
 
     public Set<String> getHashOKSet() {
-        return currencyOKSet.stream().map(currencyStateDto -> currencyStateDto.getRevocationHashBase64()).collect(Collectors.toSet());
+        return currencyOKSet.stream().map(currencyStateDto -> currencyStateDto.getRevocationHash()).collect(Collectors.toSet());
     }
 
     public Set<String> getHashWithErrorSet() {
-        return currencyWithErrorSet.stream().map(currencyStateDto -> currencyStateDto.getRevocationHashBase64()).collect(Collectors.toSet());
+        return currencyWithErrorSet.stream().map(currencyStateDto -> currencyStateDto.getRevocationHash()).collect(Collectors.toSet());
     }
 
     public String getMessage() {
@@ -60,7 +60,7 @@ public class CurrencyCheckResponse {
         StringBuilder result = new StringBuilder("<div id='msgDiv'>");
         for(CurrencyStateDto currencyStateDto : currencyWithErrorSet) {
             result.append("<div>" + currencyStateDto.getAmount() + " " + currencyStateDto.getCurrencyCode() + " - " +
-                    currencyStateDto.getTag() + " - " + getStateDescription (currencyStateDto.getState()) + "</div>");
+                    getStateDescription (currencyStateDto.getState()) + "</div>");
         }
         return result.append("</div>").toString();
     }
@@ -89,7 +89,7 @@ public class CurrencyCheckResponse {
                     break;
                 case UNKNOWN:
                     currencyWithErrors.add(new CurrencyStateDto(currencyMap.get(
-                            currencyDto.getRevocationHashBase64())).setState(Currency.State.UNKNOWN));
+                            currencyDto.getRevocationHash())).setState(Currency.State.UNKNOWN));
                     break;
                 default:
                     currencyWithErrors.add(currencyDto);

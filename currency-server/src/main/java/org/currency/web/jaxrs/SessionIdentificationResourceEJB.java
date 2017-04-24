@@ -1,7 +1,5 @@
 package org.currency.web.jaxrs;
 
-import org.currency.web.ejb.ConfigCurrencyServer;
-import org.currency.web.ejb.ConfigEJB;
 import org.currency.web.ejb.DeviceEJB;
 import org.currency.web.http.CurrencyPrincipal;
 import org.currency.web.managed.SocketPushEvent;

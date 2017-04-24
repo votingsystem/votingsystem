@@ -6,7 +6,6 @@ import org.votingsystem.dto.currency.TransactionDto;
 import org.votingsystem.model.SignedDocument;
 import org.votingsystem.model.User;
 import org.votingsystem.model.currency.Bank;
-import org.votingsystem.model.currency.Tag;
 import org.votingsystem.model.currency.Transaction;
 import org.votingsystem.throwable.SignatureException;
 import org.votingsystem.throwable.ValidationException;
@@ -35,7 +34,7 @@ public class BankTransactionEJB {
     @Inject private TransactionEJB transactionBean;
     @Inject private CurrencySignatureEJB signatureService;
 
-    public ResultListDto<TransactionDto> processTransactionFromBank(TransactionDto request, Tag tag)
+    public ResultListDto<TransactionDto> processTransactionFromBank(TransactionDto request)
             throws ValidationException, SignatureException {
         validateRequest(request);
         List<Bank> userList = em.createNamedQuery(Bank.FIND_USER_BY_NIF).setParameter(
@@ -47,7 +46,7 @@ public class BankTransactionEJB {
         SignedDocument signedDocument = request.getSignedDocument();
         Transaction transaction = Transaction.FROM_BANK(bank, request.getFromUserIBAN(),
                 request.getFromUserName(), request.getReceptor(), request.getAmount(), request.getCurrencyCode(),
-                request.getSubject(), request.getValidTo().toLocalDateTime(), signedDocument, tag);
+                request.getSubject(), signedDocument);
         em.persist(transaction);
 
         signatureService.addReceipt(SignedDocumentType.TRANSACTION_FROM_BANK_RECEIPT, signedDocument);

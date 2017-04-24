@@ -7,13 +7,13 @@ import org.votingsystem.ejb.SignatureService;
 import org.votingsystem.model.User;
 import org.votingsystem.model.currency.Bank;
 import org.votingsystem.model.currency.CurrencyAccount;
-import org.votingsystem.model.currency.Tag;
 import org.votingsystem.model.currency.Transaction;
 import org.votingsystem.throwable.ValidationException;
 import org.votingsystem.util.CurrencyCode;
 import org.votingsystem.util.Interval;
 
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -23,6 +23,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.logging.Logger;
+
+import static javax.ejb.TransactionAttributeType.REQUIRES_NEW;
 
 /**
  * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
@@ -83,15 +85,17 @@ public class BalancesEJB {
         return balancesDto;
     }
 
-    public void updateTagBalance(BigDecimal amount, CurrencyCode currencyCode, Tag tag) throws ValidationException {
+    @TransactionAttribute(REQUIRES_NEW)
+    public void updateSystemBalance(BigDecimal amount, CurrencyCode currencyCode) throws ValidationException {
         List<CurrencyAccount> currencyAccounts = em.createNamedQuery(
-                CurrencyAccount.FIND_BY_USER_IBAN_AND_TAG_AND_CURRENCY_CODE_AND_STATE)
-                .setParameter("state", CurrencyAccount.State.ACTIVE).setParameter("userIBAN", config.getSystemUser().getIBAN())
-                .setParameter("tag", tag).setParameter("currencyCode", currencyCode).getResultList();
+                CurrencyAccount.FIND_BY_USER_IBAN_AND_CURRENCY_CODE_AND_STATE)
+                .setParameter("state", CurrencyAccount.State.ACTIVE)
+                .setParameter("userIBAN", config.getSystemUser().getIBAN())
+                .setParameter("currencyCode", currencyCode).getResultList();
         if(currencyAccounts.isEmpty()) throw new ValidationException(
-                "THERE'S NOT ACTIVE SYSTEM ACCOUNT FOR TAG " + tag.getName() + " and currency " + currencyCode);
-        CurrencyAccount tagAccount = currencyAccounts.iterator().next();
-        tagAccount.setBalance(tagAccount.getBalance().add(amount));
+                "THERE'S NOT ACTIVE SYSTEM ACCOUNT FOR currency " + currencyCode);
+        CurrencyAccount currencyAccount = currencyAccounts.iterator().next();
+        currencyAccount.setBalance(currencyAccount.getBalance().add(amount));
     }
 
     public BalancesDto getBalancesDto(List<Transaction> transactionList, Transaction.Source source) throws ValidationException {
@@ -101,9 +105,9 @@ public class BalancesEJB {
         }
         switch (source) {
             case FROM:
-                return BalancesDto.FROM(transactionFromList, BalanceUtils.getBalancesFrom(transactionList));
+                return BalancesDto.FROM(transactionFromList, BalanceUtils.getBalances(transactionList));
             case TO:
-                return BalancesDto.TO(transactionFromList, BalanceUtils.getBalancesTo(transactionList));
+                return BalancesDto.TO(transactionFromList, BalanceUtils.getBalances(transactionList));
         }
         throw new ValidationException("unknown source: " + source);
     }

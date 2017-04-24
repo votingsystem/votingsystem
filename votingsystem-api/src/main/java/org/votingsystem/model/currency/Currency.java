@@ -54,17 +54,14 @@ public class Currency extends EntityBase implements Serializable  {
     @Column(name="CURRENCY", nullable=false) @Enumerated(EnumType.STRING)
     private CurrencyCode currencyCode;
 
-    @Column(name="IS_TIME_LIMITED")
-    private Boolean timeLimited = Boolean.FALSE;
-
     @Column(name="REVOCATION_HASH_BASE64")
-    private String revocationHashBase64;
+    private String revocationHash;
     
     @Column(name="ORIGIN_REVOCATION_HASH") 
     private String originRevocationHash;
     
-    @Column(name="CURRENCY_SERVER_ENTITY_ID") 
-    private String currencyServerEntityId;
+    @Column(name="CURRENCY_ENTITY")
+    private String currencyEntity;
 
     @Column(name="REASON")
     private String reason;
@@ -93,10 +90,6 @@ public class Currency extends EntityBase implements Serializable  {
     @ManyToOne(fetch=FetchType.LAZY)
     @JoinColumn(name="AUTHORITY_CERTIFICATE") 
     private Certificate authorityCertificate;
-
-    @ManyToOne(fetch=FetchType.LAZY)
-    @JoinColumn(name="TAG", nullable=false)
-    private Tag tag;
 
     @ManyToOne(fetch=FetchType.LAZY)
     @JoinColumn(name="TRANSACTION")
@@ -138,9 +131,6 @@ public class Currency extends EntityBase implements Serializable  {
             throw new IllegalArgumentException(getErrorPrefix() +
                     "expected currencyCode '" + currencyCode + "' - found: '" + batchItemDto.getCurrencyCode());
         }
-        if(!Tag.WILDTAG.equals(certExtensionDto.getTag()) && !certExtensionDto.getTag().equals(batchItemDto.getTag()))
-            throw new IllegalArgumentException("expected tag '" + certExtensionDto.getTag() + "' - found: '" +
-                    batchItemDto.getTag());
         Date signatureTimeUTC = DateUtils.getUTCDate(signedDocument.getFirstSignature().getSignatureDate());
         if(signatureTimeUTC.after(x509AnonymousCert.getNotAfter())) throw new ValidationException(getErrorPrefix() +
                 "valid to '" + DateUtils.getUTCDateStr(x509AnonymousCert.getNotAfter()) + "' has signature date '" +
@@ -150,35 +140,29 @@ public class Currency extends EntityBase implements Serializable  {
         this.toUserName = batchItemDto.getToUserName();
     }
 
-    public Currency(String currencyEntity, BigDecimal amount, CurrencyCode currencyCode, Boolean timeLimited,
-                String revocationHashBase64, Tag tag) throws NoSuchAlgorithmException, CertificateRequestException  {
+    public Currency(String entityId, BigDecimal amount, CurrencyCode currencyCode,
+                String revocationHash) throws NoSuchAlgorithmException, CertificateRequestException  {
         this.amount = amount;
-        this.currencyServerEntityId = currencyEntity;
+        this.currencyEntity = entityId;
         this.currencyCode = currencyCode;
-        this.tag = tag;
-        this.timeLimited = timeLimited;
-        this.revocationHashBase64 = revocationHashBase64;
-        certificationRequest = CertificationRequest.getCurrencyRequest(currencyEntity, revocationHashBase64,
-                amount, currencyCode, timeLimited, tag.getName());
+        this.revocationHash = revocationHash;
+        certificationRequest = CertificationRequest.getCurrencyRequest(entityId, revocationHash, amount, currencyCode);
     }
 
-    public Currency(String currencyEntity, BigDecimal amount, CurrencyCode currencyCode, Boolean timeLimited, Tag tag)
+    public Currency(String currencyEntity, BigDecimal amount, CurrencyCode currencyCode)
             throws NoSuchAlgorithmException, CertificateRequestException {
         this.amount = amount;
-        this.currencyServerEntityId = currencyEntity;
+        this.currencyEntity = currencyEntity;
         this.currencyCode = currencyCode;
-        this.tag = tag;
-        this.timeLimited = timeLimited;
         this.originRevocationHash = UUID.randomUUID().toString();
-        this.revocationHashBase64 = HashUtils.getHashBase64(this.originRevocationHash.getBytes(),
+        this.revocationHash = HashUtils.getHashBase64(this.originRevocationHash.getBytes(),
                 Constants.DATA_DIGEST_ALGORITHM);
-        certificationRequest = CertificationRequest.getCurrencyRequest(currencyEntity, revocationHashBase64,
-                amount, currencyCode, timeLimited, tag.getName());
+        certificationRequest = CertificationRequest.getCurrencyRequest(currencyEntity, revocationHash,
+                amount, currencyCode);
     }
 
-    public static Currency FROM_CERT(X509Certificate currencyCert, Tag tag,
-                                     Certificate authorityCertificate) throws Exception {
-        Currency currency = new Currency().setState(State.OK).setTag(tag).setAuthorityCertificate(authorityCertificate);
+    public static Currency FROM_CERT(X509Certificate currencyCert, Certificate authorityCertificate) throws Exception {
+        Currency currency = new Currency().setState(State.OK).setAuthorityCertificate(authorityCertificate);
         currency.initCertData(currencyCert);
         return currency;
     }
@@ -201,38 +185,31 @@ public class Currency extends EntityBase implements Serializable  {
             throw new ValidationException("error missing cert extension data");
         amount = certExtensionDto.getAmount();
         currencyCode = certExtensionDto.getCurrencyCode();
-        revocationHashBase64 = certExtensionDto.getHashCertVS();
-        timeLimited = certExtensionDto.getTimeLimited();
-        tag = new Tag(certExtensionDto.getTag());
-        currencyServerEntityId = certExtensionDto.getCurrencyServerURL();
+        revocationHash = certExtensionDto.getRevocationHash();
+        currencyEntity = certExtensionDto.getCurrencyEntity();
         validFrom = DateUtils.getLocalDateFromUTCDate(x509AnonymousCert.getNotBefore());
         validTo = DateUtils.getLocalDateFromUTCDate(x509AnonymousCert.getNotAfter());
         String subjectDN = x509AnonymousCert.getSubjectDN().toString();
-        CurrencyDto certSubjectDto = CurrencyDto.getCertSubjectDto(subjectDN, revocationHashBase64);
-        if(!certSubjectDto.getCurrencyServerURL().equals(certExtensionDto.getCurrencyServerURL()))
-            throw new ValidationException("currencyServerEntityId: " + currencyServerEntityId + " - certSubject: " + subjectDN);
+        CurrencyDto certSubjectDto = CurrencyDto.getCertSubjectDto(subjectDN, revocationHash);
+        if(!certSubjectDto.getCurrencyEntity().equals(certExtensionDto.getCurrencyEntity()))
+            throw new ValidationException("currencyEntity: " + currencyEntity + " - certSubject: " + subjectDN);
         if(certSubjectDto.getAmount().compareTo(amount) != 0)
             throw new ValidationException("amount: " + amount + " - certSubject: " + subjectDN);
         if(!certSubjectDto.getCurrencyCode().equals(currencyCode))
-            throw new ValidationException("currencyCode: " + currencyCode + " - certSubject: " + subjectDN);
-        if(!certSubjectDto.getTag().equals(certExtensionDto.getTag()))
             throw new ValidationException("currencyCode: " + currencyCode + " - certSubject: " + subjectDN);
         return this;
     }
 
     public Currency checkRequestWithDB(Currency currencyRequest) throws ValidationException {
-        if(!currencyRequest.getCurrencyServerEntityId().equals(currencyServerEntityId))
-            throw new ValidationException("Expected Currency server: " + currencyServerEntityId +
-                    " - found: " + currencyRequest.getCurrencyServerEntityId());
-        if(!currencyRequest.getRevocationHash().equals(revocationHashBase64))
-            throw new ValidationException("Expected revocation hash: " + revocationHashBase64 +
+        if(!currencyRequest.getCurrencyEntity().equals(currencyEntity))
+            throw new ValidationException("Expected Currency server: " + currencyEntity +
+                    " - found: " + currencyRequest.getCurrencyEntity());
+        if(!currencyRequest.getRevocationHash().equals(revocationHash))
+            throw new ValidationException("Expected revocation hash: " + revocationHash +
                     " - found: " + currencyRequest.getRevocationHash());
         if(!currencyRequest.getCurrencyCode().equals(currencyCode))
             throw new ValidationException("Expected currency code: " + currencyCode + " - found: " +
                     currencyRequest.getCurrencyCode());
-        if (!currencyRequest.getCertExtensionDto().getTag().equals(tag.getName()))
-            throw new ValidationException("Expected tag: " + tag.getName() +
-                    " - found: " + currencyRequest.getCertExtensionDto().getTag());
         if(currencyRequest.getAmount().compareTo(amount) != 0)  throw new ValidationException(
                 "Expected amount: " + amount + " - found: " + currencyRequest.getAmount());
         this.signedDocument = currencyRequest.getSignedDocument();
@@ -265,16 +242,8 @@ public class Currency extends EntityBase implements Serializable  {
         this.x509AnonymousCert = x509AnonymousCert;
     }
 
-    public Boolean getTimeLimited() {
-        return timeLimited;
-    }
-
-    public void setTimeLimited(Boolean timeLimited) {
-        this.timeLimited = timeLimited;
-    }
-
     private String getErrorPrefix() {
-        return "ERROR - Currency with revocation hash: " + revocationHashBase64 + " - ";
+        return "ERROR - Currency with revocation hash: " + revocationHash + " - ";
     }
 
     public String getReason() {
@@ -283,15 +252,6 @@ public class Currency extends EntityBase implements Serializable  {
 
     public void setReason(String reason) {
         this.reason = reason;
-    }
-
-    public Tag getTag() {
-        return tag;
-    }
-
-    public Currency setTag(Tag tag) {
-        this.tag = tag;
-        return this;
     }
 
     public void initSigner(byte[] csrBytes) throws Exception {
@@ -351,11 +311,11 @@ public class Currency extends EntityBase implements Serializable  {
     }
 
     public String getRevocationHash() {
-        return revocationHashBase64;
+        return revocationHash;
     }
 
-    public void setRevocationHashBase64(String revocationHash) {
-        this.revocationHashBase64 = revocationHashBase64;
+    public void setRevocationHash(String revocationHash) {
+        this.revocationHash = revocationHash;
     }
 
     public BigDecimal getAmount() {
@@ -366,12 +326,12 @@ public class Currency extends EntityBase implements Serializable  {
         this.amount = amount;
     }
 
-    public String getCurrencyServerEntityId() {
-        return currencyServerEntityId;
+    public String getCurrencyEntity() {
+        return currencyEntity;
     }
 
-    public void setCurrencyServerEntityId(String currencyServerEntityId) {
-        this.currencyServerEntityId = currencyServerEntityId;
+    public void setCurrencyEntity(String currencyServerEntityId) {
+        this.currencyEntity = currencyServerEntityId;
     }
 
     public String getOriginRevocationHash() {

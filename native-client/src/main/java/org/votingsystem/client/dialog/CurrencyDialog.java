@@ -47,7 +47,6 @@ public class CurrencyDialog extends AppDialog {
     @FXML private VBox mainPane;
     @FXML private TextField currencyHashText;
     @FXML private Label currencyValueLbl;
-    @FXML private Label currencyTagLbl;
     @FXML private Label validFromLbl;
     @FXML private Label validToLbl;
     @FXML private Label currencyLbl;
@@ -56,9 +55,9 @@ public class CurrencyDialog extends AppDialog {
     private Runnable statusChecker = new Runnable() {
         @Override public void run() {
             try {
-                MetadataDto currencyServer = MainApp.instance().getSystemEntity(currency.getCurrencyServerEntityId(), true);
+                MetadataDto currencyServer = MainApp.instance().getSystemEntity(currency.getCurrencyEntity(), true);
                 ResponseDto response = HttpConn.getInstance().doPostRequest(currency.getRevocationHash().getBytes(),
-                        null, CurrencyOperation.GET_CURRENCY_STATUS.getUrl(currency.getCurrencyServerEntityId()));
+                        null, CurrencyOperation.GET_CURRENCY_STATUS.getUrl(currency.getCurrencyEntity()));
                 if(ResponseDto.SC_OK != response.getStatusCode()) {
                     currency.setState(Currency.State.ERROR).setReason(response.getMessage());
                     update();
@@ -83,8 +82,7 @@ public class CurrencyDialog extends AppDialog {
                     if(new Date().after(x509Cert.getNotAfter())) {
                         errorMsg =  Messages.currentInstance().get("currencyLapsedErrorLbl");
                     } else errorMsg =  Messages.currentInstance().get("currencyErrorLbl");
-                    String amountStr = currency.getAmount() + " " + currency.getCurrencyCode() + " " +
-                            Utils.getTagForDescription(currency.getTag().getName());
+                    String amountStr = currency.getAmount() + " " + currency.getCurrencyCode();
                     msg = Messages.currentInstance().get("currencyInfoErroMsg", errorMsg, amountStr, x509Cert.getIssuerDN().toString(),
                             DateUtils.getDateStr(currency.getValidFrom(), "dd MMM yyyy' 'HH:mm"),
                             DateUtils.getDateStr(currency.getValidTo(), "dd MMM yyyy' 'HH:mm"));
@@ -116,17 +114,14 @@ public class CurrencyDialog extends AppDialog {
     public void showDialog(Currency currency) {
         this.currency = currency;
         mainPane.getStyleClass().remove("currency-error");
-        setCaption(currency.getCurrencyServerEntityId().split("//")[1]);
+        setCaption(currency.getCurrencyEntity().split("//")[1]);
         currencyHashText.setText(currency.getRevocationHash());
         currencyValueLbl.setText(currency.getAmount().toPlainString());
         currencyLbl.setText(currency.getCurrencyCode().toString());
-        currencyTagLbl.setText(MsgUtils.getTagDescription(currency.getTag().getName()));
         validFromLbl.setText(Messages.currentInstance().get("issuedLbl") + ": " +
                 DateUtils.getDateStr(currency.getValidFrom(), "dd MMM yyyy' 'HH:mm"));
         validToLbl.setText(Messages.currentInstance().get("expiresLbl") + ": " +
                 DateUtils.getDateStr(currency.getValidTo(), "dd MMM yyyy' 'HH:mm"));
-        if(currency.getTimeLimited())
-            validToLbl.setStyle("-fx-text-fill:rgba(186,0,17, 0.45);");
         show();
     }
 

@@ -16,12 +16,9 @@ public class DashBoardDto {
     private Transaction.Type type;
     private Long numTransFromBank;
     private Long numTransFromUser;
-    private Long numTransCurrencyInitPeriod;
-    private Long numTransCurrencyInitPeriodTimeLimited;
     private Long numTransCurrencyRequest;
     private Long numTransCurrencySend;
     private Long numTransCurrencyChange;
-    private Long numTransCancellation;
 
     public DashBoardDto() {}
 
@@ -61,22 +58,6 @@ public class DashBoardDto {
         this.numTransFromUser = numTransFromUser;
     }
 
-    public Long getNumTransCurrencyInitPeriod() {
-        return numTransCurrencyInitPeriod;
-    }
-
-    public void setNumTransCurrencyInitPeriod(Long numTransCurrencyInitPeriod) {
-        this.numTransCurrencyInitPeriod = numTransCurrencyInitPeriod;
-    }
-
-    public Long getNumTransCurrencyInitPeriodTimeLimited() {
-        return numTransCurrencyInitPeriodTimeLimited;
-    }
-
-    public void setNumTransCurrencyInitPeriodTimeLimited(Long numTransCurrencyInitPeriodTimeLimited) {
-        this.numTransCurrencyInitPeriodTimeLimited = numTransCurrencyInitPeriodTimeLimited;
-    }
-
     public Long getNumTransCurrencyRequest() {
         return numTransCurrencyRequest;
     }
@@ -91,14 +72,6 @@ public class DashBoardDto {
 
     public void setNumTransCurrencySend(Long numTransCurrencySend) {
         this.numTransCurrencySend = numTransCurrencySend;
-    }
-
-    public Long getNumTransCancellation() {
-        return numTransCancellation;
-    }
-
-    public void setNumTransCancellation(Long numTransCancellation) {
-        this.numTransCancellation = numTransCancellation;
     }
 
     public Long getNumTransCurrencyChange() {

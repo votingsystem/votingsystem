@@ -79,8 +79,7 @@ public class Transaction extends EntityBase implements Serializable {
     public enum Source {FROM, TO}
 
     public enum Type {
-        FROM_BANK, FROM_USER, CURRENCY_PERIOD_INIT, CURRENCY_PERIOD_INIT_TIME_LIMITED, CURRENCY_REQUEST, CURRENCY_SEND,
-        CURRENCY_CHANGE, CANCELLATION, TRANSACTION_INFO; }
+        FROM_BANK, FROM_USER, CURRENCY_REQUEST, CURRENCY_SEND, CURRENCY_CHANGE; }
 
     public enum State { OK, REPEATED, CANCELED;}
 
@@ -92,10 +91,6 @@ public class Transaction extends EntityBase implements Serializable {
 
     @Column(name="CURRENCY", nullable=false) @Enumerated(EnumType.STRING)
     private CurrencyCode currencyCode;
-
-    @ManyToOne(fetch=FetchType.EAGER)
-    @JoinColumn(name="TAG", nullable=false)
-    private Tag tag;
 
     @Column(name="AMOUNT", nullable=false)
     private BigDecimal amount = null;
@@ -128,18 +123,11 @@ public class Transaction extends EntityBase implements Serializable {
     @OneToOne @JoinColumn(name="CURRENCY_BATCH")
     private CurrencyBatch currencyBatch;
 
-    @Column(name="IS_TIME_LIMITED")
-    private Boolean isTimeLimited;
-
     @Column(name="TYPE", nullable=false) @Enumerated(EnumType.STRING)
     private Type type;
 
     @Column(name="STATE", nullable=false) @Enumerated(EnumType.STRING)
     private State state;
-
-    @Column(name="VALID_TO", columnDefinition="TIMESTAMP")
-    @Convert(converter = LocalDateTimeAttributeConverter.class)
-    private LocalDateTime validTo;
 
     @Column(name="DATE_CREATED", columnDefinition="TIMESTAMP")
     @Convert(converter = LocalDateTimeAttributeConverter.class)
@@ -156,7 +144,7 @@ public class Transaction extends EntityBase implements Serializable {
     public Transaction() {}
 
     public Transaction(User fromUser, User toUser, BigDecimal amount, CurrencyCode currencyCode, String subject,
-                       SignedDocument signedDocument, Type type, State state, Tag tag) {
+                       SignedDocument signedDocument, Type type, State state) {
         this.amount = amount;
         this.fromUser = fromUser;
         this.fromUserIBAN = fromUser.getIBAN();
@@ -167,51 +155,40 @@ public class Transaction extends EntityBase implements Serializable {
         this.currencyCode = currencyCode;
         this.type = type;
         this.state = state;
-        this.tag = tag;
     }
 
-    public static Transaction CURRENCY_SEND(CurrencyBatch batch, User toUser, LocalDateTime validTo,
-                                            SignedDocument signedDocument, Tag tag) {
+    public static Transaction CURRENCY_SEND(CurrencyBatch batch, User toUser, SignedDocument signedDocument) {
         Transaction transaction = BASIC(toUser, Transaction.Type.CURRENCY_SEND, null, batch.getBatchAmount(),
-                batch.getCurrencyCode(), batch.getSubject(), validTo, signedDocument, batch.getTag());
+                batch.getCurrencyCode(), batch.getSubject(), signedDocument);
         transaction.setToUserIBAN(batch.getToUser().getIBAN());
         transaction.setCurrencyBatch(batch);
         transaction.setState(Transaction.State.OK);
         transaction.setSignedDocument(signedDocument);
-        transaction.setTag(tag);
-        transaction.setIsTimeLimited(batch.getTimeLimited());
         return transaction;
     }
 
-    public static Transaction CURRENCY_CHANGE(CurrencyBatch batch, LocalDateTime validTo, SignedDocument signedDocument,
-                                              Tag tag) {
+    public static Transaction CURRENCY_CHANGE(CurrencyBatch batch, SignedDocument signedDocument) {
         Transaction transaction = new Transaction();
         transaction.setType(Type.CURRENCY_CHANGE);
         transaction.setAmount(batch.getBatchAmount());
         transaction.setCurrencyCode(batch.getCurrencyCode());
         transaction.setSubject(batch.getSubject());
-        transaction.setValidTo(validTo);
         transaction.setSignedDocument(signedDocument);
-        transaction.setTag(tag);
         transaction.setCurrencyBatch(batch);
         transaction.setState(Transaction.State.OK);
-        transaction.setIsTimeLimited(batch.getTimeLimited());
         return transaction;
     }
 
     public static Transaction USER(User user, User toUser, Type type, Map<CurrencyAccount, BigDecimal> accountFromMovements,
-           BigDecimal amount, CurrencyCode currencyCode, String subject, LocalDateTime validTo,
-           SignedDocument signedDocument, Tag tag) {
-        Transaction transaction = BASIC(toUser, type, accountFromMovements, amount, currencyCode, subject,
-                validTo, signedDocument, tag);
+           BigDecimal amount, CurrencyCode currencyCode, String subject, SignedDocument signedDocument) {
+        Transaction transaction = BASIC(toUser, type, accountFromMovements, amount, currencyCode, subject, signedDocument);
         transaction.setFromUser(user);
         transaction.setFromUserIBAN(user.getIBAN());
         return transaction;
     }
 
     public static Transaction BASIC(User toUser, Type type, Map<CurrencyAccount, BigDecimal> accountFromMovements,
-            BigDecimal amount, CurrencyCode currencyCode, String subject, LocalDateTime validTo,
-            SignedDocument signedDocument, Tag tag) {
+            BigDecimal amount, CurrencyCode currencyCode, String subject, SignedDocument signedDocument) {
         Transaction transaction = new Transaction();
         transaction.setToUser(toUser);
         transaction.setToUserIBAN(toUser.getIBAN());
@@ -220,16 +197,13 @@ public class Transaction extends EntityBase implements Serializable {
         transaction.setAmount(amount);
         transaction.setCurrencyCode(currencyCode);
         transaction.setSubject(subject);
-        transaction.setValidTo(validTo);
         transaction.setSignedDocument(signedDocument);
-        transaction.setTag(tag);
         transaction.setState(Transaction.State.OK);
         return transaction;
     }
 
     public static Transaction FROM_BANK(Bank bank, String bankClientIBAN, String bankClientName, User toUser,
-            BigDecimal amount, CurrencyCode currencyCode, String subject, LocalDateTime validTo,
-            SignedDocument signedDocument, Tag tag) {
+            BigDecimal amount, CurrencyCode currencyCode, String subject, SignedDocument signedDocument) {
         Transaction transaction = new Transaction();
         transaction.setFromUser(bank);
         transaction.setFromUserIBAN(bankClientIBAN);
@@ -239,9 +213,7 @@ public class Transaction extends EntityBase implements Serializable {
         transaction.setAmount(amount);
         transaction.setCurrencyCode(currencyCode);
         transaction.setSubject(subject);
-        transaction.setValidTo(validTo);
         transaction.setSignedDocument(signedDocument);
-        transaction.setTag(tag);
         transaction.setState(Transaction.State.OK);
         transaction.setType(Transaction.Type.FROM_BANK);
         return transaction;
@@ -254,7 +226,6 @@ public class Transaction extends EntityBase implements Serializable {
         transaction.setState(Transaction.State.OK);
         transaction.setAmount(requestDto.getTotalAmount());
         transaction.setCurrencyCode(requestDto.getCurrencyCode());
-        transaction.setTag(requestDto.getTag());
         transaction.setSubject(subject);
         transaction.setSignedDocument(requestDto.getSignedDocument());
         transaction.setFromUser(fromUser);
@@ -330,15 +301,6 @@ public class Transaction extends EntityBase implements Serializable {
         this.type = type;
     }
 
-    public LocalDateTime getValidTo() {
-        return validTo;
-    }
-
-    public Transaction setValidTo(LocalDateTime validTo) {
-        this.validTo = validTo;
-        return this;
-    }
-
     public String getSubject() {
         return subject;
     }
@@ -395,29 +357,12 @@ public class Transaction extends EntityBase implements Serializable {
         this.fromUserName = fromUser;
     }
 
-    public Boolean getIsTimeLimited() {
-        return isTimeLimited;
-    }
-
-    public void setIsTimeLimited(Boolean isTimeLimited) {
-        this.isTimeLimited = isTimeLimited;
-    }
-
     public List<String> getToUserList() {
         return toUserList;
     }
 
     public void setToUserList(List<String> toUserList) {
         this.toUserList = toUserList;
-    }
-
-    public Tag getTag() {
-        return tag;
-    }
-
-    public Transaction setTag(Tag tag) {
-        this.tag = tag;
-        return this;
     }
 
     public CurrencyBatch getCurrencyBatch() {
@@ -437,11 +382,9 @@ public class Transaction extends EntityBase implements Serializable {
         result.fromUser = transactionParent.fromUser;
         result.fromUserIBAN = transactionParent.fromUserIBAN;
         result.state = transactionParent.state;
-        result.validTo = transactionParent.validTo;
         result.subject = transactionParent.subject;
         result.currencyCode = transactionParent.currencyCode;
         result.type = transactionParent.type;
-        result.tag = transactionParent.tag;
         result.transactionParent = transactionParent;
         result.toUser = toUser;
         result.toUserIBAN = toUserIBAN;
@@ -469,12 +412,6 @@ public class Transaction extends EntityBase implements Serializable {
     public Transaction setSignedDocument(SignedDocument signedDocument) {
         this.signedDocument = signedDocument;
         return this;
-    }
-
-    @PrePersist
-    public void prePersist() {
-        if(this.validTo != null) isTimeLimited = Boolean.TRUE;
-        else isTimeLimited = Boolean.FALSE;
     }
 
 }

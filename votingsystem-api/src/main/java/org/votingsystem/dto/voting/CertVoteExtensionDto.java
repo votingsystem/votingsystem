@@ -7,25 +7,25 @@ public class CertVoteExtensionDto {
 
     private String identityServiceEntity;
     private String votingServiceEntity;
-    private String revocationHashBase64;
+    private String revocationHash;
     private String electionUUID;
 
     public CertVoteExtensionDto() {}
 
-    public CertVoteExtensionDto(String identityServiceEntity, String votingServiceEntity, String revocationHashBase64,
+    public CertVoteExtensionDto(String identityServiceEntity, String votingServiceEntity, String revocationHash,
                                 String electionUUID) {
         this.identityServiceEntity = identityServiceEntity;
         this.votingServiceEntity = votingServiceEntity;
-        this.revocationHashBase64 = revocationHashBase64;
+        this.revocationHash = revocationHash;
         this.electionUUID = electionUUID;
     }
 
-    public String getRevocationHashBase64() {
-        return revocationHashBase64;
+    public String getRevocationHash() {
+        return revocationHash;
     }
 
-    public void setRevocationHashBase64(String revocationHashBase64) {
-        this.revocationHashBase64 = revocationHashBase64;
+    public void setRevocationHash(String revocationHash) {
+        this.revocationHash = revocationHash;
     }
 
     public String getElectionUUID() {

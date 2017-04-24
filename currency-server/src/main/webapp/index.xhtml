@@ -5,13 +5,18 @@
     <ui:define name="head">
     </ui:define>
     <ui:define name="content">
-        <div style="width: 1000px; margin: 30px auto;">
+        <div class="panel-heading">
+            Pruebas PKI
+        </div>
+        <div class="panel-body">
             <button onclick="signAndSend()">signAndSend</button>
             <button onclick="printPKISessionData()">pkiSessionData on console</button>
             <br/>
             <a href="https://voting.ddns.net/currency-server/res/sb2/pages/notifications.html" style="margin: 0 20px 0 20px;">sb2</a>
             <a href="https://voting.ddns.net/currency-server/res/gtl/production/index.html">gtl</a>
+
         </div>
+
         <script>
             //<![CDATA[
                 vs.setMainPageCaption("#{msg.appTitle}");

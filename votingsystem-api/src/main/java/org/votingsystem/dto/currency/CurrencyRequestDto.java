@@ -3,16 +3,13 @@ package org.votingsystem.dto.currency;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.core.type.TypeReference;
 import org.votingsystem.crypto.CertUtils;
 import org.votingsystem.crypto.PEMUtils;
 import org.votingsystem.model.SignedDocument;
-import org.votingsystem.model.currency.Tag;
 import org.votingsystem.throwable.ValidationException;
 import org.votingsystem.util.Constants;
 import org.votingsystem.util.CurrencyCode;
 import org.votingsystem.util.CurrencyOperation;
-import org.votingsystem.util.JSON;
 
 import java.math.BigDecimal;
 import java.security.cert.X509Certificate;
@@ -32,11 +29,9 @@ public class CurrencyRequestDto {
 
     private CurrencyOperation operation = CurrencyOperation.CURRENCY_REQUEST;
     private String subject;
-    private String serverURL;
+    private String entityId;
     private CurrencyCode currencyCode;
-    private Tag tag;
     private BigDecimal totalAmount;
-    private Boolean timeLimited;
     private String UUID;
 
     @JsonIgnore
@@ -50,18 +45,18 @@ public class CurrencyRequestDto {
 
     public CurrencyRequestDto() {}
 
+    public CurrencyRequestDto(BigDecimal totalAmount, CurrencyCode currencyCode, String subject, String entityId) {
+        this.entityId = entityId;
+        this.totalAmount = totalAmount;
+        this.currencyCode = currencyCode;
+        this.subject = subject;
+    }
 
     public static CurrencyRequestDto CREATE_REQUEST(TransactionDto transactionDto, BigDecimal currencyValue,
-                                                    String serverURL) throws Exception {
-        CurrencyRequestDto currencyRequestDto = new CurrencyRequestDto();
-        currencyRequestDto.serverURL = serverURL;
-        currencyRequestDto.subject = transactionDto.getSubject();
-        currencyRequestDto.totalAmount = transactionDto.getAmount();
-        currencyRequestDto.currencyCode = transactionDto.getCurrencyCode();
-        currencyRequestDto.timeLimited = transactionDto.isTimeLimited();
-        currencyRequestDto.tag = new Tag(transactionDto.getTagName());;
+                                                    String entityId) throws Exception {
+        CurrencyRequestDto currencyRequestDto = new CurrencyRequestDto(transactionDto.getAmount(),
+                transactionDto.getCurrencyCode(), transactionDto.getSubject(), entityId);
         currencyRequestDto.UUID = java.util.UUID.randomUUID().toString();
-
         Map<String, org.votingsystem.model.currency.Currency> currencyMap = new HashMap<>();
         Set<String> requestCSRSet = new HashSet<>();
         BigDecimal divideAndRemainder[] = transactionDto.getAmount().divideAndRemainder(currencyValue);
@@ -69,8 +64,8 @@ public class CurrencyRequestDto {
                 "request with remainder - requestAmount ''{0}''  currencyValue ''{{1}}'' remainder ''{{2}}''",
                 transactionDto.getAmount(), currencyValue, divideAndRemainder[1]));
         for(int i = 0; i < divideAndRemainder[0].intValue(); i++) {
-            org.votingsystem.model.currency.Currency currency = new org.votingsystem.model.currency.Currency(serverURL, currencyValue, transactionDto.getCurrencyCode(),
-                    transactionDto.isTimeLimited(), currencyRequestDto.tag);
+            org.votingsystem.model.currency.Currency currency = new org.votingsystem.model.currency.Currency(
+                    entityId, currencyValue, transactionDto.getCurrencyCode());
             requestCSRSet.add(new String(currency.getCertificationRequest().getCsrPEM()));
             currencyMap.put(currency.getRevocationHash(), currency);
         }
@@ -99,20 +94,19 @@ public class CurrencyRequestDto {
         X509Certificate x509Certificate = certificates.iterator().next();
         CurrencyCertExtensionDto certExtensionDto = CertUtils.getCertExtensionData(CurrencyCertExtensionDto.class,
                 x509Certificate, Constants.CURRENCY_OID);
-        org.votingsystem.model.currency.Currency currency = currencyMap.get(certExtensionDto.getHashCertVS()).setState(org.votingsystem.model.currency.Currency.State.OK);
+        org.votingsystem.model.currency.Currency currency = currencyMap.get(certExtensionDto.getRevocationHash()).setState(org.votingsystem.model.currency.Currency.State.OK);
         currency.initSigner(x509CertificatePEM.getBytes());
         return currency;
     }
 
-    public static CurrencyRequestDto validateRequest(byte[] currencyBatchRequest, SignedDocument signedDocument,
+    public static CurrencyRequestDto validateRequest(Set<String> requestCSRSet, SignedDocument signedDocument,
                                                      String entityId) throws Exception {
-        CurrencyRequestDto requestDto = signedDocument.getSignedContent(CurrencyRequestDto.class);
+        CurrencyRequestDto requestDto = signedDocument.getSignedContent(CurrencyRequestDto.class).setRequestCSRSet(requestCSRSet);
         requestDto.signedDocument = signedDocument;
         if(CurrencyOperation.CURRENCY_REQUEST != requestDto.getOperation()) throw new ValidationException(
                 "Expected operation 'CURRENCY_REQUEST' found: " + requestDto.getOperation());
-        if(!entityId.equals(requestDto.getServerURL())) throw new ValidationException("Expected serverURL '" + entityId +
-                "' found: " + requestDto.getServerURL());
-        requestDto.requestCSRSet = JSON.getMapper().readValue(currencyBatchRequest, new TypeReference<Set<String>>() {});
+        if(!entityId.equals(requestDto.getEntityId())) throw new ValidationException("Expected serverURL '" + entityId +
+                "' found: " + requestDto.getEntityId());
         BigDecimal csrRequestAmount = BigDecimal.ZERO;
         Map<String, CurrencyDto> currencyDtoMap = new HashMap<>();
         for(String currencyCSR : requestDto.requestCSRSet) {
@@ -120,12 +114,10 @@ public class CurrencyRequestDto {
             if(!currencyDto.getCurrencyCode().equals(requestDto.getCurrencyCode())) throw new ValidationException(
                     "currency error - CurrencyCSRDto currencyCode: " + currencyDto.getCurrencyCode() +
                             " - csr currencyCode: " + currencyDto.getCurrencyCode());
-            if(!currencyDto.getTag().equals(requestDto.getTag().getName())) throw new ValidationException(
-                    "requestDto tag: " + requestDto.getTag().getName() + " - CurrencyCSRDto tag: " + currencyDto.getTag());
-            if (!entityId.equals(currencyDto.getCurrencyServerURL()))  throw new ValidationException("serverURL error - " +
-                    " serverURL: " + entityId + " - csr serverURL: " + currencyDto.getCurrencyServerURL());
+            if (!entityId.equals(currencyDto.getCurrencyEntity()))  throw new ValidationException("serverURL error - " +
+                    " serverURL: " + entityId + " - csr serverURL: " + currencyDto.getCurrencyEntity());
             csrRequestAmount = csrRequestAmount.add(currencyDto.getAmount());
-            currencyDtoMap.put(currencyDto.getRevocationHashBase64(), currencyDto);
+            currencyDtoMap.put(currencyDto.getRevocationHash(), currencyDto);
         }
         if(requestDto.getTotalAmount().compareTo(csrRequestAmount) != 0) throw new ValidationException(MessageFormat.format(
                 "Amount mismatch - CurrencyRequestDto ''{0}'' - csr ''{1}''", requestDto.getTotalAmount(), csrRequestAmount));
@@ -149,12 +141,12 @@ public class CurrencyRequestDto {
         this.subject = subject;
     }
 
-    public String getServerURL() {
-        return serverURL;
+    public String getEntityId() {
+        return entityId;
     }
 
-    public void setServerURL(String serverURL) {
-        this.serverURL = serverURL;
+    public void setServerURL(String entityId) {
+        this.entityId = entityId;
     }
 
     public CurrencyCode getCurrencyCode() {
@@ -181,28 +173,13 @@ public class CurrencyRequestDto {
         this.totalAmount = totalAmount;
     }
 
-    public Tag getTag() {
-        return tag;
-    }
-
-    public void setTag(Tag tag) {
-        this.tag = tag;
-    }
-
-    public Boolean getTimeLimited() {
-        return timeLimited;
-    }
-
-    public void setTimeLimited(Boolean timeLimited) {
-        this.timeLimited = timeLimited;
-    }
-
     public Set<String> getRequestCSRSet() {
         return requestCSRSet;
     }
 
-    public void setRequestCSRSet(Set<String> requestCSRSet) {
+    public CurrencyRequestDto setRequestCSRSet(Set<String> requestCSRSet) {
         this.requestCSRSet = requestCSRSet;
+        return this;
     }
 
     public Map<String, CurrencyDto> getCurrencyDtoMap() {

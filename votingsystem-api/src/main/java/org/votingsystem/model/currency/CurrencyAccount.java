@@ -24,8 +24,8 @@ import static javax.persistence.GenerationType.IDENTITY;
                 "SELECT account FROM CurrencyAccount account WHERE account.user =:user AND account.type =:type"),
         @NamedQuery(name = CurrencyAccount.FIND_BY_USER, query =
                 "SELECT account FROM CurrencyAccount account WHERE account.user =:user"),
-        @NamedQuery(name = CurrencyAccount.FIND_BY_USER_IBAN_AND_TAG_AND_CURRENCY_CODE_AND_STATE, query =
-                "SELECT account FROM CurrencyAccount account WHERE account.IBAN =:userIBAN and account.tag =:tag " +
+        @NamedQuery(name = CurrencyAccount.FIND_BY_USER_IBAN_AND_CURRENCY_CODE_AND_STATE, query =
+                "SELECT account FROM CurrencyAccount account WHERE account.IBAN =:userIBAN " +
                 "and account.currencyCode =:currencyCode and account.state =:state"),
         @NamedQuery(name = CurrencyAccount.FIND_BY_USER_AND_STATE, query = "SELECT account FROM CurrencyAccount account WHERE " +
                 "account.user =:user and account.state =:state")
@@ -36,8 +36,8 @@ public class CurrencyAccount extends EntityBase implements Serializable {
 
     public static final String FIND_BY_TYPE_AND_USER = "CurrencyAccount.findByTypeAndUser";
     public static final String FIND_BY_USER = "CurrencyAccount.findByUser";
-    public static final String FIND_BY_USER_IBAN_AND_TAG_AND_CURRENCY_CODE_AND_STATE =
-            "CurrencyAccount.findByUserIBANAndTagAndCurrencyCodeAndState";
+    public static final String FIND_BY_USER_IBAN_AND_CURRENCY_CODE_AND_STATE =
+            "CurrencyAccount.findByUserIBANAndCurrencyCodeAndState";
     public static final String FIND_BY_USER_AND_STATE = "CurrencyAccount.findByUserAndState";
 
 
@@ -69,9 +69,6 @@ public class CurrencyAccount extends EntityBase implements Serializable {
     @ManyToOne(fetch=FetchType.LAZY)
     @JoinColumn(name="USER_ID") private User user;
 
-    @ManyToOne(fetch=FetchType.EAGER)
-    @JoinColumn(name="TAG") private Tag tag;
-
     @Column(name="DATE_CREATED", columnDefinition="TIMESTAMP")
     @Convert(converter = LocalDateTimeAttributeConverter.class)
     private LocalDateTime dateCreated;
@@ -82,12 +79,11 @@ public class CurrencyAccount extends EntityBase implements Serializable {
 
     public CurrencyAccount() {}
 
-    public CurrencyAccount(User user, BigDecimal balance, CurrencyCode currencyCode, Tag tag) {
+    public CurrencyAccount(User user, BigDecimal balance, CurrencyCode currencyCode) {
         this.currencyCode = currencyCode;
         this.user = user;
         this.balance = balance;
         this.IBAN = user.getIBAN();
-        this.tag = tag;
     }
 
     public Long getId() {
@@ -149,14 +145,6 @@ public class CurrencyAccount extends EntityBase implements Serializable {
 
     public void setIBAN(String IBAN) {
         this.IBAN = IBAN;
-    }
-
-    public Tag getTag() {
-        return tag;
-    }
-
-    public void setTag(Tag tag) {
-        this.tag = tag;
     }
 
     public State getState() {
