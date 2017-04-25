@@ -2,7 +2,7 @@ package org.votingsystem.dto.metadata;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import org.votingsystem.crypto.CertUtils;
+import org.votingsystem.crypto.CertificateUtils;
 import org.votingsystem.crypto.PEMUtils;
 import org.votingsystem.model.Certificate;
 
@@ -40,7 +40,7 @@ public class CertificateDto implements Serializable {
     public CertificateDto(X509Certificate x509Cert) throws CertificateException, NoSuchAlgorithmException,
             NoSuchProviderException, IOException {
         serialNumber = x509Cert.getSerialNumber().toString();
-        isRoot = CertUtils.isSelfSigned(x509Cert);
+        isRoot = CertificateUtils.isSelfSigned(x509Cert);
         x509CertificatePEM = new String(PEMUtils.getPEMEncoded (x509Cert), "UTF-8");
         subjectDN = x509Cert.getSubjectDN().toString();
         issuerDN = x509Cert.getIssuerDN().toString();
@@ -50,7 +50,7 @@ public class CertificateDto implements Serializable {
     }
 
     public CertificateDto(Certificate certificate) throws Exception {
-        this(CertUtils.loadCertificate(certificate.getContent()));
+        this(CertificateUtils.loadCertificate(certificate.getContent()));
         type = certificate.getType();
         state = certificate.getState();
         if(certificate.getAuthorityCertificate() != null) issuerSerialNumber = certificate

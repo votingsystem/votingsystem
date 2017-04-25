@@ -71,5 +71,5 @@ public interface ConfigCurrencyServer {
 
     public X509Certificate getSigningCert();
 
-    public boolean isAdmin(User user);
+    public boolean isAdmin(User user) throws ValidationException;
 }

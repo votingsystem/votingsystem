@@ -65,7 +65,7 @@ public class ShopExampleEJB {
             try {
                 if(responseDto.getCurrencyChangeCert() != null) {
                     X509Certificate currencyCert = PEMUtils.fromPEMToX509Cert(responseDto.getCurrencyChangeCert().getBytes());
-                    CurrencyCertExtensionDto certExtensionDto = CertUtils.getCertExtensionData(CurrencyCertExtensionDto.class,
+                    CurrencyCertExtensionDto certExtensionDto = CertificateUtils.getCertExtensionData(CurrencyCertExtensionDto.class,
                             currencyCert, Constants.CURRENCY_OID);
                     Currency currency = requestBundle.getCurrency(certExtensionDto.getRevocationHash());
                     currency.initSigner(responseDto.getCurrencyChangeCert().getBytes());

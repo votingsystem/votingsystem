@@ -82,7 +82,8 @@ public class Wallet {
     private File getWalletFile(char[] password) throws NoSuchAlgorithmException {
         String passwordHashHex = StringUtils.toHex(
                 HashUtils.getHashBase64(new String(password).getBytes(), Constants.DATA_DIGEST_ALGORITHM));
-        String walletFileName = Constants.WALLET_FILE_NAME + "_" + passwordHashHex + Constants.WALLET_FILE_EXTENSION;
+        String walletFileName = Constants.WALLET_FILE_NAME + "_" + passwordHashHex.substring(0, 10) +
+                Constants.WALLET_FILE_EXTENSION;
         return new File(walletDirPath + File.separator + walletFileName);
     }
     

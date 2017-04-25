@@ -1,6 +1,5 @@
 package org.votingsystem.ejb;
 
-import org.votingsystem.crypto.CertUtils;
 import org.votingsystem.crypto.CertificateUtils;
 import org.votingsystem.dto.voting.CertVoteExtensionDto;
 import org.votingsystem.model.Certificate;
@@ -75,7 +74,7 @@ public class SignerInfoEJB implements SignerInfoService {
                     break;
                 case ANON_ELECTOR:
                     if(certificates.isEmpty()) {
-                        CertVoteExtensionDto certExtensionDto = CertUtils.getCertExtensionData(CertVoteExtensionDto.class,
+                        CertVoteExtensionDto certExtensionDto = CertificateUtils.getCertExtensionData(CertVoteExtensionDto.class,
                                 x509CertSigner, Constants.VOTE_OID);
                         Certificate certificate = Certificate.VOTE(certExtensionDto.getRevocationHash(),
                                 x509CertSigner, certificateCA).setCertVoteExtension(certExtensionDto);
@@ -113,8 +112,7 @@ public class SignerInfoEJB implements SignerInfoService {
             } else {
                 signerCertificate = certificates.iterator().next();
             }
-            signer.setX509Certificate(x509CertSigner).setCertificate(signerCertificate)
-                    .setCertificateCA(certificateCA);
+            signer.setX509Certificate(x509CertSigner).setCertificate(signerCertificate).setCertificateCA(certificateCA);
             log.log(Level.FINE, "NumIdAndType: " + signer.getNumIdAndType() + " - cert Authority: " + certificateCA.getSubjectDN());
             return signer;
         } catch (NoSuchAlgorithmException | NoSuchProviderException | CertificateException ex) {
@@ -134,7 +132,7 @@ public class SignerInfoEJB implements SignerInfoService {
      * @throws Exception
      */
     public Certificate verifyCertificate(X509Certificate certToCheck) throws CertificateValidationException {
-        PKIXCertPathValidatorResult validatorResult = CertUtils.verifyCertificate(
+        PKIXCertPathValidatorResult validatorResult = CertificateUtils.verifyCertificate(
                 config.getTrustedCertAnchors(), false, Arrays.asList(certToCheck));
         X509Certificate certCaResult = validatorResult.getTrustAnchor().getTrustedCert();
         return config.getCACertificate(certCaResult.getSerialNumber().longValue());

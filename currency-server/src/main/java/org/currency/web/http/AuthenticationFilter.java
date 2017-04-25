@@ -12,6 +12,7 @@ import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.ext.Provider;
 import java.io.IOException;
 import java.security.Principal;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 @Provider
@@ -27,25 +28,29 @@ public class AuthenticationFilter implements ContainerRequestFilter {
     public void filter(ContainerRequestContext requestContext) throws IOException {
         CurrencyPrincipal principal = (CurrencyPrincipal) requestContext.getSecurityContext().getUserPrincipal();
         if(principal != null) {
-            if(config.isAdmin(principal.getUser())) {
-                requestContext.setSecurityContext(new SecurityContext() {
+            try {
+                if(config.isAdmin(principal.getUser())) {
+                    requestContext.setSecurityContext(new SecurityContext() {
 
-                    @Override public Principal getUserPrincipal() {
-                        return principal;
-                    }
+                        @Override public Principal getUserPrincipal() {
+                            return principal;
+                        }
 
-                    @Override public boolean isUserInRole(String role) {
-                        return AuthRole.ADMIN_ROLES.contains(role);
-                    }
+                        @Override public boolean isUserInRole(String role) {
+                            return AuthRole.ADMIN_ROLES.contains(role);
+                        }
 
-                    @Override public boolean isSecure() {
-                        return requestContext.getSecurityContext().isSecure();
-                    }
+                        @Override public boolean isSecure() {
+                            return requestContext.getSecurityContext().isSecure();
+                        }
 
-                    @Override public String getAuthenticationScheme() {
-                        return null;
-                    }
-                });
+                        @Override public String getAuthenticationScheme() {
+                            return null;
+                        }
+                    });
+                }
+            } catch (Exception ex) {
+                log.log(Level.SEVERE, ex.getMessage(), ex);
             }
         }
     }

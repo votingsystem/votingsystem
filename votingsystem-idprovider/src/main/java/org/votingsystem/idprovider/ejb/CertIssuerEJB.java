@@ -185,7 +185,7 @@ public class CertIssuerEJB {
     @TransactionAttribute(REQUIRES_NEW)
     public Certificate signCSR(User user, PKCS10CertificationRequest csr, String organizationalUnit, LocalDateTime dateBegin,
                LocalDateTime dateFinish, Certificate.Type certificateType, String revocationHash) throws Exception {
-        X509Certificate issuedCert = CertUtils.signCSR(csr, organizationalUnit, certIssuerPrivateKey,
+        X509Certificate issuedCert = CertificateUtils.signCSR(csr, organizationalUnit, certIssuerPrivateKey,
                 certIssuerSigningCert, dateBegin, dateFinish, config.getOcspServerURL());
         Certificate result = null;
         switch (certificateType) {
@@ -266,7 +266,7 @@ public class CertIssuerEJB {
         }
 
         PKCS10CertificationRequest csr = PEMUtils.fromPEMToPKCS10CertificationRequest(csrBytes);
-        CertVoteExtensionDto certExtensionDto = CertUtils.getCertExtensionData(CertVoteExtensionDto.class, csr,
+        CertVoteExtensionDto certExtensionDto = CertificateUtils.getCertExtensionData(CertVoteExtensionDto.class, csr,
                 Constants.VOTE_OID);
         if (!certExtensionDto.getElectionUUID().equals(election.getUUID())) {
             throw new ValidationException("validateCSRVote - expected event UUID: " + election.getUUID() + " - found:" +
@@ -285,7 +285,7 @@ public class CertIssuerEJB {
         LocalDateTime validFrom = election.getDateBegin();
         LocalDateTime validTo = election.getDateFinish();
 
-        CsrResponse csrResponse = new CsrResponse(CertUtils.getPublicKey(csr), null, revocationHash);
+        CsrResponse csrResponse = new CsrResponse(CertificateUtils.getPublicKey(csr), null, revocationHash);
         PKCS10CertificationRequest pkcs10CertReq = PEMUtils.fromPEMToPKCS10CertificationRequest(csrBytes);
         Certificate issuedCert =  signCSR(null, pkcs10CertReq, config.getEntityId(),
                 validFrom, validTo, Certificate.Type.VOTE, csrResponse.getRevocationHash());
@@ -312,7 +312,7 @@ public class CertIssuerEJB {
     public UserCSRRequest saveUserCSR(byte[] csrBytes) throws Exception {
         PKCS10CertificationRequest csr = PEMUtils.fromPEMToPKCS10CertificationRequest(csrBytes);
         User user = User.getUser(User.class, csr.getSubject());
-        CertExtensionDto certExtensionDto = CertUtils.getCertExtensionData(CertExtensionDto.class, csr, Constants.DEVICE_OID);
+        CertExtensionDto certExtensionDto = CertificateUtils.getCertExtensionData(CertExtensionDto.class, csr, Constants.DEVICE_OID);
         DeviceDto deviceDto = new DeviceDto(user, certExtensionDto);
         Device device = checkDeviceFromCSR(deviceDto);
         Query query = em.createQuery("select r from UserCSRRequest r where r.device.UUID =:UUID and " +
@@ -370,10 +370,10 @@ public class CertIssuerEJB {
         ZonedDateTime dateBegin = ZonedDateTime.now();
         ZonedDateTime dateFinish = dateBegin.plus(1, ChronoUnit.DAYS).toLocalDate().atStartOfDay(ZoneId.of("UTC"))
                 .withZoneSameInstant(ZoneId.systemDefault());
-        X509Certificate browserCert = CertUtils.signCSR(browserCSR, "browser-certificate", certIssuerPrivateKey,
+        X509Certificate browserCert = CertificateUtils.signCSR(browserCSR, "browser-certificate", certIssuerPrivateKey,
                 certIssuerSigningCert, dateBegin.toLocalDateTime(), dateFinish.toLocalDateTime(),
                 config.getOcspServerURL());
-        X509Certificate mobileCert = CertUtils.signCSR(mobileCSR, "mobile-certificate", certIssuerPrivateKey,
+        X509Certificate mobileCert = CertificateUtils.signCSR(mobileCSR, "mobile-certificate", certIssuerPrivateKey,
                 certIssuerSigningCert, dateBegin.toLocalDateTime(), dateFinish.toLocalDateTime(),
                 config.getOcspServerURL());
 

@@ -1,7 +1,7 @@
 package org.votingsystem.model.voting;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import org.votingsystem.crypto.CertUtils;
+import org.votingsystem.crypto.CertificateUtils;
 import org.votingsystem.dto.metadata.MetaInfDto;
 import org.votingsystem.dto.voting.ElectionDto;
 import org.votingsystem.dto.voting.ElectionOptionDto;
@@ -271,7 +271,7 @@ public class Election extends EntityBase implements Serializable {
 
     public Set<X509Certificate> getTrustedCerts() throws Exception {
         Set<X509Certificate> eventTrustedCerts = new HashSet<>();
-        eventTrustedCerts.add(CertUtils.loadCertificate(certificate.getContent()));
+        eventTrustedCerts.add(CertificateUtils.loadCertificate(certificate.getContent()));
         return eventTrustedCerts;
     }
 

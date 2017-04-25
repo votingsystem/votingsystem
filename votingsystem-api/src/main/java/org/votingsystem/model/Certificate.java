@@ -1,7 +1,7 @@
 package org.votingsystem.model;
 
 
-import org.votingsystem.crypto.CertUtils;
+import org.votingsystem.crypto.CertificateUtils;
 import org.votingsystem.dto.metadata.MetaInfDto;
 import org.votingsystem.dto.voting.CertVoteExtensionDto;
 import org.votingsystem.model.converter.LocalDateTimeAttributeConverter;
@@ -130,7 +130,7 @@ public class Certificate implements Serializable {
     public static Certificate AUTHORITY(X509Certificate x509Cert, Type type, MetaInfDto metaInf) throws CertificateException,
             NoSuchAlgorithmException, NoSuchProviderException {
         Certificate result = new Certificate(x509Cert);
-        result.isRoot = CertUtils.isSelfSigned(x509Cert);
+        result.isRoot = CertificateUtils.isSelfSigned(x509Cert);
         result.subjectDN = x509Cert.getSubjectDN().toString();
         result.type = type;
         result.state = Certificate.State.OK;
@@ -301,7 +301,7 @@ public class Certificate implements Serializable {
     }
 
     public X509Certificate getX509Certificate() throws Exception {
-        return CertUtils.loadCertificate(content);
+        return CertificateUtils.loadCertificate(content);
     }
 
     public LocalDateTime getStateDate() {

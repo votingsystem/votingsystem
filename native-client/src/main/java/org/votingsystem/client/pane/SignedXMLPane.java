@@ -12,7 +12,7 @@ import org.votingsystem.client.dialog.ProgressDialog;
 import org.votingsystem.client.util.DocumentContainer;
 import org.votingsystem.client.util.Formatter;
 import org.votingsystem.client.util.Utils;
-import org.votingsystem.crypto.CertUtils;
+import org.votingsystem.crypto.CertificateUtils;
 import org.votingsystem.crypto.SignedFile;
 import org.votingsystem.dto.ResponseDto;
 import org.votingsystem.dto.voting.CertVoteExtensionDto;
@@ -139,7 +139,7 @@ public class SignedXMLPane extends GridPane implements DocumentContainer {
 
         @Override protected ResponseDto call() throws Exception {
             updateMessage(Messages.currentInstance().get("checkVoteLbl"));
-            CertVoteExtensionDto certExtensionDto = CertUtils.getCertExtensionData(
+            CertVoteExtensionDto certExtensionDto = CertificateUtils.getCertExtensionData(
                     CertVoteExtensionDto.class, x509AnonymousCert, Constants.VOTE_OID);
 
             String voteStateServiceURL = OperationType.VOTE_REPOSITORY.getUrl(MainApp.instance().getVotingServiceEntityId());

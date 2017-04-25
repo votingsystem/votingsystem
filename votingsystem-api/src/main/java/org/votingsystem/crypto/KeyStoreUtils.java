@@ -31,7 +31,7 @@ public class KeyStoreUtils {
         KeyStore store = KeyStore.getInstance("JKS");
         store.load(null, null);
         KeyPair rootPair = KeyGenerator.INSTANCE.genKeyPair();
-        X509Certificate rootCert = CertUtils.generateV3RootCert(rootPair, dateBegin, dateFinish, strSubjectDN);
+        X509Certificate rootCert = CertificateUtils.generateV3RootCert(rootPair, dateBegin, dateFinish, strSubjectDN);
         X500PrivateCredential rootCredential = new X500PrivateCredential(rootCert, rootPair.getPrivate(), rootAlias);
         store.setKeyEntry(rootCredential.getAlias(), rootCredential.getPrivateKey(), password,
                 new Certificate[] {rootCredential.getCertificate()});
@@ -44,7 +44,7 @@ public class KeyStoreUtils {
         KeyStore store = KeyStore.getInstance("JKS");
         store.load(null, null);
         KeyPair endPair = KeyGenerator.INSTANCE.genKeyPair();
-        X509Certificate endCert = CertUtils.generateUserCert(endPair.getPublic(),
+        X509Certificate endCert = CertificateUtils.generateUserCert(endPair.getPublic(),
                 rootCredential.getPrivateKey(), rootCredential.getCertificate(),
                 dateBegin, dateFinish, endEntitySubjectDN, ocspServer);
         X500PrivateCredential endCredential = new X500PrivateCredential(
@@ -60,7 +60,7 @@ public class KeyStoreUtils {
         KeyStore store = KeyStore.getInstance("JKS");
         store.load(null, null);
         KeyPair endPair = KeyGenerator.INSTANCE.genKeyPair();
-        X509Certificate endCert = CertUtils.generateUserCert(endPair.getPublic(),
+        X509Certificate endCert = CertificateUtils.generateUserCert(endPair.getPublic(),
                 rootCredential.getPrivateKey(), rootCredential.getCertificate(),
                 dateBegin, dateFinish, endEntitySubjectDN, ocspServerURL);
         X500PrivateCredential endCredential = new X500PrivateCredential(
@@ -76,7 +76,7 @@ public class KeyStoreUtils {
         KeyStore store = KeyStore.getInstance("JKS");
         store.load(null, null);
         KeyPair endPair = KeyGenerator.INSTANCE.genKeyPair();
-        X509Certificate endCert = CertUtils.generateTimeStampServerCert(endPair.getPublic(),
+        X509Certificate endCert = CertificateUtils.generateTimeStampServerCert(endPair.getPublic(),
                 rootCredential.getPrivateKey(), rootCredential.getCertificate(),
                 dateBegin, dateFinish, endEntitySubjectDN, ocspServerURL);
         X500PrivateCredential endCredential = new X500PrivateCredential(

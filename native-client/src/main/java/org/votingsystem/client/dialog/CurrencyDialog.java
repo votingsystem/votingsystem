@@ -11,9 +11,8 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Window;
 import org.controlsfx.glyphfont.FontAwesome;
 import org.votingsystem.client.MainApp;
-import org.votingsystem.client.util.MsgUtils;
 import org.votingsystem.client.util.Utils;
-import org.votingsystem.crypto.CertUtils;
+import org.votingsystem.crypto.CertificateUtils;
 import org.votingsystem.dto.ResponseDto;
 import org.votingsystem.dto.metadata.KeyDto;
 import org.votingsystem.dto.metadata.MetadataDto;
@@ -67,7 +66,7 @@ public class CurrencyDialog extends AppDialog {
                 for (KeyDto keyDto : currencyIssuerKeys) {
                     trustAnchors.add(new TrustAnchor(keyDto.getX509Certificate(), null));
                 }
-                PKIXCertPathValidatorResult validatorResult = CertUtils.verifyCertificate(trustAnchors, false, Arrays.asList(
+                PKIXCertPathValidatorResult validatorResult = CertificateUtils.verifyCertificate(trustAnchors, false, Arrays.asList(
                         currency.getCertificationRequest().getCertificate()));
                 X509Certificate certCaResult = validatorResult.getTrustAnchor().getTrustedCert();
                 PlatformImpl.runLater(statusChecker);

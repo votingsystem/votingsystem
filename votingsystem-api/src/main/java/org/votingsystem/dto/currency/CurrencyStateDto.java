@@ -3,7 +3,7 @@ package org.votingsystem.dto.currency;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import org.votingsystem.crypto.CertUtils;
+import org.votingsystem.crypto.CertificateUtils;
 import org.votingsystem.crypto.PEMUtils;
 import org.votingsystem.model.currency.Currency;
 import org.votingsystem.util.CurrencyCode;
@@ -44,7 +44,7 @@ public class CurrencyStateDto {
         if(currency.getCurrencyBatch() != null)
             batchUUID = currency.getCurrencyBatch().getBatchUUID();
         if(currency.getContent() != null) {
-            X509Certificate certX509 = CertUtils.loadCertificate(currency.getContent());
+            X509Certificate certX509 = CertificateUtils.loadCertificate(currency.getContent());
             currencyCert = new String(PEMUtils.getPEMEncoded (certX509));
         } else if(currency.getX509AnonymousCert() != null) {
             currencyCert = new String(PEMUtils.getPEMEncoded (currency.getX509AnonymousCert()));
@@ -61,11 +61,11 @@ public class CurrencyStateDto {
         for(Currency currency : batchCurrencyList) {
             if(currency.getType() == Currency.Type.LEFT_OVER && currency.getDateCreated().isAfter(
                     dateCreated.toLocalDateTime())) {
-                X509Certificate certX509 = CertUtils.loadCertificate(currency.getContent());
+                X509Certificate certX509 = CertificateUtils.loadCertificate(currency.getContent());
                 leftOverCert = new String(PEMUtils.getPEMEncoded (certX509));
             } else if(currency.getType() == Currency.Type.CHANGE && currency.getDateCreated().isAfter(
                     dateCreated.toLocalDateTime())) {
-                X509Certificate certX509 = CertUtils.loadCertificate(currency.getContent());
+                X509Certificate certX509 = CertificateUtils.loadCertificate(currency.getContent());
                 currencyChangeCert = new String(PEMUtils.getPEMEncoded (certX509));
             }
         }

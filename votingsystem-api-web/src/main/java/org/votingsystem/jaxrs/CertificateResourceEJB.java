@@ -5,7 +5,7 @@ import org.hibernate.Session;
 import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
-import org.votingsystem.crypto.CertUtils;
+import org.votingsystem.crypto.CertificateUtils;
 import org.votingsystem.crypto.PEMUtils;
 import org.votingsystem.dto.CertificateDto;
 import org.votingsystem.dto.ResultListDto;
@@ -59,7 +59,7 @@ public class CertificateResourceEJB {
             return Response.status(Response.Status.NOT_FOUND).entity("Revocation hash: " + revocationHash +
                     " not found").build();
         }
-        X509Certificate certX509 = CertUtils.loadCertificate(certificates.iterator().next().getContent());
+        X509Certificate certX509 = CertificateUtils.loadCertificate(certificates.iterator().next().getContent());
         return Response.ok().entity(PEMUtils.getPEMEncoded (certX509)).build();
     }
 
@@ -73,7 +73,7 @@ public class CertificateResourceEJB {
             return Response.status(Response.Status.NOT_FOUND).entity("Cert with uuid: " + uuid +
                     " not found").build();
         }
-        X509Certificate certX509 = CertUtils.loadCertificate(certificates.iterator().next().getContent());
+        X509Certificate certX509 = CertificateUtils.loadCertificate(certificates.iterator().next().getContent());
         return Response.ok().entity(PEMUtils.getPEMEncoded (certX509)).build();
     }
 
@@ -90,7 +90,7 @@ public class CertificateResourceEJB {
             if(certificates.isEmpty()) {
                 return Response.status(Response.Status.NOT_FOUND).entity("userWithoutCert - userId: " + userId).build();
             }
-            X509Certificate certX509 = CertUtils.loadCertificate (certificates.iterator().next().getContent());
+            X509Certificate certX509 = CertificateUtils.loadCertificate (certificates.iterator().next().getContent());
             return Response.ok().entity(PEMUtils.getPEMEncoded (certX509)).build();
         }
     }

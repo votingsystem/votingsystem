@@ -3,7 +3,7 @@ package org.currency.web.ejb;
 import eu.europa.esig.dss.x509.CertificateToken;
 import org.bouncycastle.pkcs.PKCS10CertificationRequest;
 import org.currency.web.util.AuditLogger;
-import org.votingsystem.crypto.CertUtils;
+import org.votingsystem.crypto.CertificateUtils;
 import org.votingsystem.crypto.PEMUtils;
 import org.votingsystem.dto.currency.CurrencyCertExtensionDto;
 import org.votingsystem.dto.currency.CurrencyDto;
@@ -90,7 +90,7 @@ public class CurrencyIssuerEJB {
         Set<String> issuedCertSet = new HashSet<>();
         try {
             for(CurrencyDto currencyDto : requestDto.getCurrencyDtoMap().values()) {
-                X509Certificate issuedCert = CertUtils.signCSR(currencyDto.getCsrPKCS10(), null, certIssuerPrivateKey,
+                X509Certificate issuedCert = CertificateUtils.signCSR(currencyDto.getCsrPKCS10(), null, certIssuerPrivateKey,
                         certIssuerSigningCert, timePeriod.getDateFrom().toLocalDateTime(),
                         timePeriod.getDateTo().toLocalDateTime(), config.getOcspServerURL());
                 Currency currency = Currency.FROM_CERT(issuedCert, authorityCertificate);
@@ -115,7 +115,7 @@ public class CurrencyIssuerEJB {
                 CurrencyBatch currencyBatch, int currencyIssuedLiveInYears) throws CertificateRequestException {
         CurrencyCertExtensionDto certExtensionDto = null;
         try {
-            certExtensionDto = CertUtils.getCertExtensionData(CurrencyCertExtensionDto.class, csrReq, Constants.CURRENCY_OID);
+            certExtensionDto = CertificateUtils.getCertExtensionData(CurrencyCertExtensionDto.class, csrReq, Constants.CURRENCY_OID);
         } catch (Exception ex) {
             throw new CertificateRequestException(ex.getMessage(), ex);
         }
@@ -126,7 +126,7 @@ public class CurrencyIssuerEJB {
         ZonedDateTime dateTo = dateFrom.plus(currencyIssuedLiveInYears, ChronoUnit.YEARS);
         Interval timePeriod = new Interval(dateFrom, dateTo);
         try {
-            X509Certificate issuedCert = CertUtils.signCSR(csrReq, null, certIssuerPrivateKey,
+            X509Certificate issuedCert = CertificateUtils.signCSR(csrReq, null, certIssuerPrivateKey,
                     certIssuerSigningCert, timePeriod.getDateFrom().toLocalDateTime(),
                     timePeriod.getDateTo().toLocalDateTime(), config.getOcspServerURL());
             Currency currency = Currency.FROM_CERT(issuedCert,authorityCertificate).setType(type).setCurrencyBatch(currencyBatch);

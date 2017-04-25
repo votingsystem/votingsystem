@@ -2,7 +2,7 @@ package org.votingsystem.testlib.xml;
 
 
 import org.kxml2.kdom.Element;
-import org.votingsystem.crypto.CertUtils;
+import org.votingsystem.crypto.CertificateUtils;
 import org.votingsystem.util.Constants;
 
 import java.security.cert.X509Certificate;
@@ -104,7 +104,7 @@ public class XmlSignature {
 
     public XmlSignature setSigningCertificate(X509Certificate signingCertificate) throws Exception {
         this.signingCertificate = signingCertificate;
-        String certExtData = CertUtils.getCertExtensionData(signingCertificate, Constants.ANON_CERT_OID);
+        String certExtData = CertificateUtils.getCertExtensionData(signingCertificate, Constants.ANON_CERT_OID);
         if(certExtData != null)
             setSigningCertSelfSigned(Boolean.valueOf(certExtData));
         return this;

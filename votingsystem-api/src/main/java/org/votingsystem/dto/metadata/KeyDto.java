@@ -7,7 +7,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlText;
-import org.votingsystem.crypto.CertUtils;
+import org.votingsystem.crypto.CertificateUtils;
 
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
@@ -73,7 +73,7 @@ public class KeyDto {
             return null;
         else {
             byte[] certEncoded = Base64.getDecoder().decode(x509CertificateBase64);
-            return CertUtils.loadCertificate(certEncoded);
+            return CertificateUtils.loadCertificate(certEncoded);
         }
     }
 

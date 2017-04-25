@@ -1,6 +1,6 @@
 package org.votingsystem.model;
 
-import org.votingsystem.crypto.CertUtils;
+import org.votingsystem.crypto.CertificateUtils;
 import org.votingsystem.dto.CertExtensionDto;
 import org.votingsystem.dto.DeviceDto;
 import org.votingsystem.model.converter.LocalDateTimeAttributeConverter;
@@ -205,7 +205,7 @@ public class Device extends EntityBase implements Serializable {
 
     public X509Certificate getX509Certificate() throws Exception {
         if(x509Certificate == null && certificate != null)
-            x509Certificate = CertUtils.loadCertificate(certificate.getContent());
+            x509Certificate = CertificateUtils.loadCertificate(certificate.getContent());
         return x509Certificate;
     }
 
@@ -224,7 +224,7 @@ public class Device extends EntityBase implements Serializable {
 
     public Device updateCertInfo (X509Certificate certificate) throws Exception {
         this.x509Certificate = certificate;
-        CertExtensionDto extensionDto = CertUtils.getCertExtensionData(CertExtensionDto.class, certificate,
+        CertExtensionDto extensionDto = CertificateUtils.getCertExtensionData(CertExtensionDto.class, certificate,
                 Constants.DEVICE_OID);
         return updateCertInfo(extensionDto);
     }

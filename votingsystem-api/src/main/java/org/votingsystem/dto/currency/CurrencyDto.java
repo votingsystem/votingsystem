@@ -5,7 +5,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import org.bouncycastle.asn1.pkcs.CertificationRequestInfo;
 import org.bouncycastle.pkcs.PKCS10CertificationRequest;
-import org.votingsystem.crypto.CertUtils;
+import org.votingsystem.crypto.CertificateUtils;
 import org.votingsystem.crypto.CertificationRequest;
 import org.votingsystem.model.currency.Currency;
 import org.votingsystem.throwable.ValidationException;
@@ -69,7 +69,7 @@ public class CurrencyDto implements Serializable {
         this.csrPKCS10 = csrPKCS10;
         CertificationRequestInfo info = csrPKCS10.toASN1Structure().getCertificationRequestInfo();
         String subjectDN = info.getSubject().toString();
-        CurrencyCertExtensionDto certExtensionDto = CertUtils.getCertExtensionData(CurrencyCertExtensionDto.class,
+        CurrencyCertExtensionDto certExtensionDto = CertificateUtils.getCertExtensionData(CurrencyCertExtensionDto.class,
                 csrPKCS10, Constants.CURRENCY_OID);
         if(certExtensionDto == null) throw new ValidationException("error missing cert extension data");
         currencyEntity = certExtensionDto.getCurrencyEntity();

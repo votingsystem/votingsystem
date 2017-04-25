@@ -183,7 +183,7 @@ public class CertificationRequest implements java.io.Serializable {
         byte[] certificateBytes = (byte[]) s.readObject();
         if(certificateBytes != null) {
             try {
-                certificate = CertUtils.loadCertificate(certificateBytes);
+                certificate = CertificateUtils.loadCertificate(certificateBytes);
             } catch(Exception ex) {
                 ex.printStackTrace();
             }

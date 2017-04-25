@@ -7,8 +7,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  */
 public enum CurrencyOperation implements SystemOperation {
 
-    @JsonProperty("BANK_NEW")
-    BANK_NEW("/api/user/new-bank"),
     @JsonProperty("CLOSE_SESSION")
     CLOSE_SESSION(null),
     @JsonProperty("CURRENCY_WALLET_CHANGE")
@@ -50,6 +48,8 @@ public enum CurrencyOperation implements SystemOperation {
     QR_INFO("/api/currency-qr/info"),
     @JsonProperty("REGISTER_DEVICE")
     REGISTER_DEVICE("/api/cert-issuer/register-device"),
+    @JsonProperty("REGISTER_BANK")
+    REGISTER_BANK(null),
     @JsonProperty("GET_SESSION_CERTIFICATION")
     GET_SESSION_CERTIFICATION("/api/cert-issuer/mobile-browser-session"),
     @JsonProperty("VALIDATE_SESSION_CERTIFICATES")

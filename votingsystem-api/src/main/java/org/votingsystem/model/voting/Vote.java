@@ -2,7 +2,7 @@ package org.votingsystem.model.voting;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.bouncycastle.tsp.TimeStampToken;
-import org.votingsystem.crypto.CertUtils;
+import org.votingsystem.crypto.CertificateUtils;
 import org.votingsystem.dto.voting.CertVoteExtensionDto;
 import org.votingsystem.model.Certificate;
 import org.votingsystem.model.EntityBase;
@@ -265,7 +265,7 @@ public class Vote extends EntityBase implements Serializable {
     public Vote loadSignatureData(X509Certificate x509Certificate, TimeStampToken timeStampToken) throws Exception {
         this.timeStampToken = timeStampToken;
         this.x509Certificate = x509Certificate;
-        CertVoteExtensionDto certExtensionDto = CertUtils.getCertExtensionData(CertVoteExtensionDto.class,
+        CertVoteExtensionDto certExtensionDto = CertificateUtils.getCertExtensionData(CertVoteExtensionDto.class,
                 x509Certificate, Constants.VOTE_OID);
         this.electionUUID = certExtensionDto.getElectionUUID();
         this.identityServiceEntity = certExtensionDto.getIdentityServiceEntity();

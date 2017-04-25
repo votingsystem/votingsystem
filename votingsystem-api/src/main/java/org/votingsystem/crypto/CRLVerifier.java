@@ -52,7 +52,7 @@ public class CRLVerifier {
     public static String getCRLURL(X509Certificate certificate) throws CertificateParsingException {
         ASN1Primitive obj;
         try {
-            obj = CertUtils.getExtensionValue(certificate, Extension.cRLDistributionPoints.getId());
+            obj = CertificateUtils.getExtensionValue(certificate, Extension.cRLDistributionPoints.getId());
         } catch (IOException e) {
             obj = null;
         }

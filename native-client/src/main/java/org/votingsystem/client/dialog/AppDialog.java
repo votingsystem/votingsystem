@@ -25,7 +25,6 @@ public class AppDialog {
     private DecoratedPane decoratedPane;
 
     public AppDialog(Stage stage) throws IOException {
-        stage.initStyle(StageStyle.UNDECORATED);
         stage.initStyle(StageStyle.TRANSPARENT);
         stage.setResizable(false);
         stage.getIcons().add(Utils.getIconFromResources(Utils.APPLICATION_ICON));

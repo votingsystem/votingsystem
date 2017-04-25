@@ -1,6 +1,6 @@
 package org.votingsystem.model.currency;
 
-import org.votingsystem.crypto.CertUtils;
+import org.votingsystem.crypto.CertificateUtils;
 import org.votingsystem.crypto.CertificationRequest;
 import org.votingsystem.crypto.HashUtils;
 import org.votingsystem.dto.currency.CurrencyCertExtensionDto;
@@ -179,7 +179,7 @@ public class Currency extends EntityBase implements Serializable  {
         this.x509AnonymousCert = x509AnonymousCert;
         content = x509AnonymousCert.getEncoded();
         serialNumber = x509AnonymousCert.getSerialNumber().longValue();
-        certExtensionDto = CertUtils.getCertExtensionData(CurrencyCertExtensionDto.class,
+        certExtensionDto = CertificateUtils.getCertExtensionData(CurrencyCertExtensionDto.class,
                 x509AnonymousCert, Constants.CURRENCY_OID);
         if(certExtensionDto == null)
             throw new ValidationException("error missing cert extension data");

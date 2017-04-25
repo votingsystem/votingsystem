@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import org.bouncycastle.pkcs.PKCS10CertificationRequest;
-import org.votingsystem.crypto.CertUtils;
+import org.votingsystem.crypto.CertificateUtils;
 import org.votingsystem.crypto.PEMUtils;
 import org.votingsystem.model.SignedDocument;
 import org.votingsystem.model.currency.CurrencyBatch;
@@ -129,7 +129,7 @@ public class CurrencyBatchDto {
         CurrencyCertExtensionDto certExtensionDto = null;
         if(leftOverCSR != null) {
             leftOverCsr = PEMUtils.fromPEMToPKCS10CertificationRequest(leftOverCSR.getBytes());
-            certExtensionDto = CertUtils.getCertExtensionData(CurrencyCertExtensionDto.class,
+            certExtensionDto = CertificateUtils.getCertExtensionData(CurrencyCertExtensionDto.class,
                     leftOverCsr, Constants.CURRENCY_OID);
             if(leftOver.compareTo(certExtensionDto.getAmount()) != 0) throw new ValidationException(
                     "leftOver 'amount' mismatch - request: " + leftOver + " - csr: " + certExtensionDto.getAmount());
@@ -142,7 +142,7 @@ public class CurrencyBatchDto {
                 "leftOver request: " + leftOver + " without CSR");
         if(currencyChangeCSR != null) {
             currencyChangeCsr = PEMUtils.fromPEMToPKCS10CertificationRequest(currencyChangeCSR.getBytes());
-            certExtensionDto = CertUtils.getCertExtensionData(CurrencyCertExtensionDto.class,
+            certExtensionDto = CertificateUtils.getCertExtensionData(CurrencyCertExtensionDto.class,
                     currencyChangeCsr, Constants.CURRENCY_OID);
             if(certExtensionDto.getAmount().compareTo(this.batchAmount) != 0) throw new ValidationException(
                     "currencyChange 'amount' mismatch - request: " + this.batchAmount +
@@ -167,7 +167,7 @@ public class CurrencyBatchDto {
         log.severe("============= TODO");
         //responseDto.getReceipt();
         SignedDocument signedDocument = null;
-        //CertUtils.verifyCertificate(trustAnchor, false, new ArrayList<>(receipt.getSignersCerts()));
+        //CertificateUtils.verifyCertificate(trustAnchor, false, new ArrayList<>(receipt.getSignersCerts()));
         if(responseDto.getLeftOverCert() != null) {
             leftOverCurrency.initSigner(responseDto.getLeftOverCert().getBytes());
         }

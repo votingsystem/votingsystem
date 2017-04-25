@@ -12,13 +12,11 @@ import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 import org.iban4j.Iban;
-import org.votingsystem.dto.ResponseDto;
 import org.votingsystem.dto.ResultListDto;
 import org.votingsystem.dto.UserDto;
 import org.votingsystem.ejb.SignatureService;
 import org.votingsystem.http.MediaType;
 import org.votingsystem.model.Device;
-import org.votingsystem.model.SignedDocument;
 import org.votingsystem.model.User;
 import org.votingsystem.model.currency.Bank;
 import org.votingsystem.model.currency.BankInfo;
@@ -131,13 +129,30 @@ public class UserResourceEJB {
 
     @Path("/id/{id}")
     @GET @Produces(javax.ws.rs.core.MediaType.APPLICATION_JSON) @Transactional
-    public Response index(@PathParam("id") long id,
+    public Response byId(@PathParam("id") long id,
                 @DefaultValue("false") @QueryParam("connectedDevices") Boolean connectedDevices,
                 @Context ServletContext context, @Context HttpServletRequest req,
                 @Context HttpServletResponse resp) throws Exception {
         User user = em.find(User.class, id);
         if(user == null) return Response.status(Response.Status.NOT_FOUND).entity(
                 Messages.currentInstance().get("objectNotFoundMsg", Long.valueOf(id).toString())).build();
+        if(connectedDevices) {
+            UserDto resultDto = userBean.getUserDto(user, false);
+            return Response.ok().entity(JSON.getMapper().writeValueAsBytes(resultDto)).build() ;
+        } else return processUserResult(user, null);
+    }
+
+    @Path("/uuid/{uuid}")
+    @GET @Produces(javax.ws.rs.core.MediaType.APPLICATION_JSON) @Transactional
+    public Response index(@PathParam("uuid") String uuid,
+                          @DefaultValue("false") @QueryParam("connectedDevices") Boolean connectedDevices,
+                          @Context ServletContext context, @Context HttpServletRequest req,
+                          @Context HttpServletResponse resp) throws Exception {
+        List<User> userList = em.createQuery("select u from User u where u.UUID=:UUID").setParameter("UUID", uuid)
+                .getResultList();
+        if(userList.isEmpty()) return Response.status(Response.Status.NOT_FOUND).entity(
+                Messages.currentInstance().get("objectNotFoundMsg", uuid)).build();
+        User user = userList.iterator().next();
         if(connectedDevices) {
             UserDto resultDto = userBean.getUserDto(user, false);
             return Response.ok().entity(JSON.getMapper().writeValueAsBytes(resultDto)).build() ;
@@ -214,17 +229,6 @@ public class UserResourceEJB {
             resultList.add(userBean.getUserDto(bank, false));
         }
         return Response.ok().entity(JSON.getMapper().writeValueAsBytes(resultList)).build();
-    }
-
-
-    @Path("/new-bank")
-    @POST @Produces(javax.ws.rs.core.MediaType.APPLICATION_JSON)
-    public Response newBank(SignedDocument signedDocument, @Context HttpServletRequest req) throws Exception {
-        Bank newBank = bankBean.saveBank(signedDocument);
-        ResponseDto responseDto = new ResponseDto(ResponseDto.SC_OK,
-                Messages.currentInstance().get("newBankOKMsg", newBank.getX509Certificate().getSubjectDN().toString()),
-                config.getEntityId() + "/api/user/id/" + newBank.getId());
-        return Response.ok().entity(JSON.getMapper().writeValueAsBytes(responseDto)).type(MediaType.JSON).build();
     }
 
     @RolesAllowed(AuthRole.ADMIN)

@@ -43,7 +43,7 @@ public class CSRTest extends BaseTest {
 
         PKCS10CertificationRequest csr = PEMUtils.fromPEMToPKCS10CertificationRequest(certificationRequest.getCsrPEM());
 
-        X509Certificate voteCert = CertUtils.signCSR(csr, org.votingsystem.test.Constants.ID_PROVIDER_ENTITY_ID,
+        X509Certificate voteCert = CertificateUtils.signCSR(csr, org.votingsystem.test.Constants.ID_PROVIDER_ENTITY_ID,
                 adminCert.getPrivateKey(), adminCert.getX509Certificate(), LocalDateTime.now(), LocalDateTime.now(),
                 org.votingsystem.test.Constants.OCSP_SERVER_URL);
         log.info("voteCert: " + voteCert);

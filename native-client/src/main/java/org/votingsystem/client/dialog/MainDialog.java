@@ -27,7 +27,7 @@ public class MainDialog extends AppDialog {
         setCaption(Messages.currentInstance().get("mainDialogCaption"));
         //set Stage boundaries to the top right corner of the visible bounds of the main screen
         Rectangle2D primaryScreenBounds = Screen.getPrimary().getVisualBounds();
-        primaryStage.setX(primaryScreenBounds.getMinX() + primaryScreenBounds.getWidth() - 240);
+        primaryStage.setX(primaryScreenBounds.getMinX() + primaryScreenBounds.getWidth() - 500);
         primaryStage.setY(primaryScreenBounds.getMinY() + 70);
         Button openFileButton = new Button(Messages.currentInstance().get("openFileButtonLbl"),
                 Utils.getIcon(FontAwesome.Glyph.FOLDER_OPEN_ALT));

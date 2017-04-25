@@ -1,28 +1,27 @@
 package org.currency.web.ejb;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import org.iban4j.Iban;
-import org.votingsystem.crypto.CertUtils;
+import org.votingsystem.crypto.CertificateUtils;
 import org.votingsystem.crypto.PEMUtils;
-import org.votingsystem.crypto.SignedDocumentType;
 import org.votingsystem.dto.currency.BankDto;
 import org.votingsystem.ejb.SignatureService;
 import org.votingsystem.ejb.SignerInfoService;
-import org.votingsystem.model.SignedDocument;
+import org.votingsystem.model.Certificate;
 import org.votingsystem.model.User;
 import org.votingsystem.model.currency.Bank;
 import org.votingsystem.model.currency.BankInfo;
-import org.votingsystem.throwable.InsufficientPrivilegesException;
-import org.votingsystem.util.NifUtils;
+import org.votingsystem.xml.XML;
 
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
-import java.security.cert.PKIXCertPathValidatorResult;
+import java.io.File;
 import java.security.cert.X509Certificate;
-import java.util.*;
-import java.util.logging.Level;
+import java.util.List;
+import java.util.UUID;
 import java.util.logging.Logger;
 
 import static javax.ejb.TransactionAttributeType.REQUIRES_NEW;
@@ -45,63 +44,39 @@ public class BankEJB {
     @Inject private ConfigCurrencyServer config;
 
     @TransactionAttribute(REQUIRES_NEW)
-    public Bank saveBank(SignedDocument signedDocument) throws Exception {
-        signedDocument.setSignedDocumentType(SignedDocumentType.BANK_NEW);
-        User signer = signedDocument.getFirstSignature().getSigner();
-        log.log(Level.FINE, "signer:" + signer.getNumIdAndType());
-        BankDto request = signedDocument.getSignedContent(BankDto.class);
-        request.validatePublishRequest();
-        Iban IBAN = Iban.valueOf(request.getIBAN());
-        if(!config.isAdmin(signer))
-                throw new InsufficientPrivilegesException("User " + signer.getNumIdAndType() +
-                " hasn't admin privileges to register a bank");
-        Iterator<X509Certificate> certIterator = PEMUtils.fromPEMToX509CertCollection(
-                request.getCertChainPEM().getBytes()).iterator();
-        X509Certificate cert = certIterator.next();
-        Set<X509Certificate> additionalCerts = new HashSet<>();
-        while(certIterator.hasNext()) {
-            additionalCerts.add(certIterator.next());
-        }
-        CertUtils.verifyCertificateChain(cert, additionalCerts);
-        Bank bank = Bank.FROM_CERT(Bank.class, cert, User.Type.BANK);
+    public void updateBanksInfo() throws Exception {
+        File banksFile = new File(config.getApplicationDirPath() + "/sec/banks.xml");
+        List<BankDto> bankList = XML.getMapper().readValue(banksFile,  new TypeReference<List<BankDto>>() {});
+        for(BankDto bankDto : bankList) {
+            bankDto.validatePublishRequest(config.getEntityId());
+            Iban IBAN = Iban.valueOf(bankDto.getIBAN());
+            List<BankInfo> bankInfoList = em.createQuery("SELECT b FROM BankInfo b WHERE b.bankCode =:bankCode and b.countryCode=:countryCode")
+                    .setParameter("bankCode", IBAN.getBankCode())
+                    .setParameter("countryCode", IBAN.getCountryCode()).getResultList();
+            BankInfo bankInfo = null;
+            X509Certificate bankCertificate = null;
+            if(bankInfoList.isEmpty()) {
+                bankCertificate = PEMUtils.fromPEMToX509Cert(bankDto.getX509Certificate().getBytes());
+                Bank bank = Bank.FROM_CERT(Bank.class, bankCertificate, User.Type.BANK);
+                bank.setDescription(bankDto.getInfo()).setEntityId(bankDto.getEntityId()).setUUID(UUID.randomUUID().toString());
+                bank.setCertificateCA(signerInfoService.verifyCertificate(bankCertificate));
+                signerInfoService.checkSigner(bank, User.Type.BANK, bankDto.getEntityId());
+                bankInfo = new BankInfo(bank, IBAN.getBankCode(), IBAN.getCountryCode());
+                em.persist(bankInfo);
+                config.createIBAN(bank);
+                log.info("Added new bank to database - bank UUID: " + bank.getUUID());
 
-        PKIXCertPathValidatorResult validatorResult = CertUtils.verifyCertificate(
-                config.getTrustedCertAnchors(), false, Arrays.asList(bank.getX509Certificate()));
-        X509Certificate certCaResult = validatorResult.getTrustAnchor().getTrustedCert();
-        bank.setCertificateCA(config.getCACertificate(certCaResult.getSerialNumber().longValue()));
-        log.log(Level.FINE, "bank:" + bank.getNumIdAndType() + " cert issuer: " + certCaResult.getSubjectDN());
-
-        String validatedNIF = NifUtils.validate(bank.getNumId());
-        List<Bank> bankList = em.createNamedQuery(User.FIND_USER_BY_NIF).setParameter("nif", validatedNIF).getResultList();
-        if(bankList.isEmpty()) {
-            bank.setDescription(request.getInfo()).setIBAN(request.getIBAN());
-            em.persist(bank);
-            em.persist(new BankInfo(bank, IBAN.getBankCode()));
-            log.info("Added new bank to database - bank id: " + bank.getId());
-        } else {
-            Bank bankDB = bankList.iterator().next();
-            bankDB.setDescription(request.getInfo()).setCertificateCA(bank.getCertificateCA());
-            bankDB.setX509Certificate(bank.getX509Certificate());
-            bankDB.setTimeStampToken(bank.getTimeStampToken());
-            bank = bankDB;
-        }
-        signerInfoService.checkSigner(bank, User.Type.BANK, config.getEntityId());
-        config.createIBAN(bank);
-        log.info("Bank id: " + bank.getId() + " - " + cert.getSubjectDN().toString());
-        return bank;
-    }
-
-    @TransactionAttribute(REQUIRES_NEW)
-    public void refreshBankInfoData() {
-        List<Bank> bankList = em.createQuery("SELECT b FROM Bank b").getResultList();
-        for(Bank bank : bankList) {
-            List<BankInfo> bankInfoList = em.createNamedQuery(BankInfo.FIND_BY_BANK).setParameter("bank", bank).getResultList();
-            BankInfo bankInfo = bankInfoList.iterator().next();
-            Iban iban = Iban.valueOf(bank.getIBAN());
-            if(bankInfo != null) {
-                em.merge(bankInfo.setBankCode(iban.getBankCode()));
-            } else em.persist(new BankInfo(bank, iban.getBankCode()));
+            } else {
+                bankInfo = bankInfoList.iterator().next();
+                List<Certificate> certificates = em.createQuery(
+                        "select c from Certificate c where c.state=:state and c.signer=:bank")
+                        .setParameter("state", Certificate.State.OK)
+                        .setParameter("bank", bankInfo.getBank()).getResultList();
+                bankCertificate = CertificateUtils.loadCertificate(certificates.iterator().next().getContent());
+            }
+            log.info("Bank UUID: " + bankInfo.getBank().getUUID() + " - " + bankCertificate.getSubjectDN().toString());
         }
     }
+
 
 }

@@ -1,7 +1,6 @@
 package org.currency.test;
 
 import org.votingsystem.testlib.BaseTest;
-import org.votingsystem.util.NifUtils;
 
 import java.util.logging.Logger;
 
@@ -16,7 +15,6 @@ public class Test extends BaseTest {
     }
 
     public void test() throws Exception {
-        log.info(NifUtils.getNif(999999999));
     }
 
 }

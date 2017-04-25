@@ -44,9 +44,9 @@ public class SignedAccessAuthenticationFilter implements ContainerRequestFilter 
             throw new NotAuthorizedException(ex.getMessage());
         }
         CurrencyPrincipal principal = new CurrencyPrincipal(signedDocument);
-        Set<String> roles = config.isAdmin(signedDocument.getFirstSignature().getSigner()) ?
-                AuthRole.ADMIN_ROLES : AuthRole.USER_ROLES;
         try {
+            Set<String> roles = config.isAdmin(signedDocument.getFirstSignature().getSigner()) ?
+                    AuthRole.ADMIN_ROLES : AuthRole.USER_ROLES;
             requestContext.setSecurityContext(new SecurityContext() {
                 @Override public Principal getUserPrincipal() {
                     return principal;

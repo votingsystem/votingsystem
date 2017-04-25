@@ -3,7 +3,7 @@ package org.votingsystem.dto.currency;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import org.votingsystem.crypto.CertUtils;
+import org.votingsystem.crypto.CertificateUtils;
 import org.votingsystem.crypto.PEMUtils;
 import org.votingsystem.model.SignedDocument;
 import org.votingsystem.throwable.ValidationException;
@@ -92,7 +92,7 @@ public class CurrencyRequestDto {
         if(certificates.isEmpty())
             throw new ValidationException("Unable to init Currency. Certs not found on signed CSR");
         X509Certificate x509Certificate = certificates.iterator().next();
-        CurrencyCertExtensionDto certExtensionDto = CertUtils.getCertExtensionData(CurrencyCertExtensionDto.class,
+        CurrencyCertExtensionDto certExtensionDto = CertificateUtils.getCertExtensionData(CurrencyCertExtensionDto.class,
                 x509Certificate, Constants.CURRENCY_OID);
         org.votingsystem.model.currency.Currency currency = currencyMap.get(certExtensionDto.getRevocationHash()).setState(org.votingsystem.model.currency.Currency.State.OK);
         currency.initSigner(x509CertificatePEM.getBytes());

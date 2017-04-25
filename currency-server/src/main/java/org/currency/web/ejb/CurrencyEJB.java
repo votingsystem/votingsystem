@@ -132,7 +132,7 @@ public class CurrencyEJB {
         currency = currencyDB.checkRequestWithDB(currency);
         User user = cmsMessage.getSigner(); //anonymous signer
         timeStampBean.validateToken(user.getTimeStampToken());
-        PKIXCertPathValidatorResult certValidatorResult = CertUtils.verifyCertificate(
+        PKIXCertPathValidatorResult certValidatorResult = CertificateUtils.verifyCertificate(
                 cmsBean.getCurrencyAnchors(), false, Arrays.asList(user.getX509Certificate()));
         X509Certificate certCaResult = certValidatorResult.getTrustAnchor().getTrustedCert();
         currency.setAuthorityCertificate(cmsBean.getServerCertificate());*/

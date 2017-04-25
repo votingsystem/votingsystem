@@ -54,6 +54,7 @@ public class MainApp extends Application {
             if(StringUtils.isEmpty(applicationDirPath))
                 applicationDirPath = System.getProperty("user.home");
             File tempDirFile = new File(applicationDirPath + File.separator + "votingsystem-native-client");
+            log.info("applicationDirPath: " + applicationDirPath);
             tempDir = tempDirFile.getAbsolutePath();
             new MainDialog(primaryStage).show();
         } catch (Exception ex) { log.log(Level.SEVERE, ex.getMessage(), ex);}

@@ -1,5 +1,6 @@
 package org.votingsystem.model.currency;
 
+import org.iban4j.CountryCode;
 import org.votingsystem.model.EntityBase;
 import org.votingsystem.model.converter.LocalDateTimeAttributeConverter;
 
@@ -31,8 +32,11 @@ public class BankInfo extends EntityBase implements Serializable {
     @OneToOne
     private Bank bank;
 
-    @Column(name="BANK_CODE" )
+    @Column(name="BANK_CODE", nullable=false)
     private String bankCode;
+
+    @Column(name="COUNTRY_CODE", nullable=false) @Enumerated(EnumType.STRING)
+    private CountryCode countryCode;
 
     @Column(name="DATE_CREATED", columnDefinition="TIMESTAMP")
     @Convert(converter = LocalDateTimeAttributeConverter.class)
@@ -44,9 +48,10 @@ public class BankInfo extends EntityBase implements Serializable {
 
     public BankInfo() {}
 
-    public BankInfo(Bank bank, String bankCode) {
+    public BankInfo(Bank bank, String bankCode, CountryCode countryCode) {
         this.bank = bank;
         this.bankCode = bankCode;
+        this.countryCode = countryCode;
     }
 
     public Long getId() {
@@ -95,4 +100,11 @@ public class BankInfo extends EntityBase implements Serializable {
         this.lastUpdated = lastUpdated;
     }
 
+    public CountryCode getCountryCode() {
+        return countryCode;
+    }
+
+    public void setCountryCode(CountryCode countryCode) {
+        this.countryCode = countryCode;
+    }
 }

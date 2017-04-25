@@ -14,6 +14,7 @@ import org.bouncycastle.asn1.x500.style.BCStyle;
 import org.bouncycastle.cert.jcajce.JcaX509CertificateHolder;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.iban4j.*;
+import org.votingsystem.crypto.CertificateUtils;
 import org.votingsystem.crypto.KeyGenerator;
 import org.votingsystem.crypto.PEMUtils;
 import org.votingsystem.dto.metadata.MetadataDto;
@@ -59,7 +60,7 @@ import static javax.ejb.TransactionAttributeType.REQUIRES_NEW;
 /**
  * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-@javax.ejb.Singleton
+@javax.ejb.Singleton(name = "ConfigCurrencyServer")
 @Startup
 @Lock(LockType.READ)
 public class ConfigEJB implements Config, ConfigCurrencyServer, Serializable {
@@ -104,6 +105,7 @@ public class ConfigEJB implements Config, ConfigCurrencyServer, Serializable {
     private String ocspServerURL;
     private User systemUser;
 
+
     @PostConstruct
     public void initialize() {
         try {
@@ -112,17 +114,17 @@ public class ConfigEJB implements Config, ConfigCurrencyServer, Serializable {
             KeyGenerator.INSTANCE.init(Constants.SIG_NAME, Constants.PROVIDER, Constants.KEY_SIZE, Constants.ALGORITHM_RNG);
             HttpConn.init(HttpConn.HTTPS_POLICY.ALL, null);
 
-            //TODO load certs from config dir
-            Set<X509Certificate> adminCerts = new HashSet<>();
-            for(X509Certificate adminCert : adminCerts) {
-                User admin = User.FROM_CERT(adminCert, User.Type.USER);
-                adminMap.put(admin.getNumIdAndType(), admin);
-            }
-
             entityMap = new ConcurrentHashMap<>();
             applicationDirPath = System.getProperty("currency_server_dir");
             if(StringUtils.isEmpty(applicationDirPath))
                 applicationDirPath = DEFAULT_APP_HOME;
+
+            Collection<X509Certificate> adminCertificates = CertificateUtils.loadCertificatesFromFolder(
+                    new File(applicationDirPath + "/sec/admins"));
+            for(X509Certificate adminCert : adminCertificates) {
+                User admin = User.FROM_CERT(adminCert, User.Type.USER);
+                adminMap.put(CertificateUtils.getHash(adminCert), admin);
+            }
 
             Properties properties = new Properties();
             File propertiesFile = new File(applicationDirPath + "/config.properties");
@@ -291,8 +293,17 @@ public class ConfigEJB implements Config, ConfigCurrencyServer, Serializable {
     }
 
     @Override
-    public boolean isAdmin(User user) {
-        return adminMap.containsKey(user.getNumIdAndType());
+    public boolean isAdmin(User user) throws ValidationException {
+        try {
+            String certHash = CertificateUtils.getHash(user.getX509Certificate());
+            if(adminMap.containsKey(certHash)) {
+               return  CertificateUtils.equals(user.getX509Certificate(), adminMap.get(certHash).getX509Certificate());
+            }
+            return false;
+        } catch (Exception ex) {
+            throw new ValidationException(ex.getMessage());
+        }
+
     }
 
     @Override
