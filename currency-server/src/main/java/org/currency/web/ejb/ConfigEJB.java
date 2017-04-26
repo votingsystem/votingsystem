@@ -183,13 +183,14 @@ public class ConfigEJB implements Config, ConfigCurrencyServer, Serializable {
             signatureCertChainPEMBytes = PEMUtils.getPEMEncoded(certificateList);
             loadAuthorityCertificate(dssPrivateKey.getCertificate());
 
-            List<User> userList = em.createNamedQuery(User.FIND_USER_BY_TYPE)
+            List<User> userList = em.createQuery("SELECT u FROM User u WHERE u.type =:type and u.entityId=:entityId")
+                    .setParameter("entityId", entityId)
                     .setParameter("type", User.Type.CURRENCY_SERVER).getResultList();
             if(userList.isEmpty()) { //First time run;
                 systemUser = new User(User.Type.CURRENCY_SERVER, entityId).setEntityId(entityId);
                 em.persist(systemUser);
                 createIBAN(systemUser);
-            }
+            } else systemUser = userList.iterator().next();
         } catch (Exception ex) {
             log.log(Level.SEVERE, ex.getMessage(), ex);
         }
@@ -371,12 +372,14 @@ public class ConfigEJB implements Config, ConfigCurrencyServer, Serializable {
     @Override
     @TransactionAttribute(REQUIRES_NEW)
     public User createIBAN(User user) throws ValidationException {
-        String accountNumberStr = String.format("%010d", user.getId());
-        Iban iban = new Iban.Builder().countryCode(CountryCode.ES).bankCode(bankCode).branchCode(branchCode)
-                .accountNumber(accountNumberStr).nationalCheckDigit("45").build();
-        user.setIBAN(iban.toString());
-        em.merge(user);
-        em.persist(new CurrencyAccount(user, BigDecimal.ZERO, CurrencyCode.EUR));
+        if(user.getIBAN() == null) {
+            String accountNumberStr = String.format("%010d", user.getId());
+            Iban iban = new Iban.Builder().countryCode(CountryCode.ES).bankCode(bankCode).branchCode(branchCode)
+                    .accountNumber(accountNumberStr).nationalCheckDigit("45").build();
+            user.setIBAN(iban.toString());
+            em.merge(user);
+            em.persist(new CurrencyAccount(user, BigDecimal.ZERO, CurrencyCode.EUR));
+        } else log.severe("user uuid: " + user.getUUID() + " already has an IBAN");
         return user;
     }
 

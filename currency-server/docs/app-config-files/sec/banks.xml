@@ -2,27 +2,28 @@
     <Bank EntityId="http://externalbank.eu/currency-server-interface">
         <iban>ES1877777777450000000050</iban>
         <X509Certificate>-----BEGIN CERTIFICATE-----
-            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
+            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
-            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
-            bSev1hUbZ1A4vpoehKAyhr8ZLNHmMZ9hhRMMqE4=
-            -----END CERTIFICATE-----</X509Certificate>
+            Q0ExDjAMBgNVBAsMBUNlcnRzgghvzDD4vCDU6jAdBgNVHQ4EFgQUB2/+v/miV3vX
+            GNHGZv2XunH5LjMwDAYDVR0TAQH/BAIwADAOBgNVHQ8BAf8EBAMCBaAwDQYJKoZI
+            hvcNAQELBQADggEBAEXXcdUbFB5ZbyZp7sJAZphFwc5Fx/dk3gnvTA5Ejg22gr2O
+            k14UhSr533tXkF6J2OZOM4feuQjC8G/2VSPWWg9rtD/6qVpU9neCLv/KGHfsUiVR
+            Ej7qqO37VF8WuJn7bhXzBYQJSwV8bY+Euf1RNPnM2OftNfAinZV1ntdio2UuYZFX
+            0FoGI+MVnahFSXeKW9Ad/LS1z0eZq5WimkSxfIxPhgnbnfL/PS41W0CRo5LeQ0WL
+            QzuWaEoMvwaQ79zlKOZz2hhm5lFbm8MgV+Dni+ibFxcH0CS3XJI+4/aw9w17u3sr
+            c02dE8MhPM7kTuqOycmcKZU/y6gYCA6soELyUYg=
+            -----END CERTIFICATE-----
+        </X509Certificate>
         <Info>external bank info</Info>
     </Bank>
 </Banks>

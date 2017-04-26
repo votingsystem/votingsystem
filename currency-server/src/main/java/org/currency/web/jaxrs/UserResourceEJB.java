@@ -12,18 +12,18 @@ import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 import org.iban4j.Iban;
+import org.votingsystem.dto.OperationDto;
 import org.votingsystem.dto.ResultListDto;
 import org.votingsystem.dto.UserDto;
 import org.votingsystem.ejb.SignatureService;
 import org.votingsystem.http.MediaType;
 import org.votingsystem.model.Device;
+import org.votingsystem.model.SignedDocument;
 import org.votingsystem.model.User;
 import org.votingsystem.model.currency.Bank;
 import org.votingsystem.model.currency.BankInfo;
-import org.votingsystem.util.DateUtils;
-import org.votingsystem.util.Interval;
-import org.votingsystem.util.JSON;
-import org.votingsystem.util.Messages;
+import org.votingsystem.throwable.ValidationException;
+import org.votingsystem.util.*;
 
 import javax.annotation.security.PermitAll;
 import javax.annotation.security.RolesAllowed;
@@ -40,6 +40,7 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import java.net.URI;
+import java.text.MessageFormat;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -104,6 +105,20 @@ public class UserResourceEJB {
         return Response.ok().entity(JSON.getMapper().writeValueAsBytes(resultListDto)).type(MediaType.JSON).build();
     }
 
+    @PermitAll
+    @Path("/register")
+    @POST @Produces(javax.ws.rs.core.MediaType.APPLICATION_JSON)
+    public Response register(SignedDocument signedDocument) throws Exception {
+        User user = signedDocument.getFirstSignature().getSigner();
+        OperationDto operation = signedDocument.getSignedContent(OperationDto.class);
+        if(CurrencyOperation.REGISTER_USER != operation.getOperation().getCurrencyOperationType())
+            throw new ValidationException("Expected operation 'REGISTER_USER' found " + operation.getOperation().getType());
+        if(!config.getEntityId().equals(operation.getOperation().getEntityId()))
+            throw new ValidationException(MessageFormat.format("Expected entity id '{0}' found '{1}'",
+                    config.getEntityId(), operation.getOperation().getEntityId()));
+        config.createIBAN(user);
+        return Response.ok().entity(user.getIBAN()).build();
+    }
 
     @Path("/IBAN/{IBAN}")
     @GET @Produces(javax.ws.rs.core.MediaType.APPLICATION_JSON) @Transactional

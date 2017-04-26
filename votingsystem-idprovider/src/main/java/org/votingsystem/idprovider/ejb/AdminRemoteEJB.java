@@ -46,25 +46,13 @@ public class AdminRemoteEJB implements EJBAdminRemoteIdProvider {
         java.security.KeyStore keyStore = null;
         switch(type) {
             case ENTITY:
-                keyStore = generateSystemEntityKeyStore(givenName, keyAlias, password);
+                keyStore = certIssuer.generateSystemEntityKeyStore(givenName, keyAlias, password);;
                 break;
             case TIMESTAMP_SERVER:
-                keyStore = generateTimeStampServerKeyStore(givenName, keyAlias, password);
+                keyStore = certIssuer.generateTimeStampServerKeyStore(givenName, keyAlias, password);
                 break;
         }
         return KeyStoreUtils.toByteArray(keyStore, password);
-    }
-
-    public java.security.KeyStore generateSystemEntityKeyStore(String givenName, String keyAlias,
-                                                         char[] password) throws Exception {
-        log.info("givenName: " + givenName);
-        return certIssuer.generateSystemEntityKeyStore(givenName, keyAlias, password);
-    }
-
-    public java.security.KeyStore generateTimeStampServerKeyStore(String givenName, String keyAlias,
-                                                            char[] password) throws Exception {
-        log.info("givenName: " + givenName);
-        return certIssuer.generateTimeStampServerKeyStore(givenName, keyAlias, password);
     }
 
     @Override

@@ -31,9 +31,9 @@ import java.util.logging.Logger;
 /**
  * Licence: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-public class GenerateSessionCertificates extends BaseTest {
+public class GenerateSessionCertificatesTest extends BaseTest {
 
-    private static final Logger log = Logger.getLogger(GenerateSessionCertificates.class.getName());
+    private static final Logger log = Logger.getLogger(GenerateSessionCertificatesTest.class.getName());
 
     private static final String QR_CODE = "eid=https://voting.ddns.net/currency-server;op=0;uid=eca1eb90-408e-4055-99de-f9d432cd07dc;";
 
@@ -41,13 +41,13 @@ public class GenerateSessionCertificates extends BaseTest {
 
 
     public static void main(String[] args) throws Exception {
-        GenerateSessionCertificates genSessionCert = new GenerateSessionCertificates();
+        GenerateSessionCertificatesTest genSessionCert = new GenerateSessionCertificatesTest();
         SessionCertificationDto certificationDto = genSessionCert.buildIdentificationRequest();
         genSessionCert.sendMessageToBrowser(certificationDto);
         System.exit(0);
     }
 
-    public GenerateSessionCertificates() { }
+    public GenerateSessionCertificatesTest() { }
 
     private SessionCertificationDto buildIdentificationRequest() throws Exception {
         SessionCertificationDto result = null;

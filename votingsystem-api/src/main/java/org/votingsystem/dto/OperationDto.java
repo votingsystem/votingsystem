@@ -23,6 +23,10 @@ public class OperationDto<T> {
 
     public OperationDto() {}
 
+    public OperationDto(OperationTypeDto operation) {
+        this.operation = operation;
+    }
+
     public OperationDto(Integer statusCode, String message) {
         this.statusCode = statusCode;
         this.message = message;

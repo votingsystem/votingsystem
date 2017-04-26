@@ -7,9 +7,8 @@ import org.votingsystem.dto.currency.TransactionDto;
 import org.votingsystem.dto.currency.TransactionResponseDto;
 import org.votingsystem.ejb.Config;
 import org.votingsystem.ejb.SignatureService;
-import org.votingsystem.model.User;
-import org.votingsystem.model.currency.Transaction;
 import org.votingsystem.util.CurrencyCode;
+import org.votingsystem.util.CurrencyOperation;
 import org.votingsystem.util.JSON;
 
 import javax.ejb.Stateless;
@@ -53,10 +52,10 @@ public class ShopExampleResourceEJB {
     @Path("/") @GET
     public Object index(@Context ServletContext context,
                         @Context HttpServletRequest req, @Context HttpServletResponse resp) throws Exception {
-        TransactionDto dto = TransactionDto.PAYMENT_REQUEST("Receptor name", User.Type.USER,
-                new BigDecimal(5), CurrencyCode.EUR, "IBANNumber12345", "shop example payment");
-        dto.setPaymentOptions(Arrays.asList(Transaction.Type.FROM_USER,
-                Transaction.Type.CURRENCY_SEND, Transaction.Type.CURRENCY_CHANGE));
+        TransactionDto dto = TransactionDto.PAYMENT_REQUEST("Receptor name",  new BigDecimal(5),
+                CurrencyCode.EUR, "IBANNumber12345", "shop example payment", null);
+        dto.setPaymentOptions(Arrays.asList(CurrencyOperation.TRANSACTION_FROM_USER,
+                CurrencyOperation.CURRENCY_SEND, CurrencyOperation.CURRENCY_CHANGE));
         String sessionID = dto.getUUID().substring(0, 8);
         String paymentInfoServiceURL = config.getEntityId() + "/rest/shop/" + sessionID;
         shopExampleBean.putTransactionRequest(sessionID, dto);

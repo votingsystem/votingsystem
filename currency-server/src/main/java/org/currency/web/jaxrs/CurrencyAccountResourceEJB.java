@@ -8,13 +8,16 @@ import org.currency.web.util.AuthRole;
 import org.votingsystem.dto.ResultListDto;
 import org.votingsystem.dto.currency.CurrencyAccountDto;
 import org.votingsystem.dto.currency.SystemAccountsDto;
+import org.votingsystem.model.CMSDocument;
 import org.votingsystem.model.User;
 import org.votingsystem.model.currency.Bank;
 import org.votingsystem.model.currency.CurrencyAccount;
 import org.votingsystem.model.currency.Transaction;
 import org.votingsystem.util.CurrencyCode;
+import org.votingsystem.util.CurrencyOperation;
 import org.votingsystem.util.JSON;
 
+import javax.annotation.security.PermitAll;
 import javax.annotation.security.RolesAllowed;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
@@ -24,10 +27,7 @@ import javax.persistence.Query;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.transaction.Transactional;
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
+import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -40,7 +40,7 @@ import java.util.logging.Logger;
  * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
 @Stateless
-@Path("/currencyAccount")
+@Path("/currency-account")
 public class CurrencyAccountResourceEJB {
 
     private static final Logger log = Logger.getLogger(CurrencyAccountResourceEJB.class.getName());
@@ -76,20 +76,34 @@ public class CurrencyAccountResourceEJB {
     @GET @Produces(MediaType.APPLICATION_JSON)
     public Response userAccounts(@Context HttpServletRequest req) throws IOException, ServletException {
         User user = ((CurrencyPrincipal)req.getUserPrincipal()).getUser();
-        List<CurrencyAccount> userAccountsDB = em.createQuery(
+        List<CurrencyAccount> userAccountList = em.createQuery(
                 "select account from CurrencyAccount account where account.user =:user and account.state =:state")
                 .setParameter("user", user)
                 .setParameter("state", CurrencyAccount.State.ACTIVE).getResultList();
-        Map<CurrencyCode, List<CurrencyAccountDto>> resultMap = new HashMap<>();
-        for(CurrencyAccount account : userAccountsDB) {
-            if(resultMap.containsKey(account.getCurrencyCode()))
-                resultMap.get(account.getCurrencyCode()).add(new CurrencyAccountDto(account));
-            else resultMap.put(account.getCurrencyCode(), new ArrayList<>(Arrays.asList(new CurrencyAccountDto(account))));
+        Map<CurrencyCode, CurrencyAccountDto> resultMap = new HashMap<>();
+        for(CurrencyAccount account : userAccountList) {
+            resultMap.put(account.getCurrencyCode(), new CurrencyAccountDto(account));
         }
-        //ResultListDto<CurrencyAccountDto> resultListDto = new ResultListDto<>(userAccounts);
         return Response.ok().entity(JSON.getMapper().writeValueAsBytes(resultMap)).build();
     }
 
+    @PermitAll
+    @Path("/user-accounts")
+    @POST @Produces(MediaType.APPLICATION_JSON)
+    public Response signedRequestUserAccounts(CMSDocument signedDocument) throws IOException, ServletException {
+        User user = signedDocument.getFirstSignature().getSigner();
+        List<CurrencyAccount> userAccountList = em.createQuery(
+                "select account from CurrencyAccount account where account.user =:user and account.state =:state")
+                .setParameter("user", user)
+                .setParameter("state", CurrencyAccount.State.ACTIVE).getResultList();
+        Map<CurrencyCode, CurrencyAccountDto> resultMap = new HashMap<>();
+        for(CurrencyAccount account : userAccountList) {
+            resultMap.put(account.getCurrencyCode(), new CurrencyAccountDto(account));
+        }
+        return Response.ok().entity(JSON.getMapper().writeValueAsBytes(resultMap)).build();
+    }
+
+    @PermitAll
     @GET @Produces(MediaType.APPLICATION_JSON)
     @Path("/system") @Transactional
     public Response system() throws IOException, ServletException {
@@ -114,7 +128,7 @@ public class CurrencyAccountResourceEJB {
         query = em.createQuery(
                 "select SUM(t.amount), t.currencyCode from Transaction t where t.state =:state " +
                 "and t.type =:type group by t.currencyCode").setParameter("state", Transaction.State.OK)
-                .setParameter("type", Transaction.Type.FROM_BANK);
+                .setParameter("type", CurrencyOperation.TRANSACTION_FROM_BANK);
         resultList = query.getResultList();
         Map<CurrencyCode, BigDecimal> bankInputs = new HashMap<>();
         for(Object[] result : resultList) {

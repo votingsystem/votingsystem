@@ -150,8 +150,11 @@ public class CertIssuerEJB {
         X500PrivateCredential rootCAPrivateCredential = new X500PrivateCredential(certIssuerSigningCert,
                 certIssuerPrivateKey, Constants.ROOT_CERT_ALIAS);
         String userDN = format("GIVENNAME={0}", givenName);
-        return KeyStoreUtils.generateTimeStampServerKeyStore(validFromDate, validToDate, password, keyAlias,
+        KeyStore keyStore = KeyStoreUtils.generateUserKeyStore(validFromDate, validToDate, password, keyAlias,
                 rootCAPrivateCredential, userDN, config.getOcspServerURL());
+        X509Certificate issuedCert = (X509Certificate) keyStore.getCertificate(Constants.USER_CERT_ALIAS);
+        signerEJB.checkSigner(issuedCert, User.Type.TIMESTAMP_SERVER, null);
+        return keyStore;
     }
 
     public java.security.KeyStore generateSystemEntityKeyStore(String givenName, String keyAlias,
@@ -164,8 +167,11 @@ public class CertIssuerEJB {
         X500PrivateCredential rootCAPrivateCredential = new X500PrivateCredential(certIssuerSigningCert,
                 certIssuerPrivateKey, Constants.ROOT_CERT_ALIAS);
         String userDN = format("GIVENNAME={0}", givenName);
-        return KeyStoreUtils.generateUserKeyStore(validFromDate, validToDate, password, keyAlias,
+        KeyStore keyStore = KeyStoreUtils.generateUserKeyStore(validFromDate, validToDate, password, keyAlias,
                 rootCAPrivateCredential, userDN, config.getOcspServerURL());
+        X509Certificate issuedCert = (X509Certificate) keyStore.getCertificate(Constants.USER_CERT_ALIAS);
+        signerEJB.checkSigner(issuedCert, User.Type.ENTITY, null);
+        return keyStore;
     }
 
     public java.security.KeyStore generateServerKeyStore(String commonName, String keyAlias,

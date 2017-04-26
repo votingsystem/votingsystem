@@ -6,11 +6,7 @@ import org.currency.web.util.AuditLogger;
 import org.votingsystem.dto.ResultListDto;
 import org.votingsystem.dto.currency.TransactionDto;
 import org.votingsystem.http.MediaType;
-import org.votingsystem.model.currency.Transaction;
-import org.votingsystem.util.DateUtils;
-import org.votingsystem.util.FileUtils;
-import org.votingsystem.util.Interval;
-import org.votingsystem.util.JSON;
+import org.votingsystem.util.*;
 
 import javax.ejb.Stateless;
 import javax.inject.Inject;
@@ -111,12 +107,12 @@ public class ReportsResourceEJB {
         AtomicLong totalCount = new AtomicLong(0);
         if(transactionType != null) {
             List<TransactionDto> resultList = new ArrayList<>();
-            Transaction.Type type = Transaction.Type.valueOf(transactionType);
+            CurrencyOperation type = CurrencyOperation.valueOf(transactionType);
             Files.readAllLines(Paths.get(reportsFile.toURI()), Charset.defaultCharset()).forEach(line -> {
                     totalCount.getAndIncrement();
                     try {
                         TransactionDto transactionDto =  mapper.readValue(line, TransactionDto.class);
-                        if(type == transactionDto.getType()) {
+                        if(type == transactionDto.getOperation().getCurrencyOperationType()) {
                             resultList.add(transactionDto);
                         }
                     } catch (IOException e) {

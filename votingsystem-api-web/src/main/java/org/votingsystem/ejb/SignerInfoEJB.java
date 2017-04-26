@@ -103,8 +103,7 @@ public class SignerInfoEJB implements SignerInfoService {
                 em.persist(signer);
             }
             if(certificates.isEmpty()) {
-                signerCertificate = Certificate.SIGNER(signer, x509CertSigner).setAuthorityCertificate(certificateCA)
-                        .setUUID(CertificateUtils.getHash(x509CertSigner));
+                signerCertificate = Certificate.SIGNER(signer, x509CertSigner).setAuthorityCertificate(certificateCA);
                 em.persist(signerCertificate);
                 log.severe("Added new signer id: " + signer.getId() + " - certificate id: " + signerCertificate.getId() +
                         " - certificate subjectDN: " + signerCertificate.getSubjectDN() +

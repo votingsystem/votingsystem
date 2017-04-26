@@ -14,7 +14,8 @@ import static javax.persistence.GenerationType.IDENTITY;
  * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
 @Entity
-@Table(name="BANK_INFO")
+@Table(name="BANK_INFO",
+        uniqueConstraints= @UniqueConstraint(columnNames = {"BANK_CODE", "COUNTRY_CODE"}))
 @NamedQueries({
         @NamedQuery(name = BankInfo.FIND_BY_BANK, query = "SELECT b FROM BankInfo b WHERE b.bank =:bank")
 })

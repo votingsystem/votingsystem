@@ -12,13 +12,14 @@ import org.currency.web.util.AuthRole;
 import org.currency.web.websocket.SessionManager;
 import org.iban4j.CountryCode;
 import org.iban4j.Iban;
-import org.votingsystem.dto.currency.TransactionDto;
 import org.votingsystem.model.CMSDocument;
 import org.votingsystem.model.SignedDocument;
 import org.votingsystem.model.User;
-import org.votingsystem.model.currency.Transaction;
 import org.votingsystem.throwable.ValidationException;
-import org.votingsystem.util.*;
+import org.votingsystem.util.Constants;
+import org.votingsystem.util.DateUtils;
+import org.votingsystem.util.Interval;
+import org.votingsystem.util.JSON;
 
 import javax.annotation.security.RolesAllowed;
 import javax.inject.Inject;
@@ -34,16 +35,10 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.*;
 import java.io.IOException;
-import java.math.BigDecimal;
 import java.security.Principal;
-import java.text.DecimalFormat;
 import java.time.LocalDateTime;
-import java.time.ZonedDateTime;
-import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.logging.Logger;
-
-import static java.text.MessageFormat.format;
 
 /**
  * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
@@ -208,35 +203,6 @@ public class TestResourceEJB {
         dataMap.put("coreSignal", "transaction-new");
         SessionManager.getInstance().broadcast(JSON.getMapper().writeValueAsString(dataMap));
         return Response.ok().entity("OK").build();
-    }
-
-    @GET @Path("/logTransactions")
-    public Response logTransactions(@Context HttpServletRequest req, @Context HttpServletResponse resp)
-            throws ServletException, IOException {
-        LocalDateTime init = LocalDateTime.now();
-        Random randomGenerator = new Random();
-        Transaction.Type[] transactionTypes = Transaction.Type.values();
-        int numTransactions = 1000;
-        for (int idx = 1; idx <= numTransactions; ++idx){
-            int randomInt = randomGenerator.nextInt(100);
-            int transactionItemId = new Random().nextInt(transactionTypes.length);
-            Transaction.Type transactionType = transactionTypes[transactionItemId];
-            TransactionDto dto = new TransactionDto();
-            dto.setId(Long.valueOf(idx));
-            dto.setType(transactionType);
-            dto.setFromUserName("fromUser" + randomInt);
-            dto.setToUserName("toUser" + randomInt);
-            dto.setCurrencyCode(CurrencyCode.EUR);
-            dto.setAmount(new BigDecimal(randomInt));
-            dto.setSubject("Subject - " + randomInt);
-            dto.setDateCreated(ZonedDateTime.now());
-            AuditLogger.logTransaction(dto);
-        }
-        long seconds = ChronoUnit.SECONDS.between(init, LocalDateTime.now());
-        String msg = format("NumTransactions : {0} - duration: {1} seconds", numTransactions,
-                new DecimalFormat("#,##0").format(seconds));
-        log.info(msg);
-        return Response.ok().entity(msg).build();
     }
 
     @GET @Path("/newWeek")

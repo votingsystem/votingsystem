@@ -3,11 +3,12 @@ package org.votingsystem.dto.currency;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.google.common.collect.Sets;
+import org.votingsystem.dto.OperationTypeDto;
 import org.votingsystem.dto.UserDto;
 import org.votingsystem.model.SignedDocument;
 import org.votingsystem.model.User;
-import org.votingsystem.model.currency.CurrencyAccount;
 import org.votingsystem.model.currency.Transaction;
 import org.votingsystem.throwable.ValidationException;
 import org.votingsystem.util.CurrencyCode;
@@ -17,9 +18,7 @@ import org.votingsystem.util.Messages;
 import java.math.BigDecimal;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
 
@@ -32,7 +31,8 @@ public class TransactionDto {
 
     private static Logger log = Logger.getLogger(TransactionDto.class.getName());
 
-    private CurrencyOperation operation;
+    @JacksonXmlProperty(localName = "Operation")
+    private OperationTypeDto operation;
     private Long id;
     private Long userId;
     private UserDto fromUser;
@@ -48,17 +48,11 @@ public class TransactionDto {
     private String signedDocumentBase64;
     private String UUID;
     private BigDecimal amount;
-    private Integer numReceptors;
-    private Transaction.Type type;
-    private Set<String> toUserIBAN = null;
-    private Long numChildTransactions;
+    private String toUserIBAN = null;
 
-    private User.Type userToType;
-    private List<Transaction.Type> paymentOptions;
+    private List<CurrencyOperation> paymentOptions;
     private TransactionDetailsDto details;
 
-    @JsonIgnore
-    private List<User> toUserList;
     @JsonIgnore
     private User signer;
     @JsonIgnore
@@ -68,6 +62,10 @@ public class TransactionDto {
 
 
     public TransactionDto() {}
+
+    public TransactionDto(OperationTypeDto operation) {
+        this.operation = operation;
+    }
 
     public TransactionDto(Transaction transaction) {
         this.id = transaction.getId();
@@ -82,47 +80,45 @@ public class TransactionDto {
         this.dateCreated = ZonedDateTime.of(transaction.getDateCreated(), ZoneId.systemDefault());
         this.subject = transaction.getSubject();
         this.amount = transaction.getAmount();
-        this.type = transaction.getType();
+        this.operation = new OperationTypeDto(transaction.getType(), null);
         this.currencyCode = transaction.getCurrencyCode();
     }
 
-    public static TransactionDto PAYMENT_REQUEST(String toUser, User.Type userToType, BigDecimal amount,
-            CurrencyCode currencyCode, String toUserIBAN, String subject) {
+    public static TransactionDto PAYMENT_REQUEST(String toUser, BigDecimal amount,
+            CurrencyCode currencyCode, String toUserIBAN, String subject, String entityId) {
         TransactionDto dto = new TransactionDto();
-        dto.setOperation(CurrencyOperation.TRANSACTION_INFO);
-        dto.setUserToType(userToType);
+        dto.setOperation(new OperationTypeDto(CurrencyOperation.TRANSACTION_INFO, entityId));
         dto.setToUserName(toUser);
         dto.setAmount(amount);
         dto.setCurrencyCode(currencyCode);
         dto.setSubject(subject);
-        dto.setToUserIBAN(Sets.newHashSet(toUserIBAN));
+        dto.setToUserIBAN(toUserIBAN);
         dto.setDateCreated(ZonedDateTime.now());
         dto.setUUID(java.util.UUID.randomUUID().toString());
         return dto;
     }
 
     public static TransactionDto CURRENCY_SEND(String toUser, String subject, BigDecimal amount,
-                                   CurrencyCode currencyCode, String toUserIBAN) {
+                       CurrencyCode currencyCode, String toUserIBAN, String entityId) {
         TransactionDto dto = new TransactionDto();
-        dto.setOperation(CurrencyOperation.CURRENCY_SEND);
+        dto.setOperation(new OperationTypeDto(CurrencyOperation.CURRENCY_SEND, entityId));
         dto.setSubject(subject);
         dto.setToUserName(toUser);
         dto.setAmount(amount);
-        dto.setToUserIBAN(Sets.newHashSet(toUserIBAN));
+        dto.setToUserIBAN(toUserIBAN);
         dto.setCurrencyCode(currencyCode);
         dto.setUUID(java.util.UUID.randomUUID().toString());
         return dto;
     }
 
-    public static TransactionDto BASIC(String toUser, User.Type userToType, BigDecimal amount,
+    public static TransactionDto BASIC(String toUser, BigDecimal amount,
                                        CurrencyCode currencyCode, String toUserIBAN, String subject) {
         TransactionDto dto = new TransactionDto();
-        dto.setUserToType(userToType);
         dto.setToUserName(toUser);
         dto.setAmount(amount);
         dto.setCurrencyCode(currencyCode);
         dto.setSubject(subject);
-        dto.setToUserIBAN(Sets.newHashSet(toUserIBAN));
+        dto.setToUserIBAN(toUserIBAN);
         dto.setUUID(java.util.UUID.randomUUID().toString());
         return dto;
     }
@@ -130,31 +126,12 @@ public class TransactionDto {
     public void validate() throws ValidationException {
         if(operation == null)
             throw new ValidationException("missing param 'operation'");
-        type = Transaction.Type.valueOf(operation.toString());
         if(amount == null)
             throw new ValidationException("missing param 'amount'");
-        if(getCurrencyCode() == null)
+        if(currencyCode == null)
             throw new ValidationException("missing param 'currencyCode'");
         if(subject == null)
             throw new ValidationException("missing param 'subject'");
-    }
-
-    @JsonIgnore
-    public Transaction getTransaction(User fromUser, User toUser, Map<CurrencyAccount, BigDecimal> accountFromMovements)
-            throws Exception {
-        Transaction transaction = new Transaction();
-        transaction.setFromUser(fromUser);
-        transaction.setFromUserIBAN(fromUser.getIBAN());
-        transaction.setToUser(toUser);
-        if(toUser != null)
-            transaction.setToUserIBAN(toUser.getIBAN());
-        transaction.setType(getType());
-        transaction.setAccountFromMovements(accountFromMovements);
-        transaction.setAmount(amount);
-        transaction.setCurrencyCode(currencyCode);
-        transaction.setSubject(subject);
-        transaction.setState(Transaction.State.OK);
-        return transaction;
     }
 
     public Long getId() {
@@ -193,8 +170,9 @@ public class TransactionDto {
         return subject;
     }
 
-    public void setSubject(String subject) {
+    public TransactionDto setSubject(String subject) {
         this.subject = subject;
+        return this;
     }
 
     public String getDescription() {
@@ -209,33 +187,18 @@ public class TransactionDto {
         return amount;
     }
 
-    public void setAmount(BigDecimal amount) {
+    public TransactionDto setAmount(BigDecimal amount) {
         this.amount = amount;
+        return this;
     }
 
-    public Transaction.Type getType() {
-        if(type == null && operation != null) type = Transaction.Type.valueOf(operation.toString());
-        return type;
-    }
-
-    public void setType(Transaction.Type type) {
-        this.type = type;
-    }
-
-    public Long getNumChildTransactions() {
-        return numChildTransactions;
-    }
-
-    public void setNumChildTransactions(Long numChildTransactions) {
-        this.numChildTransactions = numChildTransactions;
-    }
-
-    public CurrencyOperation getOperation() {
+    public OperationTypeDto getOperation() {
         return operation;
     }
 
-    public void setOperation(CurrencyOperation operation) {
+    public TransactionDto setOperation(OperationTypeDto operation) {
         this.operation = operation;
+        return this;
     }
 
     public CurrencyCode getCurrencyCode() {
@@ -262,28 +225,11 @@ public class TransactionDto {
         this.fromUserIBAN = fromUserIBAN;
     }
 
-    public Integer getNumReceptors() {
-        return numReceptors;
-    }
-
-    public void setNumReceptors(Integer numReceptors) {
-        this.numReceptors = numReceptors;
-    }
-
-    public List<User> getToUserList() {
-        return toUserList;
-    }
-
-    public void setToUserList(List<User> toUserList) {
-        this.toUserList = toUserList;
-        this.numReceptors = toUserList.size();
-    }
-
-    public Set<String> getToUserIBAN() {
+    public String getToUserIBAN() {
         return toUserIBAN;
     }
 
-    public void setToUserIBAN(Set<String> toUserIBAN) {
+    public void setToUserIBAN(String toUserIBAN) {
         this.toUserIBAN = toUserIBAN;
     }
 
@@ -305,24 +251,6 @@ public class TransactionDto {
 
     public String getUUID() {
         return UUID;
-    }
-
-    public void loadBankTransaction(String UUID) {
-        setUUID(UUID);
-        if((toUserIBAN == null || toUserIBAN.isEmpty()) && toUser != null) {
-            toUserIBAN = Sets.newHashSet(toUser.getIBAN());
-            toUser = null;
-        }
-    }
-
-    public TransactionDto getGroupChild(String receptorNIF, BigDecimal receptorPart, Integer numReceptors,
-                                        String contextURL) {
-        TransactionDto dto =  new TransactionDto();
-        dto.setOperation(operation);
-        dto.setToUserName(receptorNIF);
-        dto.setAmount(receptorPart);
-        dto.setNumReceptors(numReceptors);
-        return dto;
     }
 
     public void setUUID(String UUID) {
@@ -353,25 +281,17 @@ public class TransactionDto {
         this.toUserName = toUserName;
     }
 
-    public User.Type getUserToType() {
-        return userToType;
-    }
-
-    public void setUserToType(User.Type userToType) {
-        this.userToType = userToType;
-    }
-
-    public List<Transaction.Type> getPaymentOptions() {
+    public List<CurrencyOperation> getPaymentOptions() {
         return paymentOptions;
     }
 
-    public void setPaymentOptions(List<Transaction.Type> paymentOptions) {
+    public void setPaymentOptions(List<CurrencyOperation> paymentOptions) {
         this.paymentOptions = paymentOptions;
     }
 
     public String validateReceipt(SignedDocument signedDocument, boolean isIncome) throws Exception {
         TransactionDto dto = signedDocument.getSignedContent(TransactionDto.class);
-        switch(dto.getOperation()) {
+        switch(dto.getOperation().getCurrencyOperationType()) {
             case TRANSACTION_FROM_USER:
                 return validateFromUserReceipt(signedDocument, isIncome);
             case CURRENCY_SEND:
@@ -402,12 +322,10 @@ public class TransactionDto {
 
     private String validateFromUserReceipt(SignedDocument signedDocument, boolean isIncome) throws Exception {
         TransactionDto receiptDto = signedDocument.getSignedContent(TransactionDto.class);
-        if(type != receiptDto.getType()) throw new ValidationException("expected type " + type + " found " +
-                receiptDto.getType());
-        if(userToType != receiptDto.getUserToType()) throw new ValidationException("expected userToType " + userToType +
-                " found " + receiptDto.getUserToType());
-        if(!new HashSet<>(toUserIBAN).equals(new HashSet<>(receiptDto.getToUserIBAN())) ||
-                toUserIBAN.size() != receiptDto.getToUserIBAN().size()) throw new ValidationException(
+        if(operation.getCurrencyOperationType() != receiptDto.getOperation().getCurrencyOperationType())
+            throw new ValidationException("expected type " + operation.getCurrencyOperationType() + " found " +
+                    receiptDto.getOperation().getCurrencyOperationType());
+        if(!toUserIBAN.equals(receiptDto.getToUserIBAN())) throw new ValidationException(
                 "expected toUserIBAN " + toUserIBAN + " found " + receiptDto.getToUserIBAN());
         if(!subject.equals(receiptDto.getSubject())) throw new ValidationException("expected subject " + subject +
                 " found " + receiptDto.getSubject());
@@ -467,6 +385,7 @@ public class TransactionDto {
 
     public TransactionDto setSignedDocument(SignedDocument signedDocument) {
         this.signedDocument = signedDocument;
+        this.signer = signedDocument.getFirstSignature().getSigner();
         return this;
     }
 

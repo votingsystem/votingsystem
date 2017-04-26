@@ -65,9 +65,11 @@ public class AuditEJB {
         backupDir.mkdirs();
         log.info( "user: " + user.getId() + " - timePeriod: " + timePeriod.toString() + " - backupDir: " + backupDir.getAbsolutePath());
         //Expenses
-        List<Transaction> transactionList = em.createNamedQuery(Transaction.FIND_TRANS_BY_FROM_USER_AND_TRANS_PARENT_NULL_AND_DATE_CREATED_BETWEEN)
-                .setParameter("fromUser", user).setParameter("dateFrom", timePeriod.getDateFrom())
-                .setParameter("dateTo", timePeriod.getDateTo()).getResultList();
+        List<Transaction> transactionList = em.createNamedQuery(Transaction.FIND_TRANS_BY_FROM_USER_AND_STATE)
+                .setParameter("fromUser", user)
+                .setParameter("dateFrom", timePeriod.getDateFrom())
+                .setParameter("dateTo", timePeriod.getDateTo())
+                .setParameter("state", Transaction.State.OK).getResultList();
 
         List<TransactionDto> transactionFromList = new ArrayList<>();
         Map<CurrencyCode, BigDecimal> balancesFromMap = new HashMap<>();

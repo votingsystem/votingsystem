@@ -10,6 +10,7 @@ import org.votingsystem.model.currency.CurrencyAccount;
 import org.votingsystem.model.currency.Transaction;
 import org.votingsystem.throwable.ValidationException;
 import org.votingsystem.util.CurrencyCode;
+import org.votingsystem.util.CurrencyOperation;
 import org.votingsystem.util.Interval;
 
 import javax.ejb.Stateless;
@@ -45,17 +46,19 @@ public class BalancesEJB {
 
     public BalancesDto getSystemBalancesDto(Interval timePeriod) throws Exception {
         log.info("timePeriod: " + timePeriod.toString());
-        List<Transaction> transactionList = em.createNamedQuery(Transaction.FIND_SYSTEM_TRANSACTION)
-                .setParameter("state", Transaction.State.OK)
+        List<Transaction> transactionList = em.createNamedQuery(Transaction.FIND_TRANS_BY_TYPE_LIST)
                 .setParameter("dateFrom", timePeriod.getDateFrom().toLocalDateTime())
                 .setParameter("dateTo", timePeriod.getDateTo().toLocalDateTime())
-                .setParameter("typeList", Arrays.asList(Transaction.Type.CURRENCY_SEND)).getResultList();
+                .setParameter("state", Transaction.State.OK)
+                .setParameter("typeList", Arrays.asList(CurrencyOperation.CURRENCY_SEND)).getResultList();
         BalancesDto balancesDto = getBalancesDto(transactionList, Transaction.Source.FROM).setTimePeriod(timePeriod);
-        transactionList = em.createNamedQuery(Transaction.FIND_SYSTEM_TRANSACTION_FROM_LIST)
+        transactionList = em.createNamedQuery(Transaction.FIND_TRANS_BY_TYPE_LIST)
                 .setParameter("dateFrom", timePeriod.getDateFrom())
                 .setParameter("dateTo", timePeriod.getDateTo())
-                .setParameter("typeList", Arrays.asList(Transaction.Type.CURRENCY_SEND)).getResultList();
-        BalancesDto balancesToDto = getBalancesDto(transactionList, Transaction.Source.FROM);
+                .setParameter("state", Transaction.State.OK)
+                .setParameter("typeList", Arrays.asList(CurrencyOperation.CURRENCY_REQUEST,
+                        CurrencyOperation.TRANSACTION_FROM_BANK)).getResultList();
+        BalancesDto balancesToDto = getBalancesDto(transactionList, Transaction.Source.TO);
         balancesDto.setTo(balancesToDto);
         return balancesDto;
     }
@@ -89,7 +92,7 @@ public class BalancesEJB {
     public void updateSystemBalance(BigDecimal amount, CurrencyCode currencyCode) throws ValidationException {
         List<CurrencyAccount> accounts = em.createNamedQuery(
                 CurrencyAccount.FIND_BY_USER_IBAN_AND_CURRENCY_CODE_AND_STATE)
-                .setParameter("userIBAN", config.getSystemUser())
+                .setParameter("userIBAN", config.getSystemUser().getIBAN())
                 .setParameter("currencyCode", currencyCode)
                 .setParameter("state", CurrencyAccount.State.ACTIVE).getResultList();
         if(!accounts.isEmpty()) {

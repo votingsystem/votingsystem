@@ -54,27 +54,37 @@ public class BankEJB {
                     .setParameter("bankCode", IBAN.getBankCode())
                     .setParameter("countryCode", IBAN.getCountryCode()).getResultList();
             BankInfo bankInfo = null;
-            X509Certificate bankCertificate = null;
+            X509Certificate x509BankCert = PEMUtils.fromPEMToX509Cert(bankDto.getX509Certificate().getBytes());
+            String x509BankCertUUID = CertificateUtils.getHash(x509BankCert);
+            Certificate bankCertificate = null;
             if(bankInfoList.isEmpty()) {
-                bankCertificate = PEMUtils.fromPEMToX509Cert(bankDto.getX509Certificate().getBytes());
-                Bank bank = Bank.FROM_CERT(Bank.class, bankCertificate, User.Type.BANK);
+                Bank bank = Bank.FROM_CERT(Bank.class, x509BankCert, User.Type.BANK);
                 bank.setDescription(bankDto.getInfo()).setEntityId(bankDto.getEntityId()).setUUID(UUID.randomUUID().toString());
-                bank.setCertificateCA(signerInfoService.verifyCertificate(bankCertificate));
+                bank.setCertificateCA(signerInfoService.verifyCertificate(x509BankCert));
                 signerInfoService.checkSigner(bank, User.Type.BANK, bankDto.getEntityId());
                 bankInfo = new BankInfo(bank, IBAN.getBankCode(), IBAN.getCountryCode());
                 em.persist(bankInfo);
                 config.createIBAN(bank);
                 log.info("Added new bank to database - bank UUID: " + bank.getUUID());
-
+                bankCertificate = bank.getCertificate();
             } else {
                 bankInfo = bankInfoList.iterator().next();
                 List<Certificate> certificates = em.createQuery(
                         "select c from Certificate c where c.state=:state and c.signer=:bank")
                         .setParameter("state", Certificate.State.OK)
                         .setParameter("bank", bankInfo.getBank()).getResultList();
-                bankCertificate = CertificateUtils.loadCertificate(certificates.iterator().next().getContent());
+                bankCertificate = certificates.iterator().next();
+                if(!bankCertificate.getUUID().equals(x509BankCertUUID)) {
+                    Certificate certificateCA = signerInfoService.verifyCertificate(x509BankCert);
+                    Certificate newBankCertificate = Certificate.SIGNER(bankInfo.getBank(), x509BankCert)
+                            .setAuthorityCertificate(certificateCA);
+                    bankCertificate.setState(Certificate.State.RENEWED);
+                    em.persist(newBankCertificate);
+                    log.info("Renewed bank certificate from " + x509BankCert.getSubjectDN() +
+                            " - new certificate id: " + newBankCertificate.getId());
+                }
             }
-            log.info("Bank UUID: " + bankInfo.getBank().getUUID() + " - " + bankCertificate.getSubjectDN().toString());
+            log.info("Bank UUID: " + bankInfo.getBank().getUUID() + " - " + x509BankCert.getSubjectDN().toString());
         }
     }
 

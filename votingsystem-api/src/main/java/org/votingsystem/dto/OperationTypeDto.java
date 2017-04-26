@@ -34,6 +34,11 @@ public class OperationTypeDto<T> {
         return type;
     }
 
+    @JsonIgnore
+    public CurrencyOperation getCurrencyOperationType() {
+        return CurrencyOperation.valueOf(type.toString());
+    }
+
     public OperationTypeDto setType(SystemOperation type) {
         this.type = type;
         return this;

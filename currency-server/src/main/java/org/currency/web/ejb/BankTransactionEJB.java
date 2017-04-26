@@ -1,5 +1,6 @@
 package org.currency.web.ejb;
 
+import org.votingsystem.crypto.CertificateUtils;
 import org.votingsystem.crypto.SignedDocumentType;
 import org.votingsystem.dto.ResultListDto;
 import org.votingsystem.dto.currency.TransactionDto;
@@ -10,7 +11,6 @@ import org.votingsystem.model.currency.Transaction;
 import org.votingsystem.throwable.SignatureException;
 import org.votingsystem.throwable.ValidationException;
 import org.votingsystem.util.CurrencyOperation;
-import org.votingsystem.util.Messages;
 
 import javax.ejb.Stateless;
 import javax.inject.Inject;
@@ -34,41 +34,43 @@ public class BankTransactionEJB {
     @Inject private TransactionEJB transactionBean;
     @Inject private CurrencySignatureEJB signatureService;
 
-    public ResultListDto<TransactionDto> processTransactionFromBank(TransactionDto request)
+    public ResultListDto<TransactionDto> processTransactionFromBank(TransactionDto transactionDto)
             throws ValidationException, SignatureException {
-        validateRequest(request);
-        List<Bank> userList = em.createNamedQuery(Bank.FIND_USER_BY_NIF).setParameter(
-                "numId", request.getSigner().getNumId()).getResultList();
-        if(userList.isEmpty()) throw new ValidationException(
-                Messages.currentInstance().get("bankPrivilegesErrorMsg", request.getOperation().toString()));
-        Bank bank = userList.iterator().next();
+        if(CurrencyOperation.TRANSACTION_FROM_BANK != transactionDto.getOperation().getCurrencyOperationType())
+            throw new ValidationException(
+                    "Operation expected: 'TRANSACTION_FROM_BANK' - found: " + transactionDto.getOperation());
+        List<User> userList = em.createNamedQuery(User.FIND_USER_BY_IBAN)
+                .setParameter("IBAN", transactionDto.getToUserIBAN()).getResultList();
+        if(userList.isEmpty())
+            throw new ValidationException("invalid receptor IBAN:" + transactionDto.getToUserIBAN());
+        transactionDto.setReceptor(userList.iterator().next());
+        String bankCertificateHash = null;
+        try {
+            bankCertificateHash = CertificateUtils.getHash(transactionDto.getSigner().getX509Certificate());
+        }catch (Exception ex) {
+            throw new ValidationException("Error with bank certificate");
+        }
+        List<Bank> bankList = em.createQuery(
+                "select b from Certificate c JOIN c.signer b where c.UUID=:UUID")
+                .setParameter("UUID", bankCertificateHash).getResultList();
+        if(bankList.isEmpty())
+            throw new ValidationException("Not a valid bank: " + transactionDto.getSigner().getX509Certificate().getSubjectDN());
+        Bank bank = bankList.iterator().next();
 
-        SignedDocument signedDocument = request.getSignedDocument();
-        Transaction transaction = Transaction.FROM_BANK(bank, request.getFromUserIBAN(),
-                request.getFromUserName(), request.getReceptor(), request.getAmount(), request.getCurrencyCode(),
-                request.getSubject(), signedDocument);
+        SignedDocument signedDocument = transactionDto.getSignedDocument();
+        Transaction transaction = Transaction.FROM_BANK(bank, transactionDto.getFromUserIBAN(),
+                transactionDto.getFromUserName(), transactionDto.getReceptor(), transactionDto.getAmount(),
+                transactionDto.getCurrencyCode(),
+                transactionDto.getSubject(), signedDocument);
+
         em.persist(transaction);
 
         signatureService.addReceipt(SignedDocumentType.TRANSACTION_FROM_BANK_RECEIPT, signedDocument);
 
+
         transactionBean.updateCurrencyAccounts(transaction);
-        log.info("Bank: " + bank.getId() + " - to user: " + request.getReceptor().getIBAN());
+        log.info("Bank: " + bank.getId() + " - to user: " + transactionDto.getReceptor().getIBAN());
         return new ResultListDto(Arrays.asList(new TransactionDto(transaction)), 0, 1, 1L);
-    }
-
-
-    public TransactionDto validateRequest(TransactionDto dto) throws ValidationException {
-        if(CurrencyOperation.TRANSACTION_FROM_BANK != dto.getOperation())
-            throw new ValidationException(
-                    "Operation expected: 'TRANSACTION_FROM_BANK' - found: " + dto.getOperation());
-        if(dto.getToUserIBAN().size() != 1) throw new ValidationException(
-                "'TRANSACTION_FROM_BANK' only allows one receptor. Receptors:" + dto.getToUserIBAN());
-        List<User> userList = em.createNamedQuery(User.FIND_USER_BY_IBAN)
-                .setParameter("IBAN", dto.getToUserIBAN().iterator().next()).getResultList();
-        if(userList.isEmpty())
-            throw new ValidationException("invalid 'toUserIBAN':" + dto.getToUserIBAN().iterator().next());
-        dto.setReceptor(userList.iterator().next());
-        return dto;
     }
 
 }

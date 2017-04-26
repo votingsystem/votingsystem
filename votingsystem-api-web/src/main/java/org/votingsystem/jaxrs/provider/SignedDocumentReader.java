@@ -3,6 +3,7 @@ package org.votingsystem.jaxrs.provider;
 import org.votingsystem.ejb.SignatureService;
 import org.votingsystem.http.MediaType;
 import org.votingsystem.model.SignedDocument;
+import org.votingsystem.throwable.DuplicatedDbItemException;
 import org.votingsystem.util.FileUtils;
 
 import javax.inject.Inject;
@@ -41,9 +42,11 @@ public class SignedDocumentReader implements MessageBodyReader<SignedDocument> {
             throws IOException, WebApplicationException {
         try {
             return signatureService.validateXAdESAndSave(FileUtils.getBytesFromStream(inputStream));
+        } catch (DuplicatedDbItemException ex) {
+            throw new WebApplicationException("Message already stored in database");
         } catch (Exception ex) {
             log.log(Level.SEVERE, ex.getMessage(), ex);
-            throw new WebApplicationException("Signed document with errors");
+            throw new WebApplicationException(ex.getMessage());
         }
     }
 

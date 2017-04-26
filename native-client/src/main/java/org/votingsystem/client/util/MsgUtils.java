@@ -1,8 +1,5 @@
 package org.votingsystem.client.util;
 
-import org.votingsystem.model.currency.Tag;
-import org.votingsystem.util.Messages;
-
 /**
  * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */

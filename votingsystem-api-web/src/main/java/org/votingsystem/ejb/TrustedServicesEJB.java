@@ -39,7 +39,7 @@ public class TrustedServicesEJB {
 
     @PostConstruct
     public void initialize() {
-        executorService.submit(() -> {
+        /*executorService.submit(() -> {
             try {
                 //Hack to allow local OCSP service initialization
                 Thread.sleep(10000);
@@ -47,7 +47,7 @@ public class TrustedServicesEJB {
             } catch (Exception ex) {
                 log.log(Level.SEVERE, ex.getMessage(), ex);
             }
-        });
+        });*/
     }
 
     /**

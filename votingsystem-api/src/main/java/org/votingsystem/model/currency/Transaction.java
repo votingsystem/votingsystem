@@ -6,6 +6,7 @@ import org.votingsystem.model.SignedDocument;
 import org.votingsystem.model.User;
 import org.votingsystem.model.converter.LocalDateTimeAttributeConverter;
 import org.votingsystem.util.CurrencyCode;
+import org.votingsystem.util.CurrencyOperation;
 
 import javax.persistence.*;
 import java.io.Serializable;
@@ -30,23 +31,15 @@ import static javax.persistence.GenerationType.IDENTITY;
         "SELECT COUNT(t) FROM Transaction t WHERE t.dateCreated between :dateFrom and :dateTo AND t.toUser is not null AND t.type =:type"),
         @NamedQuery(name= Transaction.COUNT_BY_TYPE_AND_DATE_CREATED_BETWEEN, query=
         "SELECT COUNT(t) FROM Transaction t WHERE t.type =:type AND t.dateCreated between :dateFrom and :dateTo"),
-        @NamedQuery(name= Transaction.FIND_SYSTEM_TRANSACTION, query=
-                "SELECT t FROM Transaction t WHERE (t.state =:state and t.transactionParent is not null " +
-                        "and t.dateCreated between :dateFrom and :dateTo) OR (t.state =:state and t.transactionParent is null " +
-                        "and t.type in :typeList)"),
-        @NamedQuery(name=Transaction.FIND_SYSTEM_TRANSACTION_FROM_LIST, query=
-                "SELECT t FROM Transaction t WHERE t.transactionParent is null and t.dateCreated between :dateFrom and :dateTo and t.type not in :typeList"),
-        @NamedQuery(name=Transaction.COUNT_BY_TRANSACTION_PARENT, query=
-                "SELECT COUNT(t) FROM Transaction t WHERE t.transactionParent =:transactionParent"),
-        @NamedQuery(name=Transaction.FIND_USER_TRANS_FROM_BY_FROM_USER_AND_STATE_AND_DATE_CREATED_AND_IN_LIST, query=
-                "SELECT t FROM Transaction t WHERE (t.fromUser =:fromUser and t.state =:state " +
-                        "and t.transactionParent is not null and t.dateCreated between :dateFrom and :dateTo) " +
-                        "OR (t.fromUser =:fromUser and t.state =:state and t.transactionParent is null " +
-                        "and  t.dateCreated between :dateFrom and :dateTo and t.type in (:inList))"),
+        @NamedQuery(name=Transaction.FIND_TRANS_BY_TYPE_LIST, query=
+                "SELECT t FROM Transaction t WHERE t.dateCreated between :dateFrom and :dateTo and t.type in :typeList and t.state=:state"),
+        @NamedQuery(name=Transaction.FIND_TRANS_BY_FROM_USER_AND_IN_LIST, query=
+                "SELECT t FROM Transaction t WHERE t.fromUser =:fromUser and t.state =:state " +
+                        "and t.dateCreated between :dateFrom and :dateTo and t.type in :inList"),
         @NamedQuery(name=Transaction.FIND_TRANS_BY_TO_USER_AND_STATE_AND_DATE_CREATED_BETWEEN, query= "SELECT t FROM Transaction t " +
                 "WHERE t.toUser =:toUser and t.state =:state and t.dateCreated between :dateFrom and :dateTo"),
-        @NamedQuery(name=Transaction.FIND_TRANS_BY_FROM_USER_AND_TRANS_PARENT_NULL_AND_DATE_CREATED_BETWEEN,
-                query= "SELECT t FROM Transaction t WHERE t.fromUser =:fromUser and t.transactionParent is null and t.dateCreated between :dateFrom and :dateTo"),
+        @NamedQuery(name=Transaction.FIND_TRANS_BY_FROM_USER_AND_STATE,
+                query= "SELECT t FROM Transaction t WHERE t.fromUser =:fromUser and t.dateCreated between :dateFrom and :dateTo and t.state=:state"),
         @NamedQuery(name=Transaction.FIND_TRANS_BY_TO_USER_AND_DATE_CREATED_BETWEEN,
                 query= "SELECT t FROM Transaction t  WHERE t.toUser =:toUser and t.dateCreated between :dateFrom and :dateTo")
 })
@@ -63,23 +56,17 @@ public class Transaction extends EntityBase implements Serializable {
             "Transaction.countByToUserNotNullAndTypeAndDateCreatedBetween";
     public static final String COUNT_BY_TYPE_AND_DATE_CREATED_BETWEEN =
             "Transaction.countByTypeAndDateCreatedBetween";
-    public static final String FIND_SYSTEM_TRANSACTION     = "Transaction.findSystemTransaction";
-    public static final String FIND_SYSTEM_TRANSACTION_FROM_LIST     = "Transaction.findSystemTransactionFromList";
-    public static final String COUNT_BY_TRANSACTION_PARENT = "Transaction.countByTransactionParent";
-    public static final String FIND_USER_TRANS_FROM_BY_FROM_USER_AND_STATE_AND_DATE_CREATED_AND_IN_LIST =
-            "Transaction.findUserTransFromByFromUserAndStateAndDateCreatedAndInList";
+    public static final String FIND_TRANS_BY_TYPE_LIST = "Transaction.findSystemTransactionByTypeList";
+    public static final String FIND_TRANS_BY_FROM_USER_AND_IN_LIST = "Transaction.findTransByFromUserAndInList";
     public static final String FIND_TRANS_BY_TO_USER_AND_STATE_AND_DATE_CREATED_BETWEEN =
             "Transaction.findTransByToUserAndStateAndDateCreatedBetween";
-    public static final String FIND_TRANS_BY_FROM_USER_AND_TRANS_PARENT_NULL_AND_DATE_CREATED_BETWEEN =
-            "Transaction.findTransByFromUserAndTransactionParentNullAndDateCreatedBetween";
+    public static final String FIND_TRANS_BY_FROM_USER_AND_STATE =
+            "Transaction.findTransByFromUserAndStateAndDateCreatedBetween";
     public static final String FIND_TRANS_BY_TO_USER_AND_DATE_CREATED_BETWEEN =
             "Transaction.findTransByToUserAndDateCreatedBetween";
 
 
     public enum Source {FROM, TO}
-
-    public enum Type {
-        FROM_BANK, FROM_USER, CURRENCY_REQUEST, CURRENCY_SEND, CURRENCY_CHANGE; }
 
     public enum State { OK, REPEATED, CANCELED;}
 
@@ -99,11 +86,7 @@ public class Transaction extends EntityBase implements Serializable {
     private SignedDocument signedDocument;
 
     @ManyToOne(fetch=FetchType.LAZY)
-    @JoinColumn(name="TRANSACTION_PARENT")
-    private Transaction transactionParent;
-
-    @ManyToOne(fetch=FetchType.LAZY)
-    @JoinColumn(name="TRANSACTION_FROM_USER")
+    @JoinColumn(name="FROM_USER")
     private User fromUser;
 
     //This is to set the data of the Bank client the transaction comes from
@@ -124,7 +107,7 @@ public class Transaction extends EntityBase implements Serializable {
     private CurrencyBatch currencyBatch;
 
     @Column(name="TYPE", nullable=false) @Enumerated(EnumType.STRING)
-    private Type type;
+    private CurrencyOperation type;
 
     @Column(name="STATE", nullable=false) @Enumerated(EnumType.STRING)
     private State state;
@@ -144,7 +127,7 @@ public class Transaction extends EntityBase implements Serializable {
     public Transaction() {}
 
     public Transaction(User fromUser, User toUser, BigDecimal amount, CurrencyCode currencyCode, String subject,
-                       SignedDocument signedDocument, Type type, State state) {
+                       SignedDocument signedDocument, CurrencyOperation type, State state) {
         this.amount = amount;
         this.fromUser = fromUser;
         this.fromUserIBAN = fromUser.getIBAN();
@@ -158,7 +141,7 @@ public class Transaction extends EntityBase implements Serializable {
     }
 
     public static Transaction CURRENCY_SEND(CurrencyBatch batch, User toUser, SignedDocument signedDocument) {
-        Transaction transaction = BASIC(toUser, Transaction.Type.CURRENCY_SEND, null, batch.getBatchAmount(),
+        Transaction transaction = BASIC(toUser, CurrencyOperation.CURRENCY_SEND, null, batch.getBatchAmount(),
                 batch.getCurrencyCode(), batch.getSubject(), signedDocument);
         transaction.setToUserIBAN(batch.getToUser().getIBAN());
         transaction.setCurrencyBatch(batch);
@@ -169,7 +152,6 @@ public class Transaction extends EntityBase implements Serializable {
 
     public static Transaction CURRENCY_CHANGE(CurrencyBatch batch, SignedDocument signedDocument) {
         Transaction transaction = new Transaction();
-        transaction.setType(Type.CURRENCY_CHANGE);
         transaction.setAmount(batch.getBatchAmount());
         transaction.setCurrencyCode(batch.getCurrencyCode());
         transaction.setSubject(batch.getSubject());
@@ -179,7 +161,7 @@ public class Transaction extends EntityBase implements Serializable {
         return transaction;
     }
 
-    public static Transaction USER(User user, User toUser, Type type, Map<CurrencyAccount, BigDecimal> accountFromMovements,
+    public static Transaction USER(User user, User toUser, CurrencyOperation type, Map<CurrencyAccount, BigDecimal> accountFromMovements,
            BigDecimal amount, CurrencyCode currencyCode, String subject, SignedDocument signedDocument) {
         Transaction transaction = BASIC(toUser, type, accountFromMovements, amount, currencyCode, subject, signedDocument);
         transaction.setFromUser(user);
@@ -187,7 +169,7 @@ public class Transaction extends EntityBase implements Serializable {
         return transaction;
     }
 
-    public static Transaction BASIC(User toUser, Type type, Map<CurrencyAccount, BigDecimal> accountFromMovements,
+    public static Transaction BASIC(User toUser, CurrencyOperation type, Map<CurrencyAccount, BigDecimal> accountFromMovements,
             BigDecimal amount, CurrencyCode currencyCode, String subject, SignedDocument signedDocument) {
         Transaction transaction = new Transaction();
         transaction.setToUser(toUser);
@@ -215,14 +197,14 @@ public class Transaction extends EntityBase implements Serializable {
         transaction.setSubject(subject);
         transaction.setSignedDocument(signedDocument);
         transaction.setState(Transaction.State.OK);
-        transaction.setType(Transaction.Type.FROM_BANK);
+        transaction.setType(CurrencyOperation.TRANSACTION_FROM_BANK);
         return transaction;
     }
 
     public static Transaction CURRENCY_REQUEST(String subject, Map<CurrencyAccount, BigDecimal> accountFromMovements,
             CurrencyRequestDto requestDto, User fromUser) {
         Transaction transaction = new Transaction();
-        transaction.setType(Transaction.Type.CURRENCY_REQUEST);
+        transaction.setType(CurrencyOperation.CURRENCY_REQUEST);
         transaction.setState(Transaction.State.OK);
         transaction.setAmount(requestDto.getTotalAmount());
         transaction.setCurrencyCode(requestDto.getCurrencyCode());
@@ -285,19 +267,12 @@ public class Transaction extends EntityBase implements Serializable {
         this.amount = amount;
     }
 
-    public Transaction getTransactionParent() {
-        return transactionParent;
-    }
 
-    public void setTransactionParent(Transaction transactionParent) {
-        this.transactionParent = transactionParent;
-    }
-
-    public Type getType() {
+    public CurrencyOperation getType() {
         return type;
     }
 
-    public void setType(Type type) {
+    public void setType(CurrencyOperation type) {
         this.type = type;
     }
 
@@ -372,23 +347,6 @@ public class Transaction extends EntityBase implements Serializable {
     public Transaction setCurrencyBatch(CurrencyBatch currencyBatch) {
         this.currencyBatch = currencyBatch;
         return this;
-    }
-
-    public static Transaction generateTriggeredTransaction(Transaction transactionParent, BigDecimal amount,
-                       User toUser, String toUserIBAN) {
-        Transaction result = new Transaction();
-        result.amount = amount;
-        result.signedDocument = transactionParent.signedDocument;
-        result.fromUser = transactionParent.fromUser;
-        result.fromUserIBAN = transactionParent.fromUserIBAN;
-        result.state = transactionParent.state;
-        result.subject = transactionParent.subject;
-        result.currencyCode = transactionParent.currencyCode;
-        result.type = transactionParent.type;
-        result.transactionParent = transactionParent;
-        result.toUser = toUser;
-        result.toUserIBAN = toUserIBAN;
-        return result;
     }
 
     public Map<CurrencyAccount, BigDecimal> getAccountFromMovements() {

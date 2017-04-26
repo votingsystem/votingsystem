@@ -2,10 +2,12 @@ package org.currency.web.jaxrs;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import org.currency.web.ejb.ConfigCurrencyServer;
+import org.votingsystem.model.User;
+import org.votingsystem.model.currency.Bank;
 import org.votingsystem.model.currency.CurrencyAccount;
 import org.votingsystem.model.currency.Tag;
-import org.votingsystem.model.currency.Transaction;
 import org.votingsystem.throwable.ValidationException;
+import org.votingsystem.util.FileUtils;
 
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
@@ -13,11 +15,13 @@ import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.transaction.Transactional;
 import javax.ws.rs.GET;
+import javax.ws.rs.POST;
 import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
-import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -45,14 +49,21 @@ public class TestJPAResourceEJB {
         return Response.ok().entity("OK").build();
     }
 
-    @GET @Path("/transactions")
-    public Response transactions() throws Exception {
-        List<Transaction> resultList = em.createQuery("select t from Transaction t where t.type  in :inList")
-                .setParameter("inList", Arrays.asList(Transaction.Type.CURRENCY_CHANGE)).getResultList();
-        for(Transaction transaction : resultList) {
-            em.remove(transaction);
-        }
-        return Response.ok().entity("OK").build();
-    }
 
+    @Transactional
+    @Path("/cert-by-hash") @POST
+    @Produces(javax.ws.rs.core.MediaType.TEXT_PLAIN)
+    public Response uuid(@Context HttpServletRequest req, @Context HttpServletResponse res) throws Exception {
+        String uuid = FileUtils.getStringFromStream(req.getInputStream());
+        List<Bank> bankList = em.createQuery(
+                "select b from Certificate c JOIN c.signer b where c.UUID=:UUID")
+                .setParameter("UUID", uuid).getResultList();
+        if (bankList.isEmpty()) {
+            return Response.status(Response.Status.NOT_FOUND).entity("Cert with uuid: " + uuid +
+                    " not found").build();
+        }
+        User bank = bankList.iterator().next();
+        return Response.ok().entity("Signer UUID: " + bank.getUUID() + " - simple name: " +
+                bank.getClass().getSimpleName()).build();
+    }
 }

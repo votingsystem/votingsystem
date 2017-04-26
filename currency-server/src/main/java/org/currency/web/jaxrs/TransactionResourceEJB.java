@@ -88,9 +88,11 @@ public class TransactionResourceEJB {
               @DefaultValue("100") @QueryParam("max") int max,
               @QueryParam("transactionType") String transactionType, @Context ServletContext context,
               @Context HttpServletRequest req, @Context HttpServletResponse resp) throws IOException, ServletException {
-        List<Transaction.Type> transactionTypeList = Arrays.asList(Transaction.Type.values());
+        List<CurrencyOperation> transactionTypeList = Arrays.asList(CurrencyOperation.TRANSACTION_FROM_BANK,
+                CurrencyOperation.TRANSACTION_FROM_USER, CurrencyOperation.CURRENCY_REQUEST, CurrencyOperation.CURRENCY_CHANGE);
+
         try {
-            if(transactionType != null) transactionTypeList = Arrays.asList(Transaction.Type.valueOf(transactionType));
+            if(transactionType != null) transactionTypeList = Arrays.asList(CurrencyOperation.valueOf(transactionType));
         } catch(Exception ex) {}
         Criteria criteria = em.unwrap(Session.class).createCriteria(Transaction.class);
         criteria.add(Restrictions.isNull("transactionParent"));
@@ -124,14 +126,14 @@ public class TransactionResourceEJB {
                        @PathParam("dateFrom") String dateFromStr, @PathParam("dateTo") String dateToStr,
                        @Context ServletContext context, @Context HttpServletRequest req,
                        @Context HttpServletResponse resp) throws IOException, ParseException, ServletException, ValidationException {
-        Transaction.Type transactionType = null;
+        CurrencyOperation transactionType = null;
         BigDecimal amount = null;
         LocalDateTime dateFrom = DateUtils.getURLPart(dateFromStr);
         LocalDateTime dateTo = DateUtils.getURLPart(dateToStr);
         try {
             if(transactionType != null && !"ALL".equals(transactionTypeStr.toUpperCase()))
-                transactionType = Transaction.Type.valueOf(transactionTypeStr);
-            else transactionType = Transaction.Type.valueOf(searchText);} catch(Exception ex) {}
+                transactionType = CurrencyOperation.valueOf(transactionTypeStr);
+            else transactionType = CurrencyOperation.valueOf(searchText);} catch(Exception ex) {}
         try {amount = new BigDecimal(searchText);} catch(Exception ex) {}
         Criteria criteria = em.unwrap(Session.class).createCriteria(Transaction.class);
         criteria.add(Restrictions.between("dateCreated", dateFrom, dateTo));

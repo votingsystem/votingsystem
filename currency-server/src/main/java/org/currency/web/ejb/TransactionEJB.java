@@ -10,6 +10,7 @@ import org.votingsystem.model.currency.CurrencyAccount;
 import org.votingsystem.model.currency.Transaction;
 import org.votingsystem.throwable.ValidationException;
 import org.votingsystem.util.CurrencyCode;
+import org.votingsystem.util.CurrencyOperation;
 import org.votingsystem.util.Interval;
 import org.votingsystem.util.Messages;
 
@@ -46,24 +47,22 @@ public class TransactionEJB {
 
 
     public ResultListDto<TransactionDto> processTransaction(SignedDocument signedDocument) throws Exception {
-        TransactionDto request = signedDocument.getSignedContent(TransactionDto.class);
-        request.setSignedDocument(signedDocument).validate();
-        if(request.getToUserIBAN() != null) {
-            for(String IBAN : request.getToUserIBAN()) {
-                config.validateIBAN(IBAN);
-            }
+        TransactionDto transactionDto = signedDocument.getSignedContent(TransactionDto.class);
+        transactionDto.setSignedDocument(signedDocument).validate();
+        if(transactionDto.getToUserIBAN() != null) {
+            config.validateIBAN(transactionDto.getToUserIBAN());
         }
 
-        AuditLogger.logTransaction(request);
+        AuditLogger.logTransaction(transactionDto);
 
-        switch(request.getOperation()) {
+        switch(transactionDto.getOperation().getCurrencyOperationType()) {
             case TRANSACTION_FROM_BANK:
-                return bankTransactionService.processTransactionFromBank(request);
+                return bankTransactionService.processTransactionFromBank(transactionDto);
             case TRANSACTION_FROM_USER:
-                return userTransactionService.processTransactionFromUser(request);
+                return userTransactionService.processTransactionFromUser(transactionDto);
             default:
                 throw new ValidationException(
-                        Messages.currentInstance().get("unknownTransactionErrorMsg", request.getOperation().toString()));
+                        Messages.currentInstance().get("unknownTransactionErrorMsg", transactionDto.getOperation().toString()));
         }
     }
 
@@ -108,9 +107,8 @@ public class TransactionEJB {
             em.persist(transaction);
         log.info("updateCurrencyAccounts - Transaction id: " + transaction.getId());
         if(transaction.getState() == Transaction.State.OK) {
-            boolean isParentTransaction = (transaction.getTransactionParent() == null);
             switch(transaction.getType()) {
-                case FROM_USER:
+                case TRANSACTION_FROM_USER:
                     updateUserAccountFrom(transaction);
                     updateUserAccountTo(transaction);
                     break;
@@ -126,7 +124,8 @@ public class TransactionEJB {
                     Currency leftOver = transaction.getCurrencyBatch().getLeftOver();
                     if(leftOver != null) balancesBean.updateSystemBalance(leftOver.getAmount(), leftOver.getCurrencyCode());
                     break;
-                case FROM_BANK:
+                case TRANSACTION_FROM_BANK:
+                    balancesBean.updateSystemBalance(transaction.getAmount(), transaction.getCurrencyCode());
                     updateUserAccountTo(transaction);
                     break;
                 case CURRENCY_CHANGE:
@@ -140,16 +139,9 @@ public class TransactionEJB {
                     balancesBean.updateSystemBalance(currencyChange.getAmount(), currencyChange.getCurrencyCode());
                     break;
                 default:
-                    if(isParentTransaction) {//Parent transaction, to system before trigger to receptors
-                        if(transaction.getType() != Transaction.Type.FROM_BANK) updateUserAccountFrom(transaction);
-                        balancesBean.updateSystemBalance(transaction.getAmount(), transaction.getCurrencyCode());
-                    } else {
-                        updateUserAccountTo(transaction);
-                        balancesBean.updateSystemBalance(transaction.getAmount().negate(), transaction.getCurrencyCode());
-                        log.info("transaction: " + transaction.getType() + " - " + transaction.getAmount() +  " " +
-                                transaction.getCurrencyCode() + " - " + "fromUserIBAN: " + transaction.getFromUserIBAN() +
-                                " - toIBAN: " + transaction.getToUser().getIBAN());
-                    }
+                    throw new IllegalArgumentException("uunexpected transaction type: " + transaction.getType());
+
+
             }
         } else log.log(Level.SEVERE, "Transaction:" + transaction.getId() + " - state:" +
                 transaction.getState().toString());
@@ -201,10 +193,13 @@ public class TransactionEJB {
 
     public List<Transaction> getTransactionFromList(User fromUser, Interval timePeriod) {
         List<Transaction> transactionList = em.createNamedQuery(
-                Transaction.FIND_USER_TRANS_FROM_BY_FROM_USER_AND_STATE_AND_DATE_CREATED_AND_IN_LIST)
-                .setParameter("fromUser", fromUser).setParameter("state", Transaction.State.OK)
-                .setParameter("dateFrom", timePeriod.getDateFrom()).setParameter("dateTo", timePeriod.getDateTo())
-                .setParameter("inList", Arrays.asList(Transaction.Type.CURRENCY_REQUEST, Transaction.Type.FROM_USER)).getResultList();
+                Transaction.FIND_TRANS_BY_FROM_USER_AND_IN_LIST)
+                .setParameter("fromUser", fromUser)
+                .setParameter("state", Transaction.State.OK)
+                .setParameter("dateFrom", timePeriod.getDateFrom())
+                .setParameter("dateTo", timePeriod.getDateTo())
+                .setParameter("inList", Arrays.asList(CurrencyOperation.CURRENCY_REQUEST,
+                        CurrencyOperation.TRANSACTION_FROM_USER)).getResultList();
         return transactionList;
     }
 

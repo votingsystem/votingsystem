@@ -10,12 +10,14 @@ import org.votingsystem.util.DateUtils;
 
 import javax.persistence.*;
 import java.io.Serializable;
+import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.time.LocalDateTime;
+import java.util.Base64;
 import java.util.logging.Logger;
 
 import static javax.persistence.GenerationType.IDENTITY;
@@ -44,7 +46,7 @@ public class Certificate implements Serializable {
     public static final String FIND_BY_SERIALNUMBER_AND_SUBJECT_DN = "Certificate.findBySerialNumberAndSubjectDN";
     public static final String FIND_BY_SIGNER_STATE_AND_TYPE = "Certificate.findBySignerAndStateAndType";
 
-    public enum State {OK, ERROR, CANCELED, CONSUMED, LAPSED, UNKNOWN, SESSION_CLOSED}
+    public enum State {OK, ERROR, CANCELED, CONSUMED, LAPSED, RENEWED, UNKNOWN, SESSION_CLOSED}
 
     public enum Type {
         VOTE, USER, USER_ID_CARD, CERTIFICATE_AUTHORITY, CERTIFICATE_AUTHORITY_ID_CARD, BROWSER_SESSION, MOBILE_SESSION,
@@ -328,6 +330,13 @@ public class Certificate implements Serializable {
     public Certificate setSignedDocument(SignedDocument signedDocument) {
         this.signedDocument = signedDocument;
         return this;
+    }
+
+    @PrePersist
+    public void prePersist() throws NoSuchAlgorithmException {
+        MessageDigest md = MessageDigest.getInstance("SHA-1");
+        md.update(content);
+        this.UUID =  Base64.getEncoder().encodeToString(md.digest());
     }
 
 }
