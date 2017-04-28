@@ -10,7 +10,7 @@ import java.util.logging.Logger;
 @LocalBean
 @Singleton
 @Startup
-@DependsOn("ConfigCurrencyServer")
+@DependsOn("ConfigEJB")
 public class StartUpEJB {
 
     private static final Logger log = Logger.getLogger(StartUpEJB.class.getName());
@@ -24,11 +24,7 @@ public class StartUpEJB {
     @PostConstruct
     public void initialize() {
         try {
-            log.info("updateBanksInfo");
             bankEJB.updateBanksInfo();
-            //Hack to allow local OCSP service initialization
-            //Thread.sleep(10000);
-            trustedServices.loadTrustedServices();
         } catch (Exception ex) {
             log.log(Level.SEVERE, ex.getMessage(), ex);
         }

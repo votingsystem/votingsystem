@@ -2,6 +2,7 @@ package org.currency.test.operation;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.google.common.collect.Sets;
+import org.currency.test.Constants;
 import org.votingsystem.crypto.MockDNIe;
 import org.votingsystem.crypto.TSPHttpSource;
 import org.votingsystem.currency.Wallet;
@@ -10,10 +11,11 @@ import org.votingsystem.dto.ResultListDto;
 import org.votingsystem.dto.currency.CurrencyRequestDto;
 import org.votingsystem.dto.currency.TransactionDto;
 import org.votingsystem.http.HttpConn;
+import org.votingsystem.model.User;
 import org.votingsystem.testlib.BaseTest;
-import org.votingsystem.util.Constants;
 import org.votingsystem.util.CurrencyCode;
 import org.votingsystem.util.CurrencyOperation;
+import org.votingsystem.util.JSON;
 import org.votingsystem.xades.XAdESSignature;
 import org.votingsystem.xml.XML;
 
@@ -29,49 +31,40 @@ public class CurrencyRequestTest extends BaseTest {
 
     public CurrencyRequestTest() {}
 
+
     public static void main(String[] args) throws Exception {
-        new CurrencyRequestTest().sendRequest();
+        new CurrencyRequestTest().test();
         System.exit(0);
     }
 
-    public void sendRequest() throws Exception {
-        Wallet wallet = new Wallet(".", "local-demo".toCharArray());
-        log.info("WalletDirPath: " + wallet.getWalletDirPath());
+    public void test() throws Exception {
         MockDNIe mockDNIe = new MockDNIe("08888888D");
-
+        Wallet wallet = new Wallet("", mockDNIe.getNif().toCharArray());
         BigDecimal totalAmount = new BigDecimal(12);
         TransactionDto transactionDto = new TransactionDto();
         transactionDto.setAmount(totalAmount);
         transactionDto.setCurrencyCode(CurrencyCode.EUR);
-        CurrencyRequestDto requestDto = CurrencyRequestDto.CREATE_REQUEST(transactionDto, totalAmount,
-                org.currency.test.Constants.CURRENCY_SERVICE_ENTITY_ID);
-        Map<String, byte[]> fileMap = new HashMap<>();
-        //byte[] requestBytes = JSON.getMapper().writeValueAsBytes(requestDto.getRequestCSRSet());
-        byte[] csrRequestBytes = XML.getMapper().writeValueAsBytes(requestDto.getRequestCSRSet());
-        fileMap.put(Constants.CSR_CURRENCY_FILE_NAME, csrRequestBytes);
-        byte[] contentToSign =  XML.getMapper().writeValueAsBytes(requestDto);
-        byte[] signedDocumentBytes = XAdESSignature.sign(contentToSign, mockDNIe.getJksSignatureToken(),
-                new TSPHttpSource(org.currency.test.Constants.TIMESTAMP_SERVICE_URL));
-        fileMap.put(Constants.CURRENCY_REQUEST_FILE_NAME, signedDocumentBytes);
-        //CMSSignatureBuilder signatureService = new CMSSignatureBuilder(mockDNIe);
-        //byte[] contentToSign =  JSON.getMapper().writeValueAsBytes(requestDto);
-        //CMSSignedMessage cmsMessage = signatureService.signDataWithTimeStamp(contentToSign,
-        //        org.currency.test.Constants.TIMESTAMP_SERVICE_URL);
-        //fileMap.put(Constants.CURRENCY_REQUEST_FILE_NAME, cmsMessage.toPEM());
-        fileMap.put(Constants.CURRENCY_REQUEST_FILE_NAME, signedDocumentBytes);
-        String serviceURL = CurrencyOperation.CURRENCY_REQUEST.getUrl(org.currency.test.Constants.CURRENCY_SERVICE_ENTITY_ID);
-        ResponseDto responseDto = HttpConn.getInstance().doPostMultipartRequest(fileMap, serviceURL);
 
-        if(ResponseDto.SC_OK == responseDto.getStatusCode()) {
-            ResultListDto<String> currencyCertsDto = (ResultListDto<String>) responseDto.getMessage(
+        CurrencyRequestDto requestDto = CurrencyRequestDto.CREATE_REQUEST(transactionDto, totalAmount,
+                Constants.CURRENCY_SERVICE_ENTITY_ID);
+        Map<String, byte[]> mapToSend = new HashMap<>();
+        byte[] requestBytes = XML.getMapper().writeValueAsBytes(requestDto.getRequestCSRSet());
+        mapToSend.put(org.votingsystem.util.Constants.CSR_CURRENCY_FILE_NAME, requestBytes);
+
+        byte[] signedBytes =  XAdESSignature.sign(XML.getMapper().writeValueAsBytes(requestDto),
+                mockDNIe.getJksSignatureToken(), new TSPHttpSource(Constants.TIMESTAMP_SERVICE_URL));
+
+        mapToSend.put(org.votingsystem.util.Constants.CURRENCY_REQUEST_FILE_NAME, signedBytes);
+        ResponseDto response = HttpConn.getInstance().doPostMultipartRequest(mapToSend,
+                CurrencyOperation.CURRENCY_REQUEST.getUrl(Constants.CURRENCY_SERVICE_ENTITY_ID));
+        if(ResponseDto.SC_OK == response.getStatusCode()) {
+            ResultListDto<String> currencyCertsDto = (ResultListDto<String>) response.getMessage(
                     new TypeReference<ResultListDto<String>>(){});
             requestDto.loadCurrencyCerts(currencyCertsDto.getResultList());
             wallet.addToWallet(Sets.newHashSet(requestDto.getCurrencyMap().values()));
         } else {
-            log.log(Level.SEVERE," --- ERROR --- " + responseDto.getMessage());
+            log.log(Level.SEVERE," --- ERROR --- " + response.getMessage());
         }
-        System.exit(0);
     }
 
 }
-

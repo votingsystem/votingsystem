@@ -16,6 +16,7 @@ import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
+import java.text.MessageFormat;
 import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Logger;
@@ -54,9 +55,15 @@ public class BankTransactionEJB {
                 "select b from Certificate c JOIN c.signer b where c.UUID=:UUID")
                 .setParameter("UUID", bankCertificateHash).getResultList();
         if(bankList.isEmpty())
-            throw new ValidationException("Not a valid bank: " + transactionDto.getSigner().getX509Certificate().getSubjectDN());
-        Bank bank = bankList.iterator().next();
-
+            throw new ValidationException(MessageFormat.format("User ''{0}'' is not an authorized bank",
+                    transactionDto.getSigner().getX509Certificate().getSubjectDN()));
+        Bank bank = null;
+        try {
+            bank = bankList.iterator().next();
+        } catch (Exception ex) {
+            throw new ValidationException(MessageFormat.format("User ''{0}'' is not an authorized bank",
+                    transactionDto.getSigner().getX509Certificate().getSubjectDN()));
+        }
         SignedDocument signedDocument = transactionDto.getSignedDocument();
         Transaction transaction = Transaction.FROM_BANK(bank, transactionDto.getFromUserIBAN(),
                 transactionDto.getFromUserName(), transactionDto.getReceptor(), transactionDto.getAmount(),
@@ -65,6 +72,7 @@ public class BankTransactionEJB {
 
         em.persist(transaction);
 
+        transactionDto.getSignedDocument().setSignedDocumentType(SignedDocumentType.TRANSACTION_FROM_BANK);
         signatureService.addReceipt(SignedDocumentType.TRANSACTION_FROM_BANK_RECEIPT, signedDocument);
 
 

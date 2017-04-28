@@ -193,7 +193,6 @@ public class CertificateUtils {
         //nameBuilder.addRDN(BCStyle.DN_QUALIFIER, subjectDN);
         //X500Name x500Name = nameBuilder.build();
 
-
         X500Name x500Name = new X500Name(subjectDN);
 
         X500Name issuer500name = new JcaX509CertificateHolder(caCert).getSubject();

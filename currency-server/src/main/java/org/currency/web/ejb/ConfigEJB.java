@@ -60,7 +60,7 @@ import static javax.ejb.TransactionAttributeType.REQUIRES_NEW;
 /**
  * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-@javax.ejb.Singleton(name = "ConfigCurrencyServer")
+@javax.ejb.Singleton(name = "ConfigEJB")
 @Startup
 @Lock(LockType.READ)
 public class ConfigEJB implements Config, ConfigCurrencyServer, Serializable {

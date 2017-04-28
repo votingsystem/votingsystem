@@ -19,7 +19,9 @@ import org.votingsystem.util.Interval;
 import org.votingsystem.util.Messages;
 
 import javax.annotation.PostConstruct;
+import javax.ejb.DependsOn;
 import javax.ejb.Singleton;
+import javax.ejb.Startup;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -41,6 +43,8 @@ import java.util.logging.Logger;
  * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
 @Singleton
+@Startup
+@DependsOn("ConfigEJB")
 public class CurrencyIssuerEJB {
 
     private static Logger log = Logger.getLogger(CurrencyIssuerEJB.class.getName());

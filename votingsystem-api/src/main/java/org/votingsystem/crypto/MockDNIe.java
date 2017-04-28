@@ -25,6 +25,7 @@ public class MockDNIe {
     private KeyStore keyStore;
     private String keyAlias;
     private String password;
+    private String nif;
 
     public MockDNIe(String nif) throws IOException, KeyStoreException, CertificateException, NoSuchAlgorithmException,
             UnrecoverableEntryException {
@@ -36,6 +37,7 @@ public class MockDNIe {
         AbstractSignatureTokenConnection signingToken = new JKSSignatureToken(res.openStream(),
                 org.votingsystem.util.Constants.PASSW_DEMO);
         jksSignatureToken = signingToken;
+        this.nif = nif;
     }
 
     public MockDNIe(KeyStore keyStore, char[] password, String keyAlias) throws UnrecoverableKeyException,
@@ -134,5 +136,9 @@ public class MockDNIe {
 
     public AbstractSignatureTokenConnection getJksSignatureToken() {
         return jksSignatureToken;
+    }
+
+    public String getNif() {
+        return nif;
     }
 }

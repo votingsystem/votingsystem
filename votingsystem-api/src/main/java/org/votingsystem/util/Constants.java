@@ -34,7 +34,7 @@ public class Constants {
     public static final String ALGORITHM_RNG                 = "SHA1PRNG";
     public static final String CERT_GENERATION_SIG_ALGORITHM = "SHA256WithRSAEncryption";
     public static final String SIGNATURE_ALGORITHM           = "SHA256withRSA";
-    public static final String DATA_DIGEST_ALGORITHM         = "SHA256";
+    public static final String DATA_DIGEST_ALGORITHM         = "SHA-256";
 
     public static final String QR_OPERATIONS       = "QR_OPERATIONS_KEY";
     public static final String SESSION_UUID        = "SESSION_UUID_KEY";

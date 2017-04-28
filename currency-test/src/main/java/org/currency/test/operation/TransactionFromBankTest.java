@@ -42,45 +42,15 @@ public class TransactionFromBankTest extends BaseTest {
     private void runSingleTransaction() throws Exception {
         TransactionDto transaction = new TransactionDto(new OperationTypeDto(CurrencyOperation.TRANSACTION_FROM_BANK,
                 Constants.CURRENCY_SERVICE_ENTITY_ID));
-        transaction.setOperation(new OperationTypeDto(CurrencyOperation.TRANSACTION_FROM_BANK, Constants.CURRENCY_SERVICE_ENTITY_ID))
-                .setUUID(UUID.randomUUID().toString());
-        transaction.setSubject("Test transaction").setAmount(new BigDecimal(4)).setCurrencyCode(CurrencyCode.CNY);
-        transaction.setToUserIBAN("ES4078788989450000000013");
-        /*UserDto fromUser = TestUtils.getUser(transaction.getFromUser().getId(), currencyServer);
-        transaction.setFromUser(fromUser);
-        UserDto toUser = TestUtils.getUser(transaction.getToUser().getId(), currencyServer);
-        transaction.setToUser(toUser);
-        transaction.loadBankTransaction(UUID.randomUUID().toString());
-        if(User.Type.BANK != transaction.getFromUser().getType()) throw new ExceptionVS("User: " +
-                transaction.getFromUser().getNIF() + " type is '" +
-                transaction.getFromUser().getType().toString() + "' not a 'BANK'");
-
-        SignatureService signatureService = SignatureService.getUserSignatureService(
-                transaction.getFromUser().getNIF(), User.Type.BANK);
-        CMSSignedMessage cmsMessage = signatureService.signDataWithTimeStamp(
-                JSON.getMapper().writeValueAsBytes(transaction));
-        ResponseVS responseVS = HttpHelper.getInstance().sendData(cmsMessage.toPEM(), ContentType.JSON_SIGNED,
-                getCurrencyServer().getTransactionServiceURL());
-        if(ResponseVS.SC_OK != responseVS.getStatusCode()) throw new ExceptionVS(responseVS.getMessage());
-        updateCurrencyMap(bankBalance, transaction);*/
-
-
-
-
+        transaction.setUUID(UUID.randomUUID().toString());
+        transaction.setSubject("Test transaction").setAmount(new BigDecimal(200)).setCurrencyCode(CurrencyCode.EUR);
+        transaction.setToUserIBAN("ES2478788989450000000010");
         MockDNIe mockDNIe = new MockDNIe("ExternalBank");
-        //MockDNIe mockDNIe = new MockDNIe("08888888D");
         byte[] signedBytes =  XAdESSignature.sign(XML.getMapper().writeValueAsBytes(transaction),
                 mockDNIe.getJksSignatureToken(), new TSPHttpSource(Constants.TIMESTAMP_SERVICE_URL));
-
         ResponseDto responseDto = HttpConn.getInstance().doPostRequest(signedBytes, MediaType.XML,
                 CurrencyOperation.TRANSACTION_FROM_BANK.getUrl(Constants.CURRENCY_SERVICE_ENTITY_ID));
         log.info("statusCode: " + responseDto.getStatusCode() + " - Message: " + responseDto.getMessage());
-        /*File transactionsPlan = FileUtils.getFileFromBytes(ContextVS.getInstance().getResourceBytes("transactionsPlan/bank.json"));
-        TransactionPlanDto transactionPlanDto = JSON.getMapper().readValue(transactionsPlan, TransactionPlanDto.class);
-        transactionPlanDto.setCurrencyServer(currencyServer);
-        transactionPlanDto.runTransactions();
-        log.info("Transaction report:" + transactionPlanDto.getReport());
-        log.info("currencyResultMap: " + transactionPlanDto.getBankBalance());*/
     }
 
     public void validateSignedDocument(byte[] signedDocumentBytes) {
@@ -92,41 +62,4 @@ public class TransactionFromBankTest extends BaseTest {
         log.info("response: " + responseDto.getStatusCode() + " - " + responseDto.getMessage());
     }
 
-/*
-    private static void runMultipleTransactions() throws Exception {
-        int numTransactions = 10;
-        Long fromUserId = 3L;
-        Long toUserId = 2L;
-        int amountLimit = 100;
-        for(int i = 0; i < numTransactions; i++) {
-            TransactionDto transaction = new TransactionDto();
-            transaction.setOperation(TypeVS.FROM_BANK);
-            transaction.setType(Transaction.Type.FROM_BANK);
-            transaction.setSubject("SendTransactionFromBank - runMultipleTransactions - " + DateUtils.getDateStr(new Date()));
-            transaction.setCurrencyCode(availableCurrencyCodes.get(
-                    KeyGenerator.INSTANCE.getNextRandomInt(availableCurrencyCodes.size())));
-            Set<String> tags = Sets.newHashSet(availableTags.get(
-                    KeyGenerator.INSTANCE.getNextRandomInt(availableTags.size())));
-            transaction.setTags(tags);
-            transaction.setAmount(new BigDecimal(KeyGenerator.INSTANCE.getNextRandomInt(amountLimit)));
-            UserDto fromUser = TestUtils.getUser(fromUserId, currencyServer);
-            transaction.setFromUser(fromUser);
-            UserDto toUser = TestUtils.getUser(toUserId, currencyServer);
-            transaction.setToUser(toUser);
-            transaction.loadBankTransaction(UUID.randomUUID().toString());
-            if(User.Type.BANK != transaction.getFromUser().getType()) throw new ExceptionVS("User: " +
-                    transaction.getFromUser().getNIF() + " type is '" +
-                    transaction.getFromUser().getType().toString() + "' not a 'BANK'");
-
-            SignatureService signatureService = SignatureService.getUserSignatureService(
-                    transaction.getFromUser().getNIF(), User.Type.BANK);
-            CMSSignedMessage cmsMessage = signatureService.signDataWithTimeStamp(
-                    JSON.getMapper().writeValueAsBytes(transaction));
-            ResponseVS responseVS = HttpHelper.getInstance().sendData(cmsMessage.toPEM(), ContentType.JSON_SIGNED,
-                    currencyServer.getTransactionServiceURL());
-            if(ResponseVS.SC_OK != responseVS.getStatusCode()) throw new ExceptionVS(responseVS.getMessage());
-        }
-    }
-
-*/
 }

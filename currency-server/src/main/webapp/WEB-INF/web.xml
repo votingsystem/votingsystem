@@ -39,6 +39,10 @@
         <param-value>true</param-value>
     </context-param>
 
+    <listener>
+        <listener-class>org.currency.web.servlet.AppServletContextListener</listener-class>
+    </listener>
+
     <login-config>
         <auth-method>CURRENCY_SERVER_LOGIN</auth-method>
     </login-config>
