@@ -1,7 +1,5 @@
 package org.currency.web.ejb;
 
-import org.votingsystem.ejb.TrustedServicesEJB;
-
 import javax.annotation.PostConstruct;
 import javax.ejb.*;
 import java.util.logging.Level;
@@ -15,11 +13,7 @@ public class StartUpEJB {
 
     private static final Logger log = Logger.getLogger(StartUpEJB.class.getName());
 
-    @EJB
-    private BankEJB bankEJB;
-    @EJB
-    private TrustedServicesEJB trustedServices;
-
+    @EJB private BankEJB bankEJB;
 
     @PostConstruct
     public void initialize() {

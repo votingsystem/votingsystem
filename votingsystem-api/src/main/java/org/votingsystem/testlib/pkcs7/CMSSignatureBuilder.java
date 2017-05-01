@@ -116,10 +116,6 @@ public class CMSSignatureBuilder {
         return encryptor.encryptToCMS(dataToEncrypt, receiverCert);
     }
 
-    public byte[] encryptToCMS(byte[] dataToEncrypt) throws Exception {
-        return encryptor.encryptToCMS(dataToEncrypt, x509Certificate);
-    }
-
     public byte[] decryptCMS (byte[] encryptedFile) throws Exception {
         return encryptor.decryptCMS(encryptedFile);
     }

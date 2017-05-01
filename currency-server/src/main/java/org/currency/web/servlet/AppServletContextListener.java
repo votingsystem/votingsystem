@@ -46,7 +46,7 @@ public class AppServletContextListener implements ServletContextListener{
 
     @Override
     public void contextDestroyed(ServletContextEvent contextEvent) {
-        log.info("--------- shutdown --------- ServerInfo: " + contextEvent.getServletContext().getServerInfo());
+        log.info("ServerInfo: " + contextEvent.getServletContext().getServerInfo());
     }
 
 }

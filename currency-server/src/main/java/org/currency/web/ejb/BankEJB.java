@@ -54,7 +54,7 @@ public class BankEJB {
                     .setParameter("bankCode", IBAN.getBankCode())
                     .setParameter("countryCode", IBAN.getCountryCode()).getResultList();
             BankInfo bankInfo = null;
-            X509Certificate x509BankCert = PEMUtils.fromPEMToX509Cert(bankDto.getX509Certificate().getBytes());
+            X509Certificate x509BankCert = PEMUtils.fromPEMToX509Cert(bankDto.getX509Certificate().trim().getBytes());
             String x509BankCertUUID = CertificateUtils.getHash(x509BankCert);
             Certificate bankCertificate = null;
             if(bankInfoList.isEmpty()) {
@@ -66,7 +66,6 @@ public class BankEJB {
                 em.persist(bankInfo);
                 config.createIBAN(bank);
                 log.info("Added new bank to database - bank UUID: " + bank.getUUID());
-                bankCertificate = bank.getCertificate();
             } else {
                 bankInfo = bankInfoList.iterator().next();
                 List<Certificate> certificates = em.createQuery(

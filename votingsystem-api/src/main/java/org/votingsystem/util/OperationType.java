@@ -60,8 +60,6 @@ public enum OperationType implements SystemOperation {
 
     @JsonProperty("MESSAGE_INFO")
     MESSAGE_INFO(null),
-    @JsonProperty("MESSAGE_INFO_RESPONSE")
-    MESSAGE_INFO_RESPONSE(null),
 
     @JsonProperty("PUBLISH_ELECTION")
     PUBLISH_ELECTION("/api/election/save"),
@@ -77,8 +75,6 @@ public enum OperationType implements SystemOperation {
     USER_INFO(null),
     @JsonProperty("LISTEN_TRANSACTIONS")
     LISTEN_TRANSACTIONS(null),
-    @JsonProperty("MESSAGE")
-    MESSAGEVS(null),
     @JsonProperty("MSG_TO_DEVICE")
     MSG_TO_DEVICE(null),
 

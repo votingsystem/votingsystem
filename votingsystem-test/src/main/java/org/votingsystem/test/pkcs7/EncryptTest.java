@@ -4,6 +4,7 @@ import org.votingsystem.crypto.Encryptor;
 import org.votingsystem.crypto.PEMUtils;
 import org.votingsystem.crypto.cms.CMSSignedMessage;
 import org.votingsystem.testlib.BaseTest;
+import org.votingsystem.testlib.pkcs7.CMSSignatureBuilder;
 
 import java.security.PrivateKey;
 import java.util.logging.Logger;

@@ -478,7 +478,7 @@ public class CertificateUtils {
     }
 
     public static String getHash(X509Certificate x509Certificate) throws NoSuchAlgorithmException, CertificateEncodingException {
-        MessageDigest md = MessageDigest.getInstance("MD5");
+        MessageDigest md = MessageDigest.getInstance(Constants.CERT_UUID_DIGEST_ALGORITHM);
         byte[] der = x509Certificate.getEncoded();
         md.update(der);
         return Base64.getEncoder().encodeToString(md.digest());

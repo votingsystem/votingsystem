@@ -80,7 +80,7 @@ public class ConfigEJB {
             signingToken = new JKSSignatureToken(new FileInputStream(applicationDirPath + "/sec/" + keyStoreFileName),
                     keyStorePassword);
             signingCert = signingToken.getKeys().get(0).getCertificate().getCertificate();
-            trustedEntities = TrustedEntitiesDto.loadTrustedEntities(applicationDirPath + "/sec/trustedEntities.xml");
+            trustedEntities = TrustedEntitiesDto.loadTrustedEntities(applicationDirPath + "/sec/trusted-entities.xml");
         } catch(Exception ex) {
             log.log(Level.SEVERE, ex.getMessage(), ex);
         }

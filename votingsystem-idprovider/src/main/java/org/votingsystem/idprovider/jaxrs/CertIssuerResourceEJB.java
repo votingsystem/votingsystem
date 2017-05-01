@@ -2,8 +2,6 @@ package org.votingsystem.idprovider.jaxrs;
 
 import org.votingsystem.crypto.PEMUtils;
 import org.votingsystem.dto.currency.RegisterDto;
-import org.votingsystem.ejb.CmsEJB;
-import org.votingsystem.ejb.SignatureService;
 import org.votingsystem.idprovider.ejb.CertIssuerEJB;
 import org.votingsystem.model.CMSDocument;
 import org.votingsystem.model.Certificate;
@@ -33,8 +31,7 @@ public class CertIssuerResourceEJB {
     private static final Logger log = Logger.getLogger(CertIssuerResourceEJB.class.getName());
 
     @Inject private CertIssuerEJB certIssuer;
-    @Inject private CmsEJB cmsBean;
-    @Inject private SignatureService signatureService;
+
 
     @POST @Path("/mobile-browser-session")
     public Response mobileBrowserSession(@Context HttpServletRequest req, CMSDocument signedDocument) throws Exception {

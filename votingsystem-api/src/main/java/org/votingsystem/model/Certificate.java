@@ -6,6 +6,7 @@ import org.votingsystem.dto.metadata.MetaInfDto;
 import org.votingsystem.dto.voting.CertVoteExtensionDto;
 import org.votingsystem.model.converter.LocalDateTimeAttributeConverter;
 import org.votingsystem.model.converter.MetaInfConverter;
+import org.votingsystem.util.Constants;
 import org.votingsystem.util.DateUtils;
 
 import javax.persistence.*;
@@ -334,7 +335,7 @@ public class Certificate implements Serializable {
 
     @PrePersist
     public void prePersist() throws NoSuchAlgorithmException {
-        MessageDigest md = MessageDigest.getInstance("SHA-1");
+        MessageDigest md = MessageDigest.getInstance(Constants.CERT_UUID_DIGEST_ALGORITHM);
         md.update(content);
         this.UUID =  Base64.getEncoder().encodeToString(md.digest());
     }

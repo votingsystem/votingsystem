@@ -7,7 +7,9 @@ import org.votingsystem.dto.OperationTypeDto;
 import org.votingsystem.dto.ResponseDto;
 import org.votingsystem.http.HttpConn;
 import org.votingsystem.http.MediaType;
+import org.votingsystem.test.Constants;
 import org.votingsystem.testlib.BaseTest;
+import org.votingsystem.testlib.pkcs7.CMSSignatureBuilder;
 import org.votingsystem.util.CurrencyOperation;
 import org.votingsystem.util.JSON;
 
@@ -103,7 +105,8 @@ public class SignatureTest extends BaseTest {
         String operationStr = JSON.getMapper().writeValueAsString(operation);
         log.info("operation: " + operationStr);
 
-        CMSSignedMessage cmsSignedMessage = signatureService.signDataWithTimeStamp(operationStr.getBytes());
+        CMSSignedMessage cmsSignedMessage = signatureService.signDataWithTimeStamp(operationStr.getBytes(),
+                Constants.TIMESTAMP_SERVICE_URL);
         return cmsSignedMessage;
     }
 
