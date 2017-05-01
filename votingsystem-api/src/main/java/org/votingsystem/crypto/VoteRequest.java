@@ -17,7 +17,7 @@ import java.util.UUID;
 /**
  * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-public class VoteContainer implements Serializable {
+public class VoteRequest implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
@@ -30,12 +30,12 @@ public class VoteContainer implements Serializable {
     private IdentityRequestDto identityRequestDto;
     private CertificationRequest certificationRequest;
 
-    public VoteContainer() throws Exception {}
+    public VoteRequest() throws Exception {}
 
 
-    public static VoteContainer generate(ElectionDto election, ElectionOptionDto optionSelected,
-                                         String identityServiceId) throws Exception {
-        VoteContainer result = new VoteContainer();
+    public static VoteRequest build(ElectionDto election, ElectionOptionDto optionSelected,
+                                       String identityServiceId) throws Exception {
+        VoteRequest result = new VoteRequest();
         result.originHashIdentityRequest = UUID.randomUUID().toString();
         result.hashIdentityRequestBase64 = HashUtils.getHashBase64(
                 result.originHashIdentityRequest.getBytes(), Constants.DATA_DIGEST_ALGORITHM);
@@ -63,9 +63,9 @@ public class VoteContainer implements Serializable {
         return result;
     }
 
-    public static VoteContainer genRandomVote(ElectionDto election, String identityServiceId) throws Exception {
+    public static VoteRequest genRandomVote(ElectionDto election, String identityServiceId) throws Exception {
         ElectionOptionDto optionSelected = getRandomOption(election.getElectionOptions());
-        return  VoteContainer.generate(election, optionSelected, identityServiceId);
+        return  VoteRequest.build(election, optionSelected, identityServiceId);
     }
 
     public static ElectionOptionDto getRandomOption(Set<ElectionOptionDto> options) {

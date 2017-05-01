@@ -4,7 +4,7 @@ import org.apache.commons.collections.map.HashedMap;
 import org.votingsystem.crypto.CertificationRequest;
 import org.votingsystem.crypto.KeyStoreUtils;
 import org.votingsystem.crypto.MockDNIe;
-import org.votingsystem.crypto.VoteContainer;
+import org.votingsystem.crypto.VoteRequest;
 import org.votingsystem.dto.QRMessageDto;
 import org.votingsystem.dto.QRResponseDto;
 import org.votingsystem.dto.ResponseDto;
@@ -70,10 +70,10 @@ public class VoteTest extends BaseTest {
         ElectionDto electionDto = XmlReader.readElection(qrResponseDto.getData());
         ElectionOptionDto electionOption = electionDto.getElectionOptions().iterator().next();
         log.info("selected option: " + electionOption.getContent() + " - election UUID: " + electionDto.getUUID());
-        VoteContainer voteContainer = VoteContainer.generate(electionDto, electionOption, qrMessageDto.getSystemEntityID());
-        CertificationRequest certificationRequest = voteContainer.getCertificationRequest();
+        VoteRequest voteRequest = VoteRequest.build(electionDto, electionOption, qrMessageDto.getSystemEntityID());
+        CertificationRequest certificationRequest = voteRequest.getCertificationRequest();
 
-        //log.info("Csr PEM: " + new String(voteContainer.getCertificationRequest().getCsrPEM()));
+        //log.info("Csr PEM: " + new String(voteRequest.getCertificationRequest().getCsrPEM()));
 
         IdentityRequestDto identityRequest = new IdentityRequestDto();
 
@@ -83,7 +83,7 @@ public class VoteTest extends BaseTest {
                 org.votingsystem.test.Constants.VOTING_SERVICE_ENTITY_ID, SystemEntityType.VOTING_SERVICE_PROVIDER);
         identityRequest.setIndentityServiceEntity(identityEntity).setCallbackServiceEntityId(callbackEntity);
         identityRequest.setUUID(electionDto.getUUID()).setType(OperationType.ANON_VOTE_CERT_REQUEST);
-        identityRequest.setRevocationHash(voteContainer.getRevocationHash());
+        identityRequest.setRevocationHash(voteRequest.getRevocationHash());
 
         byte[] xmlRequest = XmlWriter.write(identityRequest);
         String textToSign = XMLUtils.prepareRequestToSign(xmlRequest);
@@ -94,7 +94,7 @@ public class VoteTest extends BaseTest {
                 org.votingsystem.test.Constants.TIMESTAMP_SERVICE_URL).build();
 
         Map<String, byte[]> fileMap = new HashedMap();
-        fileMap.put(CSR_FILE_NAME, voteContainer.getCertificationRequest().getCsrPEM());
+        fileMap.put(CSR_FILE_NAME, voteRequest.getCertificationRequest().getCsrPEM());
         fileMap.put(ANON_CERTIFICATE_REQUEST_FILE_NAME, signatureBytes);
 
         serviceURL = OperationType.ANON_VOTE_CERT_REQUEST.getUrl(qrMessageDto.getSystemEntityID());
@@ -102,7 +102,7 @@ public class VoteTest extends BaseTest {
         log.info("status: " + responseDto.getStatusCode() + " - message: " + responseDto.getMessage());
         if(ResponseDto.SC_OK == responseDto.getStatusCode()) {
             certificationRequest.setSignedCsr(responseDto.getMessageBytes());
-            byte[] voteBytes = XmlWriter.write(voteContainer.getVote());
+            byte[] voteBytes = XmlWriter.write(voteRequest.getVote());
             String voteStr = XMLUtils.prepareRequestToSign(voteBytes);
             log.info("vote: " + new String(voteBytes));
             Certificate[] certificateChain = new Certificate[]{certificationRequest.getCertificate()};
@@ -135,15 +135,15 @@ public class VoteTest extends BaseTest {
         ElectionDto electionDto = XmlReader.readElection(qrResponseDto.getData());
         ElectionOptionDto electionOption = electionDto.getElectionOptions().iterator().next();
         log.info("selected option: " + electionOption.getContent() + " - election UUID: " + electionDto.getUUID());
-        VoteContainer voteContainer = VoteContainer.generate(electionDto, electionOption, qrMessageDto.getSystemEntityID());
-        CertificationRequest certificationRequest = voteContainer.getCertificationRequest();
+        VoteRequest voteRequest = VoteRequest.build(electionDto, electionOption, qrMessageDto.getSystemEntityID());
+        CertificationRequest certificationRequest = voteRequest.getCertificationRequest();
 
         //we use discrete timestamps to avoid associate by time proximity signed request with votes in the audits
         KeyStore keyStore = KeyStoreUtils.getKeyStore(FileUtils.getBytesFromFile(new File(KEYSTORE_PATH)),
                 Constants.PASSW_DEMO.toCharArray());
         MockDNIe mockDNIe = new MockDNIe(keyStore, Constants.PASSW_DEMO.toCharArray(), Constants.USER_CERT_ALIAS);
 
-        byte[] voteBytes = XmlWriter.write(voteContainer.getVote());
+        byte[] voteBytes = XmlWriter.write(voteRequest.getVote());
         String voteStr = XMLUtils.prepareRequestToSign(voteBytes);
 
         byte[] signedVote = new XMLSignatureBuilder(voteStr.getBytes(), XAdESUtils.XML_MIME_TYPE,
