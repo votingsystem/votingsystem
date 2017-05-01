@@ -8,6 +8,10 @@ import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
 import org.bouncycastle.pkcs.PKCS10CertificationRequest;
 import org.bouncycastle.pkcs.PKCS10CertificationRequestBuilder;
 import org.bouncycastle.pkcs.jcajce.JcaPKCS10CertificationRequestBuilder;
+import org.bouncycastle.tsp.TimeStampToken;
+import org.votingsystem.crypto.cms.CMSGenerator;
+import org.votingsystem.crypto.cms.CMSSignedMessage;
+import org.votingsystem.crypto.cms.CMSUtils;
 import org.votingsystem.dto.CertExtensionDto;
 import org.votingsystem.dto.currency.CurrencyCertExtensionDto;
 import org.votingsystem.dto.voting.CertVoteExtensionDto;
@@ -28,6 +32,7 @@ import java.security.cert.X509Certificate;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -130,12 +135,19 @@ public class CertificationRequest implements java.io.Serializable {
         }
     }
     
-    public byte[] signDataWithTimeStamp(byte[] xmlToSign, String timeStampServiceURL) throws Exception {
+    public byte[] signXAdESWithTimeStamp(byte[] xmlToSign, String timeStampServiceURL) throws Exception {
         Collection<X509Certificate> certificates = PEMUtils.fromPEMToX509CertCollection(csrCertificate);
         X509Certificate[] arrayCerts = new X509Certificate[certificates.size()];
         certificates.toArray(arrayCerts);
         return XAdESSignature.sign(xmlToSign,
                 new SignatureTokenConnection(keyPair.getPrivate(), arrayCerts), new TSPHttpSource(timeStampServiceURL));
+    }
+
+    public byte[] signPKCS7WithTimeStamp(byte[] contentToSign, String timeStampServiceURL) throws Exception {
+        CMSGenerator cmsGenerator = new CMSGenerator(keyPair.getPrivate(), Arrays.asList(certificate), signatureMechanism);
+        TimeStampToken timeStampToken = CMSUtils.getTimeStampToken(signatureMechanism, contentToSign, timeStampServiceURL);
+        CMSSignedMessage cmsSignedMessage = cmsGenerator.signDataWithTimeStamp(contentToSign, timeStampToken);
+        return cmsSignedMessage.toPEM();
     }
 
     public X509Certificate getCertificate() throws Exception {

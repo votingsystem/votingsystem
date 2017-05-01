@@ -1,6 +1,5 @@
 package org.currency.web.ejb;
 
-import org.currency.web.util.AuditLogger;
 import org.votingsystem.dto.ResultListDto;
 import org.votingsystem.dto.currency.TransactionDto;
 import org.votingsystem.model.SignedDocument;
@@ -52,9 +51,6 @@ public class TransactionEJB {
         if(transactionDto.getToUserIBAN() != null) {
             config.validateIBAN(transactionDto.getToUserIBAN());
         }
-
-        AuditLogger.logTransaction(transactionDto);
-
         switch(transactionDto.getOperation().getCurrencyOperationType()) {
             case TRANSACTION_FROM_BANK:
                 return bankTransactionService.processTransactionFromBank(transactionDto);
@@ -122,7 +118,8 @@ public class TransactionEJB {
                         balancesBean.updateSystemBalance(currency.getAmount().negate(), currency.getCurrencyCode());
                     }
                     Currency leftOver = transaction.getCurrencyBatch().getLeftOver();
-                    if(leftOver != null) balancesBean.updateSystemBalance(leftOver.getAmount(), leftOver.getCurrencyCode());
+                    if(leftOver != null)
+                        balancesBean.updateSystemBalance(leftOver.getAmount(), leftOver.getCurrencyCode());
                     break;
                 case TRANSACTION_FROM_BANK:
                     balancesBean.updateSystemBalance(transaction.getAmount(), transaction.getCurrencyCode());
@@ -133,8 +130,8 @@ public class TransactionEJB {
                         balancesBean.updateSystemBalance(currency.getAmount().negate(), currency.getCurrencyCode());
                     }
                     Currency changeLeftOver = transaction.getCurrencyBatch().getLeftOver();
-                    if(changeLeftOver != null) balancesBean.updateSystemBalance(changeLeftOver.getAmount(),
-                            changeLeftOver.getCurrencyCode());
+                    if(changeLeftOver != null)
+                        balancesBean.updateSystemBalance(changeLeftOver.getAmount(), changeLeftOver.getCurrencyCode());
                     Currency currencyChange = transaction.getCurrencyBatch().getCurrencyChange();
                     balancesBean.updateSystemBalance(currencyChange.getAmount(), currencyChange.getCurrencyCode());
                     break;

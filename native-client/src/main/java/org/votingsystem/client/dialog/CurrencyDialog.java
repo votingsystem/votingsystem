@@ -73,7 +73,7 @@ public class CurrencyDialog extends AppDialog {
                 log.info("currency issuer: " + certCaResult.getSubjectDN().toString());
             } catch (Exception ex) {
                 log.log(Level.SEVERE, ex.getMessage(), ex);
-                X509Certificate x509Cert = currency.getX509AnonymousCert();
+                X509Certificate x509Cert = currency.getCurrencyCertificate();
                 String msg = null;
                 if(x509Cert == null) msg = Messages.currentInstance().get("currencyWithoutCertErrorMsg");
                 else {

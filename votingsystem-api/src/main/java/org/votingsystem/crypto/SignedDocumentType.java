@@ -22,6 +22,8 @@ public enum SignedDocumentType {
     CURRENCY_REQUEST,
     CURRENCY_CHANGE,
     CURRENCY_CHANGE_RECEIPT,
+    CURRENCY_SEND,
+    CURRENCY_SEND_RECEIPT,
     CURRENCY_PERIOD_INIT,
 
     //Admin documents

@@ -180,7 +180,7 @@ public class CheckPKCS7TimestampTest extends BaseTest {
     }
 
     public void checkTimestamp() throws Exception {
-        CMSSignedMessage signedMessage = CMSSignedMessage.FROM_PEM(PKCS7_DOC);
+        CMSSignedMessage signedMessage = CMSSignedMessage.FROM_PEM(PKCS7_DOC.getBytes());
         if(signedMessage.getSignatures().isEmpty())
             throw new ValidationException("document without signatures");
         Set<Long> timestampServersSerialNumbers = new HashSet<>(Arrays.asList(149080567659334L));

@@ -37,10 +37,10 @@ public class VoteCanceler extends EntityBase implements Serializable {
     @Enumerated(EnumType.STRING)
     @Column(name="STATE", nullable=false)
     private State state;
-    @Column(name="CERT_REVOCATION_HASH_BASE64") private String certRevocationHash;
-    @Column(name="ORIGIN_CERT_REVOCATION_HASH_BASE64") private String originCertRevocationHash;
-    @Column(name="ANON_CERT_REQUEST_REVOCATION_HASH_BASE64") private String anonCertRequestRevocationHash;
-    @Column(name="ORIGIN_ANON_CERT_REQUEST_REVOCATION_HASH_BASE64") private String originAnonCertRequestRevocationHash;
+    @Column(name="CERT_REVOCATION_HASH") private String certRevocationHash;
+    @Column(name="ORIGIN_CERT_REVOCATION_HASH") private String originCertRevocationHash;
+    @Column(name="ANON_CERT_REQUEST_REVOCATION_HASH") private String anonCertRequestRevocationHash;
+    @Column(name="ORIGIN_ANON_CERT_REQUEST_REVOCATION_HASH") private String originAnonCertRequestRevocationHash;
     @ManyToOne(fetch=FetchType.LAZY)
     @JoinColumn(name="ELECTION", nullable=false)
     private Election election;

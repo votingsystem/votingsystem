@@ -175,7 +175,7 @@ public class RegisterDeviceTest extends BaseTest {
     }
 
     public void checkRequest() throws Exception {
-        CMSSignedMessage cmsSignedMessage = CMSSignedMessage.FROM_PEM(REQUEST);
+        CMSSignedMessage cmsSignedMessage = CMSSignedMessage.FROM_PEM(REQUEST.getBytes());
         log.info("request: " + cmsSignedMessage.getSignedContentStr());
         OperationCheckerDto operationDto = cmsSignedMessage.getSignedContent(OperationCheckerDto.class);
         RegisterDto registerDto = cmsSignedMessage.getSignedContent(RegisterDto.class);

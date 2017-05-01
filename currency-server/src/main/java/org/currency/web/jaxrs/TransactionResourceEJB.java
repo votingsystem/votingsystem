@@ -1,7 +1,6 @@
 package org.currency.web.jaxrs;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import eu.europa.esig.dss.InMemoryDocument;
 import org.apache.commons.io.IOUtils;
 import org.currency.web.ejb.*;
 import org.hibernate.Criteria;
@@ -9,11 +8,12 @@ import org.hibernate.Session;
 import org.hibernate.criterion.Disjunction;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
-import org.votingsystem.crypto.SignatureParams;
-import org.votingsystem.crypto.SignedDocumentType;
+import org.votingsystem.currency.CurrencyChangeTransactionRequest;
+import org.votingsystem.currency.CurrencyTransactionRequest;
 import org.votingsystem.dto.ResponseDto;
 import org.votingsystem.dto.ResultListDto;
 import org.votingsystem.dto.currency.BalancesDto;
+import org.votingsystem.dto.currency.CurrencyBatchDto;
 import org.votingsystem.dto.currency.CurrencyBatchResponseDto;
 import org.votingsystem.dto.currency.TransactionDto;
 import org.votingsystem.dto.metadata.MetaInfDto;
@@ -211,11 +211,18 @@ public class TransactionResourceEJB {
     @Path("/currency")
     @POST @Produces(MediaType.APPLICATION_JSON) @Consumes(MediaType.APPLICATION_JSON)
     public Response currency(byte[] postData, @Context HttpServletRequest req, @Context HttpServletResponse res) throws Exception {
-        SignatureParams signatureParams = new SignatureParams(null, User.Type.ID_CARD_USER,
-                SignedDocumentType.CURRENCY_CHANGE).setWithTimeStampValidation(true);
-        SignedDocument signedDocument = signatureService.validateXAdESAndSave(
-                new InMemoryDocument(postData), signatureParams);
-        CurrencyBatchResponseDto responseDto = currencyBean.processCurrencyBatch(signedDocument);
+        CurrencyBatchDto batchDto = JSON.getMapper().readValue(postData, CurrencyBatchDto.class);
+        CurrencyTransactionRequest transactionRequest = CurrencyTransactionRequest.build(batchDto);
+        CurrencyBatchResponseDto responseDto = currencyBean.processCurrencyTransaction(transactionRequest);
+        return HttpResponse.sendResponseDto(ResponseDto.SC_OK, req, res, responseDto);
+    }
+
+    @Path("/currency-change")
+    @POST @Produces(MediaType.APPLICATION_JSON) @Consumes(MediaType.APPLICATION_JSON)
+    public Response currencyChange(byte[] postData, @Context HttpServletRequest req, @Context HttpServletResponse res) throws Exception {
+        CurrencyBatchDto batchDto = JSON.getMapper().readValue(postData, CurrencyBatchDto.class);
+        CurrencyChangeTransactionRequest transactionRequest = CurrencyChangeTransactionRequest.build(batchDto);
+        CurrencyBatchResponseDto responseDto = currencyBean.processCurrencyChangeTransaction(transactionRequest);
         return HttpResponse.sendResponseDto(ResponseDto.SC_OK, req, res, responseDto);
     }
 

@@ -93,7 +93,7 @@ public class EncryptTest extends BaseTest {
         log.info("PKCS7 signed and encrypted: " + new String(encryptedBytes));
         byte[] decryptedBytes = Encryptor.decryptCMS(encryptedBytes, signatureService.getPrivateKey());
         CMSSignedMessage signedData = new CMSSignedMessage(decryptedBytes);
-        signedData.isValidSignature();
+        signedData.checkSignatureInfo();
         log.info("SignedContent: " + signedData.getSignedContentStr());
     }
 

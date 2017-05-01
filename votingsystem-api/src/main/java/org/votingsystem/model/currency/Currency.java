@@ -3,6 +3,8 @@ package org.votingsystem.model.currency;
 import org.votingsystem.crypto.CertificateUtils;
 import org.votingsystem.crypto.CertificationRequest;
 import org.votingsystem.crypto.HashUtils;
+import org.votingsystem.crypto.cms.CMSSignedMessage;
+import org.votingsystem.currency.CurrencyUtils;
 import org.votingsystem.dto.currency.CurrencyCertExtensionDto;
 import org.votingsystem.dto.currency.CurrencyDto;
 import org.votingsystem.model.Certificate;
@@ -22,8 +24,6 @@ import java.math.BigDecimal;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.X509Certificate;
 import java.time.LocalDateTime;
-import java.util.Date;
-import java.util.UUID;
 
 import static javax.persistence.GenerationType.IDENTITY;
 
@@ -35,6 +35,14 @@ import static javax.persistence.GenerationType.IDENTITY;
 public class Currency extends EntityBase implements Serializable  {
 
     public static final long serialVersionUID = 1L;
+
+    public CMSSignedMessage getCmsSignedMessage() {
+        return cmsSignedMessage;
+    }
+
+    public void setCmsSignedMessage(CMSSignedMessage cmsSignedMessage) {
+        this.cmsSignedMessage = cmsSignedMessage;
+    }
 
     //Lapsed -> for not expended time limited currency
     public enum State { OK, EXPENDED, LAPSED, UNKNOWN, ERROR_CERT_AUTHORITY, ERROR;}
@@ -54,7 +62,9 @@ public class Currency extends EntityBase implements Serializable  {
     @Column(name="CURRENCY", nullable=false) @Enumerated(EnumType.STRING)
     private CurrencyCode currencyCode;
 
-    @Column(name="REVOCATION_HASH_BASE64")
+    @Column(name="UUID") private String UUID;
+
+    @Column(name="REVOCATION_HASH")
     private String revocationHash;
     
     @Column(name="ORIGIN_REVOCATION_HASH") 
@@ -115,56 +125,60 @@ public class Currency extends EntityBase implements Serializable  {
     private LocalDateTime lastUpdated;
 
     @Transient private CertificationRequest certificationRequest;
-    @Transient private X509Certificate x509AnonymousCert;
+    @Transient private X509Certificate currencyCertificate;
     @Transient private String toUserIBAN;
     @Transient private String toUserName;
     @Transient private CurrencyDto batchItemDto;
+    @Transient private CMSSignedMessage cmsSignedMessage;
     @Transient private CurrencyCertExtensionDto certExtensionDto;
 
     public Currency() {}
 
-    public Currency(SignedDocument signedDocument) throws Exception {
-        this.signedDocument = signedDocument;
-        initCertData(signedDocument.getCurrencyCert());
-        batchItemDto = signedDocument.getSignedContent(CurrencyDto.class);
-        if(!this.currencyCode.equals(batchItemDto.getCurrencyCode())) {
-            throw new IllegalArgumentException(getErrorPrefix() +
-                    "expected currencyCode '" + currencyCode + "' - found: '" + batchItemDto.getCurrencyCode());
-        }
-        Date signatureTimeUTC = DateUtils.getUTCDate(signedDocument.getFirstSignature().getSignatureDate());
-        if(signatureTimeUTC.after(x509AnonymousCert.getNotAfter())) throw new ValidationException(getErrorPrefix() +
-                "valid to '" + DateUtils.getUTCDateStr(x509AnonymousCert.getNotAfter()) + "' has signature date '" +
-                DateUtils.getUTCDateStr(signatureTimeUTC)+ "'");
+    public Currency(CMSSignedMessage cmsSignedMessage) throws Exception {
+        cmsSignedMessage.checkSignatureInfo();
+        initCertData(cmsSignedMessage.getCurrencyCert());
+        batchItemDto = cmsSignedMessage.getSignedContent(CurrencyDto.class);
+        CurrencyUtils.checkDto(this, batchItemDto);
         this.subject = batchItemDto.getSubject();
         this.toUserIBAN = batchItemDto.getToUserIBAN();
         this.toUserName = batchItemDto.getToUserName();
     }
 
-    public Currency(String entityId, BigDecimal amount, CurrencyCode currencyCode,
-                String revocationHash) throws NoSuchAlgorithmException, CertificateRequestException  {
-        this.amount = amount;
-        this.currencyEntity = entityId;
-        this.currencyCode = currencyCode;
-        this.revocationHash = revocationHash;
-        certificationRequest = CertificationRequest.getCurrencyRequest(entityId, revocationHash, amount, currencyCode);
-    }
-
-    public Currency(String currencyEntity, BigDecimal amount, CurrencyCode currencyCode)
-            throws NoSuchAlgorithmException, CertificateRequestException {
+    public Currency(String currencyEntity, BigDecimal amount, CurrencyCode currencyCode,
+            String revocationHash, String originRevocationHash) throws NoSuchAlgorithmException,
+            CertificateRequestException  {
         this.amount = amount;
         this.currencyEntity = currencyEntity;
         this.currencyCode = currencyCode;
-        this.originRevocationHash = UUID.randomUUID().toString();
-        this.revocationHash = HashUtils.getHashBase64(this.originRevocationHash.getBytes(),
-                Constants.DATA_DIGEST_ALGORITHM);
-        certificationRequest = CertificationRequest.getCurrencyRequest(currencyEntity, revocationHash,
-                amount, currencyCode);
+        this.revocationHash = revocationHash;
+        this.originRevocationHash = originRevocationHash;
+        certificationRequest = CertificationRequest.getCurrencyRequest(currencyEntity, revocationHash, amount, currencyCode);
     }
 
-    public static Currency FROM_CERT(X509Certificate currencyCert, Certificate authorityCertificate) throws Exception {
-        Currency currency = new Currency().setState(State.OK).setAuthorityCertificate(authorityCertificate);
-        currency.initCertData(currencyCert);
-        return currency;
+    public Currency initCertData(X509Certificate currencyCertificate) throws Exception {
+        this.currencyCertificate = currencyCertificate;
+        content = currencyCertificate.getEncoded();
+        UUID = CertificateUtils.getHash(currencyCertificate);
+        serialNumber = currencyCertificate.getSerialNumber().longValue();
+        certExtensionDto = CertificateUtils.getCertExtensionData(CurrencyCertExtensionDto.class,
+                currencyCertificate, Constants.CURRENCY_OID);
+        if(certExtensionDto == null)
+            throw new ValidationException("error missing currency cert extension data");
+        amount = certExtensionDto.getAmount();
+        currencyCode = certExtensionDto.getCurrencyCode();
+        revocationHash = certExtensionDto.getRevocationHash();
+        currencyEntity = certExtensionDto.getCurrencyEntity();
+        validFrom = DateUtils.getLocalDateFromUTCDate(currencyCertificate.getNotBefore());
+        validTo = DateUtils.getLocalDateFromUTCDate(currencyCertificate.getNotAfter());
+        String subjectDN = currencyCertificate.getSubjectDN().toString();
+        CurrencyDto.CertSubjectDto certSubject = CurrencyDto.getCertSubjectDto(subjectDN);
+        if(!certSubject.getCurrencyEntity().equals(certExtensionDto.getCurrencyEntity()))
+            throw new ValidationException("currencyEntity: " + currencyEntity + " - certSubject: " + subjectDN);
+        if(certSubject.getAmount().compareTo(amount) != 0)
+            throw new ValidationException("amount: " + amount + " - certSubject: " + subjectDN);
+        if(!certSubject.getCurrencyCode().equals(currencyCode))
+            throw new ValidationException("currencyCode: " + currencyCode + " - certSubject: " + subjectDN);
+        return this;
     }
 
     public CurrencyDto getBatchItemDto() {
@@ -173,51 +187,6 @@ public class Currency extends EntityBase implements Serializable  {
 
     public void setBatchItemDto(CurrencyDto batchItemDto) {
         this.batchItemDto = batchItemDto;
-    }
-
-    public Currency initCertData(X509Certificate x509AnonymousCert) throws Exception {
-        this.x509AnonymousCert = x509AnonymousCert;
-        content = x509AnonymousCert.getEncoded();
-        serialNumber = x509AnonymousCert.getSerialNumber().longValue();
-        certExtensionDto = CertificateUtils.getCertExtensionData(CurrencyCertExtensionDto.class,
-                x509AnonymousCert, Constants.CURRENCY_OID);
-        if(certExtensionDto == null)
-            throw new ValidationException("error missing cert extension data");
-        amount = certExtensionDto.getAmount();
-        currencyCode = certExtensionDto.getCurrencyCode();
-        revocationHash = certExtensionDto.getRevocationHash();
-        currencyEntity = certExtensionDto.getCurrencyEntity();
-        validFrom = DateUtils.getLocalDateFromUTCDate(x509AnonymousCert.getNotBefore());
-        validTo = DateUtils.getLocalDateFromUTCDate(x509AnonymousCert.getNotAfter());
-        String subjectDN = x509AnonymousCert.getSubjectDN().toString();
-        CurrencyDto certSubjectDto = CurrencyDto.getCertSubjectDto(subjectDN, revocationHash);
-        if(!certSubjectDto.getCurrencyEntity().equals(certExtensionDto.getCurrencyEntity()))
-            throw new ValidationException("currencyEntity: " + currencyEntity + " - certSubject: " + subjectDN);
-        if(certSubjectDto.getAmount().compareTo(amount) != 0)
-            throw new ValidationException("amount: " + amount + " - certSubject: " + subjectDN);
-        if(!certSubjectDto.getCurrencyCode().equals(currencyCode))
-            throw new ValidationException("currencyCode: " + currencyCode + " - certSubject: " + subjectDN);
-        return this;
-    }
-
-    public Currency checkRequestWithDB(Currency currencyRequest) throws ValidationException {
-        if(!currencyRequest.getCurrencyEntity().equals(currencyEntity))
-            throw new ValidationException("Expected Currency server: " + currencyEntity +
-                    " - found: " + currencyRequest.getCurrencyEntity());
-        if(!currencyRequest.getRevocationHash().equals(revocationHash))
-            throw new ValidationException("Expected revocation hash: " + revocationHash +
-                    " - found: " + currencyRequest.getRevocationHash());
-        if(!currencyRequest.getCurrencyCode().equals(currencyCode))
-            throw new ValidationException("Expected currency code: " + currencyCode + " - found: " +
-                    currencyRequest.getCurrencyCode());
-        if(currencyRequest.getAmount().compareTo(amount) != 0)  throw new ValidationException(
-                "Expected amount: " + amount + " - found: " + currencyRequest.getAmount());
-        this.signedDocument = currencyRequest.getSignedDocument();
-        this.x509AnonymousCert = currencyRequest.getX509AnonymousCert();
-        this.toUser = currencyRequest.getToUser();
-        this.toUserIBAN = currencyRequest.getToUserIBAN();
-        this.subject = currencyRequest.getSubject();
-        return this;
     }
 
     public CurrencyBatch getCurrencyBatch() {
@@ -238,8 +207,8 @@ public class Currency extends EntityBase implements Serializable  {
         return this;
     }
 
-    public void setX509AnonymousCert(X509Certificate x509AnonymousCert) {
-        this.x509AnonymousCert = x509AnonymousCert;
+    public void setCurrencyCertificate(X509Certificate currencyCertificate) {
+        this.currencyCertificate = currencyCertificate;
     }
 
     private String getErrorPrefix() {
@@ -290,8 +259,8 @@ public class Currency extends EntityBase implements Serializable  {
         this.subject = subject;
     }
 
-    public X509Certificate getX509AnonymousCert() {
-        return x509AnonymousCert;
+    public X509Certificate getCurrencyCertificate() {
+        return currencyCertificate;
     }
 
     public String getMetaInf() {
@@ -451,6 +420,22 @@ public class Currency extends EntityBase implements Serializable  {
 
     public void setCertificationRequest(CertificationRequest certificationRequest) {
         this.certificationRequest = certificationRequest;
+    }
+
+    public static Currency build(String currencyEntity, BigDecimal amount, CurrencyCode currencyCode)
+            throws NoSuchAlgorithmException, CertificateRequestException {
+        String originRevocationHash = java.util.UUID.randomUUID().toString();
+        String revocationHash = HashUtils.getHashBase64(originRevocationHash.getBytes(), Constants.DATA_DIGEST_ALGORITHM);
+        Currency currency = new Currency(currencyEntity, amount, currencyCode, revocationHash, originRevocationHash);
+        currency.setCertificationRequest(CertificationRequest.getCurrencyRequest(currencyEntity, currency.getRevocationHash(),
+                amount, currencyCode));
+        return currency;
+    }
+
+    public static Currency FROM_CERT(X509Certificate currencyCert, Certificate authorityCertificate) throws Exception {
+        Currency currency = new Currency().setState(State.OK).setAuthorityCertificate(authorityCertificate);
+        currency.initCertData(currencyCert);
+        return currency;
     }
 
 }

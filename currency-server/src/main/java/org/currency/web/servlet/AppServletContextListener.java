@@ -5,9 +5,8 @@ import org.votingsystem.ejb.TrustedServicesEJB;
 import javax.annotation.Resource;
 import javax.ejb.EJB;
 import javax.enterprise.concurrent.ManagedExecutorService;
-import javax.inject.Inject;
-import javax.servlet.ServletContextListener;
 import javax.servlet.ServletContextEvent;
+import javax.servlet.ServletContextListener;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 

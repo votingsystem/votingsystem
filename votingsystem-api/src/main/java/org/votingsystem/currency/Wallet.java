@@ -41,6 +41,7 @@ public class Wallet {
     public Wallet(String walletDirPath, char[] password) throws Exception {
         this.password = password;
         this.walletDirPath = walletDirPath;
+        log.info("wallet path: " + new File(walletDirPath).getAbsolutePath());
         load();
     }
     

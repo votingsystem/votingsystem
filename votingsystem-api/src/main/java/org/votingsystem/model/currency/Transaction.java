@@ -13,7 +13,6 @@ import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
 
@@ -121,8 +120,7 @@ public class Transaction extends EntityBase implements Serializable {
     private LocalDateTime lastUpdated;
 
     @Transient private Map<CurrencyAccount, BigDecimal> accountFromMovements;
-    @Transient private Long userId;
-    @Transient private List<String> toUserList;
+
 
     public Transaction() {}
 
@@ -312,14 +310,6 @@ public class Transaction extends EntityBase implements Serializable {
         return toUserIBAN;
     }
 
-    public Long getUserId() {
-        return userId;
-    }
-
-    public void setUserId(Long userId) {
-        this.userId = userId;
-    }
-
     public void setToUserIBAN(String toUserIBAN) {
         this.toUserIBAN = toUserIBAN;
     }
@@ -330,14 +320,6 @@ public class Transaction extends EntityBase implements Serializable {
 
     public void setFromUserName(String fromUser) {
         this.fromUserName = fromUser;
-    }
-
-    public List<String> getToUserList() {
-        return toUserList;
-    }
-
-    public void setToUserList(List<String> toUserList) {
-        this.toUserList = toUserList;
     }
 
     public CurrencyBatch getCurrencyBatch() {

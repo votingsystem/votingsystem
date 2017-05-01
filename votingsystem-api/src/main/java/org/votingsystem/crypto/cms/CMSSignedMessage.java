@@ -114,7 +114,7 @@ public class CMSSignedMessage extends CMSSignedData {
         return PEMUtils.getPEMEncoded(toASN1Structure());
     }
 
-    public CMSSignedMessage isValidSignature() throws Exception {
+    public CMSSignedMessage checkSignatureInfo() throws Exception {
         getMessageData();
         return this;
     }
@@ -125,15 +125,6 @@ public class CMSSignedMessage extends CMSSignedData {
     public String getContentDigestStr() throws Exception {
         MessageDigest messageDigest = MessageDigest.getInstance("MD5");
         return Base64.getEncoder().encodeToString(messageDigest.digest((byte[]) getSignedContent().getContent()));
-    }
-
-    public static CMSSignedMessage FROM_PEM(String pkcs7PEMData) throws Exception {
-        PEMParser PEMParser = new PEMParser(new InputStreamReader(new ByteArrayInputStream(pkcs7PEMData.getBytes())));
-        ContentInfo contentInfo = (ContentInfo) PEMParser.readObject();
-        /*if (!contentInfo.getContentType().equals(CMSObjectIdentifiers.envelopedData)) {
-            log.info("CMSObjectIdentifiers - contentInfo not envelopedData");
-        }*/
-        return new CMSSignedMessage(contentInfo.getEncoded());
     }
 
     public static CMSSignedMessage FROM_PEM(byte[] pemBytes) throws Exception {
@@ -169,22 +160,22 @@ public class CMSSignedMessage extends CMSSignedData {
         return signerCerts;
     }
 
+    public X509Certificate getCurrencyCert() throws Exception {
+        return getMessageData().getCurrencyCert();
+    }
+
     private class MessageData {
 
         private Signature firstSignature;
         private Set<Signature> signatures;
         private TimeStampToken timeStampToken;
-
+        private X509Certificate currencyCert;
 
         public MessageData() throws Exception {
-            checkSignature();
-        }
-
-        /**
-         * verify that the signature is correct and that it was generated when the
-         * certificate was current(assuming the cert is contained in the message).
-         */
-        private boolean checkSignature() throws Exception {
+            /**
+             * verify that the signature is correct and that it was generated when the
+             * certificate was current(assuming the cert is contained in the message).
+             */
             Store certs = getCertificates();
             SignerInformationStore signerInfos = getSignerInfos();
             Set<X509Certificate> signerCerts = new HashSet<>();
@@ -231,9 +222,11 @@ public class CMSSignedMessage extends CMSSignedData {
                         timeStampToken = tsToken;
                     }
                 } else signatures.add(new Signature(user, Base64.getEncoder().encodeToString(signerDigest), null).setSigningCert(cert));
+                if (cert.getExtensionValue(Constants.CURRENCY_OID) != null) {
+                    currencyCert = cert;
+                }
                 signerCerts.add(cert);
             }
-            return true;
         }
 
         public Signature getFirstSignature() throws ValidationException {
@@ -250,6 +243,9 @@ public class CMSSignedMessage extends CMSSignedData {
             return timeStampToken;
         }
 
+        public X509Certificate getCurrencyCert() {
+            return currencyCert;
+        }
     }
 
 }

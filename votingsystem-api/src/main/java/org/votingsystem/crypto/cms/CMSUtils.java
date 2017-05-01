@@ -116,7 +116,6 @@ public class CMSUtils {
 
     public static TimeStampToken checkTimeStampToken(SignerInformation signer) throws Exception {
         TimeStampToken timeStampToken = null;
-        //AttributeTable unsignedAttributes = signer.getUnsignedAttributes();
         AttributeTable signedAttributes = signer.getSignedAttributes();
         Attribute timeStampAttribute = signedAttributes.get(PKCSObjectIdentifiers.id_aa_signatureTimeStampToken);
         if(timeStampAttribute != null) {

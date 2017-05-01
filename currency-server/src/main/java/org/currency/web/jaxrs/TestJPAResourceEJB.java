@@ -2,11 +2,16 @@ package org.currency.web.jaxrs;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import org.currency.web.ejb.ConfigCurrencyServer;
+import org.hibernate.Criteria;
+import org.hibernate.Session;
+import org.hibernate.criterion.Restrictions;
 import org.votingsystem.model.User;
 import org.votingsystem.model.currency.Bank;
 import org.votingsystem.model.currency.CurrencyAccount;
 import org.votingsystem.model.currency.Tag;
+import org.votingsystem.model.currency.Transaction;
 import org.votingsystem.throwable.ValidationException;
+import org.votingsystem.util.CurrencyOperation;
 import org.votingsystem.util.FileUtils;
 
 import javax.inject.Inject;
@@ -22,6 +27,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
+import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -49,7 +55,6 @@ public class TestJPAResourceEJB {
         return Response.ok().entity("OK").build();
     }
 
-
     @Transactional
     @Path("/cert-by-hash") @POST
     @Produces(javax.ws.rs.core.MediaType.TEXT_PLAIN)
@@ -66,4 +71,17 @@ public class TestJPAResourceEJB {
         return Response.ok().entity("Signer UUID: " + bank.getUUID() + " - simple name: " +
                 bank.getClass().getSimpleName()).build();
     }
+
+    @Transactional
+    @Path("/hibernate-criteria") @POST
+    @Produces(javax.ws.rs.core.MediaType.TEXT_PLAIN)
+    public Response hibernateCriteria(@Context HttpServletRequest req, @Context HttpServletResponse res) throws Exception {
+        List<CurrencyOperation> transactionTypeList = Arrays.asList(CurrencyOperation.TRANSACTION_FROM_BANK);
+        Criteria criteria = em.unwrap(Session.class).createCriteria(Transaction.class);
+        criteria.add(Restrictions.isNull("transactionParent"));
+        criteria.add(Restrictions.in("type", transactionTypeList));
+        List<Transaction> transactionList = criteria.setFirstResult(0).setMaxResults(100).list();
+        return Response.ok().entity("Num. transactions: "+ transactionList.size()).build();
+    }
+
 }

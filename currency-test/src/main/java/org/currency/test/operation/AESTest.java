@@ -5,6 +5,7 @@ import org.votingsystem.crypto.Encryptor;
 import org.votingsystem.dto.AESParamsDto;
 import org.votingsystem.testlib.BaseTest;
 import org.votingsystem.util.JSON;
+
 import java.util.logging.Logger;
 
 public class AESTest extends BaseTest {

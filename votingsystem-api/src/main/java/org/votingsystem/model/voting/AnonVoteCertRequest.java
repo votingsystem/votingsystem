@@ -31,7 +31,7 @@ public class AnonVoteCertRequest extends EntityBase implements Serializable {
     @OneToOne
     @JoinColumn(name="SIGNED_DOCUMENT_ID")
     private SignedDocument signedDocument;
-    @Column(name="REVOCATION_HASH_BASE64") private String revocationHash;
+    @Column(name="REVOCATION_HASH") private String revocationHash;
     @Column(name="META_INF") private String metaInf;
     @Column(name="DATE_CREATED", columnDefinition="TIMESTAMP")
     @Convert(converter = LocalDateTimeAttributeConverter.class)

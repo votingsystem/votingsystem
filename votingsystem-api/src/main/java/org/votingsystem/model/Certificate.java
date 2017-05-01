@@ -68,7 +68,7 @@ public class Certificate implements Serializable {
     @JoinColumn(name="SIGNER_ID")
     private User signer;
 
-    @Column(name="REVOCATION_HASH_BASE64", unique=true)
+    @Column(name="REVOCATION_HASH", unique=true)
     private String revocationHash;
 
     @Column(name="META_INF", columnDefinition="TEXT")

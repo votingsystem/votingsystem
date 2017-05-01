@@ -46,8 +46,8 @@ public class CurrencyStateDto {
         if(currency.getContent() != null) {
             X509Certificate certX509 = CertificateUtils.loadCertificate(currency.getContent());
             currencyCert = new String(PEMUtils.getPEMEncoded (certX509));
-        } else if(currency.getX509AnonymousCert() != null) {
-            currencyCert = new String(PEMUtils.getPEMEncoded (currency.getX509AnonymousCert()));
+        } else if(currency.getCurrencyCertificate() != null) {
+            currencyCert = new String(PEMUtils.getPEMEncoded (currency.getCurrencyCertificate()));
         }
         setAmount(currency.getAmount());
         currencyCode = currency.getCurrencyCode();

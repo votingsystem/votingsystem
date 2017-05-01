@@ -3,8 +3,6 @@ package org.currency.web.http;
 import org.votingsystem.model.User;
 import org.votingsystem.util.Constants;
 
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
 import javax.servlet.annotation.WebListener;
 import javax.servlet.http.HttpSession;
 import javax.servlet.http.HttpSessionEvent;
@@ -30,9 +28,6 @@ public class HttpSessionManager implements HttpSessionListener {
     public HttpSessionManager() {
         INSTANCE = this;
     }
-
-    @PersistenceContext
-    private EntityManager em;
 
     @Override
     public void sessionCreated(HttpSessionEvent sessionEvent) {

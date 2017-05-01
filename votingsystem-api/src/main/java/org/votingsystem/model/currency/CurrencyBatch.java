@@ -1,5 +1,6 @@
 package org.votingsystem.model.currency;
 
+import org.votingsystem.dto.currency.CurrencyBatchDto;
 import org.votingsystem.model.EntityBase;
 import org.votingsystem.model.SignedDocument;
 import org.votingsystem.model.User;
@@ -86,6 +87,15 @@ public class CurrencyBatch extends EntityBase implements Serializable {
 
     public CurrencyBatch() {}
 
+    public CurrencyBatch(CurrencyBatchDto batchDto) {
+        setType(batchDto.getOperation());
+        setSubject(batchDto.getSubject());
+        setBatchAmount(batchDto.getBatchAmount());
+        setCurrencyCode(batchDto.getCurrencyCode());
+        setContent(batchDto.getContent());
+        setBatchUUID(batchDto.getBatchUUID());
+    }
+
     public CurrencyBatch(byte[] content) throws IOException {
         this.content = content;
     }
@@ -155,15 +165,6 @@ public class CurrencyBatch extends EntityBase implements Serializable {
         this.currencyChange = currencyChange;
     }
 
-    public Set<Currency> getValidatedCurrencySet() {
-        return validatedCurrencySet;
-    }
-
-    public CurrencyBatch setValidatedCurrencySet(Set<Currency> validatedCurrencySet) {
-        this.validatedCurrencySet = validatedCurrencySet;
-        return this;
-    }
-
     public CurrencyOperation getType() {
         return type;
     }
@@ -205,6 +206,14 @@ public class CurrencyBatch extends EntityBase implements Serializable {
 
     public void setContent(byte[] content) {
         this.content = content;
+    }
+
+    public Set<Currency> getValidatedCurrencySet() {
+        return validatedCurrencySet;
+    }
+
+    public void setValidatedCurrencySet(Set<Currency> validatedCurrencySet) {
+        this.validatedCurrencySet = validatedCurrencySet;
     }
 
     @Override

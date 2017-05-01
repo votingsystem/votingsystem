@@ -82,7 +82,7 @@ public class SignatureTest extends BaseTest {
         SignatureTest signatureTest = new SignatureTest();
         CMSSignedMessage cmsSignedMessage = signatureTest.sign();
         cmsSignedMessage = CMSSignedMessage.FROM_PEM(cmsSignedMessage.toPEM());
-        log.info("isValidSignature: " + cmsSignedMessage.isValidSignature() + " - contentDigest: " +
+        log.info("checkSignatureInfo: " + cmsSignedMessage.checkSignatureInfo() + " - contentDigest: " +
                 cmsSignedMessage.getContentDigestStr());
         ResponseDto response = HttpConn.getInstance().doPostRequest(cmsSignedMessage.toPEM(), MediaType.PKCS7_SIGNED,
                 "https://voting.ddns.net/currency-server/api/test-pkcs7/sign");

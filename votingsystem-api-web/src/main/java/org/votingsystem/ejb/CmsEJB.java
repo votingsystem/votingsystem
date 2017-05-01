@@ -88,7 +88,7 @@ public class CmsEJB {
             throws Exception {
         if(documentType == null)
             documentType = SignedDocumentType.SIGNED_DOCUMENT;
-        if (cmsSignedMessage.isValidSignature() != null) {
+        if (cmsSignedMessage.checkSignatureInfo() != null) {
             List<CMSDocument> documentList = em.createNamedQuery(CMSDocument.FIND_BY_MESSAGE_DIGEST)
                     .setParameter("messageDigest", cmsSignedMessage.getContentDigestStr()).getResultList();
             if(!documentList.isEmpty())

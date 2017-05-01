@@ -11,11 +11,9 @@ import org.votingsystem.dto.ResultListDto;
 import org.votingsystem.dto.currency.CurrencyRequestDto;
 import org.votingsystem.dto.currency.TransactionDto;
 import org.votingsystem.http.HttpConn;
-import org.votingsystem.model.User;
 import org.votingsystem.testlib.BaseTest;
 import org.votingsystem.util.CurrencyCode;
 import org.votingsystem.util.CurrencyOperation;
-import org.votingsystem.util.JSON;
 import org.votingsystem.xades.XAdESSignature;
 import org.votingsystem.xml.XML;
 
