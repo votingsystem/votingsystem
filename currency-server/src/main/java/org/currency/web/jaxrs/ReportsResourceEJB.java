@@ -43,21 +43,6 @@ public class ReportsResourceEJB {
 
     @Inject private ConfigCurrencyServer config;
 
-    @Path("/{year}/{month}/{day}/week")
-    @GET  @Produces(javax.ws.rs.core.MediaType.APPLICATION_JSON) @Transactional
-    public Response week(@PathParam("year") int year, @PathParam("month") int month, @PathParam("day") int day,
-                          @Context HttpServletRequest req, @Context HttpServletResponse resp) throws Exception {
-        File reportsFile = AuditLogger.getReportsLogFile();
-        Interval timePeriod = DateUtils.getWeekPeriod(LocalDateTime.of(year, month, day, 0, 0));
-        //TODO
-        if(reportsFile.exists()) {
-            StringBuilder stringBuilder = new StringBuilder("{");
-            stringBuilder.append(FileUtils.getStringFromFile(reportsFile));
-            stringBuilder.append("}");
-            return Response.ok().type(MediaType.JSON).entity(stringBuilder.toString()).build();
-        } else return Response.status(Response.Status.NOT_FOUND).entity(
-                "ERROR - not found - file: " + AuditLogger.getReportsLogFile().getAbsolutePath()).build();
-    }
 
     @Path("/")
     @GET  @Produces(javax.ws.rs.core.MediaType.APPLICATION_JSON) @Transactional

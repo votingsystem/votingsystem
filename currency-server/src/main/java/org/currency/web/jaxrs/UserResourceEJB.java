@@ -218,6 +218,7 @@ public class UserResourceEJB {
         }
     }
 
+    @PermitAll
     @Path("/bank-list")
     @GET @Produces(javax.ws.rs.core.MediaType.APPLICATION_JSON)
     public Response bankList(@Context ServletContext context, @Context HttpServletRequest req,

@@ -1,0 +1,24 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:o="http://omnifaces.org/ui"
+                template="/WEB-INF/templates/main-template-forge.xhtml">
+    <ui:define name="head">
+    </ui:define>
+    <ui:define name="content">
+        <div class="panel-body">
+            <ui:repeat value="#{banksPage.getBankList()}" var="bank">
+                <div style="font-size: 20px;">
+                    #{bank.name}
+                </div>
+            </ui:repeat>
+
+        </div>
+
+        <script>
+            //<![CDATA[
+            vs.setMainPageCaption("#{msg.bankListLbl}");
+
+            // ]]>
+        </script>
+    </ui:define>
+</ui:composition>
