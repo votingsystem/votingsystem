@@ -44,7 +44,7 @@ public class TransactionFromBankTest extends BaseTest {
                 Constants.CURRENCY_SERVICE_ENTITY_ID));
         transaction.setUUID(UUID.randomUUID().toString());
         transaction.setSubject("Test transaction").setAmount(new BigDecimal(200)).setCurrencyCode(CurrencyCode.EUR);
-        transaction.setToUserIBAN("ES2478788989450000000010");
+        transaction.setToUserIBAN("ES3578788989450000000006");
         MockDNIe mockDNIe = new MockDNIe("ExternalBank");
         byte[] signedBytes =  XAdESSignature.sign(XML.getMapper().writeValueAsBytes(transaction),
                 mockDNIe.getJksSignatureToken(), new TSPHttpSource(Constants.TIMESTAMP_SERVICE_URL));

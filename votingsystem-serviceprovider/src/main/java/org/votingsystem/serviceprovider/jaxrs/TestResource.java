@@ -6,7 +6,8 @@ import org.votingsystem.dto.ResponseDto;
 import org.votingsystem.dto.voting.ElectionDto;
 import org.votingsystem.ejb.Config;
 import org.votingsystem.ejb.QRSessionsEJB;
-import org.votingsystem.ejb.SignatureService;
+
+import org.votingsystem.ejb.SignatureServiceEJB;
 import org.votingsystem.ejb.TrustedServicesEJB;
 import org.votingsystem.model.SignedDocument;
 import org.votingsystem.model.voting.Election;
@@ -40,7 +41,7 @@ public class TestResource {
 
     @PersistenceContext
     private EntityManager em;
-    @Inject private SignatureService signatureService;
+    @Inject private SignatureServiceEJB signatureService;
     @Inject @Push
     private PushContext serviceUpdated;
     @Inject

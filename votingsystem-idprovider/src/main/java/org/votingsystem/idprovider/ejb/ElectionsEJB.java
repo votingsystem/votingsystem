@@ -8,7 +8,8 @@ import org.votingsystem.dto.metadata.MetadataDto;
 import org.votingsystem.dto.voting.ElectionDto;
 import org.votingsystem.ejb.Config;
 import org.votingsystem.ejb.MetadataService;
-import org.votingsystem.ejb.SignatureService;
+
+import org.votingsystem.ejb.SignatureServiceEJB;
 import org.votingsystem.ejb.TrustedServicesEJB;
 import org.votingsystem.http.HttpConn;
 import org.votingsystem.model.SignedDocument;
@@ -45,7 +46,7 @@ public class ElectionsEJB {
     @EJB private TrustedServicesEJB trustedServicesEJB;
     @Inject private Config config;
     @Inject private MetadataService metadataEJB;
-    @Inject private SignatureService signatureService;
+    @EJB private SignatureServiceEJB signatureService;
 
 
     /**

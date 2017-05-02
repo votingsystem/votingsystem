@@ -5,7 +5,7 @@ import org.iban4j.Iban;
 import org.votingsystem.crypto.CertificateUtils;
 import org.votingsystem.crypto.PEMUtils;
 import org.votingsystem.dto.currency.BankDto;
-import org.votingsystem.ejb.SignatureService;
+import org.votingsystem.ejb.SignatureServiceEJB;
 import org.votingsystem.ejb.SignerInfoService;
 import org.votingsystem.model.Certificate;
 import org.votingsystem.model.User;
@@ -40,7 +40,7 @@ public class BankEJB {
     @Inject private SignerInfoService signerInfoService;
     @Inject private UserEJB userBean;
     @Inject private TransactionEJB transactionBean;
-    @Inject private SignatureService signatureService;
+    @Inject private SignatureServiceEJB signatureService;
     @Inject private ConfigCurrencyServer config;
 
     @TransactionAttribute(REQUIRES_NEW)

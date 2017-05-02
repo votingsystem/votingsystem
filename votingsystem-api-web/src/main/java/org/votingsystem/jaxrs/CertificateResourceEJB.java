@@ -10,7 +10,7 @@ import org.votingsystem.crypto.PEMUtils;
 import org.votingsystem.dto.CertificateDto;
 import org.votingsystem.dto.ResultListDto;
 import org.votingsystem.ejb.Config;
-import org.votingsystem.ejb.SignatureService;
+import org.votingsystem.ejb.SignatureServiceEJB;
 import org.votingsystem.http.HttpRequest;
 import org.votingsystem.http.MediaType;
 import org.votingsystem.model.Certificate;
@@ -45,7 +45,7 @@ public class CertificateResourceEJB {
 
     @PersistenceContext
     private EntityManager em;
-    @Inject private SignatureService signatureService;
+    @Inject private SignatureServiceEJB signatureService;
     @Inject private Config config;
 
     @Path("/revocationHash")

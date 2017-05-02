@@ -8,7 +8,7 @@ import org.currency.web.ejb.UserEJB;
 import org.votingsystem.dto.ResponseDto;
 import org.votingsystem.dto.currency.CurrencyIssuedDto;
 import org.votingsystem.dto.currency.CurrencyStateDto;
-import org.votingsystem.ejb.SignatureService;
+import org.votingsystem.ejb.SignatureServiceEJB;
 import org.votingsystem.http.MediaType;
 import org.votingsystem.model.currency.Currency;
 import org.votingsystem.util.CurrencyCode;
@@ -47,7 +47,7 @@ public class CurrencyResourceEJB {
     @Inject private UserEJB userBean;
     @Inject private TransactionEJB transactionBean;
     @Inject private ConfigCurrencyServer config;
-    @Inject private SignatureService signatureService;
+    @Inject private SignatureServiceEJB signatureService;
     @Inject private CurrencyEJB currencyBean;
 
     @Path("/issuedLog")

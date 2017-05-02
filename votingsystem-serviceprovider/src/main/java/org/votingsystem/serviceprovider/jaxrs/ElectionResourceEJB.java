@@ -10,7 +10,8 @@ import org.votingsystem.dto.voting.ElectionOptionDto;
 import org.votingsystem.dto.voting.ElectionStatsDto;
 import org.votingsystem.ejb.Config;
 import org.votingsystem.ejb.QRSessionsEJB;
-import org.votingsystem.ejb.SignatureService;
+
+import org.votingsystem.ejb.SignatureServiceEJB;
 import org.votingsystem.http.HttpRequest;
 import org.votingsystem.http.HttpResponse;
 import org.votingsystem.managed.ServiceUpdatedMessage;
@@ -52,7 +53,7 @@ public class ElectionResourceEJB {
 
     @PersistenceContext
     private EntityManager em;
-    @Inject private SignatureService signatureService;
+    @Inject private SignatureServiceEJB signatureService;
     @Inject private Config config;
     @Inject private BeanManager beanManager;
     @EJB private QRSessionsEJB qrSessions;

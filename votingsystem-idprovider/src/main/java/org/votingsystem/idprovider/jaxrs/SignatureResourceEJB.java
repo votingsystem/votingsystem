@@ -5,11 +5,13 @@ import org.votingsystem.crypto.SignatureParams;
 import org.votingsystem.crypto.SignedDocumentType;
 import org.votingsystem.dto.ResponseDto;
 import org.votingsystem.ejb.Config;
-import org.votingsystem.ejb.SignatureService;
+
+import org.votingsystem.ejb.SignatureServiceEJB;
 import org.votingsystem.model.SignedDocument;
 import org.votingsystem.model.User;
 import org.votingsystem.xml.XML;
 
+import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.ws.rs.FormParam;
@@ -29,7 +31,7 @@ public class SignatureResourceEJB {
     private static final Logger log = Logger.getLogger(SignatureResourceEJB.class.getName());
 
     @Inject private Config config;
-    @Inject private SignatureService signatureService;
+    @EJB private SignatureServiceEJB signatureService;
 
     @POST @Path("/validate")
     @Produces({"application/xml"})

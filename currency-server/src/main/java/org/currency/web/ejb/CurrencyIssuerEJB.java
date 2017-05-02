@@ -8,7 +8,7 @@ import org.votingsystem.crypto.PEMUtils;
 import org.votingsystem.dto.currency.CurrencyCertExtensionDto;
 import org.votingsystem.dto.currency.CurrencyDto;
 import org.votingsystem.dto.currency.CurrencyRequestDto;
-import org.votingsystem.ejb.SignatureService;
+import org.votingsystem.ejb.SignatureServiceEJB;
 import org.votingsystem.model.Certificate;
 import org.votingsystem.model.currency.Currency;
 import org.votingsystem.model.currency.CurrencyBatch;
@@ -54,7 +54,7 @@ public class CurrencyIssuerEJB {
     @PersistenceContext
     private EntityManager em;
     @Inject private ConfigCurrencyServer config;
-    @Inject private SignatureService signatureService;
+    @Inject private SignatureServiceEJB signatureService;
 
     private X509Certificate certIssuerSigningCert;
     private PrivateKey certIssuerPrivateKey;

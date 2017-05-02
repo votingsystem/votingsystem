@@ -9,7 +9,8 @@ import org.votingsystem.dto.indentity.IdentityRequestDto;
 import org.votingsystem.dto.indentity.SessionCertificationDto;
 import org.votingsystem.dto.voting.CertVoteExtensionDto;
 import org.votingsystem.ejb.CmsEJB;
-import org.votingsystem.ejb.SignatureService;
+
+import org.votingsystem.ejb.SignatureServiceEJB;
 import org.votingsystem.ejb.SignerInfoService;
 import org.votingsystem.model.*;
 import org.votingsystem.model.voting.AnonVoteCertRequest;
@@ -22,6 +23,7 @@ import org.votingsystem.util.*;
 import org.votingsystem.xml.XML;
 
 import javax.annotation.PostConstruct;
+import javax.ejb.DependsOn;
 import javax.ejb.EJB;
 import javax.ejb.Singleton;
 import javax.ejb.TransactionAttribute;
@@ -52,6 +54,7 @@ import static javax.ejb.TransactionAttributeType.REQUIRES_NEW;
  * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
 @Singleton
+@DependsOn("SignatureServiceEJB")
 public class CertIssuerEJB {
 
     private static final Logger log = Logger.getLogger(CertIssuerEJB.class.getName());
@@ -62,7 +65,7 @@ public class CertIssuerEJB {
     @Inject private CmsEJB cmsEJB;
 
     @Inject private SignerInfoService signerEJB;
-    @Inject private SignatureService signatureService;
+    @EJB private SignatureServiceEJB signatureService;
     @EJB private ElectionsEJB electionsEJB;
 
     private Certificate certificate;

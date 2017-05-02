@@ -27,7 +27,7 @@ public class MetadataEJB implements MetadataService {
 
     private static final Logger log = Logger.getLogger(MetadataEJB.class.getName());
 
-    @Inject private SignatureService signatureService;
+    @Inject private SignatureServiceEJB signatureService;
     @Inject private Config config;
     @Inject private SignerInfoService signerInfoService;
 

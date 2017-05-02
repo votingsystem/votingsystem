@@ -3,7 +3,7 @@ package org.currency.web.ejb;
 import org.votingsystem.currency.BalanceUtils;
 import org.votingsystem.dto.currency.BalancesDto;
 import org.votingsystem.dto.currency.TransactionDto;
-import org.votingsystem.ejb.SignatureService;
+import org.votingsystem.ejb.SignatureServiceEJB;
 import org.votingsystem.model.User;
 import org.votingsystem.model.currency.Bank;
 import org.votingsystem.model.currency.CurrencyAccount;
@@ -38,7 +38,7 @@ public class BalancesEJB {
     @PersistenceContext
     private EntityManager em;
     @Inject private ConfigCurrencyServer config;
-    @Inject private SignatureService signatureService;
+    @Inject private SignatureServiceEJB signatureService;
     @Inject private BankEJB bankBean;
     @Inject private UserEJB userBean;
     @Inject private TransactionEJB transactionBean;

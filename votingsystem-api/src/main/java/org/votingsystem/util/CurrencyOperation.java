@@ -44,8 +44,6 @@ public enum CurrencyOperation implements SystemOperation {
     QR_INFO("/api/currency-qr/info", false),
     @JsonProperty("REGISTER_DEVICE")
     REGISTER_DEVICE("/api/cert-issuer/register-device", false),
-    @JsonProperty("REGISTER_USER")
-    REGISTER_USER("/api/user/register", false),
     @JsonProperty("TRANSACTION_INFO")
     TRANSACTION_INFO(null, false),
     @JsonProperty("TRANSACTION_FROM_BANK")

@@ -6,7 +6,7 @@ import org.votingsystem.crypto.SignedDocumentType;
 import org.votingsystem.dto.AdminRequestDto;
 import org.votingsystem.dto.ResponseDto;
 import org.votingsystem.ejb.Config;
-import org.votingsystem.ejb.SignatureService;
+import org.votingsystem.ejb.SignatureServiceEJB;
 import org.votingsystem.ejb.SignerInfoService;
 import org.votingsystem.ejb.TrustedServicesEJB;
 import org.votingsystem.http.HttpResponse;
@@ -37,7 +37,7 @@ public class OperationResourceEJB {
     private static final Logger log = Logger.getLogger(OperationResourceEJB.class.getName());
 
     @Inject private Config config;
-    @Inject private SignatureService signatureService;
+    @Inject private SignatureServiceEJB signatureService;
     @Inject private SignerInfoService signerInfoService;
     @Inject private TrustedServicesEJB trustedServices;
 

@@ -52,7 +52,7 @@ public class CmsEJB {
     @PersistenceContext
     private EntityManager em;
     @Inject private Config config;
-    @Inject private SignatureService signatureService;
+    @Inject private SignatureServiceEJB signatureService;
     @Inject private SignerInfoService signerInfoService;
 
     private X509Certificate serverCert;

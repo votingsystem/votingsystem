@@ -8,7 +8,7 @@ import org.votingsystem.crypto.SignedDocumentType;
 import org.votingsystem.dto.currency.BalancesDto;
 import org.votingsystem.dto.currency.PeriodResultDto;
 import org.votingsystem.dto.currency.TransactionDto;
-import org.votingsystem.ejb.SignatureService;
+import org.votingsystem.ejb.SignatureServiceEJB;
 import org.votingsystem.ejb.SignerInfoService;
 import org.votingsystem.model.SignedDocument;
 import org.votingsystem.model.User;
@@ -54,7 +54,7 @@ public class AuditEJB {
     @Inject private TransactionEJB transactionBean;
     @Inject private SignerInfoService signerInfoService;
     @Inject private BalancesEJB balancesBean;
-    @Inject private SignatureService signatureService;
+    @Inject private SignatureServiceEJB signatureService;
 
     //Backup user transactions for timePeriod
     public BalancesDto backupUserTransactionList(User user, Interval timePeriod) throws IOException {

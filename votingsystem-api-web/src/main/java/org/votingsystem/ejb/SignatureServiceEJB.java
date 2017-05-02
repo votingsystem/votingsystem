@@ -27,9 +27,9 @@ import org.votingsystem.util.Messages;
 import org.votingsystem.xades.CertificateVerifier;
 import org.votingsystem.xml.XML;
 
-import javax.ejb.Singleton;
+import javax.ejb.EJB;
+import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
-import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.ws.rs.WebApplicationException;
@@ -50,15 +50,15 @@ import static javax.ejb.TransactionAttributeType.REQUIRES_NEW;
  *
  * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-@Singleton
-public class SignatureServiceEJB implements SignatureService {
+@Stateless
+public class SignatureServiceEJB {
 
     private static final Logger log = Logger.getLogger(SignatureServiceEJB.class.getName());
 
     @PersistenceContext
     private EntityManager em;
-    @Inject private Config config;
-    @Inject private SignerInfoService signerInfoService;
+    @EJB private Config config;
+    @EJB private SignerInfoService signerInfoService;
 
     public SignedDocument signXAdESAndSave(byte[] xmlToSign, SignatureParams signatureParams) throws SignatureException {
         try {
@@ -106,7 +106,6 @@ public class SignatureServiceEJB implements SignatureService {
         }
     }
 
-    @Override
     public SignedDocument validateXAdESAndSave(byte[] httpRequestBytes) throws XAdESValidationException,
             DuplicatedDbItemException, IOException {
         OperationCheckerDto checkerDto = XML.getMapper().readValue(httpRequestBytes, OperationCheckerDto.class);
@@ -265,5 +264,6 @@ public class SignatureServiceEJB implements SignatureService {
         }
         return xAdESDocument;
     }
+
 
 }

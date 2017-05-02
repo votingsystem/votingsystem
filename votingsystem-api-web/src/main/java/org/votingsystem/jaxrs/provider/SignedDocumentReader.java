@@ -1,12 +1,13 @@
 package org.votingsystem.jaxrs.provider;
 
-import org.votingsystem.ejb.SignatureService;
+
+import org.votingsystem.ejb.SignatureServiceEJB;
 import org.votingsystem.http.MediaType;
 import org.votingsystem.model.SignedDocument;
 import org.votingsystem.throwable.DuplicatedDbItemException;
 import org.votingsystem.util.FileUtils;
 
-import javax.inject.Inject;
+import javax.ejb.EJB;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MultivaluedMap;
@@ -28,8 +29,7 @@ public class SignedDocumentReader implements MessageBodyReader<SignedDocument> {
 
     private static final Logger log = Logger.getLogger(SignedDocumentReader.class.getName());
 
-    @Inject
-    SignatureService signatureService;
+    @EJB SignatureServiceEJB signatureService;
 
     @Override
     public boolean isReadable(Class<?> aClass, Type type, Annotation[] annotations, javax.ws.rs.core.MediaType mediaType) {

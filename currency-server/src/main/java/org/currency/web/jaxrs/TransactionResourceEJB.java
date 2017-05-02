@@ -17,7 +17,7 @@ import org.votingsystem.dto.currency.CurrencyBatchDto;
 import org.votingsystem.dto.currency.CurrencyBatchResponseDto;
 import org.votingsystem.dto.currency.TransactionDto;
 import org.votingsystem.dto.metadata.MetaInfDto;
-import org.votingsystem.ejb.SignatureService;
+import org.votingsystem.ejb.SignatureServiceEJB;
 import org.votingsystem.http.HttpResponse;
 import org.votingsystem.model.SignedDocument;
 import org.votingsystem.model.User;
@@ -65,7 +65,7 @@ public class TransactionResourceEJB {
     private EntityManager em;
     @Inject private UserEJB serVSBean;
     @Inject private TransactionEJB transactionBean;
-    @Inject private SignatureService signatureService;
+    @Inject private SignatureServiceEJB signatureService;
     @Inject private CurrencyEJB currencyBean;
     @Inject private BalancesEJB balancesBean;
     @Inject private ConfigCurrencyServer config;

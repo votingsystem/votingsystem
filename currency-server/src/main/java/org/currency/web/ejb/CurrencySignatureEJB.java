@@ -4,7 +4,7 @@ import eu.europa.esig.dss.DSSDocument;
 import eu.europa.esig.dss.InMemoryDocument;
 import org.votingsystem.crypto.SignatureParams;
 import org.votingsystem.crypto.SignedDocumentType;
-import org.votingsystem.ejb.SignatureService;
+import org.votingsystem.ejb.SignatureServiceEJB;
 import org.votingsystem.model.SignedDocument;
 import org.votingsystem.model.User;
 import org.votingsystem.throwable.DuplicatedDbItemException;
@@ -26,7 +26,7 @@ public class CurrencySignatureEJB {
 
     private static final Logger log = Logger.getLogger(CurrencySignatureEJB.class.getName());
 
-    @Inject private SignatureService signatureService;
+    @Inject private SignatureServiceEJB signatureService;
 
     @TransactionAttribute(REQUIRES_NEW)
     public SignedDocument addReceipt(SignedDocumentType signedDocumentType, SignedDocument signedDocument) throws SignatureException {

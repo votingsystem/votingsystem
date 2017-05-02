@@ -73,12 +73,11 @@ public class TestJPAResourceEJB {
     }
 
     @Transactional
-    @Path("/hibernate-criteria") @POST
+    @Path("/hibernate-criteria") @GET
     @Produces(javax.ws.rs.core.MediaType.TEXT_PLAIN)
     public Response hibernateCriteria(@Context HttpServletRequest req, @Context HttpServletResponse res) throws Exception {
         List<CurrencyOperation> transactionTypeList = Arrays.asList(CurrencyOperation.TRANSACTION_FROM_BANK);
         Criteria criteria = em.unwrap(Session.class).createCriteria(Transaction.class);
-        criteria.add(Restrictions.isNull("transactionParent"));
         criteria.add(Restrictions.in("type", transactionTypeList));
         List<Transaction> transactionList = criteria.setFirstResult(0).setMaxResults(100).list();
         return Response.ok().entity("Num. transactions: "+ transactionList.size()).build();

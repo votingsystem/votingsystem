@@ -3,7 +3,7 @@ package org.currency.web.jaxrs;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import org.currency.web.ejb.ConfigCurrencyServer;
 import org.votingsystem.dto.ResultListDto;
-import org.votingsystem.ejb.SignatureService;
+import org.votingsystem.ejb.SignatureServiceEJB;
 import org.votingsystem.http.MediaType;
 import org.votingsystem.model.currency.Tag;
 import org.votingsystem.util.JSON;
@@ -37,7 +37,7 @@ public class TagResourceEJB {
     @PersistenceContext
     private EntityManager em;
     @Inject private ConfigCurrencyServer config;
-    @Inject private SignatureService signatureService;
+    @Inject private SignatureServiceEJB signatureService;
 
     @GET @Path("/")
     public Response index(@DefaultValue("") @QueryParam("tag") String tag, @Context ServletContext context,

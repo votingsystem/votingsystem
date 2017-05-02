@@ -6,7 +6,8 @@ import org.votingsystem.crypto.SignedDocumentType;
 import org.votingsystem.dto.ResponseDto;
 import org.votingsystem.dto.voting.VoteDto;
 import org.votingsystem.ejb.Config;
-import org.votingsystem.ejb.SignatureService;
+
+import org.votingsystem.ejb.SignatureServiceEJB;
 import org.votingsystem.http.HttpResponse;
 import org.votingsystem.model.Certificate;
 import org.votingsystem.model.SignedDocument;
@@ -44,7 +45,7 @@ public class VoteResourceEJB {
 
     @PersistenceContext
     private EntityManager em;
-    @Inject private SignatureService signatureService;
+    @Inject private SignatureServiceEJB signatureService;
     @Inject private Config config;
 
     @POST @Path("/")

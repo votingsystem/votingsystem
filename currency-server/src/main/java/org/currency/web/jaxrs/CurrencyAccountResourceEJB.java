@@ -13,6 +13,7 @@ import org.votingsystem.model.User;
 import org.votingsystem.model.currency.Bank;
 import org.votingsystem.model.currency.CurrencyAccount;
 import org.votingsystem.model.currency.Transaction;
+import org.votingsystem.throwable.ValidationException;
 import org.votingsystem.util.CurrencyCode;
 import org.votingsystem.util.CurrencyOperation;
 import org.votingsystem.util.JSON;
@@ -90,8 +91,10 @@ public class CurrencyAccountResourceEJB {
     @PermitAll
     @Path("/user-accounts")
     @POST @Produces(MediaType.APPLICATION_JSON)
-    public Response signedRequestUserAccounts(CMSDocument signedDocument) throws IOException, ServletException {
+    public Response signedRequestUserAccounts(CMSDocument signedDocument) throws IOException, ServletException, ValidationException {
         User user = signedDocument.getFirstSignature().getSigner();
+        if(user.getIBAN() == null)
+            config.createIBAN(user);
         List<CurrencyAccount> userAccountList = em.createQuery(
                 "select account from CurrencyAccount account where account.user =:user and account.state =:state")
                 .setParameter("user", user)

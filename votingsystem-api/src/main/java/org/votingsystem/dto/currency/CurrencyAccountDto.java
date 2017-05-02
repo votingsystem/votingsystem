@@ -6,7 +6,8 @@ import org.votingsystem.model.currency.CurrencyAccount;
 import org.votingsystem.util.CurrencyCode;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 
 /**
  * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
@@ -19,7 +20,7 @@ public class CurrencyAccountDto {
     private CurrencyCode currencyCode;
     private String IBAN;
     private BigDecimal amount;
-    private LocalDateTime lastUpdated;
+    private ZonedDateTime lastUpdated;
 
     public CurrencyAccountDto() {}
 
@@ -28,7 +29,7 @@ public class CurrencyAccountDto {
         this.setCurrencyCode(currencyAccount.getCurrencyCode());
         this.setIBAN(currencyAccount.getIBAN());
         this.setAmount(currencyAccount.getBalance());
-        this.setLastUpdated(currencyAccount.getLastUpdated());
+        this.setLastUpdated(ZonedDateTime.of(currencyAccount.getLastUpdated(), ZoneId.systemDefault()));
     }
 
     public Long getId() {
@@ -63,11 +64,11 @@ public class CurrencyAccountDto {
         this.amount = amount;
     }
 
-    public LocalDateTime getLastUpdated() {
+    public ZonedDateTime getLastUpdated() {
         return lastUpdated;
     }
 
-    public void setLastUpdated(LocalDateTime lastUpdated) {
+    public void setLastUpdated(ZonedDateTime lastUpdated) {
         this.lastUpdated = lastUpdated;
     }
 

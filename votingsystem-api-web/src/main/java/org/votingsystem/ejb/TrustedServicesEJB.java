@@ -11,7 +11,10 @@ import org.votingsystem.util.OperationType;
 import org.votingsystem.xml.XML;
 
 import javax.annotation.Resource;
-import javax.ejb.*;
+import javax.ejb.Lock;
+import javax.ejb.LockType;
+import javax.ejb.Singleton;
+import javax.ejb.Startup;
 import javax.enterprise.concurrent.ManagedExecutorService;
 import javax.inject.Inject;
 import java.io.File;
@@ -44,7 +47,7 @@ public class TrustedServicesEJB {
     /**
      * Method that checks all trusted services every hour -> **:00:00
      */
-    @Schedule(hour = "*", minute = "0", second = "0", persistent = false)
+    //@Schedule(hour = "*", minute = "0", second = "0", persistent = false)
     public Set<String> loadTrustedServices() throws IOException {
         File timeStampServersFile = new File(config.getApplicationDirPath() + "/sec/timestamp-servers.xml");
         List<String> timeStampServersCertificates = XML.getMapper().readValue(

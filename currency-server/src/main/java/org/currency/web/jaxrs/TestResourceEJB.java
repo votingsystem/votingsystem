@@ -61,7 +61,7 @@ public class TestResourceEJB {
         result.put("UUID", UUID.randomUUID().toString());
         result.put("test", "test1, españa acentuación");
         AuditLogger.logReport(result);
-        return Response.ok().entity(" - OK - ").build();
+        return Response.ok().entity(" -- OK -- ").build();
     }
 
     @GET @Path("/sessionId")

@@ -6,7 +6,7 @@ import org.votingsystem.crypto.SignatureParams;
 import org.votingsystem.crypto.SignedDocumentType;
 import org.votingsystem.dto.MessageDto;
 import org.votingsystem.dto.ResponseDto;
-import org.votingsystem.ejb.SignatureService;
+import org.votingsystem.ejb.SignatureServiceEJB;
 import org.votingsystem.model.Device;
 import org.votingsystem.model.SignedDocument;
 import org.votingsystem.model.User;
@@ -36,7 +36,7 @@ public class WebSocketEJB {
     private EntityManager em;
     @Inject private ConfigCurrencyServer config;
     @Inject private TransactionEJB transactionBean;
-    @Inject private SignatureService signatureService;
+    @Inject private SignatureServiceEJB signatureService;
 
     @Transactional
     public void processRequest(SocketRequest socketRequest) throws Exception {
