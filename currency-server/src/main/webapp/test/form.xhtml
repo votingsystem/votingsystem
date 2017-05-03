@@ -1,0 +1,58 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                template="/WEB-INF/templates/main-template.xhtml">
+    <ui:define name="head">
+        <style type="text/css">
+            #container{
+                margin: 50px auto;
+                width: 500px;
+            }
+            .field{
+                margin-bottom: 30px;
+            }
+            input{
+                border:none;
+                border-bottom: 3px solid #aaa;
+                width: 80%;
+                outline: 0;
+                font-size: 24px;
+            }
+            label{
+                color: #337ab7;
+                position: absolute;
+                margin-top: -30px;
+                pointer-events: none;
+                transition: all 0.2s ease;
+                font-size: 21px;
+                text-transform: uppercase;
+            }
+            input:focus ~ label, input:valid ~ label{
+                margin-top:-50px;
+                font-size: 11px;
+            }
+            input:focus, input:valid{
+                border-bottom-color: #555;
+            }
+        </style>
+    </ui:define>
+    <ui:define name="content">
+        <div id="container">
+            <div class="field">
+                <input type="text" name="user" required="" /><br/>
+                <label>Username</label>
+            </div>
+
+            <div class="field">
+                <input type="password" name="password" required="" /><br/>
+                <label>Password</label>
+            </div>
+        </div>
+        <script>
+            //<![CDATA[
+            vs.setMainPageCaption("FORM");
+
+
+            // ]]>
+        </script>
+    </ui:define>
+</ui:composition>

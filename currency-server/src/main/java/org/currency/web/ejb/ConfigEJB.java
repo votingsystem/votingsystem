@@ -296,6 +296,8 @@ public class ConfigEJB implements Config, ConfigCurrencyServer, Serializable {
     @Override
     public boolean isAdmin(User user) throws ValidationException {
         try {
+            if(user == null || user.getX509Certificate() == null)
+                return false;
             String certHash = CertificateUtils.getHash(user.getX509Certificate());
             return adminMap.containsKey(certHash);
         } catch (Exception ex) {

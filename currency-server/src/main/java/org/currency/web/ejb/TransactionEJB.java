@@ -110,7 +110,7 @@ public class TransactionEJB {
                     break;
                 case CURRENCY_REQUEST:
                     updateUserAccountFrom(transaction);
-                    balancesBean.updateSystemBalance(transaction.getAmount(), transaction.getCurrencyCode());
+                    balancesBean.updateSystemBalance(transaction.getAmount().negate(), transaction.getCurrencyCode());
                     break;
                 case CURRENCY_SEND:
                     updateUserAccountTo(transaction);

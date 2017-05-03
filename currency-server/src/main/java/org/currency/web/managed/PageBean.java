@@ -2,7 +2,9 @@ package org.currency.web.managed;
 
 import com.google.zxing.WriterException;
 import org.votingsystem.ejb.Config;
+import org.votingsystem.model.User;
 import org.votingsystem.qr.QRUtils;
+import org.votingsystem.throwable.ValidationException;
 import org.votingsystem.util.Constants;
 
 import javax.ejb.AccessTimeout;
@@ -63,4 +65,16 @@ public class PageBean implements Serializable {
                 QRUtils.UUID_KEY + "=" + req.getSession().getAttribute(Constants.SESSION_UUID) + ";";
         return qrCodeURL;
     }
+
+    public boolean isAdmin() throws ValidationException {
+        HttpServletRequest request = (HttpServletRequest) FacesContext.getCurrentInstance().getExternalContext().getRequest();
+        User user = (User) request.getSession().getAttribute(Constants.USER_KEY);
+        return config.isAdmin(user);
+    }
+
+    public User getSessionUser() {
+        HttpServletRequest request = (HttpServletRequest) FacesContext.getCurrentInstance().getExternalContext().getRequest();
+        return (User) request.getSession().getAttribute(Constants.USER_KEY);
+    }
+
 }

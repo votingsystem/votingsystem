@@ -1,6 +1,8 @@
 package org.currency.test;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import org.iban4j.CountryCode;
+import org.iban4j.Iban;
 import org.votingsystem.crypto.PEMUtils;
 import org.votingsystem.testlib.BaseTest;
 import org.votingsystem.util.FileUtils;
@@ -24,7 +26,9 @@ public class Test extends BaseTest {
     }
 
     public void test() throws Exception {
-
+        Iban iban = new Iban.Builder()
+                .countryCode(CountryCode.AT).bankCode("88888").accountNumber("00000010101").build();
+        log.info(iban.toString());
     }
 
 

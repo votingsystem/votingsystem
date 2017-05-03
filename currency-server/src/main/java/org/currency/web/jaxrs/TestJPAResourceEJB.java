@@ -1,6 +1,7 @@
 package org.currency.web.jaxrs;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.google.common.collect.ImmutableMap;
 import org.currency.web.ejb.ConfigCurrencyServer;
 import org.hibernate.Criteria;
 import org.hibernate.Session;
@@ -8,16 +9,16 @@ import org.hibernate.criterion.Restrictions;
 import org.votingsystem.model.User;
 import org.votingsystem.model.currency.Bank;
 import org.votingsystem.model.currency.CurrencyAccount;
-import org.votingsystem.model.currency.Tag;
 import org.votingsystem.model.currency.Transaction;
 import org.votingsystem.throwable.ValidationException;
+import org.votingsystem.util.CurrencyCode;
 import org.votingsystem.util.CurrencyOperation;
 import org.votingsystem.util.FileUtils;
+import org.votingsystem.util.JSON;
 
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
-import javax.persistence.Query;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.transaction.Transactional;
@@ -27,8 +28,11 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
+import java.math.BigDecimal;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Logger;
 
 /**
@@ -46,13 +50,73 @@ public class TestJPAResourceEJB {
     @GET @Path("/sum-balance")
     public Response sumBalance(@Context HttpServletRequest req, @Context HttpServletResponse resp)
             throws JsonProcessingException, ValidationException {
-        Query query = em.createQuery("select SUM(c.balance), c.currencyCode from CurrencyAccount c where c.state =:state " +
-                "group by c.currencyCode").setParameter("state", CurrencyAccount.State.ACTIVE);
-         List<Object[]> resultList = query.getResultList();
-        for(Object[] result : resultList) {
-            log.info("" + result[0] + ((Tag)result[1]).getName() + result[2]);
+        Map<String, Map> resultMap = new HashMap<>();
+        List<Object[]> resultList = em.createQuery("select SUM(c.balance), c.currencyCode from CurrencyAccount c " +
+                "where c.state =:state and c.user=:user group by c.currencyCode")
+                .setParameter("user", config.getSystemUser())
+                .setParameter("state", CurrencyAccount.State.ACTIVE).getResultList();
+        Map<CurrencyCode, BigDecimal> totalBalanceMap = new HashMap<>();
+        for(Object[] listItem : resultList) {
+            totalBalanceMap.put((CurrencyCode)listItem[1], (BigDecimal) listItem[0]);
         }
-        return Response.ok().entity("OK").build();
+        resultMap.put("totalBalanceMap", totalBalanceMap);
+
+        resultList = em.createQuery("select SUM(t.amount), t.currencyCode from Transaction t " +
+                "where t.state =:state and t.type=:transactionType group by t.currencyCode")
+                .setParameter("transactionType", CurrencyOperation.TRANSACTION_FROM_BANK)
+                .setParameter("state", Transaction.State.OK).getResultList();
+        Map<CurrencyCode, BigDecimal> transactionsFromBanksMap = new HashMap<>();
+        for(Object[] listItem : resultList) {
+            transactionsFromBanksMap.put((CurrencyCode)listItem[1], (BigDecimal) listItem[0]);
+        }
+        resultMap.put("transactionsFromBanksMap", transactionsFromBanksMap);
+
+        resultList = em.createQuery("select SUM(t.amount), t.currencyCode from Transaction t " +
+                "where t.state =:state and t.type=:transactionType group by t.currencyCode")
+                .setParameter("transactionType", CurrencyOperation.CURRENCY_REQUEST)
+                .setParameter("state", Transaction.State.OK).getResultList();
+        Map<CurrencyCode, BigDecimal> currencyRequestMap = new HashMap<>();
+        for(Object[] listItem : resultList) {
+            currencyRequestMap.put((CurrencyCode)listItem[1], (BigDecimal) listItem[0]);
+        }
+        resultMap.put("currencyRequestMap", currencyRequestMap);
+
+        resultList = em.createQuery("select SUM(t.amount), t.currencyCode from Transaction t " +
+                "where t.state =:state and t.type in :transactionTypeList group by t.currencyCode")
+                .setParameter("transactionTypeList", Arrays.asList(CurrencyOperation.CURRENCY_CHANGE, CurrencyOperation.CURRENCY_SEND))
+                .setParameter("state", Transaction.State.OK).getResultList();
+        Map<CurrencyCode, BigDecimal> currencyExpendedMap = new HashMap<>();
+        for(Object[] listItem : resultList) {
+            currencyExpendedMap.put((CurrencyCode)listItem[1], (BigDecimal) listItem[0]);
+        }
+        resultMap.put("currencyExpendedMap", currencyExpendedMap);
+
+        return Response.ok().entity(JSON.getMapper().writeValueAsBytes(resultMap)).build();
+    }
+
+    @GET @Path("/bank-trans")
+    public Response sumBankTrans(@Context HttpServletRequest req, @Context HttpServletResponse resp)
+            throws JsonProcessingException, ValidationException {
+        List<Object[]> resultList = em.createQuery(
+                "select SUM(t.amount), t.currencyCode, t.fromUser.name, COUNT(t) from Transaction t " +
+                "where t.state =:state and t.type=:type group by t.currencyCode, t.fromUser.name")
+                .setParameter("type", CurrencyOperation.TRANSACTION_FROM_BANK)
+                .setParameter("state", Transaction.State.OK).getResultList();
+        Map<String, Map<CurrencyCode, Map>> totalBalanceMap = new HashMap<>();
+        for(Object[] listItem : resultList) {
+            String bankName = (String) listItem[2];
+            CurrencyCode currencyCode = (CurrencyCode)listItem[1];
+            BigDecimal amount = (BigDecimal) listItem[0];
+            Long numTransactions = (Long) listItem[3];
+            if(totalBalanceMap.containsKey(bankName)) {
+                totalBalanceMap.get(bankName).put(currencyCode, ImmutableMap.of("numTransactions", numTransactions, "amount", amount)) ;
+            } else {
+                Map<CurrencyCode, Map> currencyMap = new HashMap<>();
+                currencyMap.put(currencyCode, ImmutableMap.of("numTransactions", numTransactions, "amount", amount));
+                totalBalanceMap.put(bankName, currencyMap);
+            }
+        }
+        return Response.ok().entity(JSON.getMapper().writeValueAsBytes(totalBalanceMap)).build();
     }
 
     @Transactional
