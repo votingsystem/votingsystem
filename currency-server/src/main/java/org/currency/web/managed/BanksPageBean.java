@@ -19,8 +19,6 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 @Named("banksPage")
-@SessionScoped
-@AccessTimeout(value = 10, unit = TimeUnit.MINUTES)
 public class BanksPageBean implements Serializable {
 
     @PersistenceContext
