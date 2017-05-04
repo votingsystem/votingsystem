@@ -1,4 +1,4 @@
-package org.currency.web.managed;
+package org.currency.web.cdi;
 
 import java.util.Set;
 

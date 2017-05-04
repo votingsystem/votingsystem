@@ -1,4 +1,4 @@
-package org.currency.web.managed;
+package org.currency.web.cdi;
 
 import com.google.zxing.WriterException;
 import org.votingsystem.ejb.Config;

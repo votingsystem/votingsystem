@@ -1,6 +1,6 @@
 package org.currency.web.jaxrs;
 
-import org.currency.web.managed.SocketPushEvent;
+import org.currency.web.cdi.SocketPushEvent;
 import org.currency.web.websocket.SessionManager;
 import org.votingsystem.dto.MessageDto;
 import org.votingsystem.http.MediaType;

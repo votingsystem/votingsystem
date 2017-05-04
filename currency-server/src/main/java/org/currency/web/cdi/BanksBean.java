@@ -1,4 +1,4 @@
-package org.currency.web.managed;
+package org.currency.web.cdi;
 
 import com.google.common.collect.ImmutableMap;
 import org.votingsystem.model.currency.Bank;
@@ -6,8 +6,7 @@ import org.votingsystem.model.currency.Transaction;
 import org.votingsystem.util.CurrencyCode;
 import org.votingsystem.util.CurrencyOperation;
 
-import javax.ejb.AccessTimeout;
-import javax.enterprise.context.SessionScoped;
+import javax.ejb.Stateless;
 import javax.inject.Named;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -16,10 +15,10 @@ import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 
-@Named("banksPage")
-public class BanksPageBean implements Serializable {
+@Named("banksBean")
+@Stateless
+public class BanksBean implements Serializable {
 
     @PersistenceContext
     private EntityManager em;

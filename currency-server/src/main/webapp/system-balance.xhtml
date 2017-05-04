@@ -12,38 +12,16 @@
                     <div class="col-lg-3">
                         <div class="panel panel-default">
                             <div class="panel-heading" style="font-size: 20px;color: #337ab7;">
-                                #{msg.currencyIssuedLbl}
+                                #{msg.systemAccountsLbl}
                             </div>
-                            <div class="panel-body">
-                                <c:forEach items="#{currencyBean.getCurrencyRequestMap()}" var="currencyEntry">
+                            <div class="panel-body" style="font-size: 20px;">
+                                <c:forEach items="#{systemBalanceBean.getSystemAccountsMap()}" var="currencyEntry">
                                     <div class="row" style="padding: 0 0 5px 0;">
-                                        <div class="col-md-1" style=" font-weight: bold;font-style: italic;margin: 0 10px 0 0;">
+                                        <div class="col-md-1" style=" font-weight: bold;font-style: italic;margin: 0 20px 12px 0;">
                                             #{currencyEntry.key}
                                         </div>
                                         <div class="col-md-2" style="width: 300px;">
-                                            <div style="font-weight: bold;">#{currencyEntry.value.amount}</div>
-                                            <div>#{msg.transactionsLbl}: #{currencyEntry.value.numTransactions}</div>
-                                        </div>
-                                    </div>
-                                </c:forEach>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="col-lg-3">
-                        <div class="panel panel-danger">
-                            <div class="panel-heading" style="font-size: 20px;">
-                                #{msg.currencyExpendedLbl}
-                            </div>
-                            <div class="panel-body">
-                                <c:forEach items="#{currencyBean.getCurrencyExpendedMap()}" var="currencyEntry">
-                                    <div class="row" style="padding: 0 0 5px 0;">
-                                        <div class="col-md-1" style=" font-weight: bold;font-style: italic;margin: 0 10px 0 0;">
-                                            #{currencyEntry.key}
-                                        </div>
-                                        <div class="col-md-2" style="width: 300px;">
-                                            <div style="font-weight: bold;">#{currencyEntry.value.amount}</div>
-                                            <div>#{msg.transactionsLbl}: #{currencyEntry.value.numTransactions}</div>
+                                            <div style="font-weight: bold;">#{currencyEntry.value}</div>
                                         </div>
                                     </div>
                                 </c:forEach>
@@ -54,16 +32,17 @@
                     <div class="col-lg-3">
                         <div class="panel panel-green">
                             <div class="panel-heading" style="font-size: 20px;">
-                                #{msg.currencyCirculationLbl}
+                                #{msg.bankInputsLbl}
                             </div>
                             <div class="panel-body">
-                                <c:forEach items="#{currencyBean.getCurrencyActiveMap()}" var="currencyEntry">
+                                <c:forEach items="#{systemBalanceBean.getTransactionsFromBankMap()}" var="currencyEntry">
                                     <div class="row" style="padding: 0 0 5px 0;">
                                         <div class="col-md-1" style=" font-weight: bold;font-style: italic;margin: 0 10px 0 0;">
                                             #{currencyEntry.key}
                                         </div>
                                         <div class="col-md-2" style="width: 300px;">
-                                            <div style="font-weight: bold;">#{currencyEntry.value}</div>
+                                            <div style="font-weight: bold;">#{currencyEntry.value.amount}</div>
+                                            <div>#{msg.transactionsLbl}: #{currencyEntry.value.numTransactions}</div>
                                         </div>
                                     </div>
                                 </c:forEach>
@@ -75,7 +54,7 @@
         </div>
         <script>
             //<![CDATA[
-            vs.setMainPageCaption("#{msg.currencyBalanceLbl}");
+            vs.setMainPageCaption("#{msg.systemBalanceLbl}");
 
             // ]]>
         </script>

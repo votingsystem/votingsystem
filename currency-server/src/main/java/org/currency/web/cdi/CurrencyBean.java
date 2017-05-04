@@ -1,15 +1,12 @@
-package org.currency.web.managed;
+package org.currency.web.cdi;
 
 import com.google.common.collect.ImmutableMap;
-import org.votingsystem.ejb.Config;
 import org.votingsystem.model.currency.Currency;
 import org.votingsystem.model.currency.Transaction;
 import org.votingsystem.util.CurrencyCode;
 import org.votingsystem.util.CurrencyOperation;
 
-import javax.ejb.AccessTimeout;
-import javax.enterprise.context.SessionScoped;
-import javax.inject.Inject;
+import javax.ejb.Stateless;
 import javax.inject.Named;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -19,13 +16,13 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
-@Named("currencyPageBean")
-public class CurrencyPageBean implements Serializable {
+@Named("currencyBean")
+@Stateless
+public class CurrencyBean implements Serializable {
 
-    private static final Logger log = Logger.getLogger(CurrencyPageBean.class.getName());
+    private static final Logger log = Logger.getLogger(CurrencyBean.class.getName());
 
     @PersistenceContext
     private EntityManager em;
