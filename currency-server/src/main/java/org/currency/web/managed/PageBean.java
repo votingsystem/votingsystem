@@ -6,6 +6,7 @@ import org.votingsystem.model.User;
 import org.votingsystem.qr.QRUtils;
 import org.votingsystem.throwable.ValidationException;
 import org.votingsystem.util.Constants;
+import org.votingsystem.util.DateUtils;
 
 import javax.ejb.AccessTimeout;
 import javax.enterprise.context.SessionScoped;
@@ -17,6 +18,7 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.time.ZonedDateTime;
 import java.util.Date;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
@@ -46,6 +48,10 @@ public class PageBean implements Serializable {
     public String formatDate(Date date) {
         DateFormat formatter = new SimpleDateFormat("/yyyy/MM/dd");
         return formatter.format(date);
+    }
+
+    public String getDate() {
+        return DateUtils.getDateStr(ZonedDateTime.now());
     }
 
     public String locale() {

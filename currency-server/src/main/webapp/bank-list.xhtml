@@ -6,22 +6,23 @@
     </ui:define>
     <ui:define name="content">
         <div class="panel-body">
-
-
+            <div style="margin: 0 0 7px 20px;font-size: 0.9em;color: #616161;">#{pageBean.getDate()}</div>
             <div class="row">
                 <c:forEach items="#{banksPage.getSummaryMap()}" var="bankEntry">
-                    <div class="col-lg-4">
+                    <div class="col-lg-3">
                         <div class="panel panel-default">
-                            <div class="panel-heading" style="font-size: 20px;">
+                            <div class="panel-heading" style="font-size: 20px;color: #337ab7;">
                                 #{bankEntry.key}
                             </div>
                             <div class="panel-body">
                                 <c:forEach items="#{bankEntry.value}" var="currencyEntry">
-                                    <div class="row">
-                                        <div class="col-md-1">#{currencyEntry.key}</div>
-                                        <div class="col-md-1">
-                                            <div>#{currencyEntry.value.numTransactions}</div>
-                                            <div>#{currencyEntry.value.amount}</div>
+                                    <div class="row" style="padding: 0 0 5px 0;">
+                                        <div class="col-md-1" style=" font-weight: bold;font-style: italic;margin: 0 10px 0 0;">
+                                            #{currencyEntry.key}
+                                        </div>
+                                        <div class="col-md-2" style="width: 300px;">
+                                            <div style="font-weight: bold;">#{currencyEntry.value.amount}</div>
+                                            <div>#{msg.transactionsLbl}: #{currencyEntry.value.numTransactions}</div>
                                         </div>
                                     </div>
                                 </c:forEach>
@@ -30,10 +31,6 @@
                     </div>
                 </c:forEach>
             </div>
-
-
-
-
 
         </div>
         <script>
