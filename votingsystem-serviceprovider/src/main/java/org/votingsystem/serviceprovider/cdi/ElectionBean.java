@@ -1,4 +1,4 @@
-package org.votingsystem.serviceprovider.managed;
+package org.votingsystem.serviceprovider.cdi;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import org.votingsystem.dto.ResponseDto;

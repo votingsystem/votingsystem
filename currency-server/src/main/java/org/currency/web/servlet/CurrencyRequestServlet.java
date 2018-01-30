@@ -50,6 +50,7 @@ public class CurrencyRequestServlet extends HttpServlet {
             CurrencyRequestDto requestDto = CurrencyRequestDto.validateRequest(request.getRequestCSRSet(),
                     signedDocument, config.getEntityId());
             ResultListDto<String> dto = currencyBean.processCurrencyRequest(requestDto);
+            res.setStatus(dto.getStatusCode());
             res.setContentType(MediaType.JSON);
             res.getOutputStream().write(JSON.getMapper().writeValueAsBytes(dto));
         } catch (Exception ex) {

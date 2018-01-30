@@ -1,4 +1,4 @@
-package org.votingsystem.serviceprovider.managed;
+package org.votingsystem.serviceprovider.cdi;
 
 import org.votingsystem.ejb.Config;
 import org.votingsystem.model.voting.Election;

@@ -20,15 +20,12 @@ import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
-import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.transaction.Transactional;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
-import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.*;
 import java.util.logging.Logger;
@@ -50,23 +47,9 @@ public class CurrencyResourceEJB {
     @Inject private SignatureServiceEJB signatureService;
     @Inject private CurrencyEJB currencyBean;
 
-    @Path("/issuedLog")
-    @GET @Produces(javax.ws.rs.core.MediaType.APPLICATION_JSON)
-    public Object issuedLog(@Context ServletContext context, @Context HttpServletRequest req, @Context HttpServletResponse res)
-            throws IOException, ServletException {
-        //TODO get reference to currency logging file and render file content as JSON
-        return Response.ok().build();
-    }
-
-    @Path("/requestLog")
-    @GET @Produces(javax.ws.rs.core.MediaType.APPLICATION_JSON)
-    public Object processReques(@Context HttpServletRequest req, @Context HttpServletResponse res) throws IOException, ServletException {
-        //TODO get reference to currency logging file and render file content as JSON
-        return Response.ok().build();
-    }
 
 
-    @Path("/revocationHash/state") @GET
+    @Path("/revocation-hash/state") @GET
     public Response state(@Context HttpServletRequest req, @Context HttpServletResponse res, String revocationHash)
             throws Exception {
         List<org.votingsystem.model.currency.Currency> currencyList = em.createQuery(

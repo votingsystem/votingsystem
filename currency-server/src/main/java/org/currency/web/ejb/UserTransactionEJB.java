@@ -1,6 +1,7 @@
 package org.currency.web.ejb;
 
 import org.votingsystem.crypto.SignedDocumentType;
+import org.votingsystem.currency.AccountMovements;
 import org.votingsystem.dto.ResponseDto;
 import org.votingsystem.dto.ResultListDto;
 import org.votingsystem.dto.currency.TransactionDto;
@@ -39,8 +40,11 @@ public class UserTransactionEJB {
 
     public ResultListDto<TransactionDto> processTransactionFromUser(TransactionDto request) throws Exception {
         validateRequest(request);
-        Map<CurrencyAccount, BigDecimal> accountFromMovements = transactionBean.getAccountMovementsForTransaction(
+        AccountMovements accountMovements = transactionBean.getAccountMovementsForTransaction(
                 request.getSigner(), request.getAmount(), request.getCurrencyCode());
+        if(!accountMovements.isTransactionApproved())
+            return new ResultListDto(ResponseDto.SC_CANCELED, accountMovements.getMessage());
+        Map<CurrencyAccount, BigDecimal> accountFromMovements = accountMovements.getAccountFromMovements();
         //Transactions from users doesn't need parent transaction
         SignedDocument signedDocument = request.getSignedDocument();
         Transaction transaction = Transaction.USER(request.getSigner(), request.getReceptor(),

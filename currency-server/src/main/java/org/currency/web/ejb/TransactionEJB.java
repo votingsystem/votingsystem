@@ -1,5 +1,6 @@
 package org.currency.web.ejb;
 
+import org.votingsystem.currency.AccountMovements;
 import org.votingsystem.dto.ResultListDto;
 import org.votingsystem.dto.currency.TransactionDto;
 import org.votingsystem.model.SignedDocument;
@@ -168,8 +169,8 @@ public class TransactionEJB {
     }
 
     @TransactionAttribute(REQUIRES_NEW)
-    public Map<CurrencyAccount, BigDecimal> getAccountMovementsForTransaction(User accountUser,
-                                                      BigDecimal amount, CurrencyCode currencyCode) throws Exception {
+    public AccountMovements getAccountMovementsForTransaction(User accountUser,
+                                                              BigDecimal amount, CurrencyCode currencyCode) throws Exception {
         if(amount.compareTo(BigDecimal.ZERO) < 0) throw new ValidationException(
                 "negativeAmountRequestedErrorMsg: " +  amount.toString());
         List<CurrencyAccount> currencyAccounts = em.createNamedQuery(
@@ -178,14 +179,15 @@ public class TransactionEJB {
                 .setParameter("currencyCode", currencyCode)
                 .setParameter("state", CurrencyAccount.State.ACTIVE).getResultList();
         if(currencyAccounts.isEmpty())
-            throw new ValidationException("User UUID: " + accountUser.getUUID() + " - hasn't account for currency code: " + currencyCode);
+            return new AccountMovements(false,
+                    Messages.currentInstance().get("insufficientBalanceErrorMsg", currencyCode, BigDecimal.ZERO));
         CurrencyAccount currencyAccount = currencyAccounts.iterator().next();
         Map<CurrencyAccount, BigDecimal> result = new HashMap<>();
         if(currencyAccount.getBalance().compareTo(amount) < 0)
-            throw new ValidationException("LOW BALANCE - request: " + amount + " " + currencyCode + " - available: " +
-                    currencyAccount.getBalance() + " " + currencyAccount.getCurrencyCode());
+            return new AccountMovements(false,
+                    Messages.currentInstance().get("insufficientBalanceErrorMsg", currencyCode, currencyAccount.getBalance()));
         result.put(currencyAccount, amount);
-        return result;
+        return new AccountMovements(true, result);
     }
 
     public List<Transaction> getTransactionFromList(User fromUser, Interval timePeriod) {

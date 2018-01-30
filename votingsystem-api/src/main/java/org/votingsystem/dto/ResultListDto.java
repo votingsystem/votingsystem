@@ -36,8 +36,18 @@ public class ResultListDto<T> {
 
     public ResultListDto() { }
 
+    public ResultListDto(Integer statusCode, String message) {
+        this.statusCode = statusCode;
+        this.message = message;
+    }
+
     public ResultListDto(Collection<T> resultList) {
         this(resultList, 0, resultList.size(), Long.valueOf(resultList.size()));
+    }
+
+    public ResultListDto(Integer statusCode, Collection<T> resultList) {
+        this(resultList, 0, resultList.size(), Long.valueOf(resultList.size()));
+        this.statusCode = statusCode;
     }
 
     public ResultListDto(Collection<T> resultList, SystemOperation type) {

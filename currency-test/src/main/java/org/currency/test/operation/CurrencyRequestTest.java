@@ -61,6 +61,7 @@ public class CurrencyRequestTest extends BaseTest {
             requestDto.loadCurrencyCerts(currencyCertsDto.getResultList());
             wallet.addToWallet(Sets.newHashSet(requestDto.getCurrencyMap().values()));
         } else {
+            response = response.getErrorResponse();
             log.log(Level.SEVERE," --- ERROR --- " + response.getMessage());
         }
     }

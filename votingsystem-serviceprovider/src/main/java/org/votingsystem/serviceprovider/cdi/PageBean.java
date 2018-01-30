@@ -1,4 +1,4 @@
-package org.votingsystem.serviceprovider.managed;
+package org.votingsystem.serviceprovider.cdi;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import org.omnifaces.cdi.Push;
@@ -15,7 +15,6 @@ import org.votingsystem.util.Messages;
 import javax.ejb.EJB;
 import javax.enterprise.event.Observes;
 import javax.faces.bean.ApplicationScoped;
-import javax.faces.bean.ManagedBean;
 import javax.faces.context.FacesContext;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -35,7 +34,6 @@ import java.util.logging.Logger;
  * Helper class to hold variables and methods needed by some web pages
  */
 @Named("pageBean")
-@ManagedBean(eager=true)
 @ApplicationScoped
 public class PageBean implements Serializable {
 

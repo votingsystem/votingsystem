@@ -5,8 +5,10 @@ import org.votingsystem.crypto.PEMUtils;
 import org.votingsystem.crypto.SignatureParams;
 import org.votingsystem.crypto.SignedDocumentType;
 import org.votingsystem.crypto.cms.CMSSignedMessage;
+import org.votingsystem.currency.AccountMovements;
 import org.votingsystem.currency.CurrencyChangeTransactionRequest;
 import org.votingsystem.currency.CurrencyTransactionRequest;
+import org.votingsystem.dto.ResponseDto;
 import org.votingsystem.dto.ResultListDto;
 import org.votingsystem.dto.currency.CurrencyBatchDto;
 import org.votingsystem.dto.currency.CurrencyBatchResponseDto;
@@ -166,8 +168,11 @@ public class CurrencyEJB {
     public ResultListDto<String> processCurrencyRequest(CurrencyRequestDto requestDto) throws Exception {
         User fromUser = requestDto.getSignedDocument().getFirstSignature().getSigner();
         //check cash available for user
-        Map<CurrencyAccount, BigDecimal> accountFromMovements = transactionBean.getAccountMovementsForTransaction(
+        AccountMovements accountMovements = transactionBean.getAccountMovementsForTransaction(
                 fromUser, requestDto.getTotalAmount(), requestDto.getCurrencyCode());
+        if(!accountMovements.isTransactionApproved())
+            return new ResultListDto(ResponseDto.SC_PRECONDITION_FAILED, accountMovements.getMessage());
+        Map<CurrencyAccount, BigDecimal> accountFromMovements = accountMovements.getAccountFromMovements();
         Set<String> currencyCertSet = csrBean.signCurrencyRequest(requestDto);
         Transaction userTransaction = Transaction.CURRENCY_REQUEST(Messages.currentInstance().get("currencyRequestLbl"),
                 accountFromMovements, requestDto, fromUser);
