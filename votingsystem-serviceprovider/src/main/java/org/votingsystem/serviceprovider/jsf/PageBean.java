@@ -1,4 +1,4 @@
-package org.votingsystem.serviceprovider.cdi;
+package org.votingsystem.serviceprovider.jsf;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import org.omnifaces.cdi.Push;
@@ -7,14 +7,14 @@ import org.votingsystem.dto.metadata.MetadataDto;
 import org.votingsystem.ejb.Config;
 import org.votingsystem.ejb.TrustedServicesEJB;
 import org.votingsystem.http.SystemEntityType;
-import org.votingsystem.managed.ServiceUpdatedMessage;
+import org.votingsystem.jsf.ServiceUpdatedMessage;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.JSON;
 import org.votingsystem.util.Messages;
 
 import javax.ejb.EJB;
+import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
-import javax.faces.bean.ApplicationScoped;
 import javax.faces.context.FacesContext;
 import javax.inject.Inject;
 import javax.inject.Named;

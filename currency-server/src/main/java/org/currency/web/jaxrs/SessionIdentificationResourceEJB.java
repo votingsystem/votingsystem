@@ -1,6 +1,6 @@
 package org.currency.web.jaxrs;
 
-import org.currency.web.cdi.SocketPushEvent;
+import org.currency.web.jsf.SocketPushEvent;
 import org.currency.web.ejb.DeviceEJB;
 import org.currency.web.http.CurrencyPrincipal;
 import org.currency.web.util.AuthRole;

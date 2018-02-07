@@ -1,4 +1,4 @@
-package org.currency.web.cdi;
+package org.currency.web.jsf;
 
 import org.omnifaces.cdi.Push;
 import org.omnifaces.cdi.PushContext;

@@ -1,4 +1,4 @@
-package org.votingsystem.managed;
+package org.votingsystem.jsf;
 
 import org.votingsystem.dto.ResponseDto;
 

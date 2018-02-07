@@ -1,4 +1,4 @@
-package org.votingsystem.serviceprovider.cdi;
+package org.votingsystem.serviceprovider.jsf;
 
 import com.google.zxing.WriterException;
 import org.votingsystem.dto.voting.ElectionDto;
@@ -14,8 +14,7 @@ import org.votingsystem.xml.XML;
 
 import javax.ejb.AccessTimeout;
 import javax.ejb.EJB;
-import javax.faces.bean.ManagedBean;
-import javax.faces.bean.SessionScoped;
+import javax.enterprise.context.SessionScoped;
 import javax.faces.context.FacesContext;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -40,7 +39,7 @@ import java.util.logging.Logger;
  * Helper class to hold variables and methods needed by some web pages
  */
 @SessionScoped
-@ManagedBean(name="publishElection")
+@Named("publishElection")
 @AccessTimeout(value = 10, unit = TimeUnit.MINUTES)
 public class PublishElectionBean implements Serializable {
 

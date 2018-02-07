@@ -10,11 +10,10 @@ import org.votingsystem.dto.voting.ElectionOptionDto;
 import org.votingsystem.dto.voting.ElectionStatsDto;
 import org.votingsystem.ejb.Config;
 import org.votingsystem.ejb.QRSessionsEJB;
-
 import org.votingsystem.ejb.SignatureServiceEJB;
 import org.votingsystem.http.HttpRequest;
 import org.votingsystem.http.HttpResponse;
-import org.votingsystem.managed.ServiceUpdatedMessage;
+import org.votingsystem.jsf.ServiceUpdatedMessage;
 import org.votingsystem.model.SignedDocument;
 import org.votingsystem.model.User;
 import org.votingsystem.model.voting.Election;

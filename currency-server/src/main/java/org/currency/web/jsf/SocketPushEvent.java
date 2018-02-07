@@ -1,4 +1,4 @@
-package org.currency.web.cdi;
+package org.currency.web.jsf;
 
 import java.util.Set;
 

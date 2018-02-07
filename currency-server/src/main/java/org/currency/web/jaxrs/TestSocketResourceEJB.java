@@ -1,6 +1,6 @@
 package org.currency.web.jaxrs;
 
-import org.currency.web.cdi.SocketPushEvent;
+import org.currency.web.jsf.SocketPushEvent;
 import org.votingsystem.dto.ResponseDto;
 import org.votingsystem.util.CurrencyOperation;
 import org.votingsystem.util.JSON;
