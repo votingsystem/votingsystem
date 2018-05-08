@@ -35,7 +35,8 @@ public class MockDNIe {
         loadKeyStore(keyStore, Constants.PASSW_DEMO.toCharArray(), Constants.USER_CERT_ALIAS);
         //InputStream inputStream = Thread.currentThread().getContextClassLoader().getResource(SIGNER_KEYSTORE).openStream();
         AbstractSignatureTokenConnection signingToken = new JKSSignatureToken(res.openStream(),
-                org.votingsystem.util.Constants.PASSW_DEMO);
+                new KeyStore.PasswordProtection(org.votingsystem.util.Constants.PASSW_DEMO.toCharArray()));
+
         jksSignatureToken = signingToken;
         this.nif = nif;
     }
@@ -74,7 +75,7 @@ public class MockDNIe {
 
     public static JKSSignatureToken getJKSSignatureToken(String nif) throws IOException {
         URL res = Thread.currentThread().getContextClassLoader().getResource("certs/USER_" + nif + ".jks");
-        return new JKSSignatureToken(res.openStream(), Constants.PASSW_DEMO);
+        return new JKSSignatureToken(res.openStream(), new KeyStore.PasswordProtection(Constants.PASSW_DEMO.toCharArray()));
     }
 
     public X509Certificate getX509Certificate() {

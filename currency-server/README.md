@@ -45,8 +45,8 @@ the property **timeStampServerURL** must be set according to that.
 3. Add the datasource in Wildfly through the management interface:
 
         Name: CurrencyServer
-        JNDI Name: java:jboss/datasources/CurrencyServer
-        Connection URL: jdbc:postgresql://localhost:5432/CurrencyServer
+        JNDI Name: java:jboss/datasources/currency-server
+        Connection URL: jdbc:postgresql://localhost:5432/currency-server
         username:userVS
         password:userVS
 

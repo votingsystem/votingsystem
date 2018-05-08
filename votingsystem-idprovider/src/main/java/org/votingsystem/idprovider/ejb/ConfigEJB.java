@@ -1,7 +1,6 @@
 package org.votingsystem.idprovider.ejb;
 
 
-import eu.europa.esig.dss.test.mock.MockServiceInfo;
 import eu.europa.esig.dss.token.AbstractSignatureTokenConnection;
 import eu.europa.esig.dss.token.DSSPrivateKeyEntry;
 import eu.europa.esig.dss.token.JKSSignatureToken;
@@ -10,6 +9,7 @@ import eu.europa.esig.dss.x509.CertificateToken;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.votingsystem.crypto.CertificateUtils;
 import org.votingsystem.crypto.KeyGenerator;
+import org.votingsystem.crypto.MockServiceInfo;
 import org.votingsystem.crypto.PEMUtils;
 import org.votingsystem.dto.metadata.MetadataDto;
 import org.votingsystem.dto.metadata.MetadataUtils;
@@ -20,10 +20,7 @@ import org.votingsystem.http.SystemEntityType;
 import org.votingsystem.model.Certificate;
 import org.votingsystem.model.User;
 import org.votingsystem.throwable.ValidationException;
-import org.votingsystem.util.Constants;
-import org.votingsystem.util.Messages;
-import org.votingsystem.util.OperationType;
-import org.votingsystem.util.StringUtils;
+import org.votingsystem.util.*;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -41,9 +38,11 @@ import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.Security;
 import java.security.cert.CertificateException;
+import java.security.cert.PKIXCertPathValidatorResult;
 import java.security.cert.TrustAnchor;
 import java.security.cert.X509Certificate;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
@@ -139,13 +138,17 @@ public class ConfigEJB implements Config, ConfigIdProvider {
             trustedCertsKeyStore.load(new FileInputStream(applicationDirPath + "/sec/" + trustedCACertskeyStoreFileName),
                     trustedCACertsKeyStorePassword.toCharArray());
             Enumeration<String> aliases = trustedCertsKeyStore.aliases();
+
+            Date currentDateUTC = DateUtils.getUTCDateNow();
             while(aliases.hasMoreElements()) {
                 String certAlias = aliases.nextElement();
                 X509Certificate certificate = (X509Certificate) trustedCertsKeyStore.getCertificate(certAlias);
+                if(certificate.getNotAfter().before(currentDateUTC))
+                    throw new Exception("Certificated expired: " + certificate.getSubjectDN());
                 loadAuthorityCertificate(new CertificateToken(certificate));
             }
             signingToken = new JKSSignatureToken(new FileInputStream(applicationDirPath + "/sec/" + keyStoreFileName),
-                    keyStorePassword);
+                    new KeyStore.PasswordProtection(keyStorePassword.toCharArray()));
             privateKey = signingToken.getKeys().get(0);
             signingCert = privateKey.getCertificate().getCertificate();
 
@@ -181,6 +184,7 @@ public class ConfigEJB implements Config, ConfigIdProvider {
             trustedCertSource = new TrustedListsCertificateSource();
         }
         trustedCertAnchors.add(new TrustAnchor(trustedCertificate.getCertificate(), null));
+        //TODO
         trustedCertSource.addCertificate(trustedCertificate, new MockServiceInfo());
         return caCertificate;
     }

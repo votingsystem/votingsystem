@@ -12,6 +12,7 @@ import org.votingsystem.dto.ResponseDto;
 import org.votingsystem.http.HttpConn;
 import org.votingsystem.http.MediaType;
 
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -44,7 +45,10 @@ public class TSPHttpSource implements TSPSource {
                 byte[] bytesToken = responseDto.getMessageBytes();
                 TimeStampResponse timeStampResponse = new TimeStampResponse(bytesToken);
                 return timeStampResponse.getTimeStampToken();
-            } else throw new Exception(responseDto.getMessage());
+            } else {
+                log.log(Level.SEVERE, "Error fetching Timestamp: " + responseDto.getMessage());
+                throw new DSSException("Error fetching Timestamp");
+            }
         } catch (Exception ex) {
             throw new DSSException(ex);
         }

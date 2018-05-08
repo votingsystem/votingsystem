@@ -2,7 +2,6 @@ package org.votingsystem.ocsp;
 
 import eu.europa.esig.dss.DSSException;
 import eu.europa.esig.dss.client.http.DataLoader;
-import eu.europa.esig.dss.client.http.commons.DSSNotifier;
 import org.votingsystem.dto.ResponseDto;
 import org.votingsystem.http.HttpConn;
 
@@ -11,7 +10,7 @@ import java.util.List;
 /**
  * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-public class DNIeOCSPDataLoader implements DataLoader, DSSNotifier {
+public class DNIeOCSPDataLoader implements DataLoader {
 
     private String contentType;
 
@@ -51,8 +50,4 @@ public class DNIeOCSPDataLoader implements DataLoader, DSSNotifier {
         this.contentType = contentType;
     }
 
-    @Override
-    public void update() {
-
-    }
 }

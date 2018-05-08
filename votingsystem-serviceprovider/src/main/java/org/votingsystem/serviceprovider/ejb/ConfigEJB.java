@@ -1,6 +1,5 @@
 package org.votingsystem.serviceprovider.ejb;
 
-import eu.europa.esig.dss.test.mock.MockServiceInfo;
 import eu.europa.esig.dss.token.AbstractSignatureTokenConnection;
 import eu.europa.esig.dss.token.DSSPrivateKeyEntry;
 import eu.europa.esig.dss.token.JKSSignatureToken;
@@ -8,6 +7,7 @@ import eu.europa.esig.dss.tsl.TrustedListsCertificateSource;
 import eu.europa.esig.dss.x509.CertificateToken;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.votingsystem.crypto.KeyGenerator;
+import org.votingsystem.crypto.MockServiceInfo;
 import org.votingsystem.crypto.PEMUtils;
 import org.votingsystem.dto.metadata.MetadataDto;
 import org.votingsystem.dto.metadata.MetadataUtils;
@@ -144,7 +144,7 @@ public class ConfigEJB implements Config, ConfigServiceProvider, Serializable {
                 loadAuthorityCertificate(new CertificateToken(certificate));
             }
             signingToken = new JKSSignatureToken(new FileInputStream(applicationDirPath + "/sec/" + keyStoreFileName),
-                    keyStorePassword);
+                   new KeyStore.PasswordProtection(keyStorePassword.toCharArray()));
             privateKey = signingToken.getKeys().get(0);
             signingCert = privateKey.getCertificate().getCertificate();
 

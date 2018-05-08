@@ -3,12 +3,11 @@ package org.votingsystem.timestampserver.ejb;
 import eu.europa.esig.dss.token.AbstractSignatureTokenConnection;
 import eu.europa.esig.dss.token.JKSSignatureToken;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.votingsystem.crypto.KeyGenerator;
 import org.votingsystem.dto.metadata.MetadataDto;
 import org.votingsystem.dto.metadata.MetadataUtils;
 import org.votingsystem.dto.metadata.TrustedEntitiesDto;
 import org.votingsystem.http.HttpConn;
-import org.votingsystem.util.*;
-import org.votingsystem.crypto.KeyGenerator;
 import org.votingsystem.http.SystemEntityType;
 import org.votingsystem.service.TimeStampService;
 import org.votingsystem.service.impl.TimeStampServiceImpl;
@@ -19,6 +18,7 @@ import javax.ejb.Startup;
 import javax.inject.Named;
 import java.io.File;
 import java.io.FileInputStream;
+import java.security.KeyStore;
 import java.security.Security;
 import java.security.cert.X509Certificate;
 import java.time.ZonedDateTime;
@@ -78,7 +78,7 @@ public class ConfigEJB {
             timeStampService = new TimeStampServiceImpl(keyStoreBytes, keyStorePassword);
 
             signingToken = new JKSSignatureToken(new FileInputStream(applicationDirPath + "/sec/" + keyStoreFileName),
-                    keyStorePassword);
+                   new KeyStore.PasswordProtection(keyStorePassword.toCharArray()));
             signingCert = signingToken.getKeys().get(0).getCertificate().getCertificate();
             trustedEntities = TrustedEntitiesDto.loadTrustedEntities(applicationDirPath + "/sec/trusted-entities.xml");
         } catch(Exception ex) {

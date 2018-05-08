@@ -31,7 +31,7 @@ public class BaseTest {
             }
             HttpConn.init(HttpConn.HTTPS_POLICY.ALL, null);
 
-            DSSXMLUtils.getSecureTransformerFactory();
+            //DSSXMLUtils.getSecureTransformerFactory();
 
             org.apache.xml.security.Init.init();
             KeyGenerator.INSTANCE.init(Constants.SIG_NAME, Constants.PROVIDER,

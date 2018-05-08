@@ -1,11 +1,11 @@
 package org.votingsystem.jaxrs.provider;
 
-import org.apache.commons.io.IOUtils;
 import org.votingsystem.crypto.cms.CMSSignedMessage;
 import org.votingsystem.ejb.CmsEJB;
 import org.votingsystem.http.MediaType;
 import org.votingsystem.model.CMSDocument;
 import org.votingsystem.throwable.ValidationException;
+import org.votingsystem.util.IOUtils;
 
 import javax.inject.Inject;
 import javax.ws.rs.Consumes;

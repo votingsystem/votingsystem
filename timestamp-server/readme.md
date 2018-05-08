@@ -23,7 +23,7 @@ To enable application filters change what follows to the standalone / domain  se
 1. Make sure you have  Wildfly server started.
 2. Make sure theres configured a _datasource_ with the name:
 
-    _java:jboss/datasources/timestamp_server_
+    _java:jboss/datasources/timestamp-server_
         
 3. Use this command to build and deploy the archive:
 

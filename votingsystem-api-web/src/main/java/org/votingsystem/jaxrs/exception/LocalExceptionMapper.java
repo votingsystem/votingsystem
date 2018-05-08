@@ -61,6 +61,9 @@ public class LocalExceptionMapper implements ExceptionMapper<Exception> {
                 case vs_0500:
                     message = Messages.currentInstance().get("systemErrorMsg");
                     break;
+                case vs_0440:
+                    message = Messages.currentInstance().get("signErrorMsg") + " - " + exception.getMessage();
+                    break;
                 case vs_0405:
                 case vs_0400:
                     message = exception.getMessage();

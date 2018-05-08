@@ -1,7 +1,6 @@
 package org.votingsystem.model;
 
 import eu.europa.esig.dss.DSSDocument;
-import org.apache.commons.io.output.ByteArrayOutputStream;
 import org.votingsystem.crypto.SignedDocumentType;
 import org.votingsystem.dto.metadata.MetaInfDto;
 import org.votingsystem.model.converter.LocalDateTimeAttributeConverter;
@@ -10,6 +9,7 @@ import org.votingsystem.util.Constants;
 import org.votingsystem.xml.XML;
 
 import javax.persistence.*;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.Serializable;
 import java.security.cert.X509Certificate;

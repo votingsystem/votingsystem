@@ -1,6 +1,5 @@
 package org.votingsystem.test.android;
 
-import org.apache.commons.collections.map.HashedMap;
 import org.votingsystem.crypto.CertificationRequest;
 import org.votingsystem.crypto.KeyStoreUtils;
 import org.votingsystem.crypto.MockDNIe;
@@ -30,6 +29,7 @@ import org.votingsystem.xml.XML;
 import java.io.File;
 import java.security.KeyStore;
 import java.security.cert.Certificate;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Logger;
 
@@ -93,7 +93,7 @@ public class VoteTest extends BaseTest {
                 XAdESUtils.XML_MIME_TYPE, SignatureAlgorithm.RSA_SHA_256.getName(), new MockDNIe("08888888D"),
                 org.votingsystem.test.Constants.TIMESTAMP_SERVICE_URL).build();
 
-        Map<String, byte[]> fileMap = new HashedMap();
+        Map<String, byte[]> fileMap = new HashMap();
         fileMap.put(CSR_FILE_NAME, voteRequest.getCertificationRequest().getCsrPEM());
         fileMap.put(ANON_CERTIFICATE_REQUEST_FILE_NAME, signatureBytes);
 

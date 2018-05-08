@@ -3,9 +3,9 @@ package org.votingsystem.http;
 import com.fasterxml.jackson.core.type.TypeReference;
 import eu.europa.esig.dss.DSSDocument;
 import eu.europa.esig.dss.InMemoryDocument;
-import org.apache.commons.io.IOUtils;
 import org.votingsystem.throwable.ValidationException;
 import org.votingsystem.util.Constants;
+import org.votingsystem.util.IOUtils;
 import org.votingsystem.xml.XML;
 
 import javax.servlet.http.Part;

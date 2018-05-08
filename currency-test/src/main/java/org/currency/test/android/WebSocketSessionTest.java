@@ -6,7 +6,7 @@ import okio.ByteString;
 import org.votingsystem.dto.MessageDto;
 import org.votingsystem.dto.OperationTypeDto;
 import org.votingsystem.testlib.BaseTest;
-import org.votingsystem.testlib.util.IOUtils;
+import org.votingsystem.util.IOUtils;
 import org.votingsystem.util.CurrencyOperation;
 import org.votingsystem.util.JSON;
 

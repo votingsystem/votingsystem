@@ -18,6 +18,7 @@ import org.votingsystem.util.OperationType;
 import org.votingsystem.xades.XAdESSignature;
 import org.votingsystem.xml.XML;
 
+import java.security.KeyStore;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -51,10 +52,10 @@ public class MultipleSignatureGeneratorTest extends BaseTest {
     public void signDocument() throws Exception {
         AbstractSignatureTokenConnection signingToken1 = new JKSSignatureToken(
                 Thread.currentThread().getContextClassLoader().getResource(SIGNER1_KEYSTORE).openStream(),
-                Constants.PASSW_DEMO);
+                new KeyStore.PasswordProtection(Constants.PASSW_DEMO.toCharArray()));
         AbstractSignatureTokenConnection signingToken2 = new JKSSignatureToken(
                 Thread.currentThread().getContextClassLoader().getResource(SIGNER2_KEYSTORE).openStream(),
-                Constants.PASSW_DEMO);
+                new KeyStore.PasswordProtection(Constants.PASSW_DEMO.toCharArray()));
 
         MetadataDto metadataDto = new MetadataDto();
         metadataDto.setEntity(new SystemEntityDto("SystemEntityId", SystemEntityType.VOTING_SERVICE_PROVIDER));

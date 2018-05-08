@@ -21,6 +21,7 @@ import org.votingsystem.xades.XAdESSignature;
 import org.votingsystem.xml.XML;
 
 import java.io.InputStream;
+import java.security.KeyStore;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -59,7 +60,7 @@ public class SignatureGeneratorTest extends BaseTest {
         log.info("xmlToSign: " + new String(xmlToSign));
         InputStream inputStream = Thread.currentThread().getContextClassLoader().getResource(SIGNER_KEYSTORE).openStream();
         AbstractSignatureTokenConnection signingToken = new JKSSignatureToken(inputStream,
-                org.votingsystem.util.Constants.PASSW_DEMO);
+                new KeyStore.PasswordProtection(org.votingsystem.util.Constants.PASSW_DEMO.toCharArray()));
         byte[] signedDocumentBytes = XAdESSignature.sign(xmlToSign, signingToken,
                 new TSPHttpSource(Constants.TIMESTAMP_SERVICE_URL));
         log.info("signatureBytes: " + new String(signedDocumentBytes));

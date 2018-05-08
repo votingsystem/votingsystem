@@ -9,6 +9,8 @@ import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
 import java.util.Date;
 
+import static java.text.MessageFormat.format;
+
 /**
 * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
 */
@@ -27,11 +29,12 @@ public class KeyStoreUtils {
     }
 
     public static KeyStore generateRootKeyStore(Date dateBegin, Date dateFinish, char[] password,
-                                                String rootAlias, String strSubjectDN) throws Exception {
+                                                String rootAlias, String givenName) throws Exception {
         KeyStore store = KeyStore.getInstance("JKS");
         store.load(null, null);
         KeyPair rootPair = KeyGenerator.INSTANCE.genKeyPair();
-        X509Certificate rootCert = CertificateUtils.generateV3RootCert(rootPair, dateBegin, dateFinish, strSubjectDN);
+        String userDN = format("GIVENNAME={0}", givenName);
+        X509Certificate rootCert = CertificateUtils.generateV3RootCert(rootPair, dateBegin, dateFinish, userDN);
         X500PrivateCredential rootCredential = new X500PrivateCredential(rootCert, rootPair.getPrivate(), rootAlias);
         store.setKeyEntry(rootCredential.getAlias(), rootCredential.getPrivateKey(), password,
                 new Certificate[] {rootCredential.getCertificate()});

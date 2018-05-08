@@ -106,7 +106,7 @@ public class CertIssuerEJB {
     @TransactionAttribute(REQUIRES_NEW)
     public Certificate signUserCert(User user, byte userCSR[]) throws Exception {
         LocalDateTime now = LocalDateTime.now();
-        LocalDateTime validTo = now.plusDays(365); //one year
+        LocalDateTime validTo = now.plusYears(1); //one year
         PKCS10CertificationRequest csr = PEMUtils.fromPEMToPKCS10CertificationRequest(userCSR);
         Certificate issuedCert = signCSR(user, csr, null, now, validTo,
                 Certificate.Type.USER, null);
@@ -126,7 +126,7 @@ public class CertIssuerEJB {
         log.info("nif: " + nif + " - givenname: " + givenname + " - surname: " + surname);
         LocalDateTime validFrom = LocalDateTime.now();
         Date validFromDate = DateUtils.getUTCDate(validFrom);
-        LocalDateTime validTo = validFrom.plusDays(365);
+        LocalDateTime validTo = validFrom.plusYears(1);
         Date validToDate = DateUtils.getUTCDate(validTo);
         X500PrivateCredential rootCAPrivateCredential = new X500PrivateCredential(certIssuerSigningCert,
                 certIssuerPrivateKey, Constants.ROOT_CERT_ALIAS);
@@ -148,12 +148,12 @@ public class CertIssuerEJB {
         log.info("givenName: " + givenName);
         LocalDateTime validFrom = LocalDateTime.now();
         Date validFromDate = DateUtils.getUTCDate(validFrom);
-        LocalDateTime validTo = validFrom.plusDays(365);
+        LocalDateTime validTo = validFrom.plusYears(1);
         Date validToDate = DateUtils.getUTCDate(validTo);
         X500PrivateCredential rootCAPrivateCredential = new X500PrivateCredential(certIssuerSigningCert,
                 certIssuerPrivateKey, Constants.ROOT_CERT_ALIAS);
         String userDN = format("GIVENNAME={0}", givenName);
-        KeyStore keyStore = KeyStoreUtils.generateUserKeyStore(validFromDate, validToDate, password, keyAlias,
+        KeyStore keyStore = KeyStoreUtils.generateTimeStampServerKeyStore(validFromDate, validToDate, password, keyAlias,
                 rootCAPrivateCredential, userDN, config.getOcspServerURL());
         X509Certificate issuedCert = (X509Certificate) keyStore.getCertificate(Constants.USER_CERT_ALIAS);
         signerEJB.checkSigner(issuedCert, User.Type.TIMESTAMP_SERVER, null);
@@ -377,7 +377,7 @@ public class CertIssuerEJB {
         PKCS10CertificationRequest browserCSR = PEMUtils.fromPEMToPKCS10CertificationRequest(csrRequest.getBrowserCsr().getBytes());
         PKCS10CertificationRequest mobileCSR = PEMUtils.fromPEMToPKCS10CertificationRequest(csrRequest.getMobileCsr().getBytes());
         ZonedDateTime dateBegin = ZonedDateTime.now();
-        ZonedDateTime dateFinish = dateBegin.plus(1, ChronoUnit.DAYS).toLocalDate().atStartOfDay(ZoneId.of("UTC"))
+        ZonedDateTime dateFinish = dateBegin.plusDays(1).toLocalDate().atStartOfDay(ZoneId.of("UTC"))
                 .withZoneSameInstant(ZoneId.systemDefault());
         X509Certificate browserCert = CertificateUtils.signCSR(browserCSR, "browser-certificate", certIssuerPrivateKey,
                 certIssuerSigningCert, dateBegin.toLocalDateTime(), dateFinish.toLocalDateTime(),

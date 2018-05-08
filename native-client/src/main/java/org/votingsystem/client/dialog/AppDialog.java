@@ -22,13 +22,16 @@ import java.io.IOException;
 public class AppDialog {
 
     private Stage stage;
-    private DecoratedPane decoratedPane;
+    //private DecoratedPane decoratedPane;
+
+    private Pane mainPane;
 
     public AppDialog(Stage stage) throws IOException {
-        stage.initStyle(StageStyle.TRANSPARENT);
+        /*stage.initStyle(StageStyle.TRANSPARENT);
         stage.setResizable(false);
         stage.getIcons().add(Utils.getIconFromResources(Utils.APPLICATION_ICON));
-        stage.setAlwaysOnTop(true);
+        stage.setAlwaysOnTop(true);*/
+        stage.getIcons().add(Utils.getIconFromResources(Utils.APPLICATION_ICON));
         this.stage = stage;
     }
 
@@ -45,14 +48,17 @@ public class AppDialog {
         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource(fxmlFilePath));
         fxmlLoader.setController(this);
         stage = new Stage(stageStyle);
-        decoratedPane = new DecoratedPane(null, null, fxmlLoader.load(), stage);
+        //decoratedPane = new DecoratedPane(null, null, fxmlLoader.load(), stage);
         stage.initModality(Modality.APPLICATION_MODAL);
         stage.initOwner(MainApp.instance().getScene().getWindow());
-        stage.setScene(new Scene(decoratedPane));
+        //stage.setScene(new Scene(decoratedPane));
+
+        mainPane = fxmlLoader.load();
+        stage.setScene(new Scene(mainPane));
         stage.getIcons().add(Utils.getIconFromResources(Utils.APPLICATION_ICON));
         stage.centerOnScreen();
         stage.setTitle(Messages.currentInstance().get("mainDialogCaption"));
-        decoratedPane.getScene().setFill(Color.TRANSPARENT);
+        //decoratedPane.getScene().setFill(Color.TRANSPARENT);
         Utils.addMouseDragSupport(stage);
     }
 
@@ -66,22 +72,27 @@ public class AppDialog {
     }
 
     public void setPane(Pane pane) {
-        decoratedPane = new DecoratedPane(null, null, pane, stage);
-        stage.setScene(new Scene(decoratedPane));
-        decoratedPane.getScene().setFill(Color.TRANSPARENT);
+        //decoratedPane = new DecoratedPane(null, null, pane, stage);
+        stage.setScene(new Scene(pane));
+        //decoratedPane.getScene().setFill(Color.TRANSPARENT);
         Utils.addMouseDragSupport(stage);
     }
 
     public AppDialog setCaption(String caption) {
-        if(decoratedPane != null) decoratedPane.setCaption(caption);
-        else stage.setTitle(caption);
+        //if(decoratedPane != null) decoratedPane.setCaption(caption);
+        //else stage.setTitle(caption);
+
+
+        stage.setTitle(caption);
         return this;
     }
 
     public void setCaption(String caption, boolean closeButtonVisible) {
-        if(decoratedPane != null) decoratedPane.setCaption(caption);
-        else stage.setTitle(caption);
-        decoratedPane.setCloseButtonVisible(closeButtonVisible);
+        //if(decoratedPane != null) decoratedPane.setCaption(caption);
+        //else stage.setTitle(caption);
+        //decoratedPane.setCloseButtonVisible(closeButtonVisible);
+
+        stage.setTitle(caption);
     }
 
     public AppDialog(Pane pane) {
@@ -90,15 +101,20 @@ public class AppDialog {
 
     public AppDialog(Pane pane, Window parentWindow) {
         stage = new Stage(StageStyle.TRANSPARENT);
-        decoratedPane = new DecoratedPane(null, null, pane, stage);
-        stage.setScene(new Scene(decoratedPane));
+        //decoratedPane = new DecoratedPane(null, null, pane, stage);
+        //stage.setScene(new Scene(decoratedPane));
+
+
+        stage.setScene(new Scene(pane));
         stage.initModality(Modality.APPLICATION_MODAL);
         stage.setTitle(Messages.currentInstance().get("mainDialogCaption"));
         if(parentWindow == null) stage.initOwner(MainApp.instance().getScene().getWindow());
         else stage.initOwner(parentWindow);
         stage.getIcons().add(Utils.getIconFromResources(Utils.APPLICATION_ICON));
         stage.centerOnScreen();
-        decoratedPane.getScene().setFill(Color.TRANSPARENT);
+        //decoratedPane.getScene().setFill(Color.TRANSPARENT);
+
+        pane.getScene().setFill(Color.TRANSPARENT);
         stage.setAlwaysOnTop(true);
         Utils.addMouseDragSupport(stage);
     }
@@ -115,8 +131,10 @@ public class AppDialog {
     }
 
     public Pane getContentPane() {
-        if(decoratedPane == null) return null;
-        return decoratedPane.getContentPane();
+        //if(decoratedPane == null) return null;
+        //return decoratedPane.getContentPane();
+
+        return mainPane;
     }
 
     public Stage getStage() {
@@ -124,7 +142,9 @@ public class AppDialog {
     }
 
     public void addMenuButton(MenuButton menuButton) {
-        Platform.runLater(() -> decoratedPane.addMenuButton(menuButton));
+        //Platform.runLater(() -> decoratedPane.addMenuButton(menuButton));
+
+
     }
 
     public void show() {

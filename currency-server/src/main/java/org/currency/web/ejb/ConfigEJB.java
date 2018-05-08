@@ -1,6 +1,5 @@
 package org.currency.web.ejb;
 
-import eu.europa.esig.dss.test.mock.MockServiceInfo;
 import eu.europa.esig.dss.token.AbstractSignatureTokenConnection;
 import eu.europa.esig.dss.token.DSSPrivateKeyEntry;
 import eu.europa.esig.dss.token.JKSSignatureToken;
@@ -16,6 +15,7 @@ import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.iban4j.*;
 import org.votingsystem.crypto.CertificateUtils;
 import org.votingsystem.crypto.KeyGenerator;
+import org.votingsystem.crypto.MockServiceInfo;
 import org.votingsystem.crypto.PEMUtils;
 import org.votingsystem.dto.metadata.MetadataDto;
 import org.votingsystem.dto.metadata.MetadataUtils;
@@ -170,7 +170,7 @@ public class ConfigEJB implements Config, ConfigCurrencyServer, Serializable {
                 loadAuthorityCertificate(new CertificateToken(certificate));
             }
             signingToken = new JKSSignatureToken(new FileInputStream(applicationDirPath + "/sec/" + keyStoreFileName),
-                    keyStorePassword);
+                    new KeyStore.PasswordProtection(keyStorePassword.toCharArray()));
 
             dssPrivateKey = signingToken.getKeys().get(0);
             signingCert = dssPrivateKey.getCertificate().getCertificate();

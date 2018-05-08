@@ -81,7 +81,7 @@ public class FileUtils {
         return outputFile;
     }
 
-    public static File copyBytesToFile(byte[] bytes, File outputFile) throws Exception {
+    public static File copyBytesToFile(byte[] bytes, File outputFile) throws IOException {
         InputStream inputStream = new ByteArrayInputStream(bytes);
         OutputStream outputStream = new FileOutputStream(outputFile);
         byte[] buf =new byte[BUFFER_SIZE];

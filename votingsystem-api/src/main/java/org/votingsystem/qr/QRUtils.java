@@ -7,7 +7,7 @@ import com.google.zxing.client.j2se.MatrixToImageWriter;
 import com.google.zxing.common.BitMatrix;
 import com.google.zxing.qrcode.QRCodeWriter;
 import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel;
-import org.apache.commons.io.IOUtils;
+import org.votingsystem.util.IOUtils;
 import org.votingsystem.util.OperationType;
 
 import javax.servlet.ServletRequest;

@@ -1,7 +1,6 @@
 package org.currency.web.jaxrs;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import org.apache.commons.io.IOUtils;
 import org.currency.web.ejb.*;
 import org.hibernate.Criteria;
 import org.hibernate.Session;
@@ -158,7 +157,7 @@ public class TransactionResourceEJB {
             File zipFile = new File (tempDir, "transaction_" + desc + "_" + transactionList.size() +  ".zip");
             for(Transaction transaction :  transactionList) {
                 File cmsFile = new File(format("{0}/transaction_{1}.p7s", tempDir.getAbsolutePath(), transaction.getId()));
-                IOUtils.write(transaction.getSignedDocument().getBody(), new FileOutputStream(cmsFile));
+                FileUtils.copyStringToFile(transaction.getSignedDocument().getBody(), cmsFile);
             }
             new ZipUtils(tempDir).zipIt(zipFile);
             resp.sendRedirect(config.getStaticResourcesURL() + tempPath + File.separator + zipFile.getName());

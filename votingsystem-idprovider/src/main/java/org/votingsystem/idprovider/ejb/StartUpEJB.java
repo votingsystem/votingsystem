@@ -30,12 +30,8 @@ public class StartUpEJB {
 
     private static final Logger log = Logger.getLogger(StartUpEJB.class.getName());
 
-    @PersistenceContext
-    private EntityManager em;
+
     @EJB private TrustedServicesEJB trustedServices;
-    @EJB private Config config;
-    @EJB private CertIssuerEJB certIssuer;
-    @EJB private SignerInfoService signerInfoService;
 
     @PostConstruct
     public void initialize() {
@@ -44,34 +40,7 @@ public class StartUpEJB {
         } catch (Exception ex) {
             log.log(Level.SEVERE, ex.getMessage(), ex);
         }
-        try {
-            loadPreinstalledIssuedCerts();
-        } catch (Exception ex) {
-            log.log(Level.SEVERE, ex.getMessage(), ex);
-        }
     }
 
-    /**
-     * Load already issued user certificates. This method is mainly for development.
-     */
-    private void loadPreinstalledIssuedCerts() throws Exception {
-        File preinstalledIssuedCerts = new File(config.getApplicationDirPath() + "/sec/preinstalled-issued-certs.pem");
-        Collection<X509Certificate> preInstalledCerts = PEMUtils.fromPEMToX509CertCollection(
-                FileUtils.getBytesFromFile(preinstalledIssuedCerts));
-        log.info("num. certificates: " + preInstalledCerts.size());
-        RootCertOCSPInfo rootCertOCSPInfo = certIssuer.getRootCertOCSPInfo();
-        for(X509Certificate certificate : preInstalledCerts) {
-            Certificate caCertificate = signerInfoService.verifyCertificate(certificate);
-            if(!rootCertOCSPInfo.getCertificate().getUUID().equals(caCertificate.getUUID()))
-                throw new ValidationException(MessageFormat.format("Error with authority certificate of ''{0}''",
-                        certificate.getSubjectDN()));
-            List<Certificate> certificates = em.createQuery("SELECT c FROM Certificate c WHERE c.UUID=:UUID ")
-                    .setParameter("UUID", CertificateUtils.getHash(certificate)).getResultList();
-            if(certificates.isEmpty()) {
-                Certificate updatedCert = Certificate.ISSUED_USER_CERT(null, certificate, rootCertOCSPInfo.getCertificate());
-                em.persist(updatedCert);
-            }
-        }
-    }
 
 }

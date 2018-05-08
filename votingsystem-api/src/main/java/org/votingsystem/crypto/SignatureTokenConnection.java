@@ -7,10 +7,14 @@ import eu.europa.esig.dss.token.KSPrivateKeyEntry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.security.GeneralSecurityException;
+import java.security.KeyStore;
 import java.security.KeyStore.PrivateKeyEntry;
 import java.security.PrivateKey;
 import java.security.cert.Certificate;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Enumeration;
 import java.util.List;
 
 /**
@@ -20,6 +24,7 @@ import java.util.List;
 public class SignatureTokenConnection extends AbstractSignatureTokenConnection {
 
 	private static final Logger logger = LoggerFactory.getLogger(SignatureTokenConnection.class);
+
 
 	private Certificate[] chain;
 	protected PrivateKey privateKey;
@@ -44,6 +49,6 @@ public class SignatureTokenConnection extends AbstractSignatureTokenConnection {
 	 */
 	@Override
 	public List<DSSPrivateKeyEntry> getKeys() throws DSSException {
-		return Arrays.asList(new KSPrivateKeyEntry(new PrivateKeyEntry(privateKey, chain)));
+		return Arrays.asList(new KSPrivateKeyEntry("PrivateKey", new PrivateKeyEntry(privateKey, chain)));
 	}
 }

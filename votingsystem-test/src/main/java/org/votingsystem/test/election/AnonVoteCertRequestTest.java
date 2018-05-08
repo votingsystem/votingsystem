@@ -1,6 +1,5 @@
 package org.votingsystem.test.election;
 
-import org.apache.commons.collections.map.HashedMap;
 import org.votingsystem.dto.QRMessageDto;
 import org.votingsystem.dto.QRResponseDto;
 import org.votingsystem.dto.ResponseDto;
@@ -9,7 +8,7 @@ import org.votingsystem.testlib.BaseTest;
 import org.votingsystem.util.Constants;
 import org.votingsystem.util.JSON;
 import org.votingsystem.util.OperationType;
-
+import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Logger;
 
@@ -48,7 +47,7 @@ public class AnonVoteCertRequestTest extends BaseTest {
         }
         QRResponseDto qrResponseDto = JSON.getMapper().readValue(responseDto.getMessageBytes(), QRResponseDto.class);
 
-        Map<String, byte[]> fileMap = new HashedMap();
+        Map<String, byte[]> fileMap = new HashMap();
         fileMap.put("test1", "test1Value".getBytes());
         fileMap.put("test2", "test2Value".getBytes());
 

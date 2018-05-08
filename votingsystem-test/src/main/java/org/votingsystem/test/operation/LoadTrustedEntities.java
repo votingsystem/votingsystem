@@ -15,6 +15,7 @@ import org.votingsystem.util.OperationType;
 import org.votingsystem.xades.XAdESSignature;
 import org.votingsystem.xml.XML;
 
+import java.security.KeyStore;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
@@ -48,7 +49,7 @@ public class LoadTrustedEntities extends BaseTest {
         log.info("xmlToSign: " + new String(xmlToSign));
         AbstractSignatureTokenConnection signingToken = new JKSSignatureToken(
                 Thread.currentThread().getContextClassLoader().getResource(ADMIN_KEYSTORE).openStream(),
-                ADMIN_KEYSTORE_PASSWORD);
+                new KeyStore.PasswordProtection(ADMIN_KEYSTORE_PASSWORD.toCharArray()));
         byte[] signedDocumentBytes =  XAdESSignature.sign(xmlToSign, signingToken,
                 new TSPHttpSource(Constants.TIMESTAMP_SERVICE_URL));
         List<NameValuePair> urlParameters = new ArrayList<>();

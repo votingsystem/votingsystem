@@ -1,6 +1,8 @@
 package org.votingsystem.util;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import eu.europa.esig.dss.DSSException;
+import org.votingsystem.throwable.SignatureException;
 import org.votingsystem.throwable.ValidationException;
 import org.votingsystem.throwable.XAdESValidationException;
 import org.votingsystem.throwable.XMLValidationException;
@@ -32,6 +34,9 @@ public enum AppCode {
     //bad request - XML signature error
     @JsonProperty("vs_0430")
     vs_0430(430),
+    //Error signing document
+    @JsonProperty("vs_0440")
+    vs_0440(440),
     //system exception
     @JsonProperty("vs_0500")
     vs_0500(500),
@@ -59,6 +64,8 @@ public enum AppCode {
             return vs_0400;
         } else if(cause instanceof XAdESValidationException) {
             return vs_0430;
+        } else if(cause instanceof DSSException) {
+            return vs_0440;
         } else {
             return vs_0410;
         }

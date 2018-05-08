@@ -16,6 +16,7 @@ import org.votingsystem.util.OperationType;
 import org.votingsystem.xades.XAdESSignature;
 import org.votingsystem.xml.XML;
 
+import java.security.KeyStore;
 import java.util.Base64;
 import java.util.logging.Logger;
 
@@ -60,7 +61,8 @@ public class PublishElection extends BaseTest {
         ElectionDto electionDto = qrResponseDto.getDataJson(ElectionDto.class);
         byte[] dataToSign = XML.getMapper().writeValueAsBytes(electionDto);
         AbstractSignatureTokenConnection signingToken = new JKSSignatureToken(
-                Thread.currentThread().getContextClassLoader().getResource(KEYSTORE).openStream(), KEYSTORE_PASSWORD);
+                Thread.currentThread().getContextClassLoader().getResource(KEYSTORE).openStream(),
+                new KeyStore.PasswordProtection(KEYSTORE_PASSWORD.toCharArray()));
         byte[] signatureBytes =  XAdESSignature.sign(dataToSign, signingToken,
                 new TSPHttpSource(org.votingsystem.test.Constants.TIMESTAMP_SERVICE_URL));
 

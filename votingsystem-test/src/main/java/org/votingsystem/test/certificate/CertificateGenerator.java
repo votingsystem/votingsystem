@@ -1,6 +1,5 @@
 package org.votingsystem.test.certificate;
 
-import org.apache.commons.io.FileUtils;
 import org.bouncycastle.asn1.*;
 import org.bouncycastle.asn1.oiw.OIWObjectIdentifiers;
 import org.bouncycastle.asn1.x500.X500Name;
@@ -14,6 +13,7 @@ import org.bouncycastle.operator.DigestCalculator;
 import org.bouncycastle.operator.OperatorCreationException;
 import org.bouncycastle.operator.bc.BcDigestCalculatorProvider;
 import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
+import org.votingsystem.util.FileUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -128,7 +128,9 @@ public class CertificateGenerator {
         //Output Certificate to file
         File destFile = new File("cert.crt");
         System.out.println("destFile.getAbsolutePath: " + destFile.getAbsolutePath());
-        FileUtils.writeByteArrayToFile(destFile, certificate.getEncoded());
+        FileUtils.copyBytesToFile(certificate.getEncoded(), destFile);
     }
+
+
 
 }
