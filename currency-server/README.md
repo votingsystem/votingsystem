@@ -10,7 +10,7 @@ be done:
 
     <system-properties>
         ...
-        <property name="currency_server_dir" value="C:\Program Files\Java\jdk1.8.0_121\local\currency-server"/>
+        <property name="currency_server_dir" value="/var/local/currency-server"/>
         ...
     </system-properties>|
 
