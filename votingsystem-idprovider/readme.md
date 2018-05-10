@@ -3,7 +3,7 @@
 The application expects the content of the directory 'docs/app-config-files' with values appropriate to the 
 installation in the directory:
 
-    /var/local/wildlfy/votingsystem-idprovider
+    /var/local/wildfly/votingsystem-idprovider
 
 It can be changed setting system environment var 'idprovider_server_dir' with the desired value
 
@@ -12,9 +12,9 @@ It can be changed setting system environment var 'idprovider_server_dir' with th
 
 Application will store log files in directory:
     
-    /var/log/wildfly/wildlfy/votingsystem-idprovider
+    /var/log/wildfly/wildfly/votingsystem-idprovider
     
-You must put the permissions of the directory of appropriate form to the user executing Wildlfy
+You must put the permissions of the directory of appropriate form to the user executing Wildfly
 
 
 
@@ -57,7 +57,7 @@ relacione la solicitud firmada con certificado expedido.
         
        - Database: Postgres 9.5
        
- - The application default _working dir_ is in **/var/local/wildlfy/votingsystem-idprovider**,
+ - The application default _working dir_ is in **/var/local/wildfly/votingsystem-idprovider**,
 it needs read and write privileges. You can modify that location changing the system property **votingsystem_idprovider_dir**
  - Copy inside the _working dir_ the contents of **docs/app-config-files** completed with the values of your installation   
  - The file _trusted-certs.jks_ contains the trusted CA certificates.

@@ -64,7 +64,7 @@ public class ConfigEJB implements Config, ConfigIdProvider {
 
     private static final Logger log = Logger.getLogger(ConfigEJB.class.getName());
 
-    public static final String DEFAULT_APP_HOME = "/var/local/wildlfy/votingsystem-idprovider";
+    public static final String DEFAULT_APP_HOME = "/var/local/wildfly/votingsystem-idprovider";
     public static final Integer DEFAULT_METADATA_LIVE_IN_HOURS = 1;
 
     @PersistenceContext

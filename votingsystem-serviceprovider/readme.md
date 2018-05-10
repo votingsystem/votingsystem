@@ -3,7 +3,7 @@
 The application expects the content of the directory 'docs/app-config-files' with values appropriate to the 
 installation in the directory:
 
-    /var/local/wildlfy/votingsystem-service
+    /var/local/wildfly/votingsystem-service
 
 It can be changed setting system environment var 'voting_provider_server_dir' with the desired value
 
@@ -20,5 +20,5 @@ Application will store log files in directory:
     
     /var/log/wildfly/votingsystem-serviceprovider
     
-you must put the permissions of the directory of appropriate form to the user executing Wildlfy
+you must put the permissions of the directory of appropriate form to the user executing Wildfly
     

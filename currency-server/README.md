@@ -3,14 +3,14 @@
 The application expects the content of the directory 'docs/app-config-files' with values appropriate to the 
 installation in the directory:
 
-    /var/local/wildlfy/currency-server
+    /var/local/wildfly/currency-server
 
 The default configuration dir can be changed setting system environment var 'currency_server_dir' with the desired value. With Wildfly, this can 
 be done:
 
     <system-properties>
         ...
-        <property name="currency_server_dir" value="/var/local/wildlfy/currency-server"/>
+        <property name="currency_server_dir" value="/var/local/wildfly/currency-server"/>
         ...
     </system-properties>|
 
@@ -27,7 +27,7 @@ Change what follows to the standalone / domain  server configuration (if you are
     </server>
     <handlers>
         <file name="welcome-content" path="${jboss.home.dir}/welcome-content" directory-listing="true"/>
-        <file name="currencyServerStatic" path="/var/local/wildlfy/currency-server-static-web-content" directory-listing="true"/>
+        <file name="currencyServerStatic" path="/var/local/wildfly/currency-server-static-web-content" directory-listing="true"/>
     </handlers>
 
 The value of the variables **staticResourcesURL** and **staticResourcesPath** must be set according to the values configured.
@@ -62,4 +62,4 @@ Application will store log files in directory:
     
     /var/log/wildfly/currency-server
 
-you must put the permissions of the directory of appropriate form to the user executing Wildlfy
+you must put the permissions of the directory of appropriate form to the user executing Wildfly
