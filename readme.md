@@ -1,6 +1,7 @@
 To build the project and install javascript libraries
 
     mvn clean install -Pinstall-web-templates
+    
 ## Security
 To run the applications you need to install the Java Cryptography Extension (JCE) Unlimited Strength Jurisdiction Policy Files:
     
@@ -21,16 +22,5 @@ real certificate signed by a trusted certificate authority.
 
 All the signatures made by the system incorporates a TimeStamp, the system 
 needs a TimeStamp server to add TimeStamps to the signatures.
-You need to install the one provided in the proyect and update the
-param **timestampServerURL** on **config.properties** with the value of your
-installation.
-
-### Discrete timestamps
-
-A discrete timestamp is a timestamp that has a discrete value, f.e:
-all request between 01:00 and 02:00 will have as TimeStamp time 02:00, all
-between 04:00 and 05:00 will have 05:00 ...
-
-Discrete timestamps are created to make it more difficult to trace 
-electors analyzing the TimeStamp of the signed votes (the results of the 
-elections are freely available online for anyone that could want to validate them).
+You need to install [one Time-Stamp server](https://github.com/votingsystem/timestamp-server) an provide 
+**timestampServerURL** on **config.properties** with the value of your installation.

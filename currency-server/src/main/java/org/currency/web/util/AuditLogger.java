@@ -29,10 +29,10 @@ public class AuditLogger {
 
     //values from logging.properties
     public static final String LOG_FILE_SUFIX = ".yyyy-MM-dd";
-    public static final String CURRENCY_ISSUED_LOG_FILE_PATH = "/var/local/voting_system/currency_server/reports/currency_issued.log";
-    public static final String TRANSACTIONS_LOG_FILE_PATH = "/var/local/voting_system/currency_server/reports/transactions.log";
-    public static final String WEEK_PERIOD_LOG_FILE_PATH = "/var/local/voting_system/currency_server/reports/week_period.log";
-    public static final String REPORTS_FILE_LOG_PATH = "/var/local/voting_system/currency_server/reports/reports.log";
+    public static final String CURRENCY_ISSUED_LOG_FILE_PATH = "/var/local/wildlfy/currency_server/reports/currency_issued.log";
+    public static final String TRANSACTIONS_LOG_FILE_PATH = "/var/local/wildlfy/currency_server/reports/transactions.log";
+    public static final String WEEK_PERIOD_LOG_FILE_PATH = "/var/local/wildlfy/currency_server/reports/week_period.log";
+    public static final String REPORTS_FILE_LOG_PATH = "/var/local/wildlfy/currency_server/reports/reports.log";
 
     public static File getReportsLogFile() {
         return new File(AuditLogger.REPORTS_FILE_LOG_PATH);

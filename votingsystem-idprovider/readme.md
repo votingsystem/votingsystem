@@ -1,11 +1,36 @@
-## Config files
+#### Config files
 
 The application expects the content of the directory 'docs/app-config-files' with values appropriate to the 
 installation in the directory:
 
-    /var/local/votingsystem-idprovider
+    /var/local/wildlfy/votingsystem-idprovider
 
 It can be changed setting system environment var 'idprovider_server_dir' with the desired value
+
+
+#### Logging
+
+Application will store log files in directory:
+    
+    /var/log/wildfly/wildlfy/votingsystem-idprovider
+    
+You must put the permissions of the directory of appropriate form to the user executing Wildlfy
+
+
+
+
+#### Build and Deploy on Wildfly
+1. 
+2. Run the script **setup-database-postgres.sh** in order to create the database (it must be in the same folder that **timestamp-server-postgres.sql**)
+3. Make sure you have  Wildfly server started.
+4. Make sure theres configured a _datasource_ with the name:
+    
+    
+    java:jboss/datasources/voting-idprovider
+        
+5. Use this command to build and deploy the archive:
+
+            mvn clean package wildfly:deploy
 
 ## Proveedor de identidad
 
@@ -32,7 +57,7 @@ relacione la solicitud firmada con certificado expedido.
         
        - Database: Postgres 9.5
        
- - The application default _working dir_ is in **/var/local/votingsystem-idprovider**,
+ - The application default _working dir_ is in **/var/local/wildlfy/votingsystem-idprovider**,
 it needs read and write privileges. You can modify that location changing the system property **votingsystem_idprovider_dir**
  - Copy inside the _working dir_ the contents of **docs/app-config-files** completed with the values of your installation   
  - The file _trusted-certs.jks_ contains the trusted CA certificates.
@@ -42,12 +67,6 @@ it needs read and write privileges. You can modify that location changing the sy
  
 File with the list of server entities the id provider can deal with. You must
 put here the TimeStampServers and the Voting Service Providers 
- 
- 
-#### Logging
-Application will store log files in directory:
-    
-    /var/log/votingsystem-idprovider
     
 ## Dates
 Servers always return a dates in the standardized ISO 8601-format.
@@ -64,8 +83,6 @@ to reduce confusion with the local time zone use. Comparison are made to the mil
 **genTime** is the time at which the time-stamp token has been created by
 the TSA.  It is expressed as UTC time (Coordinated Universal Time) to
 reduce confusion with the local time zone use. 
-
-#### Trusted certs
 
 
 ## Provisioned as pre-configured virtual machine in Open Virtualization Format. 
