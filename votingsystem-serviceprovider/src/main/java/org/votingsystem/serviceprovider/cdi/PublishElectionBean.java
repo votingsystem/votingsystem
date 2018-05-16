@@ -80,8 +80,7 @@ public class PublishElectionBean implements Serializable {
 
             Election election = new Election(electionSubject, electionContent, dateBegin, dateBegin.plusDays(1),
                     Election.State.PENDING);
-            electionUUID = UUID.randomUUID().toString();
-            election.setUUID(electionUUID).setElectionOptions(new HashSet<>(optionList));
+            election.setUUID(UUID.randomUUID().toString()).setElectionOptions(new HashSet<>(optionList));
 
             ElectionDto electionDto = new ElectionDto(election);
             electionDto.setEntityId(config.getEntityId());

@@ -1,0 +1,29 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                template="/WEB-INF/templates/main-template.xhtml">
+  <ui:define name="head">
+    <title>#{msg.electionsLbl} - 404 error</title>
+  </ui:define>
+  <ui:define name="content">
+    <div class="app flex-row align-items-center">
+      <div class="container">
+        <div class="row justify-content-center">
+          <div class="col-md-6">
+            <div class="clearfix">
+              <h1 class="float-left display-3 mr-4">404</h1>
+              <p class="text-muted">The page you are looking for was not found.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bootstrap and necessary plugins-->
+      <script src="#{request.contextPath}/res/coreui/vendors/jquery/js/jquery.min.js"></script>
+      <script src="#{request.contextPath}/res/coreui/vendors/popper.js/js/popper.min.js"></script>
+      <script src="#{request.contextPath}/res/coreui/vendors/bootstrap/js/bootstrap.min.js"></script>
+      <script src="#{request.contextPath}/res/coreui/vendors/pace-progress/js/pace.min.js"></script>
+      <script src="#{request.contextPath}/res/coreui/vendors/perfect-scrollbar/js/perfect-scrollbar.min.js"></script>
+      <script src="#{request.contextPath}/res/coreui/vendors/@coreui/coreui/js/coreui.min.js"></script>
+    </div>
+  </ui:define>
+</ui:composition>

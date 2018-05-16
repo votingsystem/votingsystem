@@ -3,7 +3,6 @@ package org.votingsystem.test.misc;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.votingsystem.crypto.KeyGenerator;
 import org.votingsystem.crypto.KeyStoreUtils;
-import org.votingsystem.test.ejb.EJBClient;
 import org.votingsystem.util.Constants;
 import org.votingsystem.util.FileUtils;
 

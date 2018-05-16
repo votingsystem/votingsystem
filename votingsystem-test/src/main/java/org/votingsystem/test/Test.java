@@ -28,13 +28,12 @@ public class Test extends BaseTest {
     private static final Logger log = Logger.getLogger(Test.class.getName());
 
     public static void main(String[] args) throws Exception {
-        new Test().testHttp();
         System.exit(0);
     }
 
     public void testHttp() throws Exception {
         ResponseDto response = HttpConn.getInstance().doGetRequest(
-                OperationType.GET_METADATA.getUrl(org.votingsystem.test.Constants.CURRENCY_SERVICE_ENTITY_ID), MediaType.XML);
+                OperationType.GET_METADATA.getUrl(org.votingsystem.test.Constants.ID_PROVIDER_ENTITY_ID), MediaType.XML);
         log.info("Message: " + response.getMessage());
     }
 

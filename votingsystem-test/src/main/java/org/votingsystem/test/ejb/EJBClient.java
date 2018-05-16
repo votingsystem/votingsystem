@@ -3,9 +3,9 @@ package org.votingsystem.test.ejb;
 import org.votingsystem.model.User;
 import org.votingsystem.service.EJBAdminRemoteIdProvider;
 import org.votingsystem.testlib.BaseTest;
-import org.votingsystem.util.IOUtils;
 import org.votingsystem.util.Constants;
 import org.votingsystem.util.FileUtils;
+import org.votingsystem.util.IOUtils;
 import org.votingsystem.util.NifUtils;
 
 import javax.naming.Context;

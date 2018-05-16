@@ -1,9 +1,6 @@
 package org.votingsystem.dto.voting;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import com.fasterxml.jackson.annotation.*;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
@@ -55,6 +52,7 @@ public class ElectionDto implements Dto {
     private String certChain;
     @JacksonXmlProperty(localName = "EntityId")
     private String entityId;
+    @JsonProperty("UUID")
     @JacksonXmlProperty(localName = "UUID")
     private String UUID;
 

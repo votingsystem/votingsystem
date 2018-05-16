@@ -28,6 +28,9 @@ public class TrustedEntitiesDto {
 
     public TrustedEntitiesDto() {}
 
+    public TrustedEntitiesDto(Set<EntityDto> entities) {
+        this.entities = entities;
+    }
 
     public Set<EntityDto> getEntities() {
         return entities;

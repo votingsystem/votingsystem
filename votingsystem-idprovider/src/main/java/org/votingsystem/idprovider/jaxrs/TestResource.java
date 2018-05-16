@@ -1,11 +1,9 @@
 package org.votingsystem.idprovider.jaxrs;
 
-import org.votingsystem.crypto.KeyStoreUtils;
 import org.votingsystem.crypto.cms.CMSSignedMessage;
 import org.votingsystem.dto.ResponseDto;
 import org.votingsystem.ejb.CmsEJB;
 import org.votingsystem.idprovider.ejb.CertIssuerEJB;
-import org.votingsystem.util.FileUtils;
 import org.votingsystem.util.JSON;
 import org.votingsystem.xml.XML;
 
@@ -17,7 +15,6 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
-import java.io.File;
 import java.util.logging.Logger;
 
 /**
@@ -44,16 +41,9 @@ public class TestResource {
         }
     }
 
-    @GET @Path("/keystore")
-    public Response keystore(@Context HttpServletRequest req, @Context HttpServletResponse res) throws Exception {
-        String password = "local-demo";
-        java.security.KeyStore keyStore = certIssuerEJB.generateServerKeyStore("voting.ddns.net", "userkey", password.toCharArray());
-        byte[] keyStoreBytes = KeyStoreUtils.toByteArray(keyStore, password.toCharArray());
-        File outputFile = FileUtils.copyBytesToFile(keyStoreBytes, new File(System.getProperty("user.home") +
-                "/keystore.jks"));
-        System.out.println("KeyStore saved: " + outputFile.getAbsolutePath());
-        return Response.ok().entity("keystore absolute path: " + outputFile.getAbsolutePath()).build();
+    @GET @Path("/")
+    public Response query(@Context HttpServletRequest req, @Context HttpServletResponse res) throws Exception {
+        return Response.ok().entity("OK").build();
     }
-
 
 }

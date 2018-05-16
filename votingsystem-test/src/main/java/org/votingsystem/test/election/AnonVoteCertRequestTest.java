@@ -8,6 +8,7 @@ import org.votingsystem.testlib.BaseTest;
 import org.votingsystem.util.Constants;
 import org.votingsystem.util.JSON;
 import org.votingsystem.util.OperationType;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Logger;

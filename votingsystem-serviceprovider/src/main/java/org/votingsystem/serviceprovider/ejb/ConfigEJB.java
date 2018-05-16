@@ -67,8 +67,7 @@ public class ConfigEJB implements Config, ConfigServiceProvider, Serializable {
 
     @PersistenceContext
     private EntityManager em;
-    @Inject
-    TrustedServicesEJB trustedServices;
+    @Inject TrustedServicesEJB trustedServices;
 
     private String entityId;
     private String timestampServiceURL;
@@ -166,7 +165,13 @@ public class ConfigEJB implements Config, ConfigServiceProvider, Serializable {
         for(Election election : electionList) {
             if(!election.isActive(LocalDateTime.now())) {
                 if(election.getDateFinish().isBefore(LocalDateTime.now())) {
-                    election.setState(Election.State.TERMINATED);
+                    switch (election.getState()) {
+                        case ACTIVE:
+                        case PENDING:
+                            election.setState(Election.State.TERMINATED);
+                            em.persist(election);
+                            break;
+                    }
                     log.log(Level.SEVERE, "election id: " + election.getId() + " has finished");
                 }
             } else {

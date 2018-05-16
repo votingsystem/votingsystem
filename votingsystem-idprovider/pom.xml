@@ -154,7 +154,6 @@
                     </systemPropertyVariables>
                 </configuration>
             </plugin>
-
         </plugins>
     </build>
 
@@ -174,14 +173,10 @@
                                 <configuration>
                                     <tasks>
                                         <echo message="prepare javascript libs" />
-                                        <unzip src="${project.basedir}/../lib/org/web-templates/gentelella/1.3.0/gentelella-1.3.0.zip"
-                                               dest="${project.basedir}/src/main/webapp/res"/>
-                                        <unzip src="${project.basedir}/../lib/org/web-libs/esimakin-twbs-pagination/1.3.1/esimakin-twbs-pagination-1.3.1.zip"
-                                               dest="${project.basedir}/src/main/webapp/res"/>
-                                        <unzip src="${project.basedir}/../lib/org/web-templates/startbootstrap-sb-admin/3.3.7.1/startbootstrap-sb-admin-2-3.3.7.1.zip"
+                                        <unzip src="${project.basedir}/../lib/org/web-libs/datatables/1.10.16/datatables-custom-1.10.16.zip"
                                                dest="${project.basedir}/src/main/webapp/res" />
-                                        <unzip src="${project.basedir}/../lib/org/web-libs/fontawesome/4.7.0/font-awesome-4.7.0.zip"
-                                               dest="${project.basedir}/src/main/webapp/res"/>
+                                        <unzip src="${project.basedir}/../lib/org/web-templates/coreui/2.0.0/coreui-custom-2.0.0.zip"
+                                               dest="${project.basedir}/src/main/webapp/res" />
                                     </tasks>
                                 </configuration>
                                 <goals>

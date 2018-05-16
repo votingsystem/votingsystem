@@ -27,7 +27,7 @@ public class PublishElection extends BaseTest {
 
     private static final Logger log = Logger.getLogger(PublishElection.class.getName());
 
-    private static String QR_CODE = "eid=https://voting.ddns.net/voting-service;uid=62f5cf22-06f8-4e23-a1fe-43cac8bcedc4;";
+    private static String QR_CODE = "eid=https://voting.ddns.net/voting-service;uid=b6a3c785-c001-44f9-95f5-f482b4e07cca;";
     private static String KEYSTORE = "certs/fake_08888888D.jks";
     private static String KEYSTORE_PASSWORD = Constants.PASSW_DEMO;
 

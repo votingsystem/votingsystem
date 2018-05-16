@@ -56,3 +56,10 @@ Date.prototype.toISOStr = function() {
         ('0' + this.getHours()).slice(-2) + ":" + ('0' + this.getMinutes()).slice(-2) + ":" + ('0' + this.getSeconds()).slice(-2)
 }
 
+String.prototype.format = function() {
+    var args = arguments;
+    var str =  this.replace(/''/g, "'")
+    return str.replace(/{(\d+)}/g, function(match, number) {
+        return typeof args[number] != 'undefined' ? args[number] : match;
+    });
+};

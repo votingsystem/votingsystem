@@ -41,18 +41,21 @@
             </div>
       </div>
 
-      <div class="card-footer">
-        <h:form prependId="false" a:accept-charset="ISO-8859-1">
-          <div id="submitButtonDiv" style="display: flex; flex-direction: row;justify-content: flex-end;">
-            <div style="margin: 0 10px 0 0;">
-              <h:commandLink value="#{msg.backLbl}" class="btn btn-block btn-primary" action="publish-election"/>
+      <div id="electionFooter">
+        <div class="card-footer">
+          <h:form prependId="false" a:accept-charset="ISO-8859-1">
+            <div id="submitButtonDiv" style="display: flex; flex-direction: row;justify-content: flex-end;">
+              <div style="margin: 0 10px 0 0;">
+                <h:commandLink value="#{msg.backLbl}" class="btn btn-block btn-primary" action="publish-election"/>
+              </div>
+              <div>
+                <h:commandLink value="#{msg.cancelLbl}" class="btn btn-block btn-danger" action="endFlow"/>
+              </div>
             </div>
-            <div>
-              <h:commandLink value="#{msg.cancelLbl}" class="btn btn-block btn-danger" action="endFlow"/>
-            </div>
-          </div>
-        </h:form>
+          </h:form>
+        </div>
       </div>
+
     </div>
 
     <o:socket channel="serviceUpdated" user="#{publishElection.qrUUID}" onmessage="serviceUpdated" scope="view"/>
@@ -63,8 +66,7 @@
           <h3 class="modal-title" style="font-size: 1.4em;font-weight: bold;">#{msg.operationOkMsg}</h3>
           <div id="publishResultDialogMessage" style="font-size: 1.2em;"></div>
           <div style="margin: 15px 0 0 0;display: flex; flex-direction: row;justify-content: flex-end;">
-            <a href="#{request.contextPath}/election/election.xhtml?UUID=#{publishElection.electionUUID}" type="button"
-               class="btn btn-primary">#{msg.acceptLbl}</a>
+            <button type="button" class="btn btn-primary" data-dismiss="modal">#{msg.acceptLbl}</button>
           </div>
         </div>
       </div>
@@ -81,6 +83,7 @@
             if(200 == responseDto.statusCode) {
                 document.querySelector("#submitButtonDiv").style.display = 'none';
                 document.querySelector("#qrImgDiv").style.display = 'none';
+                document.querySelector("#electionFooter").style.display = 'none';
                 document.querySelector("#publishResultDialogMessage").innerHTML = responseDto.message;
                 $("#publishResultDialog").modal({backdrop: 'static', keyboard: false})
             } else {

@@ -5,13 +5,13 @@
         <style> </style>
     </ui:define>
     <ui:define name="content">
-        <div style="width: 1000px; margin: 30px auto; text-align:center;font-size: 1.6em;">
-            #{responseDto.message}
+        <div class="card text-white bg-danger" style="margin: 10px auto;max-width: 600px;">
+            <div class="card-header">
+                <h4 style="text-align: center;">#{responseDto.caption}</h4>
+            </div>
+            <div class="card-body" style="font-size: 1.2em;">
+                #{responseDto.message}
+            </div>
         </div>
-        <script>
-            //<![CDATA[
-                app.setMainPageCaption("#{responseDto.caption}");
-            // ]]>
-        </script>
     </ui:define>
 </ui:composition>

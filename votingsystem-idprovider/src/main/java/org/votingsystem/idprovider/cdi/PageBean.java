@@ -1,4 +1,4 @@
-package org.votingsystem.idprovider.managed;
+package org.votingsystem.idprovider.cdi;
 
 import org.votingsystem.util.Messages;
 

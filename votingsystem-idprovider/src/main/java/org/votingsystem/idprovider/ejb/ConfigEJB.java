@@ -40,11 +40,9 @@ import java.security.Security;
 import java.security.cert.CertificateException;
 import java.security.cert.TrustAnchor;
 import java.security.cert.X509Certificate;
-import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.LogManager;
@@ -81,7 +79,6 @@ public class ConfigEJB implements Config, ConfigIdProvider {
     private Set<TrustAnchor> trustedCertAnchors;
     private Map<Long, Certificate> trustedCACertsMap = new HashMap<>();
     private MetadataDto metadata;
-    private Map<String, MetadataDto> entityMap;
     private Map<Long, X509Certificate> trustedTimeStampServers;
     private String ocspServerURL;
     private Map<String, User> adminMap = new HashMap<>();
@@ -100,8 +97,6 @@ public class ConfigEJB implements Config, ConfigIdProvider {
                 User admin = User.FROM_CERT(adminCert, User.Type.USER);
                 adminMap.put(CertificateUtils.getHash(adminCert), admin);
             }
-
-            entityMap = new ConcurrentHashMap<>();
 
             applicationDirPath = System.getProperty("idprovider_server_dir");
             if(StringUtils.isEmpty(applicationDirPath))
@@ -282,22 +277,6 @@ public class ConfigEJB implements Config, ConfigIdProvider {
             throw new ValidationException(ex.getMessage());
         }
 
-    }
-
-    public void putEntityMetadata(MetadataDto metadata) {
-        entityMap.put(metadata.getEntity().getId(), metadata);
-    }
-
-    public MetadataDto getEntityMetadata(String entityId) {
-        MetadataDto metadata = entityMap.get(entityId);
-        if(metadata != null) {
-            if (metadata.getValidUntilDate().isAfter(LocalDateTime.now())) {
-                log.info("metadata expired - entityId: " + entityId);
-                entityMap.remove(entityId);
-                return null;
-            }
-        }
-        return metadata;
     }
 
     public Map<Long, X509Certificate> getTrustedTimeStampServers() {

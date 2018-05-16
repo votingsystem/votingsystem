@@ -56,11 +56,6 @@ Date.prototype.toISOStr = function() {
         ('0' + this.getHours()).slice(-2) + ":" + ('0' + this.getMinutes()).slice(-2) + ":" + ('0' + this.getSeconds()).slice(-2)
 }
 
-app.setMainPageCaption = function (mainPageCaption) {
-    if(document.querySelector("#mainPageCaption"))
-        document.querySelector("#mainPageCaption").innerHTML = mainPageCaption;
-}
-
 app.alert = function (caption, message) {
     if(document.querySelector("#alertDialogQRImgDiv"))
         document.querySelector("#alertDialogQRImgDiv").style.display = 'none';

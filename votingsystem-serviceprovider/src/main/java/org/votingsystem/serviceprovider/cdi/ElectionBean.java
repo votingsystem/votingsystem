@@ -1,6 +1,7 @@
 package org.votingsystem.serviceprovider.cdi;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import org.votingsystem.dto.ResponseDto;
 import org.votingsystem.dto.indentity.IdentityRequestDto;
 import org.votingsystem.dto.metadata.MetadataDto;
 import org.votingsystem.dto.metadata.SystemEntityDto;
@@ -48,15 +49,22 @@ public class ElectionBean implements Serializable {
 
     public String initAuthentication() throws JsonProcessingException {
         MetadataDto metadata = trustedServices.getFirstEntity(SystemEntityType.ID_PROVIDER);
-        IdentityRequestDto identityRequest = new IdentityRequestDto(OperationType.ANON_VOTE_CERT_REQUEST,
-                electionUUID, new SystemEntityDto(config.getEntityId(), SystemEntityType.VOTING_SERVICE_PROVIDER));
-        String xmlInput = Base64.getEncoder().encodeToString(XML.getMapper().writeValueAsBytes(identityRequest));
-        String message = Messages.currentInstance().get("connectingToIdProviderMsg");
-        String formAction = OperationType.ELECTION_INIT_AUTHENTICATION.getUrl(metadata.getEntity().getId());
-        FacesContext.getCurrentInstance().getExternalContext().getSessionMap().put("message", message);
-        FacesContext.getCurrentInstance().getExternalContext().getSessionMap().put("formAction", formAction);
-        FacesContext.getCurrentInstance().getExternalContext().getSessionMap().put("xmlInput", xmlInput);
-        return "/redirectForm.xhtml?faces-redirect=true";
+        if(metadata == null) {
+            ResponseDto responseDto = new ResponseDto().setMessage(
+                    Messages.currentInstance().get("errorConnectingToIdProviderMsg")).setCaption(Messages.currentInstance().get("errorLbl"));
+            FacesContext.getCurrentInstance().getExternalContext().getSessionMap().put("responseDto", responseDto);
+            return "/response.xhtml";
+        } else {
+            IdentityRequestDto identityRequest = new IdentityRequestDto(OperationType.ANON_VOTE_CERT_REQUEST,
+                    electionUUID, new SystemEntityDto(config.getEntityId(), SystemEntityType.VOTING_SERVICE_PROVIDER));
+            String xmlInput = Base64.getEncoder().encodeToString(XML.getMapper().writeValueAsBytes(identityRequest));
+            String message = Messages.currentInstance().get("connectingToIdProviderMsg");
+            String formAction = OperationType.ELECTION_INIT_AUTHENTICATION.getUrl(metadata.getEntity().getId());
+            FacesContext.getCurrentInstance().getExternalContext().getSessionMap().put("message", message);
+            FacesContext.getCurrentInstance().getExternalContext().getSessionMap().put("formAction", formAction);
+            FacesContext.getCurrentInstance().getExternalContext().getSessionMap().put("xmlInput", xmlInput);
+            return "/redirectForm.xhtml?faces-redirect=true";
+        }
     }
 
     public String getElectionUUID() {

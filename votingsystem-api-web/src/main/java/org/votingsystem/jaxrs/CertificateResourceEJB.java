@@ -161,7 +161,7 @@ public class CertificateResourceEJB {
 
     @GET @Path("/trusted")
     public Response trusted(@Context HttpServletRequest req) throws Exception {
-        return Response.ok().entity(PEMUtils.getPEMEncoded(config.getTrustedCertAnchors())).build();
+        return Response.ok().entity(PEMUtils.getPEMEncoded(config.getSigningCert())).build();
     }
 
 }

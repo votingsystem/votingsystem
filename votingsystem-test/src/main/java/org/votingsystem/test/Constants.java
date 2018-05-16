@@ -10,7 +10,7 @@ public class Constants {
 
     public static final String ID_PROVIDER_ENTITY_ID = "https://voting.ddns.net/idprovider";
     public static final String VOTING_SERVICE_ENTITY_ID = "https://voting.ddns.net/voting-service";
-    public static final String CURRENCY_SERVICE_ENTITY_ID = "https://voting.ddns.net:8443/currency-server";
+    public static final String CURRENCY_SERVICE_ENTITY_ID = "https://voting.ddns.net/currency-server";
 
     public static final String OCSP_SERVER_URL = ID_PROVIDER_ENTITY_ID + "/ocsp";
 

@@ -60,7 +60,7 @@ public class ElectionsEJB {
         }
     }
 
-    public Election getElection(String electionUUID, String entityId) throws NotFoundException {
+    public Election getElection(String electionUUID, String entityId) throws NotFoundException, IOException {
         if(electionsMap.containsKey(electionUUID)) {
             Election election = electionsMap.get(electionUUID);
             if(election.getEntityId().equals(entityId))
@@ -78,9 +78,15 @@ public class ElectionsEJB {
     }
 
     public Election fetchElectionFromEntity(String electionUUID, String entityId) throws NotFoundException {
-        MetadataDto entityMetadata =  trustedServicesEJB.getEntity(entityId);
-        if(entityMetadata == null)
+        MetadataDto targetEntity = null;
+        try {
+            targetEntity = trustedServicesEJB.checkEntity(entityId);
+            if(targetEntity == null)
+                throw new Exception("Target entity null");
+        } catch (Exception ex) {
+            log.log(Level.SEVERE, ex.getMessage(), ex);
             throw new NotFoundException("Entity: " + entityId + " isn't a trusted entity");
+        }
         try {
             ResponseDto response = HttpConn.getInstance().doPostRequest(electionUUID.getBytes(), null,
                     OperationType.FETCH_ELECTION.getUrl(entityId));

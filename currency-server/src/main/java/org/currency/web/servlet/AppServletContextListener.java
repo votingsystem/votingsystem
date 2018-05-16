@@ -26,7 +26,6 @@ public class AppServletContextListener implements ServletContextListener{
     public void contextInitialized(ServletContextEvent contextEvent) {
         log.info("ContextPath: " + contextEvent.getServletContext().getContextPath());
         try {
-            //bankEJB.updateBanksInfo();
             //Hack to allow local OCSP service initialization in development
             executorService.submit(() -> {
                 try {
@@ -37,7 +36,6 @@ public class AppServletContextListener implements ServletContextListener{
                     log.log(Level.SEVERE, ex.getMessage(), ex);
                 }
             });
-
 
         } catch (Exception ex) {
             log.log(Level.SEVERE, ex.getMessage(), ex);

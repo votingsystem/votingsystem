@@ -1,17 +1,14 @@
 <ui:composition xmlns="http://www.w3.org/1999/xhtml"
                 xmlns:ui="http://java.sun.com/jsf/facelets"
                 template="/WEB-INF/templates/main-template.xhtml">
-    <ui:define name="head">
-        <style> </style>
-    </ui:define>
     <ui:define name="content">
-        <div style="width: 1000px; margin: 30px auto; text-align:center;font-size: 1.6em;">
-            #{responseDto.message}
+        <div class="card text-white bg-danger" style="margin: 10px auto;max-width: 600px;">
+            <div class="card-header">
+                <h4 style="text-align: center;">#{responseDto.caption}</h4>
+            </div>
+            <div class="card-body" style="font-size: 1.2em;">
+                #{responseDto.message}
+            </div>
         </div>
-        <script>
-            //<![CDATA[
-                vs.setMainPageCaption("#{responseDto.caption}");
-            // ]]>
-        </script>
     </ui:define>
 </ui:composition>
