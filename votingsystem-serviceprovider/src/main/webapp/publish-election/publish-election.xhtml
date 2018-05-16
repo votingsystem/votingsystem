@@ -1,0 +1,308 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:a="http://xmlns.jcp.org/jsf/passthrough"
+                xmlns:h="http://xmlns.jcp.org/jsf/html"
+                template="/WEB-INF/templates/main-template.xhtml">
+  <ui:define name="head">
+    <style>
+      /* Remove margins and padding from the list */
+      #electionOptionList {
+        margin: 0;
+        padding: 0;
+      }
+
+      /* Style the list items */
+      #electionOptionList li {
+        cursor: pointer;
+        position: relative;
+        padding: 12px 8px 12px 40px;
+        background: #eee;
+        font-size: 18px;
+        transition: 0.2s;
+        border-bottom: 1px solid #eee;
+
+        /* make the list items unselectable */
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+        list-style-type: none;
+      }
+
+      /* Set all odd list items to a different color (zebra-stripes) */
+      #electionOptionList li:nth-child(odd) {
+        background: #fff;
+      }
+
+      #electionOptionList li:hover {
+        background: #ddd;
+      }
+
+      .removeElectionOption {
+        position: absolute;
+        right: 0;
+        top: 0;
+        padding: 12px 16px 12px 16px;
+      }
+
+      .removeElectionOption:hover {
+        background-color: #f44336;
+        color: white;
+      }
+
+      /* Style the input */
+      input {
+        border: 1px solid #d9d9d9;
+        width: 75%;
+        padding: 7px;
+        float: left;
+        font-size: 16px;
+      }
+
+      /* Style the "Add" button */
+      .addElectionOption {
+        padding: 10px;
+        width: 25%;
+        background: #d9d9d9;
+        color: #555;
+        float: left;
+        text-align: center;
+        font-size: 16px;
+        cursor: pointer;
+        transition: 0.3s;
+      }
+
+      .addElectionOption:hover {
+        background-color: #bbb;
+      }
+
+    </style>
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
+  </ui:define>
+  <ui:define name="content">
+    <h:messages globalOnly="true" styleClass="alert alert-warning"/>
+    <div class="card" style="margin:15px auto; max-width: 1000px;">
+        <div class="card-header" style="margin: 0 0 10px 0;text-align: center;">
+            <h2>#{msg.publishElectionLbl}</h2>
+        </div>
+    <h:form prependId="false" a:accept-charset="ISO-8859-1" id="electionForm">
+
+    <div class="row" style="padding: 0 15px;">
+        <div class="col-md-9">
+            <div class="form-group">
+                <div class="input-group">
+                    <h:inputText id="electionSubject" type="text" class="form-control" a:placeholder="#{msg.electionSubjectLbl}"
+                                 a:maxlength='160' value="#{publishElection.electionSubject}"/>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="form-group">
+                <div class="input-group" style="max-width: 140px;">
+                    <input type="text" class="form-control has-feedback-left active" id="electionCal" readonly="readonly"
+                           placeholder="#{msg.dateLbl}" aria-describedby="inputSuccess2Status2"
+                           style="padding-right: 0px; background: #fff;" required="required"/>
+                    <div class="input-group-append">
+                            <span class="input-group-text">
+                              <i class="fa fa-calendar-o"></i>
+                            </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+      <div class="container" style="margin: 0 auto 15px auto;">
+        <textarea id="mainEditor">
+        </textarea>
+      </div>
+
+      <div class="card card-accent-primary" style="margin: 10px auto;max-width: 800px;">
+        <div class="card-header">
+          #{msg.electionOptionsLbl} (#{msg.electionOptionsAdviceLbl})
+        </div>
+        <div class="card-body">
+          <div class="row">
+            <div class="col-md-9">
+              <input id="electionOptionInput" type="text" class="form-control" placeholder="#{msg.optionLbl}" maxlength="90"/>
+            </div>
+            <div class="col-md-2" style="display: flex; flex-direction: row;justify-content: flex-end; ">
+              <button type="button" class="btn btn-outline btn-primary" onclick="
+                addElectionOption(document.getElementById('electionOptionInput').value)">#{msg.addLbl}</button>
+            </div>
+          </div>
+          <div>
+            <ul id="electionOptionList" style="margin: 5px 0 0 0;"></ul>
+          </div>
+        </div>
+      </div>
+
+        <div class="card-footer">
+            <div style="display: flex; flex-direction: row;justify-content: flex-end;">
+                <div>
+                    <h:commandButton class="btn btn-block btn-primary" value="#{msg.publishLbl}" type="submit"
+                                     action="#{publishElection.publish}" onclick="return submitForm()"/>
+                </div>
+            </div>
+        </div>
+
+
+      <h:inputHidden id="electionContentInput" value="#{publishElection.electionContent}"></h:inputHidden>
+      <h:inputHidden id="electionDate" value="#{publishElection.electionDate}"></h:inputHidden>
+      <h:inputHidden id="electionOptions" value="#{publishElection.electionOptionsBase64}"></h:inputHidden>
+
+    </h:form>
+
+      <div id="electionContent" style="display: none">
+        <h:outputText value="#{publishElection.electionContent}" escape="false"/>
+      </div>
+    </div>
+  </ui:define>
+
+  <ui:define name="javascript-libs">
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
+    <script src="#{request.contextPath}/res/tinymce/jquery.tinymce.min.js"></script>
+    <script src="#{request.contextPath}/res/tinymce/tinymce.min.js"></script>
+  </ui:define>
+  <ui:define name="javascript-code">
+    <script>
+        //this include html tags
+        var ELECTION_CONTENT_MAX_LENGTH = #{publishElection.maxContentLength};
+
+        var electionOptions = [
+            <ui:repeat value="#{publishElection.optionList}" var="option" varStatus="loop">
+                "#{option.content}",
+            </ui:repeat>
+        ];
+        //<![CDATA[
+
+        $(document).ready(function() {
+            tinymce.init({
+                selector: '#mainEditor',
+                height: 300,
+                menubar: false,
+                language: 'es',
+                plugins: "lists link",
+                toolbar: 'bold italic backcolor | link unlink | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent'
+            });
+            loadFormData();
+        });
+
+        var electionOptionsMap = {};
+        var electionOptionsSubmitSeparator = "#{publishElection.electionOptionsSeparator}";
+
+        document.querySelector("#mainEditor").innerHTML = document.querySelector("#electionContent").innerHTML
+
+        function loadFormData () {
+            for (var i = 0; i < electionOptions.length; i++) {
+                addElectionOption(electionOptions[i]);
+            }
+        }
+
+        function submitForm () {
+            var electionSubject = document.querySelector("#electionSubject").value
+            if("" === electionSubject) {
+                app.alert("#{msg.errorLbl}", "#{msg.electionSubjectErrorMsg}");
+                return false;
+            }
+
+            var electionContent = tinyMCE.activeEditor.getContent();
+
+            console.log("electionContent: ", electionContent)
+            if("" === electionContent.trim()) {
+                app.alert("#{msg.errorLbl}", "#{msg.electionContentErrorMsg}");
+                return false;
+            }
+
+            if(electionContent.length > ELECTION_CONTENT_MAX_LENGTH) {
+                app.alert("#{msg.errorLbl}", "#{msg.maxContentSizeExceededErrorMsg}");
+                return false;
+            }
+
+            document.getElementById("electionContentInput").value = electionContent;
+
+            var electionOptions = Object.values(electionOptionsMap);
+
+            if(electionOptions.length < 2) {
+                app.alert("#{msg.errorLbl}", "#{msg.electionOptionsMissingErrorMsg}");
+                return false;
+            }
+
+            var electionOptionsStr = "";
+            for (var i = 0; i < electionOptions.length; i++) {
+                if("" !== electionOptionsStr)
+                    electionOptionsStr = electionOptionsStr + electionOptionsSubmitSeparator + electionOptions[i];
+                else electionOptionsStr = electionOptions[i];
+            }
+            document.getElementById("electionOptions").value = app.utf8_to_b64(electionOptionsStr);
+            return true;
+        }
+
+        var today = moment();
+
+        var minDate = moment(today).add(1, 'day');
+        document.getElementById("electionDate").value = minDate.format('YYYY-MM-DD');
+
+        $('#electionCal').daterangepicker({
+            singleDatePicker: true,
+            minDate: minDate.toDate(),
+            maxDate: moment(today).add(30, 'day').toDate(),
+            "calender_style": "picker_2",
+            "format": "YYYY-MM-DD HH:mm ZZ",
+            "locale"  : {
+                "daysOfWeek": [#{msg.daysOfWeek}],
+                "monthNames": [#{msg.monthNames}],
+                "firstDay": 1,
+                "format": 'YYYY-MM-DD'
+            }
+        }, function(start, end, label) { });
+
+        //All elections begin at 00:00 UTC time
+        $('#electionCal').on('apply.daterangepicker', function(ev, picker) {
+            var selectedDate = new Date(picker.startDate);
+            var selectedDateUTC = moment.utc([selectedDate.getFullYear(), selectedDate.getMonth(), selectedDate.getDate()]);
+            console.log("selectedDateUTC.format(): " + selectedDateUTC.format())
+            document.getElementById("electionDate").value = picker.startDate.format('YYYY-MM-DD');
+            $(this).val(picker.startDate.format('YYYY-MM-DD'));
+        });
+
+        // Create a new list item when clicking on the "Add" button
+        function addElectionOption(inputValue) {
+            inputValue = inputValue.replace(/"/g, "'")
+            var removeOptionList = document.getElementsByClassName("removeElectionOption");
+            var li = document.createElement("li");
+            li.setAttribute("index", removeOptionList.length);
+            electionOptionsMap[removeOptionList.length] = inputValue;
+            var t = document.createTextNode(inputValue);
+            li.appendChild(t);
+            if (inputValue === '') {
+                app.alert("#{msg.errorLbl}", "#{msg.emptyFieldErrorMsg}");
+            } else {
+                document.getElementById("electionOptionList").appendChild(li);
+            }
+            document.getElementById("electionOptionInput").value = "";
+
+            var span = document.createElement("SPAN");
+            var txt = document.createTextNode("\u00D7");
+            span.className = "removeElectionOption";
+            span.appendChild(txt);
+            li.appendChild(span);
+
+            for (i = 0; i < removeOptionList.length; i++) {
+                removeOptionList[i].onclick = function() {
+                    var div = this.parentElement;
+                    var mapKey = div.getAttribute("index");
+                    delete electionOptionsMap[mapKey];
+                    div.style.display = "none";
+                    console.log(electionOptionsMap)
+                }
+            }
+        }
+
+        // ]]>
+    </script>
+
+  </ui:define>
+
+</ui:composition>

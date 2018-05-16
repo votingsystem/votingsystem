@@ -12,7 +12,7 @@ It can be changed setting system environment var 'idprovider_server_dir' with th
 
 Application will store log files in directory:
     
-    /var/log/wildfly/wildfly/votingsystem-idprovider
+    /var/log/wildfly/votingsystem-idprovider
     
 You must put the permissions of the directory of appropriate form to the user executing Wildfly
 

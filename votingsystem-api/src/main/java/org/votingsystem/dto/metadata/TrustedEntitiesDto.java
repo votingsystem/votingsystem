@@ -43,7 +43,7 @@ public class TrustedEntitiesDto {
                 TrustedEntitiesDto.class);
     }
 
-    public static class EntityDto implements Comparable<EntityDto> {
+    public static class EntityDto {
 
         @JacksonXmlProperty(localName = "Id", isAttribute = true)
         private String id;
@@ -89,26 +89,6 @@ public class TrustedEntitiesDto {
             this.description = description;
         }
 
-
-        @Override
-        public int compareTo(EntityDto o) {
-            //we want TIMESTAMP_SERVER at first because we need them to validate Metadata signature TimeStamps of the other entities
-            if(SystemEntityType.TIMESTAMP_SERVER == this.type) {
-                switch (o.getType()) {
-                    case TIMESTAMP_SERVER:
-                        return type.getName().compareTo(o.getType().getName());
-                    default:
-                        return -1;
-                }
-            } else {
-                switch (o.getType()) {
-                    case TIMESTAMP_SERVER:
-                        return 1;
-                    default:
-                        return id.compareTo(o.getId());
-                }
-            }
-        }
     }
 }
 

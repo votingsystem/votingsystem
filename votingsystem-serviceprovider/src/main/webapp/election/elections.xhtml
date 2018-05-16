@@ -2,10 +2,10 @@
                 xmlns:ui="http://java.sun.com/jsf/facelets"
                 xmlns:f="http://java.sun.com/jsf/core"
                 xmlns:h="http://xmlns.jcp.org/jsf/html"
+                xmlns:a="http://xmlns.jcp.org/jsf/passthrough"
                 xmlns:c="http://java.sun.com/jsp/jstl/core"
                 template="/WEB-INF/templates/main-template.xhtml">
   <ui:define name="head">
-    <script src="#{request.contextPath}/res/pagination/jquery.twbsPagination.js" type="text/javascript"></script>
   </ui:define>
   <f:metadata>
     <f:viewAction action="#{electionsBean.loadElections}" />
@@ -44,7 +44,7 @@
         </ui:repeat>
       </div>
 
-      <h:form id="paginateForm">
+      <h:form prependId="false" a:accept-charset="ISO-8859-1" id="paginateForm">
         <h:commandButton id="paginateButton" value="test" action="#{electionsBean.paginate()}" style="display: none;">
           <h:inputHidden id="paginationPage" value="#{electionsBean.paginationPage}"></h:inputHidden>
           <h:inputHidden id="pageSize" value="#{electionsBean.pageSize}"></h:inputHidden>
@@ -55,30 +55,35 @@
         <ul id="election-pagination" class="pagination-sm"></ul>
       </div>
     </div>
-    <script>
-      //<![CDATA[
-        console.log("qrURL: #{electionsBean.qrURL}")
-        vs.setMainPageCaption("#{electionsBean.pageCaption}");
+    <ui:define name="javascript-libs">
+      <script src="#{request.contextPath}/res/pagination/jquery.twbsPagination.js" type="text/javascript"></script>
+    </ui:define>
+    <ui:define name="javascript-code">
+      <script>
+          //<![CDATA[
+          console.log("qrURL: #{electionsBean.qrURL}")
+          app.setMainPageCaption("#{electionsBean.pageCaption}");
 
-        $('#election-pagination').twbsPagination({
-            totalPages: #{electionsBean.totalPages},
-            visiblePages: #{electionsBean.visiblePages},
-            startPage:#{electionsBean.paginationPage},
-            prev:"#{msg.prevLbl}",
-            next:"#{msg.nextLbl}",
-            first:"#{msg.firstLbl}",
-            last:"#{msg.lastLbl}",
-            initiateStartPageClick:false,
-            onPageClick: function (event, page) {
-                document.getElementById("paginateForm:paginationPage").value = page;
-                document.getElementById("paginateForm:paginateButton").click();
-            }
-        });
+          $('#election-pagination').twbsPagination({
+              totalPages: #{electionsBean.totalPages},
+              visiblePages: #{electionsBean.visiblePages},
+              startPage:#{electionsBean.paginationPage},
+              prev:"#{msg.prevLbl}",
+              next:"#{msg.nextLbl}",
+              first:"#{msg.firstLbl}",
+              last:"#{msg.lastLbl}",
+              initiateStartPageClick:false,
+              onPageClick: function (event, page) {
+                  document.getElementById("paginationPage").value = page;
+                  document.getElementById("paginateButton").click();
+              }
+          });
 
-        if("#{electionsBean.totalPages}" === "1"){
-            document.querySelector("#paginationDiv").style.display = "none";
-        }
-      // ]]>
-    </script>
+          if("#{electionsBean.totalPages}" === "1"){
+              document.querySelector("#paginationDiv").style.display = "none";
+          }
+          // ]]>
+      </script>
+    </ui:define>
   </ui:define>
 </ui:composition>

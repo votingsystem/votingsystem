@@ -1,6 +1,5 @@
 package org.votingsystem.testlib;
 
-import eu.europa.esig.dss.xades.DSSXMLUtils;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.votingsystem.crypto.KeyGenerator;
 import org.votingsystem.http.HttpConn;

@@ -8,7 +8,6 @@ import org.votingsystem.ejb.Config;
 import org.votingsystem.ejb.TrustedServicesEJB;
 import org.votingsystem.http.SystemEntityType;
 import org.votingsystem.jsf.ServiceUpdatedMessage;
-
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.JSON;
 import org.votingsystem.util.Messages;
@@ -40,10 +39,8 @@ public class PageBean implements Serializable {
 
     private static final Logger log = Logger.getLogger(PageBean.class.getName());
 
-    @EJB
-    Config config;
-    @EJB
-    TrustedServicesEJB trustedServices;
+    @EJB Config config;
+    @EJB TrustedServicesEJB trustedServices;
     @Inject @Push
     private PushContext serviceUpdated;
 

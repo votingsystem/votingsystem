@@ -6,9 +6,6 @@ import org.votingsystem.crypto.SignedDocumentType;
 import org.votingsystem.dto.ResponseDto;
 import org.votingsystem.dto.metadata.MetadataDto;
 import org.votingsystem.dto.voting.ElectionDto;
-import org.votingsystem.ejb.Config;
-import org.votingsystem.ejb.MetadataService;
-
 import org.votingsystem.ejb.SignatureServiceEJB;
 import org.votingsystem.ejb.TrustedServicesEJB;
 import org.votingsystem.http.HttpConn;
@@ -21,7 +18,6 @@ import org.votingsystem.util.OperationType;
 import org.votingsystem.xml.XML;
 
 import javax.ejb.*;
-import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import java.io.IOException;
@@ -44,8 +40,6 @@ public class ElectionsEJB {
     @PersistenceContext
     private EntityManager em;
     @EJB private TrustedServicesEJB trustedServicesEJB;
-    @Inject private Config config;
-    @Inject private MetadataService metadataEJB;
     @EJB private SignatureServiceEJB signatureService;
 
 

@@ -5,7 +5,6 @@ import org.votingsystem.crypto.SignatureParams;
 import org.votingsystem.crypto.SignedDocumentType;
 import org.votingsystem.dto.ResponseDto;
 import org.votingsystem.ejb.Config;
-
 import org.votingsystem.ejb.SignatureServiceEJB;
 import org.votingsystem.model.SignedDocument;
 import org.votingsystem.model.User;

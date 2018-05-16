@@ -7,19 +7,29 @@
     <meta name="viewport" content="width=device-width, initial-scale=1"/>
     <meta name="mobile-web-app-capable" content="yes"/>
     <meta name="apple-mobile-web-app-capable" content="yes" />
-    <link rel="icon" type="image/png" href="#{request.contextPath}/res/img/favicon-32x32.png" sizes="32x32"/>
-    <link href="#{request.contextPath}/res/gtl/vendors/bootstrap/dist/css/bootstrap.min.css" media="all" rel="stylesheet" />
-    <script src="#{request.contextPath}/res/gtl/vendors/jquery/dist/jquery.min.js"></script>
-    <!-- Include all compiled plugins (below), or include individual files as needed -->
-    <script src="#{request.contextPath}/res/gtl/vendors/bootstrap/dist/js/bootstrap.min.js" type="text/javascript"></script>
-    <script src="#{request.contextPath}/res/js/utils.js" type="text/javascript"></script>
+    <link rel="shortcut icon" type="image/png" href="#{request.contextPath}/res/img/icon_16/fa-credit-card.png" />
+
     <meta http-equiv="X-UA-Compatible" content="IE=10"/>
     <title>#{msg.appTitle}</title>
+
+    <link href="#{request.contextPath}/res/coreui/css/style.css" rel="stylesheet"/>
+    <link href="#{request.contextPath}/res/coreui/vendors/pace-progress/css/pace.min.css" rel="stylesheet"/>
     <ui:insert name="head" />
 </h:head>
 <h:body>
     <div id="votingsystem_page" style="margin: 10px auto; width: 100%; max-width: 1100px;">
         <ui:insert name="content"/>
     </div>
+
+    <script src="#{request.contextPath}/res/coreui/vendors/jquery/js/jquery.min.js"></script>
+    <script src="#{request.contextPath}/res/coreui/vendors/popper.js/js/popper.min.js"></script>
+    <script src="#{request.contextPath}/res/coreui/vendors/bootstrap/js/bootstrap.min.js"></script>
+    <script src="#{request.contextPath}/res/coreui/vendors/pace-progress/js/pace.min.js"></script>
+    <script src="#{request.contextPath}/res/coreui/vendors/perfect-scrollbar/js/perfect-scrollbar.min.js"></script>
+    <script src="#{request.contextPath}/res/coreui/vendors/@coreui/coreui/js/coreui.min.js"></script>
+    <script src="#{request.contextPath}/res/js/utils.js" type="text/javascript"></script>
+
+    <ui:insert name="javascript-libs"/>
+    <ui:insert name="javascript-code"/>
 </h:body>
 </html>

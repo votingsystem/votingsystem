@@ -1,0 +1,66 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                template="/WEB-INF/templates/main-template.xhtml">
+    <ui:define name="head">
+    </ui:define>
+
+    <ui:define name="content">
+        <div class="card container" style="margin: 10px auto;">
+
+            <table id="example" class="table table-striped table-bordered" cellspacing="0" width="100%">
+                <thead>
+                <tr>
+                    <th>First name</th>
+                    <th>Last name</th>
+                    <th>Position</th>
+                    <th>Office</th>
+                    <th>Start date</th>
+                    <th>Salary</th>
+                </tr>
+                </thead>
+                <tfoot>
+                <tr>
+                    <th>First name</th>
+                    <th>Last name</th>
+                    <th>Position</th>
+                    <th>Office</th>
+                    <th>Start date</th>
+                    <th>Salary</th>
+                </tr>
+                </tfoot>
+            </table>
+        </div>
+    </ui:define>
+
+    <ui:define name="javascript-libs">
+        <link rel="stylesheet" type="text/css" href="#{request.contextPath}/res/datatables/css/dataTables.bootstrap4.css"/>
+
+        <script type="text/javascript" language="javascript" src="#{request.contextPath}/res/datatables/js/jquery.dataTables.js"/>
+        <script type="text/javascript" language="javascript" src="#{request.contextPath}/res/datatables/js/dataTables.bootstrap4.js"/>
+        <script type="text/javascript" language="javascript" src="#{request.contextPath}/res/datatables/api/fnFilterOnReturn.js"/>
+    </ui:define>
+
+    <ui:define name="javascript-code">
+        <script>
+            //<![CDATA[
+            $(document).ready(function() {
+                $('#example').DataTable( {
+                    "processing": true,
+                    "serverSide": true,
+                    "ajax": {
+                        "url": "#{request.contextPath}/api/election/dt",
+                        "type": "POST"
+                    },
+                    "language": {
+                        "url": "#{request.contextPath}/res/datatables/i18n/English.json"
+                    },
+                    "fnInitComplete": function(oSettings, json) {
+                        $('#example').dataTable().fnFilterOnReturn();
+                    }
+                } );
+            } );
+
+            // ]]>
+        </script>
+    </ui:define>
+</ui:composition>

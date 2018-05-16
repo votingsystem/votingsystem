@@ -1,0 +1,186 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:h="http://xmlns.jcp.org/jsf/html"
+                xmlns:a="http://xmlns.jcp.org/jsf/passthrough"
+                template="/WEB-INF/templates/main-template.xhtml">
+  <ui:define name="head">
+    <style>
+      .dateColumn {
+        width: 170px;
+      }
+      .userColumn {
+        width: 300px;
+        overflow: hidden;
+        white-space: nowrap;
+      }
+      .stateColumn {
+        width: 80px;
+      }
+    </style>
+  </ui:define>
+  <ui:define name="content">
+    <div class="card container" style="margin: 7px auto; padding: 7px;">
+
+      <table id="electionsTable" class="table table-striped table-bordered" cellspacing="0" width="100%" style="table-layout:fixed;">
+        <thead>
+        <tr>
+          <th>#{msg.subjectLbl}</th>
+          <th>#{msg.userLbl}</th>
+          <th>#{msg.dateLbl}</th>
+          <th>#{msg.stateLbl}</th>
+        </tr>
+        </thead>
+      </table>
+    </div>
+
+    <div>
+      <div class="modal fade" id="electionDialogModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h4 class="modal-title">
+                <span id="openElectionMsg" class="badge badge-success" style="display: none;">#{msg.openLbl}</span>
+                <span id="pendingElectionMsg" class="badge badge-warning" style="display: none;">#{msg.pendingLbl}</span>
+                <span id="closedElectionMsg" class="badge badge-danger" style="display: none;">#{msg.closedLbl}</span>
+                <span id="electionSubject"></span></h4>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <i class="fa fa-times" aria-hidden="true"></i>
+              </button>
+            </div>
+            <div class="modal-body">
+              <div>
+                <div style="margin: 0 15px 0 0;font-style: italic;">
+                  #{msg.dateLbl}: <span id="electionDate"></span>
+                </div>
+              </div>
+              <div id="electionContent" style="font-size: 1.2em; border: 1px solid #f0f3f5; border-radius: 3px;padding: 10px;">
+              </div>
+              <div>
+                <ul id="electionOptions"></ul>
+              </div>
+            </div>
+            <h:form prependId="false" a:accept-charset="ISO-8859-1" id="electionForm">
+              <div class="modal-footer d-flex" style="display: none;">
+
+
+                <h:inputHidden id="electionUUID" value="#{electionBean.electionUUID}"></h:inputHidden>
+                <div class="ml-auto p-2">
+                  <h:commandButton class="btn btn-block btn-primary" value="#{msg.voteLbl}" type="submit" action="#{electionBean.initAuthentication}"/>
+                </div>
+              </div>
+            </h:form>
+          </div>
+          <!-- /.modal-content -->
+        </div>
+        <!-- /.modal-dialog -->
+      </div>
+    </div>
+
+
+  </ui:define>
+
+    <ui:define name="javascript-libs">
+      <link rel="stylesheet" type="text/css" href="#{request.contextPath}/res/datatables/css/dataTables.bootstrap4.css"/>
+
+      <script type="text/javascript" language="javascript" src="#{request.contextPath}/res/datatables/js/jquery.dataTables.js"/>
+      <script type="text/javascript" language="javascript" src="#{request.contextPath}/res/datatables/js/dataTables.bootstrap4.js"/>
+      <script type="text/javascript" language="javascript" src="#{request.contextPath}/res/datatables/api/fnFilterOnReturn.js"/>
+    </ui:define>
+
+    <ui:define name="javascript-code">
+      <script>
+
+        var languageURL;
+
+        switch("#{request.locale}") {
+            case "es_ES":
+                languageURL = "#{request.contextPath}/res/datatables/i18n/es_ES.json";
+                break;
+            default:
+                languageURL = "#{request.contextPath}/res/datatables/i18n/English.json";
+        }
+          //<![CDATA[
+          $(document).ready(function() {
+              $('#electionsTable').DataTable( {
+                  "order": [[3, 'asc']],
+                  "processing": true,
+                  "serverSide": true,
+                  "pageLength": 50,
+                  "ajax": {
+                      "url": "#{request.contextPath}/api/election-list-dt",
+                      "type": "POST"
+                  },
+                  "language": {
+                      "url": languageURL
+                  },
+                  "fnInitComplete": function(oSettings, json) {
+                      $('#electionsTable').dataTable().fnFilterOnReturn();
+                  },
+                  "columns": [
+                    { "data": "subject" },
+                    { "data": "publisher",
+                        "className": "userColumn"
+                    },
+                    { "data": "date",
+                      "className": "dateColumn"
+                    },
+                    { "data": "state",
+                      "className": "stateColumn",
+                      "render": function(data, type, full, meta){
+                          var base64RowData = btoa(JSON.stringify(full))
+                          switch (data) {
+                              case "PENDING":
+                                  return '<button onclick="showElectionDialog(\'' + base64RowData + '\')" class="btn btn-block btn-warning">#{msg.pendingLbl}</button>';
+                                  break;
+                              case "ACTIVE":
+                                  return '<button onclick="showElectionDialog(\'' + base64RowData + '\')" class="btn btn-block btn-success">#{msg.openLbl}</button>';
+                                  break;
+                              default:
+                                  return '<button onclick="showElectionDialog(\'' + base64RowData + '\')" class="btn btn-block btn-danger">#{msg.closedLbl}</button>';
+                          }
+                      }},
+                  ]
+              } );
+          } );
+
+        function showElectionDialog(data) {
+            var rowData = JSON.parse(atob(data));
+            console.log("rowData: ", rowData)
+
+            var optionTemplate = '<li style="margin: 5px 0 0 0; font-size:1.3em;color: #20a8d8;">{0}</li>'
+
+            document.querySelector("#electionOptions").innerHTML = "";
+            for (var i = 0; i < rowData.options.length; i++) {
+                var option = optionTemplate.format(rowData.options[i])
+                document.querySelector("#electionOptions").innerHTML = document.querySelector("#electionOptions").innerHTML + option;
+            }
+
+            document.querySelector("#electionSubject").innerHTML = rowData.subject
+            document.querySelector("#electionDate").innerHTML = rowData.date
+            document.querySelector("#electionContent").innerHTML = rowData.content
+
+            document.querySelector("#openElectionMsg").style.display = "none";
+            document.querySelector("#pendingElectionMsg").style.display = "none";
+            document.querySelector("#closedElectionMsg").style.display = "none";
+
+            document.querySelector("#electionForm").style.display = "none";
+            document.querySelector("#electionUUID").value = rowData.UUID;
+
+            switch (rowData.state) {
+                case "ACTIVE":
+                    document.querySelector("#openElectionMsg").style.display = "";
+                    document.querySelector("#electionForm").style.display = "block";
+                    break;
+                case "PENDING":
+                    document.querySelector("#pendingElectionMsg").style.display = "";
+                    break;
+                default:
+                    document.querySelector("#closedElectionMsg").style.display = "";
+            }
+
+            $("#electionDialogModal").modal();
+        }
+          // ]]>
+      </script>
+    </ui:define>
+</ui:composition>

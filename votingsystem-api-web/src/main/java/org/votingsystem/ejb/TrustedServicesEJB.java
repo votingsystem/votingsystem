@@ -2,23 +2,21 @@ package org.votingsystem.ejb;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import org.votingsystem.crypto.PEMUtils;
-import org.votingsystem.dto.metadata.KeyDto;
 import org.votingsystem.dto.metadata.MetadataDto;
 import org.votingsystem.dto.metadata.TrustedEntitiesDto;
 import org.votingsystem.http.SystemEntityType;
-import org.votingsystem.model.User;
 import org.votingsystem.util.OperationType;
 import org.votingsystem.xml.XML;
 
-import javax.annotation.Resource;
+import javax.annotation.PostConstruct;
 import javax.ejb.Lock;
 import javax.ejb.LockType;
 import javax.ejb.Singleton;
 import javax.ejb.Startup;
-import javax.enterprise.concurrent.ManagedExecutorService;
 import javax.inject.Inject;
 import java.io.File;
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
@@ -27,22 +25,25 @@ import java.util.logging.Logger;
 @Singleton
 @Startup
 @Lock(LockType.READ)
+//@DependsOn("ConfigEJB")
 public class TrustedServicesEJB {
 
     private static final Logger log = Logger.getLogger(TrustedServicesEJB.class.getName());
 
     @Inject private Config config;
     @Inject private MetadataService metadataResource;
-    @Inject private SignerInfoService signerInfoService;
 
     private static Map<String, MetadataDto> trustedEntitiesMap = new ConcurrentHashMap<>();
-
-    /* Executor service for asynchronous processing */
-    @Resource(name="comp/DefaultManagedExecutorService")
-    private ManagedExecutorService executorService;
-
     private TrustedEntitiesDto trustedEntities;
 
+    @PostConstruct
+    public void initialize() {
+        try {
+            loadTrustedServices();
+        } catch (Exception ex) {
+            log.log(Level.SEVERE, ex.getMessage(), ex);
+        }
+    }
 
     /**
      * Method that checks all trusted services every hour -> **:00:00
@@ -62,21 +63,11 @@ public class TrustedServicesEJB {
         trustedEntities = TrustedEntitiesDto.loadTrustedEntities(config.getApplicationDirPath() + "/sec/trusted-entities.xml");
         if(trustedEntities.getEntities() != null) {
             List<TrustedEntitiesDto.EntityDto> entityList = new ArrayList<>(trustedEntities.getEntities());
-            Collections.sort(entityList);
             for(TrustedEntitiesDto.EntityDto trustedEntity: entityList) {
                 log.info("trusted entity: " + trustedEntity.getType() + " from country: " + trustedEntity.getCountryCode());
                 try {
-                    MetadataDto metadataDto = null;
-                    switch(trustedEntity.getType()) {
-                        case TIMESTAMP_SERVER:
-                            metadataDto = metadataResource.getMetadataFromURL(
-                                    OperationType.GET_METADATA.getUrl(trustedEntity.getId()), false, false);
-                            checkTimeStampServer(metadataDto);
-                        default:
-                            metadataDto = metadataResource.getMetadataFromURL(
-                                    OperationType.GET_METADATA.getUrl(trustedEntity.getId()), true, false);
-                            break;
-                    }
+                    MetadataDto metadataDto = metadataResource.getMetadataFromURL(OperationType.GET_METADATA.getUrl(
+                            trustedEntity.getId()), true, false);
                     trustedEntitiesMap.put(metadataDto.getEntity().getId(), metadataDto);
                 } catch (Exception ex) {
                     log.log(Level.SEVERE, "Error loading trusted entity: " + trustedEntity.getId() + " - " + ex.getMessage(), ex);
@@ -84,21 +75,6 @@ public class TrustedServicesEJB {
             }
         }
         return trustedEntitiesMap.keySet();
-    }
-
-    private void checkTimeStampServer(MetadataDto metadataDto) {
-        log.info("Entity id: " + metadataDto.getEntity().getId());
-        for(KeyDto keyDto : metadataDto.getKeyDescriptorSet()) {
-            try {
-                if(KeyDto.Use.SIGN == keyDto.getUse()) {
-                    User user = signerInfoService.checkSigner(keyDto.getX509Certificate(), User.Type.TIMESTAMP_SERVER,
-                            metadataDto.getEntity().getId());
-                    config.addTrustedTimeStampIssuer(keyDto.getX509Certificate());
-                }
-            } catch (Exception ex) {
-                log.log(Level.SEVERE, ex.getMessage(), ex);
-            }
-        }
     }
 
     public TrustedEntitiesDto getTrustedEntities() {
@@ -128,4 +104,25 @@ public class TrustedServicesEJB {
         }
         return result;
     }
+
+    public MetadataDto getEntityMetadata(String entityId) {
+        MetadataDto metadata = trustedEntitiesMap.get(entityId);
+        if(metadata != null) {
+            if (metadata.getValidUntilDate().isAfter(LocalDateTime.now())) {
+                log.info("metadata expired - entityId: " + entityId);
+                trustedEntitiesMap.remove(entityId);
+                return null;
+            }
+        }
+        return metadata;
+    }
+
+    public MetadataDto getFirstEntity(SystemEntityType entityType) {
+        for(MetadataDto metadata : trustedEntitiesMap.values()) {
+            if(entityType == metadata.getEntity().getEntityType())
+                return metadata;
+        }
+        return null;
+    }
+
 }

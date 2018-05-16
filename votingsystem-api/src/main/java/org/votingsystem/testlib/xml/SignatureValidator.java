@@ -73,8 +73,15 @@ public class SignatureValidator {
         Element signedProperties = qualifyingProperties.getElement(XAdESUtils.XADES_NAMESPACE, "SignedProperties");
         Element signedSignatureProperties = signedProperties.getElement(null, "SignedSignatureProperties");
 
+        Element signingCertificate;
+        try {
+            signingCertificate = signedSignatureProperties.getElement(null, "SigningCertificate");
+        } catch (Exception ex) {
+            signingCertificate = signedSignatureProperties.getElement(null, "SigningCertificateV2");
+        }
+
         result.setSigningCertificate(XAdESUtils.getSigningCertificate(signatureElement.getElement(null, "KeyInfo"),
-                signedSignatureProperties.getElement(null, "SigningCertificate")));
+                signingCertificate));
         result.setSigningTime(DateUtils.getDate((String) signedSignatureProperties.getElement(
                 XAdESUtils.XADES_NAMESPACE, "SigningTime").getChild(0)));
         result.setSignedPropertiesElement(qualifyingProperties.getElement(XAdESUtils.XADES_NAMESPACE, "SignedProperties"));

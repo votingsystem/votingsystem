@@ -18,8 +18,12 @@ public class DateTest {
     private static final Logger log = Logger.getLogger(DateTest.class.getName());
 
     public static void main(String[] args) throws Exception {
-       LocalDateTime localDateTime = LocalDateTime.now();
-        log.info("localDateTime: " + localDateTime + " - Date: " + getUTCDate(localDateTime));
+
+        LocalDate localDate = LocalDate.parse("2018 05 01", DateTimeFormatter.ofPattern("yyyy MM dd"));
+        ZonedDateTime zonedDateTime = localDate.atStartOfDay(ZoneOffset.UTC).withZoneSameInstant(ZoneId.systemDefault());
+        log.info("zonedDateTime: " + zonedDateTime);
+        log.info("LocalDateTime: " + zonedDateTime.toLocalDateTime());
+
     }
 
 

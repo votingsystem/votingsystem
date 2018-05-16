@@ -58,8 +58,9 @@ public class ElectionOption extends EntityBase implements Serializable {
         return election;
     }
 
-    public void setElection(Election election) {
+    public ElectionOption setElection(Election election) {
         this.election = election;
+        return this;
     }
 
     public Long getId() {

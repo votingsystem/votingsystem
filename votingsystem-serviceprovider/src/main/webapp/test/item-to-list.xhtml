@@ -1,0 +1,145 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                template="/WEB-INF/templates/basic.xhtml">
+    <ui:define name="head">
+        <style>
+            /* https://www.w3schools.com/howto/howto_js_todolist.asp
+            Include the padding and border in an element's total width and height */
+            * {
+                box-sizing: border-box;
+            }
+
+            /* Remove margins and padding from the list */
+            #electionOptionList {
+                margin: 0;
+                padding: 0;
+            }
+
+            /* Style the list items */
+            #electionOptionList li {
+                cursor: pointer;
+                position: relative;
+                padding: 12px 8px 12px 40px;
+                background: #eee;
+                font-size: 18px;
+                transition: 0.2s;
+
+                /* make the list items unselectable */
+                -webkit-user-select: none;
+                -moz-user-select: none;
+                -ms-user-select: none;
+                user-select: none;
+                list-style-type: none;
+            }
+
+            /* Set all odd list items to a different color (zebra-stripes) */
+            #electionOptionList li:nth-child(odd) {
+                background: #f9f9f9;
+            }
+
+            #electionOptionList li:hover {
+                background: #ddd;
+            }
+
+            .removeElectionOption {
+                position: absolute;
+                right: 0;
+                top: 0;
+                padding: 12px 16px 12px 16px;
+            }
+
+            .removeElectionOption:hover {
+                background-color: #f44336;
+                color: white;
+            }
+
+            .electionOptionSelectorHeader {
+                padding: 10px 15px;
+                text-align: center;
+            }
+
+            /* Clear floats after the electionOptionSelectorHeader */
+            .electionOptionSelectorHeader:after {
+                content: "";
+                display: table;
+                clear: both;
+            }
+
+            /* Style the input */
+            input {
+                border: 1px solid #d9d9d9;
+                width: 75%;
+                padding: 7px;
+                float: left;
+                font-size: 16px;
+            }
+
+            /* Style the "Add" button */
+            .addElectionOption {
+                padding: 10px;
+                width: 25%;
+                background: #d9d9d9;
+                color: #555;
+                float: left;
+                text-align: center;
+                font-size: 16px;
+                cursor: pointer;
+                transition: 0.3s;
+            }
+
+            .addElectionOption:hover {
+                background-color: #bbb;
+            }
+
+        </style>
+    </ui:define>
+    <ui:define name="content">
+    <div style="margin: 10px auto;">
+        <div class="electionOptionSelectorHeader">
+            <h2>#{msg.electionOptionsLbl}</h2>
+            <input type="text" id="electionOptionInput" placeholder="#{msg.optionLbl}" maxlength="90"/>
+            <span onclick="addElectionOption()" class="addElectionOption">#{msg.addLbl}</span>
+        </div>
+        <ul id="electionOptionList">
+        </ul>
+    </div>
+        <script>
+            //<![CDATA[
+
+            var electionOptionsMap = {};
+            // Create a new list item when clicking on the "Add" button
+            function addElectionOption() {
+                var removeOptionList = document.getElementsByClassName("removeElectionOption");
+                var li = document.createElement("li");
+                li.setAttribute("index", removeOptionList.length);
+                var inputValue = document.getElementById("electionOptionInput").value;
+                electionOptionsMap[removeOptionList.length] = inputValue;
+                var t = document.createTextNode(inputValue);
+                li.appendChild(t);
+                if (inputValue === '') {
+                    alert("You must write something!");
+                } else {
+                    document.getElementById("electionOptionList").appendChild(li);
+                }
+                document.getElementById("electionOptionInput").value = "";
+
+                var span = document.createElement("SPAN");
+                var txt = document.createTextNode("\u00D7");
+                span.className = "removeElectionOption";
+                span.appendChild(txt);
+                li.appendChild(span);
+
+                for (i = 0; i < removeOptionList.length; i++) {
+                    removeOptionList[i].onclick = function() {
+                        var div = this.parentElement;
+                        var mapKey = div.getAttribute("index");
+                        delete electionOptions[mapKey];
+                        div.style.display = "none";
+                        console.log(electionOptions)
+                    }
+                }
+            }
+            // ]]>
+        </script>
+    </ui:define>
+</ui:composition>

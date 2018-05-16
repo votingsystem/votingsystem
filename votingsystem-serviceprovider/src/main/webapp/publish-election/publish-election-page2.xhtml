@@ -1,0 +1,106 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:h="http://xmlns.jcp.org/jsf/html"
+                xmlns:o="http://omnifaces.org/ui"
+                xmlns:a="http://xmlns.jcp.org/jsf/passthrough"
+                template="/WEB-INF/templates/main-template.xhtml">
+  <ui:define name="head">
+  </ui:define>
+  <ui:define name="content">
+    <div class="card" style="margin:10px auto; max-width: 1000px;">
+      <h:messages globalOnly="true" styleClass="alert alert-warning"/>
+      <div class="card-header">
+        <h4 style="text-align: center;">#{msg.publishElectionLbl}</h4>
+        <h2 style="text-align: center;">#{msg.readQRCodeMsg}</h2>
+      </div>
+      <div class="card-body">
+          <div>
+              <div style="text-transform:capitalize;font-weight:bold;text-align:center;font-size:1.6em">#{publishElection.electionSubject}</div>
+              <div style="margin: 0 15px 0 0;font-style: italic;">
+                  #{msg.dateLbl}: #{publishElection.electionDate}
+              </div>
+          </div>
+          <div>
+            <div style="font-size: 1.2em; border: 1px solid #f0f3f5; border-radius: 3px;padding: 10px;">
+              <h:outputText value="#{publishElection.electionContent}" escape="false"/>
+            </div>
+            <div>
+              <div style="font-size: 1.2em;font-weight: bold;margin: 0 10px 0 0;">
+                #{msg.electionOptionsLbl}:
+              </div>
+              <div>
+                <ul id="electionOptions"></ul>
+              </div>
+            </div>
+
+          </div>
+            <div id="qrImgDiv" style="margin: 0 auto; text-align: center; ">
+              <div style="font-size: 1.8em;color: #3a8287;">#{publishElection.getQrId()}</div>
+              <img id="qrImg" src="#{publishElection.getQRCodeURL()}"/>
+            </div>
+      </div>
+
+      <div class="card-footer">
+        <h:form prependId="false" a:accept-charset="ISO-8859-1">
+          <div id="submitButtonDiv" style="display: flex; flex-direction: row;justify-content: flex-end;">
+            <div style="margin: 0 10px 0 0;">
+              <h:commandLink value="#{msg.backLbl}" class="btn btn-block btn-primary" action="publish-election"/>
+            </div>
+            <div>
+              <h:commandLink value="#{msg.cancelLbl}" class="btn btn-block btn-danger" action="endFlow"/>
+            </div>
+          </div>
+        </h:form>
+      </div>
+    </div>
+
+    <o:socket channel="serviceUpdated" user="#{publishElection.qrUUID}" onmessage="serviceUpdated" scope="view"/>
+
+    <div id="publishResultDialog" class="modal fade bs-example-modal-sm" tabindex="-1" role="dialog" aria-hidden="true">
+      <div class="modal-dialog modal-sm">
+        <div class="modal-content" style="text-align: center; padding: 15px;">
+          <h3 class="modal-title" style="font-size: 1.4em;font-weight: bold;">#{msg.operationOkMsg}</h3>
+          <div id="publishResultDialogMessage" style="font-size: 1.2em;"></div>
+          <div style="margin: 15px 0 0 0;display: flex; flex-direction: row;justify-content: flex-end;">
+            <a href="#{request.contextPath}/election/election.xhtml?UUID=#{publishElection.electionUUID}" type="button"
+               class="btn btn-primary">#{msg.acceptLbl}</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </ui:define>
+  <ui:define name="javascript-code">
+    <script>
+        //<![CDATA[
+        var electionOptionsSeparator = "#{publishElection.electionOptionsSeparator}";
+
+        function serviceUpdated(updateMessage) {
+            console.log("updateMessage: " + updateMessage)
+            var responseDto = JSON.parse(updateMessage);
+            if(200 == responseDto.statusCode) {
+                document.querySelector("#submitButtonDiv").style.display = 'none';
+                document.querySelector("#qrImgDiv").style.display = 'none';
+                document.querySelector("#publishResultDialogMessage").innerHTML = responseDto.message;
+                $("#publishResultDialog").modal({backdrop: 'static', keyboard: false})
+            } else {
+                app.alert("#{msg.operationErrorMsg}", responseDto.message)
+            }
+        }
+
+        console.log("qrCodeURL: #{publishElection.getQRCodeURL()}")
+
+        var optionTemplate = '<li style="margin: 5px 0 0 0; font-size:1.5em;color: #20a8d8;">{0}</li>'
+
+        $(document).ready(function() {
+            var electionOptionsStr =  app.b64_to_utf8("#{publishElection.electionOptionsBase64}");
+            var electionOptions = electionOptionsStr.split(electionOptionsSeparator);
+            for (var i = 0; i < electionOptions.length; i++) {
+                var option = optionTemplate.format(electionOptions[i])
+                document.querySelector("#electionOptions").innerHTML = document.querySelector("#electionOptions").innerHTML + option;
+            }
+        })
+        // ]]>
+    </script>
+  </ui:define>
+</ui:composition>

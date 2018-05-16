@@ -32,7 +32,7 @@ public class PublishElection extends BaseTest {
 
     private static final String TAG = PublishElection.class.getSimpleName();
 
-    private static final String QR_CODE = "eid=https://voting.ddns.net/voting-service;uid=dce1f8a8-34d4-4172-9054-c958736cb3cb;";
+    private static final String QR_CODE = "eid=https://voting.ddns.net/voting-service;uid=987980d1-8c77-4cf4-9777-514129a52f2f;";
 
     public PublishElection() {
         super();

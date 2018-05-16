@@ -2,7 +2,6 @@ package org.votingsystem.util;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import eu.europa.esig.dss.DSSException;
-import org.votingsystem.throwable.SignatureException;
 import org.votingsystem.throwable.ValidationException;
 import org.votingsystem.throwable.XAdESValidationException;
 import org.votingsystem.throwable.XMLValidationException;

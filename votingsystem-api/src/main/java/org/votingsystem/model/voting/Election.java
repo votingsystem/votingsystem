@@ -39,15 +39,20 @@ public class Election extends EntityBase implements Serializable {
 
     public static final String FIND_BY_UUID_AND_SYSTEM_ENTITY_ID = "FIND_ELECTION_BY_UUID_AND_SYSTEM_ENTITY_ID";
 
+    /**
+     * The order is important in order to sort fields
+     *
+     * https://stackoverflow.com/questions/33508465/custom-sort-order-for-an-enum-field
+     */
     public enum State {
         @JsonProperty("ACTIVE")
         ACTIVE,
+        @JsonProperty("PENDING")
+        PENDING,
         @JsonProperty("TERMINATED")
         TERMINATED,
         @JsonProperty("CANCELED")
         CANCELED,
-        @JsonProperty("PENDING")
-        PENDING,
         @JsonProperty("DELETED_FROM_SYSTEM")
         DELETED_FROM_SYSTEM }
 
@@ -66,7 +71,7 @@ public class Election extends EntityBase implements Serializable {
     private String subject;
     @Column(name="ENTITY_ID")
     private String entityId;
-    @Enumerated(EnumType.STRING)
+    @Enumerated(EnumType.ORDINAL)
     @Column(name="STATE")
     private State state;
     @OneToOne

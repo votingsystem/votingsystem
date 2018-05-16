@@ -10,7 +10,8 @@ public class JCEPolicyTest {
 
     public static void main(String[] args) throws NoSuchPaddingException, InvalidKeyException, NoSuchAlgorithmException,
             IllegalBlockSizeException, BadPaddingException, NoSuchProviderException, InvalidAlgorithmParameterException {
-        cipherTest();
+        //cipherTest();
+        simpleTest();
     }
 
     public static void simpleTest() {
@@ -33,7 +34,7 @@ public class JCEPolicyTest {
 
         SecureRandom random = SecureRandom.getInstanceStrong();
         KeyGenerator keyGen = KeyGenerator.getInstance("AES");
-        keyGen.init(128, random);
+        keyGen.init(256, random);
         SecretKey key = keyGen.generateKey();
 
         Cipher cipher = Cipher.getInstance("AES/GCM/NoPadding", "SunJCE");

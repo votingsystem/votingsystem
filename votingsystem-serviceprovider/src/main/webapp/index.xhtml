@@ -2,12 +2,12 @@
                 xmlns:ui="http://java.sun.com/jsf/facelets"
                 template="/WEB-INF/templates/basic.xhtml">
     <ui:define name="head">
-        <meta http-equiv="refresh" content="0; url=#{request.contextPath}/election/elections.xhtml?state=ACTIVE" />
+        <meta http-equiv="refresh" content="0; url=#{request.contextPath}/election/election-list.xhtml" />
     </ui:define>
     <ui:define name="content">
     <div style="margin: 10px auto;">
         <p style="text-align: center;">
-            <a href="#{request.contextPath}/election/elections.xhtml?state=ACTIVE">Redirect</a>
+            <a href="#{request.contextPath}/election/election-list.xhtml">Redirect</a>
         </p>
     </div>
     </ui:define>

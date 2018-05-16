@@ -59,7 +59,6 @@ public class MetadataEJB implements MetadataService {
             SignatureParams signatureParams = new SignatureParams(metadata.getEntity().getId(), User.Type.ENTITY,
                     SignedDocumentType.ENTITY_METADATA).setWithTimeStampValidation(withTimeStampValidation);
             signatureService.validateXAdESAndSave(signedDocument, signatureParams);
-            config.putEntityMetadata(metadata);
         } catch (Exception ex) {
             log.log(Level.SEVERE, ex.getMessage(), ex);
             throw new XMLValidationException(Messages.currentInstance().get("invalidMetadataMsg"));

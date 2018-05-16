@@ -276,7 +276,8 @@ vs.showQR = function (message, qrId, qrURL) {
 
 
 vs.setMainPageCaption = function (mainPageCaption) {
-    document.querySelector("#mainPageCaption").innerHTML = mainPageCaption;
+    if(document.querySelector("#mainPageCaption"))
+        document.querySelector("#mainPageCaption").innerHTML = mainPageCaption;
 }
 
 vs.QROperationCode = {

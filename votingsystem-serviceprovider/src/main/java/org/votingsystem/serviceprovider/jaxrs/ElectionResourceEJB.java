@@ -139,6 +139,7 @@ public class ElectionResourceEJB {
         }
         ResultListDto<ElectionDto> resultListDto = new ResultListDto<>(electionDtoList, offset, max, electionList.size());
         return HttpResponse.sendResponseDto(ResponseDto.SC_OK, req, res, resultListDto);
+
     }
 
     @GET @Path("/uuid/{uuid}/stats")
@@ -169,4 +170,5 @@ public class ElectionResourceEJB {
             return Response.ok().build();
         } else return HttpResponse.sendResponseDto(ResponseDto.SC_OK, req, res, statsDto);
     }
+
 }

@@ -1,20 +1,8 @@
 package org.votingsystem.serviceprovider.jaxrs;
 
-import org.omnifaces.cdi.Push;
-import org.omnifaces.cdi.PushContext;
-import org.votingsystem.dto.ResponseDto;
-import org.votingsystem.dto.voting.ElectionDto;
-import org.votingsystem.ejb.Config;
-import org.votingsystem.ejb.QRSessionsEJB;
-import org.votingsystem.ejb.SignatureServiceEJB;
-import org.votingsystem.ejb.TrustedServicesEJB;
-import org.votingsystem.model.SignedDocument;
 import org.votingsystem.model.voting.Election;
-import org.votingsystem.serviceprovider.ejb.ConfigServiceProvider;
-import org.votingsystem.util.JSON;
-import org.votingsystem.xml.XML;
+import org.votingsystem.serviceprovider.ejb.TestEJB;
 
-import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
@@ -22,10 +10,10 @@ import javax.persistence.PersistenceContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
-import java.util.List;
+import java.time.*;
+import java.time.format.DateTimeFormatter;
 import java.util.logging.Logger;
 
 
@@ -38,57 +26,32 @@ public class TestResource {
 
     private static final Logger log = Logger.getLogger(TestResource.class.getName());
 
+    @Inject
+    private TestEJB testEJB;
     @PersistenceContext
     private EntityManager em;
-    @Inject private SignatureServiceEJB signatureService;
-    @Inject @Push
-    private PushContext serviceUpdated;
-    @Inject
-    ConfigServiceProvider configServiceProvider;
-    @Inject
-    TrustedServicesEJB trustedServices;
-    @Inject private Config config;
-    @EJB QRSessionsEJB qrSessionsEJB;
+
 
     @GET @Path("/")
     public Response test(@Context HttpServletRequest req) throws Exception {
+        testEJB.loadTestElections(10, Election.State.ACTIVE);
         return Response.ok().entity("OK").build();
     }
 
-    @GET @Path("/load")
-    public Response load(@Context HttpServletRequest req) throws Exception {
-        trustedServices.loadTrustedServices();
-        return Response.ok().entity("OK - load").build();
+    @GET @Path("/query")
+    public Response query(@Context HttpServletRequest req) throws Exception {
+        LocalDate localDate = LocalDate.parse("2018 05 15", DateTimeFormatter.ofPattern("yyyy MM dd"));
+        ZonedDateTime zonedDateTime = localDate.atStartOfDay(ZoneOffset.UTC).withZoneSameInstant(ZoneId.systemDefault());
+        LocalDateTime searchDate = zonedDateTime.toLocalDateTime();
+        LocalDateTime dateFrom = searchDate.minusSeconds(1);
+        LocalDateTime dateTo = searchDate.plusSeconds(1);
+        log.info("searchDate: " + searchDate + " - dateFrom: " + dateFrom + " - dateTo: " + dateTo);
+        //long numResults = (long)em.createQuery("SELECT COUNT (e) FROM Election e where e.dateBegin between :dateFrom and :dateTo")
+        //        .setParameter("dateFrom", dateFrom).setParameter("dateTo", dateTo).getSingleResult();
+        long numResults = (long)em.createQuery("SELECT COUNT (e) FROM Election e where e.dateBegin = :searchDate")
+                .setParameter("searchDate", searchDate).getSingleResult();
+        return Response.ok().entity("num results: " + numResults).build();
     }
 
-    @GET @Path("/check")
-    public Response check(@Context HttpServletRequest req) throws Exception {
-        configServiceProvider.checkElectionStates();
-        return Response.ok().entity("check OK").build();
-    }
-
-    @GET @Path("/push/{socketClientId}")
-    public Response push(@PathParam("socketClientId") String socketClientId, @Context HttpServletRequest req) throws Exception {
-        ResponseDto response = new ResponseDto(ResponseDto.SC_OK, "messsage");
-        serviceUpdated.send(JSON.getMapper().writeValueAsString(response), socketClientId);
-        return Response.ok().entity("push sent").build();
-    }
-
-    @GET @Path("/cert")
-    public Response cert(@Context HttpServletRequest req) throws Exception {
-        return Response.ok().entity("KeyHash").build();
-    }
-
-    @GET @Path("/saveElection")
-    public Response saveElection(@Context HttpServletRequest req) throws Exception {
-        List<SignedDocument> signedDocumentList = em.createQuery("SELECT sd FROM SignedDocument sd WHERE sd.id=:signedDocumentId")
-                .setParameter("signedDocumentId", 6L).getResultList();
-        SignedDocument signedDocument = signedDocumentList.iterator().next();
-        ElectionDto electionDto = XML.getMapper().readValue(signedDocument.getBody(), ElectionDto.class);
-        electionDto.validatePublishRequest();
-        Election election = new Election(electionDto, signedDocument);
-        em.persist(election);
-        return Response.ok().entity("SignedDocument OK election: " + election.getId()).build();
-    }
 
 }

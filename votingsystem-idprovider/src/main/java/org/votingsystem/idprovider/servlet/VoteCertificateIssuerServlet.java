@@ -4,7 +4,6 @@ import org.votingsystem.crypto.CsrResponse;
 import org.votingsystem.crypto.SignatureParams;
 import org.votingsystem.crypto.SignedDocumentType;
 import org.votingsystem.dto.ResponseDto;
-
 import org.votingsystem.ejb.SignatureServiceEJB;
 import org.votingsystem.http.AnonCertMultipartRequest;
 import org.votingsystem.http.ContentType;
@@ -14,7 +13,6 @@ import org.votingsystem.model.User;
 
 import javax.ejb.EJB;
 import javax.ejb.TransactionAttribute;
-import javax.inject.Inject;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.MultipartConfig;
 import javax.servlet.annotation.WebServlet;

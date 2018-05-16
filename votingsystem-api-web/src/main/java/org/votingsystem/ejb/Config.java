@@ -28,7 +28,6 @@ public interface Config {
     public Map<Long, X509Certificate> getTrustedTimeStampServers();
     public MetadataDto getMetadata();
     public boolean isAdmin(User user) throws ValidationException;
-    public void putEntityMetadata(MetadataDto metadata);
     public X509Certificate getSigningCert();
 
 }

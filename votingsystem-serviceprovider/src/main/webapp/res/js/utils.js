@@ -55,3 +55,33 @@ Date.prototype.toISOStr = function() {
     return this.toISOString().slice(0, 10) + " " +
         ('0' + this.getHours()).slice(-2) + ":" + ('0' + this.getMinutes()).slice(-2) + ":" + ('0' + this.getSeconds()).slice(-2)
 }
+
+app.setMainPageCaption = function (mainPageCaption) {
+    if(document.querySelector("#mainPageCaption"))
+        document.querySelector("#mainPageCaption").innerHTML = mainPageCaption;
+}
+
+app.alert = function (caption, message) {
+    if(document.querySelector("#alertDialogQRImgDiv"))
+        document.querySelector("#alertDialogQRImgDiv").style.display = 'none';
+    document.querySelector("#alertDialogMsgDiv").style.display = 'block';
+    document.querySelector("#alertCaption").innerHTML = caption;
+    document.querySelector("#alertMessage").innerHTML = message;
+    $("#alertDialog").modal();
+}
+
+app.utf8_to_b64 = function utf8_to_b64(str) {
+    return window.btoa(unescape(encodeURIComponent(str)));
+}
+
+app.b64_to_utf8 = function b64_to_utf8(str) {
+    return decodeURIComponent(escape(window.atob(str)));
+}
+
+String.prototype.format = function() {
+    var args = arguments;
+    var str =  this.replace(/''/g, "'")
+    return str.replace(/{(\d+)}/g, function(match, number) {
+        return typeof args[number] != 'undefined' ? args[number] : match;
+    });
+};

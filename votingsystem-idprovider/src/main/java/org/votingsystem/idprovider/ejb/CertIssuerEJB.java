@@ -9,7 +9,6 @@ import org.votingsystem.dto.indentity.IdentityRequestDto;
 import org.votingsystem.dto.indentity.SessionCertificationDto;
 import org.votingsystem.dto.voting.CertVoteExtensionDto;
 import org.votingsystem.ejb.CmsEJB;
-
 import org.votingsystem.ejb.SignatureServiceEJB;
 import org.votingsystem.ejb.SignerInfoService;
 import org.votingsystem.model.*;
@@ -40,7 +39,6 @@ import java.security.cert.X509Certificate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
-import java.time.temporal.ChronoUnit;
 import java.util.Date;
 import java.util.List;
 import java.util.Properties;

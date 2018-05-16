@@ -1,0 +1,14 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                template="/WEB-INF/templates/basic.xhtml">
+    <ui:define name="head">
+        <meta http-equiv="refresh" content="0; url=#{request.contextPath}/election/elections.xhtml?state=ACTIVE" />
+    </ui:define>
+    <ui:define name="content">
+        <div style="margin: 10px auto;">
+            <p style="text-align: center;">
+                <a href="#{request.contextPath}/election/elections.xhtml?state=ACTIVE">Redirect</a>
+            </p>
+        </div>
+    </ui:define>
+</ui:composition>

@@ -1,0 +1,38 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                template="/WEB-INF/templates/bootstrap.xhtml">
+    <ui:define name="head">
+    </ui:define>
+
+    <ui:define name="content">
+        <textarea id="mainEditor"></textarea>
+        <button class="btn btn-primary" onclick="readEditor()">Read editor</button>
+    </ui:define>
+
+    <ui:define name="javascript-libs">
+        <script src="#{request.contextPath}/res/tinymce/jquery.tinymce.min.js"></script>
+        <script src="#{request.contextPath}/res/tinymce/tinymce.min.js"></script>
+    </ui:define>
+
+    <ui:define name="javascript-code">
+        <script>
+            //<![CDATA[
+            tinymce.init({
+                selector: '#mainEditor',
+                height: 500,
+                menubar: false,
+                language: 'es',
+                plugins: "lists",
+                toolbar: 'bold italic backcolor  | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent'
+            });
+
+            function readEditor() {
+                console.log("content: " + tinyMCE.activeEditor.getContent());
+                tinyMCE.activeEditor.setContent("<b>leido</b>");
+            }
+            // ]]>
+        </script>
+
+
+    </ui:define>
+</ui:composition>

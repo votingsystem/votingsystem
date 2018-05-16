@@ -1,6 +1,14 @@
 package org.votingsystem.testlib.xml;
 
+import eu.europa.esig.dss.DSSException;
 import eu.europa.esig.dss.DigestAlgorithm;
+import org.bouncycastle.asn1.ASN1Encodable;
+import org.bouncycastle.asn1.ASN1Encoding;
+import org.bouncycastle.asn1.x500.X500Name;
+import org.bouncycastle.asn1.x509.GeneralName;
+import org.bouncycastle.asn1.x509.GeneralNames;
+import org.bouncycastle.asn1.x509.IssuerSerial;
+import org.bouncycastle.cert.X509CertificateHolder;
 import org.bouncycastle.util.encoders.Base64;
 import org.kxml2.kdom.Document;
 import org.kxml2.kdom.Element;
@@ -11,6 +19,7 @@ import org.votingsystem.util.Constants;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateEncodingException;
@@ -30,7 +39,7 @@ public class XAdESUtils {
     public static final String XAdES132 = "http://uri.etsi.org/01903/v1.3.2#";
     public static final String CANONICALIZATION_METHOD = "http://www.w3.org/2001/10/xml-exc-c14n#";
     public static final String SIGNED_PROPERTIES_REFERENCE_TYPE = "http://uri.etsi.org/01903#SignedProperties";
-    public static final String DATA_DIGEST_ALGORITHM = "SHA-256";
+    public static final String DATA_DIGEST_ALGORITHM = "SHA256";
     public static final String DOCUMENT_TO_SIGN_REFERENCE = "r-id-1";
     public static final String XML_MIME_TYPE = "text/xml";
 
@@ -53,7 +62,7 @@ public class XAdESUtils {
         return null;
     }
 
-    public static Element buildSigningCertificateElement(X509Certificate signingCertificate,
+    /*public static Element buildSigningCertificateElement(X509Certificate signingCertificate,
                                                          boolean canonicalized) throws NoSuchAlgorithmException, CertificateEncodingException {
         Document doc = new Document();
         Element signingCertificateElement = doc.createElement("", "xades:SigningCertificate");
@@ -91,6 +100,54 @@ public class XAdESUtils {
         certElement.addChild(Node.ELEMENT, issuerSerialElement);
 
         return signingCertificateElement;
+    }*/
+
+    public static Element buildSigningCertificateElement(X509Certificate signingCertificate,
+                     boolean canonicalized) throws NoSuchAlgorithmException, CertificateEncodingException, IOException {
+        Document doc = new Document();
+        Element signingCertificateElement = doc.createElement("", "xades:SigningCertificateV2");
+        Element certElement = doc.createElement("", "xades:Cert");
+        signingCertificateElement.addChild(Node.ELEMENT, certElement);
+        Element certDigestElement = doc.createElement("", "xades:CertDigest");
+        certElement.addChild(Node.ELEMENT, certDigestElement);
+        Element digestMethodElement = doc.createElement("", "ds:DigestMethod");
+        if (canonicalized) {
+            digestMethodElement.setAttribute(null, "xmlns:ds", DS_NAMESPACE);
+            digestMethodElement.addChild(Node.TEXT, "");
+        }
+        digestMethodElement.setAttribute(null, "Algorithm", DigestAlgorithm.SHA1.getXmlId());
+        Element digestValueElement = doc.createElement("", "ds:DigestValue");
+        if (canonicalized) {
+            digestValueElement.setAttribute(null, "xmlns:ds", DS_NAMESPACE);
+        }
+        digestValueElement.addChild(Node.TEXT, HashUtils.getHashBase64(signingCertificate.getEncoded(), "SHA-1"));
+        certDigestElement.addChild(Node.ELEMENT, digestMethodElement);
+        certDigestElement.addChild(Node.ELEMENT, digestValueElement);
+
+        Element issuerSerialElement = doc.createElement("", "xades:IssuerSerialV2");
+        IssuerSerial issuerSerial = getIssuerSerial(signingCertificate);
+        String issuerBase64 = java.util.Base64.getEncoder().encodeToString(getDEREncoded(issuerSerial));
+        issuerSerialElement.addChild(Node.TEXT, issuerBase64);
+        certElement.addChild(Node.ELEMENT, issuerSerialElement);
+
+        return signingCertificateElement;
+    }
+
+    public static IssuerSerial getIssuerSerial(X509Certificate signingCertificate) throws CertificateEncodingException, IOException {
+        final X500Name issuerX500Name = new X509CertificateHolder(signingCertificate.getEncoded()).getIssuer();
+        final GeneralName generalName = new GeneralName(issuerX500Name);
+        final GeneralNames generalNames = new GeneralNames(generalName);
+        final BigInteger serialNumber = signingCertificate.getSerialNumber();
+        final IssuerSerial issuerSerial = new IssuerSerial(generalNames, serialNumber);
+        return issuerSerial;
+    }
+
+    public static byte[] getDEREncoded(ASN1Encodable asn1Encodable) {
+        try {
+            return asn1Encodable.toASN1Primitive().getEncoded(ASN1Encoding.DER);
+        } catch (IOException e) {
+            throw new DSSException("Unable to encode to " + ASN1Encoding.DER, e);
+        }
     }
 
     public static Element buildSignedDataObjectPropertiesElement(String documentToSignMimeType) {
@@ -107,7 +164,7 @@ public class XAdESUtils {
 
     public static Element buildSignedPropertiesElement(X509Certificate signingCertificate, String signatureId,
                                                        Date signingTime, String documentToSignMimeType, boolean canonicalized) throws NoSuchAlgorithmException,
-            CertificateEncodingException {
+            CertificateEncodingException, IOException {
         Document doc = new Document();
         Element signedPropertiesElement = doc.createElement("", "xades:SignedProperties");
         if (canonicalized) {
@@ -205,8 +262,8 @@ public class XAdESUtils {
     }
 
     public static Element buildSignedPropertiesReferenceElement(X509Certificate signingCertificate, String signatureId,
-                                                                String digestAlgorithm, Date signingTime, String documentToSignMimeType, boolean canonicalized)
-            throws NoSuchAlgorithmException, IOException, CertificateEncodingException, ParseException {
+                        String digestAlgorithm, Date signingTime, String documentToSignMimeType, boolean canonicalized)
+            throws NoSuchAlgorithmException, IOException, CertificateEncodingException {
         Document doc = new Document();
         Element referenceElement = doc.createElement("", "ds:Reference");
         referenceElement.setAttribute(null, "Type", SIGNED_PROPERTIES_REFERENCE_TYPE);

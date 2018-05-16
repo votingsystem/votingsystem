@@ -12,7 +12,6 @@ import org.votingsystem.crypto.PEMUtils;
 import org.votingsystem.dto.metadata.MetadataDto;
 import org.votingsystem.dto.metadata.MetadataUtils;
 import org.votingsystem.ejb.Config;
-import org.votingsystem.ejb.MetadataService;
 import org.votingsystem.ejb.TrustedServicesEJB;
 import org.votingsystem.http.HttpConn;
 import org.votingsystem.http.SystemEntityType;
@@ -46,7 +45,6 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.LogManager;
@@ -70,8 +68,6 @@ public class ConfigEJB implements Config, ConfigServiceProvider, Serializable {
     @PersistenceContext
     private EntityManager em;
     @Inject
-    MetadataService metadataEJB;
-    @Inject
     TrustedServicesEJB trustedServices;
 
     private String entityId;
@@ -84,7 +80,6 @@ public class ConfigEJB implements Config, ConfigServiceProvider, Serializable {
     private X509Certificate signingCert;
     private TrustedListsCertificateSource trustedCertSource;
     private Map<Long, Certificate> trustedCACertsMap = new HashMap<>();
-    private Map<String, MetadataDto> entityMap;
     private Map<String, User> adminMap = new HashMap<>();
     private MetadataDto metadata;
     private Map<Long, X509Certificate> trustedTimeStampServers;
@@ -104,8 +99,6 @@ public class ConfigEJB implements Config, ConfigServiceProvider, Serializable {
                 User admin = User.FROM_CERT(adminCert, User.Type.USER);
                 adminMap.put(admin.getNumIdAndType(), admin);
             }
-
-            entityMap = new ConcurrentHashMap<>();
 
             applicationDirPath = System.getProperty("voting_provider_server_dir");
             if(StringUtils.isEmpty(applicationDirPath))
@@ -178,7 +171,8 @@ public class ConfigEJB implements Config, ConfigServiceProvider, Serializable {
                 }
             } else {
                 election.setState(Election.State.ACTIVE);
-                log.log(Level.SEVERE, "election id: " + election.getId() + " has started");
+                em.persist(election);
+                log.log(Level.SEVERE, "election id: " + election.getId() + " is active");
             }
         }
     }
@@ -228,7 +222,6 @@ public class ConfigEJB implements Config, ConfigServiceProvider, Serializable {
         return signatureCertChainPEMBytes;
     }
 
-
     public AbstractSignatureTokenConnection getSigningToken() {
         return signingToken;
     }
@@ -249,26 +242,10 @@ public class ConfigEJB implements Config, ConfigServiceProvider, Serializable {
     private void shutdown() {
         try {
             if(HttpConn.getInstance() != null) HttpConn.getInstance().shutdown();
-            log.info(" --------- shutdown ---------");
+            log.info(" --------- shutdown votingsystem-serviceprovider ---------");
         } catch (Exception ex) {
             log.log(Level.SEVERE, ex.getMessage(), ex);
         }
-    }
-
-    public void putEntityMetadata(MetadataDto metadata) {
-        entityMap.put(metadata.getEntity().getId(), metadata);
-    }
-
-    public MetadataDto getEntityMetadata(String entityId) {
-        MetadataDto metadata = entityMap.get(entityId);
-        if(metadata != null) {
-            if (metadata.getValidUntilDate().isAfter(LocalDateTime.now())) {
-                log.info("metadata expired - entityId: " + entityId);
-                entityMap.remove(entityId);
-                return null;
-            }
-        }
-        return metadata;
     }
 
     public X509Certificate getSigningCert() {

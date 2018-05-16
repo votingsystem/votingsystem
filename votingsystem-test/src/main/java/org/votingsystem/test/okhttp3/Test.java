@@ -10,7 +10,7 @@ public class Test extends BaseTest {
 
     private static final Logger log = Logger.getLogger(Test.class.getName());
 
-    private static final String ENDPOINT = "https://voting.ddns.net:8443/timestamp-server";
+    private static final String ENDPOINT = "https://voting.ddns.net/timestamp-server";
 
     public static void main(String[] args) throws Exception {
         new Test().testCert();
