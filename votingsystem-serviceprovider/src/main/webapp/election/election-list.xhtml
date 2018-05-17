@@ -6,11 +6,6 @@
   <ui:define name="head">
     <style>
       .dateColumn {
-        width: 170px;
-      }
-      .userColumn {
-        width: 300px;
-        overflow: hidden;
         white-space: nowrap;
       }
       .stateColumn {
@@ -19,9 +14,9 @@
     </style>
   </ui:define>
   <ui:define name="content">
-    <div class="card container" style="margin: 7px auto; padding: 7px;">
+    <div class="" style="margin: 0 auto; padding: 7px;background: #fff;overflow-x: auto;">
 
-      <table id="electionsTable" class="table table-striped table-bordered" cellspacing="0" width="100%" style="table-layout:fixed;">
+      <table id="electionsTable" class="table table-striped table-bordered" cellspacing="0" >
         <thead>
         <tr>
           <th>#{msg.subjectLbl}</th>
@@ -102,6 +97,7 @@
           //<![CDATA[
           $(document).ready(function() {
               $('#electionsTable').DataTable( {
+                  "responsive": true,
                   "order": [[3, 'asc']],
                   "processing": true,
                   "serverSide": true,
