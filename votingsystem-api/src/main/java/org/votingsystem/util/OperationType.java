@@ -68,7 +68,7 @@ public enum OperationType implements SystemOperation {
     SIGN_PDF("/api/pdf/processSigned"),
     //TimeStamp server
     @JsonProperty("TIMESTAMP_REQUEST")
-    TIMESTAMP_REQUEST("/api/timestamp"),
+    TIMESTAMP_REQUEST(""),
     @JsonProperty("TIMESTAMP_REQUEST_DISCRETE")
     TIMESTAMP_REQUEST_DISCRETE("/api/timestamp/discrete"),
     @JsonProperty("USER_INFO")

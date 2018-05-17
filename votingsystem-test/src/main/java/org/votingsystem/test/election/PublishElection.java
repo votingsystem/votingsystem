@@ -63,7 +63,7 @@ public class PublishElection extends BaseTest {
         AbstractSignatureTokenConnection signingToken = new JKSSignatureToken(
                 Thread.currentThread().getContextClassLoader().getResource(KEYSTORE).openStream(),
                 new KeyStore.PasswordProtection(KEYSTORE_PASSWORD.toCharArray()));
-        byte[] signatureBytes =  XAdESSignature.sign(dataToSign, signingToken,
+        byte[] signatureBytes = new XAdESSignature().sign(dataToSign, signingToken,
                 new TSPHttpSource(org.votingsystem.test.Constants.TIMESTAMP_SERVICE_URL));
 
         log.info("signedXML: " + new String(signatureBytes));

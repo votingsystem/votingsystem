@@ -139,7 +139,7 @@ public class CertificationRequest implements java.io.Serializable {
         Collection<X509Certificate> certificates = PEMUtils.fromPEMToX509CertCollection(csrCertificate);
         X509Certificate[] arrayCerts = new X509Certificate[certificates.size()];
         certificates.toArray(arrayCerts);
-        return XAdESSignature.sign(xmlToSign,
+        return new XAdESSignature().sign(xmlToSign,
                 new SignatureTokenConnection(keyPair.getPrivate(), arrayCerts), new TSPHttpSource(timeStampServiceURL));
     }
 

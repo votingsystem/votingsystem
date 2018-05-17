@@ -83,7 +83,8 @@ public class ElectionResourceEJB {
         List<Election> elections = em.createQuery("select e from Election e where e.uuid=:electionUUID")
                 .setParameter("electionUUID", electionUUID).getResultList();
         if(elections.isEmpty())
-            return Response.status(Response.Status.NOT_FOUND).entity(Messages.currentInstance().get("itemNotFoundErrorMsg")).build();
+            return Response.status(Response.Status.NOT_FOUND).entity(Messages.currentInstance().get("itemNotFoundErrorMsg")
+                    + " - UUID: " + electionUUID).build();
         else
             return Response.ok().entity(elections.iterator().next().getSignedDocument().getBody()).build();
     }

@@ -62,7 +62,7 @@ public class SignatureServiceEJB {
 
     public SignedDocument signXAdESAndSave(byte[] xmlToSign, SignatureParams signatureParams) throws SignatureException {
         try {
-            byte[] signedDocumentBytes = org.votingsystem.xades.XAdESSignature.sign(xmlToSign, config.getSigningToken(),
+            byte[] signedDocumentBytes = new org.votingsystem.xades.XAdESSignature().sign(xmlToSign, config.getSigningToken(),
                     new TSPHttpSource(config.getTimestampServiceURL()));
             DSSDocument signedDocument = new InMemoryDocument(signedDocumentBytes);
             String documentDigest = signedDocument.getDigest(DigestAlgorithm.MD5);
@@ -79,7 +79,7 @@ public class SignatureServiceEJB {
     public byte[] signXAdES(byte[] xmlToSign) throws SignatureException {
         try {
             AbstractSignatureTokenConnection signingToken = config.getSigningToken();
-            return org.votingsystem.xades.XAdESSignature.sign(xmlToSign, signingToken,
+            return new org.votingsystem.xades.XAdESSignature().sign(xmlToSign, signingToken,
                     new TSPHttpSource(config.getTimestampServiceURL()));
         } catch (Exception ex) {
             throw new SignatureException(ex.getMessage(), ex);
@@ -151,6 +151,8 @@ public class SignatureServiceEJB {
         Reports reports = null;
         try {
             validator.setCertificateVerifier(CertificateVerifier.create(config.getTrustedCertSource()));
+            //validator.setCertificateVerifier(new CommonCertificateVerifier());
+
             //if we set validationLevel to ValidationLevel.TIMESTAMPS we get exceptions (it doesn't seem that this is the
             // recommended way o check this)
             //validator.setValidationLevel(ValidationLevel.TIMESTAMPS);
@@ -238,8 +240,7 @@ public class SignatureServiceEJB {
                         selectedTimestampToken = timestampToken;
                 }
                 LocalDateTime selectedTokenDate = DateUtils.getLocalDateFromUTCDate(selectedTimestampToken.getGenerationTime());
-                log.log(Level.FINEST, "timestampToken: " + selectedTimestampToken + " - EncodedSignedDataDigestValue: " +
-                        selectedTimestampToken.getEncodedSignedDataDigestValue() + " - localDateTime: " + selectedTokenDate);
+                log.log(Level.FINEST,  "Selected TimeStampToken localDateTime: " + selectedTokenDate);
                 X509Certificate signingCert = xAdESSignature.getCandidatesForSigningCertificate()
                         .getTheBestCandidate().getCertificateToken().getCertificate();
                 switch (signatureParams.getSignerType()) {

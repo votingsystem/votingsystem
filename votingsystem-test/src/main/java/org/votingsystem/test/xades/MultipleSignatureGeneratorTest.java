@@ -31,7 +31,8 @@ public class MultipleSignatureGeneratorTest extends BaseTest {
 
     private static final Logger log = Logger.getLogger(MultipleSignatureGeneratorTest.class.getName());
 
-    private static String TEST_ENTITY = "https://voting.ddns.net/idprovider";
+    //private static String TEST_ENTITY = "https://voting.ddns.net/idprovider";
+    private static String TEST_ENTITY = "https://voting.ddns.net/voting-service";
 
 
     private static String SIGNER1_KEYSTORE = "certs/fake_08888888D.jks";
@@ -63,14 +64,14 @@ public class MultipleSignatureGeneratorTest extends BaseTest {
         log.info("xmlToSign: " + new String(xmlToSign));
 
 
-        byte[] signedDocumentBytes = XAdESSignature.sign(xmlToSign, signingToken1,
+        byte[] signedDocumentBytes = new XAdESSignature().sign(xmlToSign, signingToken1,
                 new TSPHttpSource(Constants.TIMESTAMP_SERVICE_URL));
         log.info("1 signer: " + new String(signedDocumentBytes));
-        signedDocumentBytes = XAdESSignature.sign(signedDocumentBytes, signingToken2,
+        signedDocumentBytes = new XAdESSignature().sign(signedDocumentBytes, signingToken2,
                 new TSPHttpSource(Constants.TIMESTAMP_SERVICE_URL));
         log.info("2 signer: " + new String(signedDocumentBytes));
-        //validateSignedDocument(signedDocumentBytes);
-        validateSignatureWithAndroid(signedDocumentBytes);
+        validateSignedDocument(signedDocumentBytes);
+        //validateSignatureWithAndroid(signedDocumentBytes);
         System.exit(0);
     }
 

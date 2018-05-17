@@ -17,7 +17,10 @@ import javax.inject.Inject;
 import java.io.File;
 import java.io.IOException;
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -33,14 +36,22 @@ public class TrustedServicesEJB {
     @Inject private MetadataService metadataResource;
     private TrustedEntitiesDto trustedEntities;
 
-    private static Map<String, MetadataDto> trustedEntitiesMap = new ConcurrentHashMap<>();
+    private static final Map<String, MetadataDto> trustedEntitiesMap = new ConcurrentHashMap<>();
 
+    @PostConstruct
+    public void initialize() {
+        try {
+            trustedEntities = TrustedEntitiesDto.loadTrustedEntities(config.getApplicationDirPath() + "/sec/trusted-entities.xml");
+        } catch (IOException ex) {
+            log.log(Level.SEVERE, ex.getMessage(), ex);
+        }
+    }
 
     /**
      * Method that checks all trusted services every hour -> **:00:00
      */
     //@Schedule(hour = "*", minute = "0", second = "0", persistent = false)
-    public Set<String> loadTrustedServices() throws IOException {
+    public void loadTrustedServices() throws IOException {
         File timeStampServersFile = new File(config.getApplicationDirPath() + "/sec/timestamp-servers.xml");
         List<String> timeStampServersCertificates = XML.getMapper().readValue(
                 timeStampServersFile, new TypeReference<List<String>>() {});
@@ -51,27 +62,21 @@ public class TrustedServicesEJB {
                 log.log(Level.SEVERE, ex.getMessage(), ex);
             }
         }
-        TrustedEntitiesDto configTrustedEntities = TrustedEntitiesDto.loadTrustedEntities(config.getApplicationDirPath() + "/sec/trusted-entities.xml");
-        if(configTrustedEntities.getEntities() != null) {
-            trustedEntities = new TrustedEntitiesDto();
-            List<TrustedEntitiesDto.EntityDto> entityList = new ArrayList<>(configTrustedEntities.getEntities());
-            Set<TrustedEntitiesDto.EntityDto> entityDtoSet = new HashSet<>();
-            for(TrustedEntitiesDto.EntityDto trustedEntity: entityList) {
-                log.info("trusted entity: " + trustedEntity.getType() + " from country: " + trustedEntity.getCountryCode());
-                try {
-                    MetadataDto metadataDto = metadataResource.getMetadataFromURL(OperationType.GET_METADATA.getUrl(
-                            trustedEntity.getId()), true, false);
-                    trustedEntitiesMap.put(metadataDto.getEntity().getId(), metadataDto);
-                    entityDtoSet.add(trustedEntity);
-                } catch (Exception ex) {
-                    log.log(Level.SEVERE, "Error loading trusted entity: " + trustedEntity.getId() + " - " + ex.getMessage(), ex);
-                }
+        for(TrustedEntitiesDto.EntityDto trustedEntity: trustedEntities.getEntities()) {
+            log.info(trustedEntity.getId() + " - " + trustedEntity.getType() + " from country: " + trustedEntity.getCountryCode());
+            try {
+                MetadataDto metadataDto = metadataResource.getMetadataFromURL(OperationType.GET_METADATA.getUrl(
+                        trustedEntity.getId()), true, false);
+                trustedEntitiesMap.put(trustedEntity.getId(), metadataDto);
+            } catch (Exception ex) {
+                log.log(Level.SEVERE, "Error loading trusted entity: " + trustedEntity.getId() + " - " + ex.getMessage(), ex);
             }
-            trustedEntities = new TrustedEntitiesDto(entityDtoSet);
         }
-        return trustedEntitiesMap.keySet();
     }
 
+    public Set<String> getLoadedEntities () {
+        return trustedEntitiesMap.keySet();
+    }
 
     public MetadataDto getEntity(String entityId) {
         return trustedEntitiesMap.get(entityId);
@@ -122,9 +127,17 @@ public class TrustedServicesEJB {
     }
 
     public MetadataDto checkEntity(String entityId) throws IOException {
-        if(trustedEntitiesMap.isEmpty())
-            loadTrustedServices();
-        return trustedEntitiesMap.get(entityId);
+        MetadataDto result = trustedEntitiesMap.get(entityId);
+        if(result == null) {
+            for(TrustedEntitiesDto.EntityDto entityDto : trustedEntities.getEntities()) {
+                if(entityDto.getId().equals(entityId)) {
+                    loadTrustedServices();
+                    return trustedEntitiesMap.get(entityId);
+                }
+            }
+            return null;
+        } else
+            return result;
     }
 
 }

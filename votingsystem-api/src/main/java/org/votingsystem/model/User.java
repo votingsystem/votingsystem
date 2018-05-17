@@ -58,10 +58,6 @@ public class User extends EntityBase implements Serializable {
         ANON_CURRENCY, BROWSER, MOBILE
     }
 
-    public enum TypeCert {
-        VOTE, USER, USER_ID_CARD, CERTIFICATE_AUTHORITY, CERTIFICATE_AUTHORITY_ID_CARD, BROWSER_SESSION, MOBILE_SESSION,
-        TIMESTAMP_SERVER}
-
     public enum State {ACTIVE, PENDING, SUSPENDED, CANCELED}
 
     @Id @GeneratedValue(strategy=IDENTITY)

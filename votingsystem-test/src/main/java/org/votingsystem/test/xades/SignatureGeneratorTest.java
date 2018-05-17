@@ -47,7 +47,8 @@ public class SignatureGeneratorTest extends BaseTest {
         //FileUtils.getBytesFromStream(Thread.currentThread().getContextClassLoader().getResource("").openStream())
         SignatureGeneratorTest signatureGeneratorTest = new SignatureGeneratorTest();
         byte[] signedDocumentBytes = signatureGeneratorTest.signDocument();
-        signatureGeneratorTest.sendToServer(signedDocumentBytes);
+        //signatureGeneratorTest.sendToServer(signedDocumentBytes);
+        signatureGeneratorTest.validateSignedDocument(signedDocumentBytes);
         System.exit(0);
     }
 
@@ -61,7 +62,7 @@ public class SignatureGeneratorTest extends BaseTest {
         InputStream inputStream = Thread.currentThread().getContextClassLoader().getResource(SIGNER_KEYSTORE).openStream();
         AbstractSignatureTokenConnection signingToken = new JKSSignatureToken(inputStream,
                 new KeyStore.PasswordProtection(org.votingsystem.util.Constants.PASSW_DEMO.toCharArray()));
-        byte[] signedDocumentBytes = XAdESSignature.sign(xmlToSign, signingToken,
+        byte[] signedDocumentBytes = new XAdESSignature().sign(xmlToSign, signingToken,
                 new TSPHttpSource(Constants.TIMESTAMP_SERVICE_URL));
         log.info("signatureBytes: " + new String(signedDocumentBytes));
         validateSignatureWithAndroid(signedDocumentBytes);
@@ -87,5 +88,6 @@ public class SignatureGeneratorTest extends BaseTest {
                 "https://voting.ddns.net/currency-server/api/test/xml-signed-document");
         log.info("statusCode: " + response.getStatusCode() + " - " + response.getMessage());
     }
+
 
 }

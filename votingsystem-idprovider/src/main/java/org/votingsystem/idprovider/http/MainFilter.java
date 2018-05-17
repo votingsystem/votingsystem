@@ -1,13 +1,18 @@
 package org.votingsystem.idprovider.http;
 
+import org.votingsystem.ejb.TrustedServicesEJB;
 import org.votingsystem.util.Constants;
 import org.votingsystem.util.Messages;
 
+import javax.inject.Inject;
 import javax.servlet.*;
 import javax.servlet.annotation.WebFilter;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * Application main HTTP filter
@@ -20,12 +25,21 @@ public class MainFilter implements Filter {
     private java.util.logging.Logger log = java.util.logging.Logger.getLogger(MainFilter.class.getName());
 
     private ServletContext servletContext;
+    private @Inject TrustedServicesEJB trustedServicesEJB;
 
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {
         // It is common to save a reference to the ServletContext here in case it is needed in the destroy() call.
         servletContext = filterConfig.getServletContext();
         servletContext.log(String.format("%s init", this.getClass().getSimpleName()));
+
+        ExecutorService executorService = Executors.newSingleThreadExecutor();
+        executorService.submit(new Callable<Void>() {
+            public Void call() throws IOException {
+                trustedServicesEJB.loadTrustedServices();
+                return null;
+            }
+        });
     }
 
     @Override

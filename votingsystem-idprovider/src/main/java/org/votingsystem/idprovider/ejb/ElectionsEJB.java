@@ -80,9 +80,10 @@ public class ElectionsEJB {
     public Election fetchElectionFromEntity(String electionUUID, String entityId) throws NotFoundException {
         MetadataDto targetEntity = null;
         try {
-            targetEntity = trustedServicesEJB.checkEntity(entityId);
-            if(targetEntity == null)
-                throw new Exception("Target entity null");
+            targetEntity = trustedServicesEJB.getEntity(entityId);
+            if(targetEntity == null) {
+                throw new Exception(entityId + " isn't a trusted entity");
+            }
         } catch (Exception ex) {
             log.log(Level.SEVERE, ex.getMessage(), ex);
             throw new NotFoundException("Entity: " + entityId + " isn't a trusted entity");

@@ -50,7 +50,7 @@ public class LoadTrustedEntitiesTest extends BaseTest {
         AbstractSignatureTokenConnection signingToken = new JKSSignatureToken(
                 Thread.currentThread().getContextClassLoader().getResource(ADMIN_KEYSTORE).openStream(),
                 new KeyStore.PasswordProtection(ADMIN_KEYSTORE_PASSWORD.toCharArray()));
-        byte[] signedDocumentBytes =  XAdESSignature.sign(xmlToSign, signingToken,
+        byte[] signedDocumentBytes = new XAdESSignature().sign(xmlToSign, signingToken,
                 new TSPHttpSource(Constants.TIMESTAMP_SERVICE_URL));
         List<NameValuePair> urlParameters = new ArrayList<>();
         urlParameters.add(new BasicNameValuePair("signedXML", new String(signedDocumentBytes)));

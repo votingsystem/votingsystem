@@ -47,16 +47,17 @@ public class LocalExceptionMapper implements ExceptionMapper<Exception> {
                     "TEST ERROR - " + sw.toString()).type(MediaType.TEXT_PLAIN).build();
         } else {
             AppCode appCode = AppCode.getByException(exception);
+            String appCodeMsg = Messages.currentInstance().get(appCode.name());
             String message = null;
             switch (appCode) {
                 case vs_0430:
                     message = exception.getMessage();
                     break;
                 case vs_0410:
-                    message = Messages.currentInstance().get("errorLbl") + " - " + exception.getMessage();
+                    message = Messages.currentInstance().get(exception.getMessage());
                     break;
                 case vs_0420:
-                    message = Messages.currentInstance().get("errorLbl") + " - " + exception.getMessage();
+                    message = Messages.currentInstance().get(exception.getMessage());
                     break;
                 case vs_0500:
                     message = Messages.currentInstance().get("systemErrorMsg");
@@ -69,7 +70,7 @@ public class LocalExceptionMapper implements ExceptionMapper<Exception> {
                     message = exception.getMessage();
                     break;
                 default:
-                    message = Messages.currentInstance().get("errorMsg", appCode);
+                    message = Messages.currentInstance().get(appCodeMsg);
             }
             try {
                 if(reqContentType.contains("json") || reqContentType.contains("application/pkcs7-signature")){
@@ -78,7 +79,7 @@ public class LocalExceptionMapper implements ExceptionMapper<Exception> {
                 } else if(reqContentType.contains("html")) {
                     res.setStatus(appCode.getStatusCode());
                     req.getSession().setAttribute("responseDto", new ResponseDto(ResponseDto.SC_ERROR,
-                            message).setCode(appCode).setCaption(Messages.currentInstance().get("errorMsg", appCode)));
+                            message).setCode(appCode).setCaption(Messages.currentInstance().get(appCodeMsg)));
                     res.sendRedirect(req.getContextPath() + "/response.xhtml");
                 } else {
                     return Response.status(Response.Status.BAD_REQUEST).entity(

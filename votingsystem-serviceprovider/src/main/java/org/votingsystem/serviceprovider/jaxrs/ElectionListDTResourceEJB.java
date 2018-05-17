@@ -125,7 +125,6 @@ public class ElectionListDTResourceEJB {
             resultPredicate = root.get("state").in(stateInList);
             numRecordsFiltered = numRecordsTotal;
         } else {
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy MM dd");
             LocalDateTime searchDate = null;
             try {
                 LocalDate localDate = LocalDate.parse(searchText, DateTimeFormatter.ofPattern("yyyy MM dd"));

@@ -1,10 +1,10 @@
 package org.votingsystem.serviceprovider.ejb;
 
-import org.votingsystem.ejb.TrustedServicesEJB;
-
 import javax.annotation.PostConstruct;
-import javax.ejb.*;
-import java.util.logging.Level;
+import javax.ejb.DependsOn;
+import javax.ejb.LocalBean;
+import javax.ejb.Singleton;
+import javax.ejb.Startup;
 import java.util.logging.Logger;
 
 @LocalBean
@@ -15,17 +15,7 @@ public class StartUpEJB {
 
     private static final Logger log = Logger.getLogger(StartUpEJB.class.getName());
 
-
-    @EJB private TrustedServicesEJB trustedServices;
-
     @PostConstruct
-    public void initialize() {
-        try {
-            trustedServices.loadTrustedServices();
-        } catch (Exception ex) {
-            log.log(Level.SEVERE, ex.getMessage(), ex);
-        }
-    }
-
+    public void initialize() { }
 
 }

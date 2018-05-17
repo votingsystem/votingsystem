@@ -7,7 +7,6 @@ import eu.europa.esig.dss.tsl.TrustedListsCertificateSource;
 import eu.europa.esig.dss.x509.CertificateToken;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.votingsystem.crypto.KeyGenerator;
-import org.votingsystem.crypto.MockServiceInfo;
 import org.votingsystem.crypto.PEMUtils;
 import org.votingsystem.dto.metadata.MetadataDto;
 import org.votingsystem.dto.metadata.MetadataUtils;
@@ -162,6 +161,7 @@ public class ConfigEJB implements Config, ConfigServiceProvider, Serializable {
         List<Election.State> inList = Arrays.asList(Election.State.PENDING, Election.State.ACTIVE);
         List<Election> electionList = em.createQuery("select e from Election e where e.state in :inList")
                 .setParameter("inList", inList).getResultList();
+
         for(Election election : electionList) {
             if(!election.isActive(LocalDateTime.now())) {
                 if(election.getDateFinish().isBefore(LocalDateTime.now())) {
@@ -186,14 +186,13 @@ public class ConfigEJB implements Config, ConfigServiceProvider, Serializable {
             NoSuchAlgorithmException, NoSuchProviderException {
         Certificate caCertificate = checkCACertificate(trustedCertificate);
         trustedCACertsMap.put(caCertificate.getSerialNumber(), caCertificate);
-        log.log(Level.SEVERE, "TrustedListsCertificateSource with MockServiceInfo!!! - certificate: " +
-                caCertificate.getSubjectDN());
+        log.log(Level.SEVERE, caCertificate.getSubjectDN());
         if(trustedCertSource == null) {
             trustedCertAnchors = new HashSet<>();
             trustedCertSource = new TrustedListsCertificateSource();
         }
         trustedCertAnchors.add(new TrustAnchor(trustedCertificate.getCertificate(), null));
-        trustedCertSource.addCertificate(trustedCertificate, new MockServiceInfo());
+        trustedCertSource.addCertificate(trustedCertificate, null);
         return caCertificate;
     }
 

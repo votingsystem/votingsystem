@@ -9,7 +9,6 @@ import eu.europa.esig.dss.x509.CertificateToken;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.votingsystem.crypto.CertificateUtils;
 import org.votingsystem.crypto.KeyGenerator;
-import org.votingsystem.crypto.MockServiceInfo;
 import org.votingsystem.crypto.PEMUtils;
 import org.votingsystem.dto.metadata.MetadataDto;
 import org.votingsystem.dto.metadata.MetadataUtils;
@@ -170,15 +169,13 @@ public class ConfigEJB implements Config, ConfigIdProvider {
             NoSuchAlgorithmException, NoSuchProviderException {
         Certificate caCertificate = checkCACertificate(trustedCertificate);
         trustedCACertsMap.put(caCertificate.getSerialNumber(), caCertificate);
-        log.log(Level.SEVERE, "TrustedListsCertificateSource with MockServiceInfo!!! - certificate: " +
-                caCertificate.getSubjectDN());
+        log.log(Level.SEVERE, caCertificate.getSubjectDN());
         if(trustedCertSource == null) {
             trustedCertAnchors = new HashSet<>();
             trustedCertSource = new TrustedListsCertificateSource();
         }
         trustedCertAnchors.add(new TrustAnchor(trustedCertificate.getCertificate(), null));
-        //TODO
-        trustedCertSource.addCertificate(trustedCertificate, new MockServiceInfo());
+        trustedCertSource.addCertificate(trustedCertificate, null);
         return caCertificate;
     }
 
@@ -241,7 +238,7 @@ public class ConfigEJB implements Config, ConfigIdProvider {
         try {
             if(HttpConn.getInstance() != null)
                 HttpConn.getInstance().shutdown();
-            log.info(" --------- shutdown ---------");
+            log.info(" --------- shutdown idprovider ---------");
         } catch (Exception ex) {
             log.log(Level.SEVERE, ex.getMessage(), ex);
         }

@@ -21,7 +21,9 @@ public class XAdESSignature {
 
     private static final Logger log = Logger.getLogger(XAdESSignature.class.getName());
 
-    public static byte[] sign(byte[] xmlToSign, AbstractSignatureTokenConnection signingToken, TSPSource tspSource)
+    public XAdESSignature() {}
+
+    public byte[] sign(byte[] xmlToSign, AbstractSignatureTokenConnection signingToken, TSPSource tspSource)
             throws IOException {
         DSSPrivateKeyEntry privateKey = signingToken.getKeys().get(0);
         DSSDocument toBeSigned = new InMemoryDocument(xmlToSign);

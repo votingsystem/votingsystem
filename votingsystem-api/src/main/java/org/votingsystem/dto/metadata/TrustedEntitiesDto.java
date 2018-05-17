@@ -12,6 +12,7 @@ import org.votingsystem.util.FileUtils;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.HashSet;
 import java.util.Set;
 
 /**
@@ -42,8 +43,11 @@ public class TrustedEntitiesDto {
 
     public static TrustedEntitiesDto loadTrustedEntities(String trustedEntitiesFilePath) throws IOException {
         File trustedServicesFile = new File(trustedEntitiesFilePath);
-        return new XmlMapper().readValue(FileUtils.getBytesFromFile(trustedServicesFile),
+        TrustedEntitiesDto trustedEntitiesDto = new XmlMapper().readValue(FileUtils.getBytesFromFile(trustedServicesFile),
                 TrustedEntitiesDto.class);
+        if(trustedEntitiesDto.getEntities() == null)
+            trustedEntitiesDto.setEntities(new HashSet<>());
+        return trustedEntitiesDto;
     }
 
     public static class EntityDto {

@@ -112,7 +112,8 @@ public class SignerInfoEJB implements SignerInfoService {
                 signerCertificate = certificates.iterator().next();
             }
             signer.setX509Certificate(x509CertSigner).setCertificate(signerCertificate).setCertificateCA(certificateCA);
-            log.log(Level.FINE, "NumIdAndType: " + signer.getNumIdAndType() + " - cert Authority: " + certificateCA.getSubjectDN());
+            log.log(Level.FINE, "NumIdAndType: " + signer.getNumIdAndType() + " - signerType: " + signerType +
+                    " - entityId: " + entityId + " - cert Authority: " + certificateCA.getSubjectDN());
             return signer;
         } catch (NoSuchAlgorithmException | NoSuchProviderException | CertificateException ex) {
             String msg = Messages.currentInstance().get("signerCertErrorMsg", ex.getMessage());

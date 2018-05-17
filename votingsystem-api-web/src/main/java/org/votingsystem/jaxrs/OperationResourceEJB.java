@@ -59,7 +59,7 @@ public class OperationResourceEJB {
                         checkedUser.getX509Certificate().getSerialNumber().longValue());
                 break;
             case GET_METADATA:
-                Set<String> trustedServiceSet = trustedServices.loadTrustedServices();
+                Set<String> trustedServiceSet = trustedServices.getLoadedEntities();
                 response = ResponseDto.OK().setMessage(trustedServiceSet.toString());
                 break;
         }
