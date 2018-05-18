@@ -68,7 +68,7 @@ public class PageBean implements Serializable {
 
     public String formatDate(LocalDateTime date) {
         if(date == null) return "";
-        return DateTimeFormatter.ISO_OFFSET_DATE_TIME.format(ZonedDateTime.of(date, ZoneId.systemDefault()));
+        return DateTimeFormatter.ofPattern("yyyy MM dd HH:mm:ss zzz").format(ZonedDateTime.of(date, ZoneId.systemDefault()));
     }
 
     public String formatDate(ZonedDateTime date) {

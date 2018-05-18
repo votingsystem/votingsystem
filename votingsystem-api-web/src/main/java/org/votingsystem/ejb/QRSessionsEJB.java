@@ -30,7 +30,8 @@ public class QRSessionsEJB {
     }
 
     public void removeOperation(String uuid) {
-        operationRequestMap.remove(uuid);
+        if(operationRequestMap.containsKey(uuid))
+            operationRequestMap.remove(uuid);
     }
 
     public Set<String> getSessionKeys() {

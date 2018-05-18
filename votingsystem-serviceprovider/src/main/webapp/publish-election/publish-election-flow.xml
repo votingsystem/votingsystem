@@ -5,8 +5,13 @@
     <flow-definition id="publish-election">
 
         <flow-return id="endFlow">
-            <from-outcome>/index</from-outcome>
+            <from-outcome>/election/election-list</from-outcome>
         </flow-return>
 
+        <flow-return id="endFlowPublishOK">
+            <from-outcome>#{publishElection.endFlowPublishOK()}</from-outcome>
+        </flow-return>
+
+        <initializer>#{publishElection.initializeFlow()}</initializer>
     </flow-definition>
 </faces-config>

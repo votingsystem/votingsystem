@@ -1,43 +1,37 @@
 <ui:composition xmlns="http://www.w3.org/1999/xhtml"
                 xmlns:ui="http://java.sun.com/jsf/facelets"
-                xmlns:of="http://omnifaces.org/functions"
                 xmlns:h="http://xmlns.jcp.org/jsf/html"
                 template="/WEB-INF/templates/main-template.xhtml">
+  <ui:define name="head">
+  </ui:define>
   <ui:define name="content">
-    <div style="margin: 30px auto;">
-      <div class="row">
-        <div>
+    <h:messages globalOnly="true" styleClass="alert alert-warning"/>
+    <div class="card" style="margin:10px auto; max-width: 1000px;">
+      <div class="card-body">
           <div>
-            <div style="margin: 0 50px 0 0; font-size:1.1em;font-weight: bold; color: #43c2cb;">
-              #{msg.dateLbl}: #{pageBean.formatDate(statsDto.dateBegin)}
-            </div>
-            <div style="text-transform:capitalize;font-weight:bold;text-align:center;font-size:1.6em">
-              #{statsDto.subject}
-            </div>
-            <div style="font-size: 1.7em;color:#146c72;">
-              #{msg.numVotesLbl} : <span style="font-weight: bold;">#{statsDto.numVotes}</span>
-            </div>
-
-            <div id="electionOptions">
-              <ul>
-                <ui:repeat value="#{of:setToList(statsDto.electionOptions)}" var="option">
-                  <li style="margin: 5px 0 0 0; font-size:1.5em;color: #43c2cb;">
-                    <span style="font-weight: bold; text-decoration: underline;">#{option.numVotes} #{msg.votesLbl}: </span> #{option.content}
-                  </li>
-                </ui:repeat>
-              </ul>
-            </div>
-
+              <div style="text-transform:capitalize;font-weight:bold;text-align:center;font-size:1.6em">#{sessionScope.election.subject}</div>
+              <div style="margin: 0 15px 0 0;font-style: italic;">
+                  #{msg.dateLbl}: #{pageBean.formatDate(sessionScope.election.dateBegin)}
+              </div>
           </div>
-        </div>
+          <div>
+            <div style="font-size: 1.2em; border: 1px solid #f0f3f5; border-radius: 3px;padding: 10px;">
+              <h:outputText value="#{sessionScope.election.content}" escape="false"/>
+            </div>
+            <div>
+              <div style="font-size: 1.2em;font-weight: bold;margin: 0 10px 0 0;">
+                #{msg.electionOptionsLbl}:
+              </div>
+              <div>
+                <ul id="electionOptions">
+                    <ui:repeat value="#{sessionScope.election.electionOptions.toArray()}" var="option" varStatus="loop">
+                        <li style="margin: 5px 0 0 0; font-size:1.5em;color: #20a8d8;">#{option.content}</li>
+                    </ui:repeat>
+                </ul>
+              </div>
+            </div>
+          </div>
       </div>
     </div>
-
-
-    <script>
-      //<![CDATA[
-
-      // ]]>
-    </script>
   </ui:define>
 </ui:composition>

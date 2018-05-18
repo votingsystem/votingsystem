@@ -1,6 +1,5 @@
 package org.votingsystem.jaxrs;
 
-import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.client.j2se.MatrixToImageWriter;
 import com.google.zxing.common.BitMatrix;
@@ -71,8 +70,8 @@ public class QRResourceEJB {
         if(qrRequest != null)
             return Response.ok().entity(qrRequest.generateResponse(req, LocalDateTime.now())).build();
         else {
-            return Response.status(Response.Status.NOT_FOUND).entity(new XmlMapper().writeValueAsBytes(
-                    new ResponseDto(ResponseDto.SC_NOT_FOUND, Messages.currentInstance().get("itemNotFoundErrorMsg")))).build();
+            return Response.status(Response.Status.NOT_FOUND).entity(
+                    Messages.currentInstance().get("itemNotFoundErrorMsg")).build();
         }
     }
 

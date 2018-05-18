@@ -15,6 +15,7 @@
         <h4 style="text-align: center;">#{msg.publishElectionLbl}</h4>
         <h2 style="text-align: center;">#{msg.readQRCodeMsg}</h2>
       </div>
+      #{flowScope.name}
       <div class="card-body">
           <div>
               <div style="text-transform:capitalize;font-weight:bold;text-align:center;font-size:1.6em">#{publishElection.electionSubject}</div>
@@ -66,10 +67,8 @@
             <h3 class="modal-title" style="font-size: 1.4em;font-weight: bold;">#{msg.operationOkMsg}</h3>
             <div id="publishResultDialogMessage" style="font-size: 1.2em;"></div>
               <div style="margin: 15px 0 0 0;display: flex; flex-direction: row;justify-content: flex-end;">
-                <h:form id="publishNotifier" prependId="false" a:accept-charset="ISO-8859-1" action="#{publishElection.refreshPage}">
-                  <h:inputHidden id="isElectionSaved" value="#{publishElection.electionSaved}" />
-                  <h:commandButton type="submit" class="btn btn-primary"
-                                   action="endFlow" value="#{msg.acceptLbl}"></h:commandButton>
+                <h:form prependId="false" a:accept-charset="ISO-8859-1">
+                  <h:commandLink action="endFlowPublishOK" type="submit" class="btn btn-primary" value="#{msg.acceptLbl}"></h:commandLink>
                 </h:form>
               </div>
           </div>
@@ -94,7 +93,6 @@
             var responseDto = JSON.parse(updateMessage);
             if(200 == responseDto.statusCode) {
                 setPublishedScreen();
-                document.querySelector("#isElectionSaved").value = true;
                 document.querySelector("#publishResultDialogMessage").innerHTML = responseDto.message;
                 $("#publishResultDialog").modal({backdrop: 'static', keyboard: false})
             } else {
@@ -116,12 +114,5 @@
         })
         // ]]>
     </script>
-    <c:if test="#{publishElection.electionSaved == true}">
-      <script>
-          //<![CDATA[
-            setPublishedScreen();
-          // ]]>
-      </script>
-    </c:if>
   </ui:define>
 </ui:composition>

@@ -12,14 +12,13 @@ import org.votingsystem.util.Messages;
 import org.votingsystem.util.OperationType;
 import org.votingsystem.xml.XML;
 
+import javax.annotation.PreDestroy;
 import javax.ejb.EJB;
 import javax.faces.application.FacesMessage;
 import javax.faces.context.FacesContext;
 import javax.faces.flow.FlowScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
 import javax.servlet.http.HttpServletRequest;
 import java.io.Serializable;
 import java.time.*;
@@ -53,7 +52,6 @@ public class PublishElectionBean implements Serializable {
     private String qrUUID;
     private int maxContentLength = ELECTION_CONTENT_MAX_LENGTH;
     private List<ElectionOption> optionList;
-    private boolean electionSaved;
     private Election election;
 
     public PublishElectionBean() {
@@ -85,7 +83,12 @@ public class PublishElectionBean implements Serializable {
 
             election = new Election(electionSubject, electionContent, dateBegin, dateBegin.plusDays(1),
                     Election.State.PENDING);
-            election.setUUID(UUID.randomUUID().toString()).setElectionOptions(new HashSet<>(optionList));
+            election.setElectionOptions(new HashSet<>(optionList));
+
+            if(electionUUID == null) {
+                electionUUID = UUID.randomUUID().toString();
+                election.setUUID(electionUUID);
+            }
 
             ElectionDto electionDto = new ElectionDto(election);
             electionDto.setEntityId(config.getEntityId());
@@ -94,13 +97,14 @@ public class PublishElectionBean implements Serializable {
             log.info("reqBytes: " + new String(reqBytes));
             //XMLValidator.validatePublishElectionRequest(reqBytes);
 
-            qrUUID = election.getUUID();
+            qrUUID = electionUUID;
             qrId = qrUUID.substring(0, 4).toUpperCase();
             Set<String> qrSessionsSet = (Set<String>) req.getSession().getAttribute(Constants.QR_OPERATIONS);
             if(qrSessionsSet == null)
                 qrSessionsSet = new HashSet<>();
             qrSessionsSet.add(qrUUID);
             qrSessions.putOperation(qrUUID, new QRRequestBundle<>(OperationType.PUBLISH_ELECTION, electionDto));
+            log.finest("qrSessions - put: " + qrUUID);
             return "publish-election-page2";
         } catch (Exception ex) {
             log.log(Level.SEVERE, ex.getMessage(), ex);
@@ -110,13 +114,21 @@ public class PublishElectionBean implements Serializable {
         }
     }
 
-    public String showElection() {
-        HttpServletRequest req = (HttpServletRequest)FacesContext.getCurrentInstance().getExternalContext().getRequest();
-        req.setAttribute("election", election);
-        return "endFlowPublishOk";
+    public void initializeFlow() {
+        log.finest("initializeFlow");
+    }
+
+    public String endFlowPublishOK() {
+        return "/election/election" ;
+    }
+
+    @PreDestroy
+    public void destroy() {
+        log.finest("Destroying publish election flow bean");
     }
 
     public String getQRCodeURL() {
+        FacesContext.getCurrentInstance().getExternalContext().getSessionMap().put("election", new ElectionDto(election));
         HttpServletRequest req = (HttpServletRequest) FacesContext.getCurrentInstance().getExternalContext().getRequest();
         String qrCodeURL = req.getContextPath() + "/api/qr?cht=qr&chs=200x200&chl=" +
                 QRUtils.SYSTEM_ENTITY_KEY + "=" + config.getEntityId() + ";" +
@@ -200,11 +212,4 @@ public class PublishElectionBean implements Serializable {
         this.maxContentLength = maxContentLength;
     }
 
-    public boolean isElectionSaved() {
-        return electionSaved;
-    }
-
-    public void setElectionSaved(boolean electionSaved) {
-        this.electionSaved = electionSaved;
-    }
 }
