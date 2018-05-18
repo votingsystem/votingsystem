@@ -3,14 +3,15 @@
                 xmlns:f="http://java.sun.com/jsf/core"
                 xmlns:h="http://xmlns.jcp.org/jsf/html"
                 xmlns:o="http://omnifaces.org/ui"
+                xmlns:c="http://java.sun.com/jsp/jstl/core"
                 xmlns:a="http://xmlns.jcp.org/jsf/passthrough"
                 template="/WEB-INF/templates/main-template.xhtml">
   <ui:define name="head">
   </ui:define>
   <ui:define name="content">
+    <h:messages globalOnly="true" styleClass="alert alert-warning"/>
     <div class="card" style="margin:10px auto; max-width: 1000px;">
-      <h:messages globalOnly="true" styleClass="alert alert-warning"/>
-      <div class="card-header">
+      <div id="cardHeaderDiv" class="card-header bg-info">
         <h4 style="text-align: center;">#{msg.publishElectionLbl}</h4>
         <h2 style="text-align: center;">#{msg.readQRCodeMsg}</h2>
       </div>
@@ -55,35 +56,45 @@
           </h:form>
         </div>
       </div>
-
     </div>
 
     <o:socket channel="serviceUpdated" user="#{publishElection.qrUUID}" onmessage="serviceUpdated" scope="view"/>
 
-    <div id="publishResultDialog" class="modal fade bs-example-modal-sm" tabindex="-1" role="dialog" aria-hidden="true">
-      <div class="modal-dialog modal-sm">
-        <div class="modal-content" style="text-align: center; padding: 15px;">
-          <h3 class="modal-title" style="font-size: 1.4em;font-weight: bold;">#{msg.operationOkMsg}</h3>
-          <div id="publishResultDialogMessage" style="font-size: 1.2em;"></div>
-          <div style="margin: 15px 0 0 0;display: flex; flex-direction: row;justify-content: flex-end;">
-            <button type="button" class="btn btn-primary" data-dismiss="modal">#{msg.acceptLbl}</button>
+      <div id="publishResultDialog" class="modal fade bs-example-modal-sm" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-sm">
+          <div class="modal-content" style="text-align: center; padding: 15px;">
+            <h3 class="modal-title" style="font-size: 1.4em;font-weight: bold;">#{msg.operationOkMsg}</h3>
+            <div id="publishResultDialogMessage" style="font-size: 1.2em;"></div>
+              <div style="margin: 15px 0 0 0;display: flex; flex-direction: row;justify-content: flex-end;">
+                <h:form id="publishNotifier" prependId="false" a:accept-charset="ISO-8859-1" action="#{publishElection.refreshPage}">
+                  <h:inputHidden id="isElectionSaved" value="#{publishElection.electionSaved}" />
+                  <h:commandButton type="submit" class="btn btn-primary"
+                                   action="endFlow" value="#{msg.acceptLbl}"></h:commandButton>
+                </h:form>
+              </div>
           </div>
         </div>
       </div>
-    </div>
+
   </ui:define>
   <ui:define name="javascript-code">
     <script>
         //<![CDATA[
         var electionOptionsSeparator = "#{publishElection.electionOptionsSeparator}";
 
+        function setPublishedScreen() {
+            document.querySelector("#submitButtonDiv").style.display = 'none';
+            document.querySelector("#qrImgDiv").style.display = 'none';
+            document.querySelector("#electionFooter").style.display = 'none';
+            document.querySelector("#cardHeaderDiv").style.display = 'none';
+        }
+
         function serviceUpdated(updateMessage) {
             console.log("updateMessage: " + updateMessage)
             var responseDto = JSON.parse(updateMessage);
             if(200 == responseDto.statusCode) {
-                document.querySelector("#submitButtonDiv").style.display = 'none';
-                document.querySelector("#qrImgDiv").style.display = 'none';
-                document.querySelector("#electionFooter").style.display = 'none';
+                setPublishedScreen();
+                document.querySelector("#isElectionSaved").value = true;
                 document.querySelector("#publishResultDialogMessage").innerHTML = responseDto.message;
                 $("#publishResultDialog").modal({backdrop: 'static', keyboard: false})
             } else {
@@ -105,5 +116,12 @@
         })
         // ]]>
     </script>
+    <c:if test="#{publishElection.electionSaved == true}">
+      <script>
+          //<![CDATA[
+            setPublishedScreen();
+          // ]]>
+      </script>
+    </c:if>
   </ui:define>
 </ui:composition>

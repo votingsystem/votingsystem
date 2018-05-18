@@ -3,7 +3,7 @@ package org.currency.web.ejb;
 import eu.europa.esig.dss.InMemoryDocument;
 import org.currency.web.websocket.SessionManager;
 import org.votingsystem.crypto.SignatureParams;
-import org.votingsystem.crypto.SignedDocumentType;
+import org.votingsystem.util.OperationType;
 import org.votingsystem.dto.MessageDto;
 import org.votingsystem.dto.ResponseDto;
 import org.votingsystem.ejb.SignatureServiceEJB;
@@ -64,7 +64,7 @@ public class WebSocketEJB {
                 break;
             case CLOSE_SESSION: {
                 SignatureParams signatureParams = new SignatureParams(null, User.Type.ID_CARD_USER,
-                        SignedDocumentType.CLOSE_SESSION).setWithTimeStampValidation(true);
+                        OperationType.CLOSE_SESSION).setWithTimeStampValidation(true);
                 SignedDocument signedDocument = signatureService.validateXAdES(
                         new InMemoryDocument(socketRequest.getBody().getBytes()), signatureParams);
                 /*if(CurrencyOperation.CLOSE_SESSION == socketRequest.getDto().getOperation()) {

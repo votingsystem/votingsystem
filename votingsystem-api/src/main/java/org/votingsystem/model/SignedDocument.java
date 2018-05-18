@@ -1,11 +1,11 @@
 package org.votingsystem.model;
 
 import eu.europa.esig.dss.DSSDocument;
-import org.votingsystem.crypto.SignedDocumentType;
 import org.votingsystem.dto.metadata.MetaInfDto;
 import org.votingsystem.model.converter.LocalDateTimeAttributeConverter;
 import org.votingsystem.model.converter.MetaInfConverter;
 import org.votingsystem.util.Constants;
+import org.votingsystem.util.OperationType;
 import org.votingsystem.xml.XML;
 
 import javax.persistence.*;
@@ -54,8 +54,8 @@ public class SignedDocument extends EntityBase implements Serializable {
     private Long id;
 
     @Enumerated(EnumType.STRING)
-    @Column(name="DOCUMENT_TYPE", nullable=false)
-    private SignedDocumentType signedDocumentType;
+    @Column(name="OPERATION_TYPE", nullable=false)
+    private OperationType operationType;
 
     @ManyToOne(fetch=FetchType.LAZY)
     @JoinColumn(name="RECEIPT_ID")
@@ -90,17 +90,17 @@ public class SignedDocument extends EntityBase implements Serializable {
 
     public SignedDocument() {}
 
-    public SignedDocument(DSSDocument signedDocument, SignedDocumentType signedDocumentType) throws IOException {
-        this.signedDocumentType = signedDocumentType;
+    public SignedDocument(DSSDocument signedDocument, OperationType operationType) throws IOException {
+        this.operationType = operationType;
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         signedDocument.writeTo(baos);
         body = new String(baos.toByteArray(), "UTF-8");
         baos.close();
     }
 
-    public SignedDocument(DSSDocument signedDocument, SignedDocumentType signedDocumentType, String messageDigest)
+    public SignedDocument(DSSDocument signedDocument, OperationType OperationType, String messageDigest)
             throws IOException {
-        this(signedDocument, signedDocumentType);
+        this(signedDocument, OperationType);
         this.messageDigest = messageDigest;
     }
 
@@ -135,12 +135,12 @@ public class SignedDocument extends EntityBase implements Serializable {
         this.body = body;
     }
 
-    public SignedDocumentType getSignedDocumentType() {
-        return signedDocumentType;
+    public OperationType getOperationType() {
+        return operationType;
     }
 
-    public SignedDocument setSignedDocumentType(SignedDocumentType signedDocumentType) {
-        this.signedDocumentType = signedDocumentType;
+    public SignedDocument setOperationType(OperationType operationType) {
+        this.operationType = operationType;
         return this;
     }
 

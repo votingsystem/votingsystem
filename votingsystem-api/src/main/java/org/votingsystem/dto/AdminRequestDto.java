@@ -21,6 +21,10 @@ public class AdminRequestDto {
     @JacksonXmlProperty(localName = "Key")
     private KeyDto key;
 
+    @JacksonXmlProperty(localName = "EntityId")
+    private String entityId;
+
+
     public AdminRequestDto(){}
 
     public AdminRequestDto(OperationType operationType){
@@ -42,5 +46,13 @@ public class AdminRequestDto {
     public AdminRequestDto setKey(KeyDto key) {
         this.key = key;
         return this;
+    }
+
+    public String getEntityId() {
+        return entityId;
+    }
+
+    public void setEntityId(String entityId) {
+        this.entityId = entityId;
     }
 }

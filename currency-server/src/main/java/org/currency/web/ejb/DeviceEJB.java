@@ -2,7 +2,7 @@ package org.currency.web.ejb;
 
 import org.currency.web.http.HttpSessionManager;
 import org.votingsystem.crypto.PEMUtils;
-import org.votingsystem.crypto.SignedDocumentType;
+import org.votingsystem.util.OperationType;
 import org.votingsystem.crypto.cms.CMSSignedMessage;
 import org.votingsystem.dto.OperationDto;
 import org.votingsystem.dto.indentity.SessionCertificationDto;
@@ -44,7 +44,7 @@ public class DeviceEJB {
     @TransactionAttribute(REQUIRES_NEW)
     public SessionCertification sessionCertification(CMSSignedMessage cmsSignedMessage) throws Exception {
         SignedDocument signedDocument = cmsBean.validateCMS(cmsSignedMessage, null).getCmsDocument();
-        em.merge(signedDocument.setSignedDocumentType(SignedDocumentType.SESSION_CERTIFICATION_RECEIPT));
+        em.merge(signedDocument.setOperationType(OperationType.SESSION_CERTIFICATION_RECEIPT));
         if(ChronoUnit.MINUTES.between(signedDocument.getFirstSignature().getSignatureDate(), LocalDateTime.now()) > 0)
             throw new ValidationException("Request expired");
 
@@ -53,8 +53,8 @@ public class DeviceEJB {
         //TODO improve request validation
         if(CurrencyOperation.GET_SESSION_CERTIFICATION != certificationDto.getOperation().getValue()) {
             signedDocument.setIndication(SignedDocument.Indication.VALIDATION_ERROR);
-            throw new ValidationException("Expected SignedDocumentType " +
-                    SignedDocumentType.SESSION_CERTIFICATION_RECEIPT + " found: " + signedDocument.getSignedDocumentType());
+            throw new ValidationException("Expected OperationType " +
+                    OperationType.SESSION_CERTIFICATION_RECEIPT + " found: " + signedDocument.getOperationType());
         }
 
         X509Certificate signerCertificate = PEMUtils.fromPEMToX509Cert(certificationDto.getSignerCertPEM().getBytes());
@@ -85,7 +85,7 @@ public class DeviceEJB {
     public void initDeviceSession(CMSDocument signedDocument, HttpSession httpSession) throws Exception {
         OperationDto operation = JSON.getMapper().readValue(signedDocument.getCMS().getSignedContentStr(), OperationDto.class);
         operation.getOperation().validate(CurrencyOperation.INIT_DEVICE_SESSION, config.getEntityId());
-        signedDocument.setSignedDocumentType(SignedDocumentType.DEVICE_SESSION);
+        signedDocument.setOperationType(OperationType.DEVICE_SESSION);
         em.merge(signedDocument);
         String previousSessionUUID = (String) httpSession.getAttribute(Constants.SESSION_UUID);
         HttpSessionManager.getInstance().updateSession(previousSessionUUID, operation.getSessionUUID(),
@@ -96,7 +96,7 @@ public class DeviceEJB {
     public void closeDeviceSession(CMSDocument signedDocument, HttpSession httpSession) throws Exception {
         OperationDto operation = JSON.getMapper().readValue(signedDocument.getCMS().getSignedContentStr(), OperationDto.class);
         operation.getOperation().validate(CurrencyOperation.CLOSE_SESSION, config.getEntityId());
-        signedDocument.setSignedDocumentType(SignedDocumentType.CLOSE_SESSION);
+        signedDocument.setOperationType(OperationType.CLOSE_SESSION);
         em.merge(signedDocument);
         httpSession.invalidate();
 

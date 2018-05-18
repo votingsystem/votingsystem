@@ -460,7 +460,8 @@ public class CertificateUtils {
             List<X509Certificate> certificateList = new ArrayList<>();
             for (int i = 0; i < listOfFiles.length; i++) {
                 if (listOfFiles[i].isFile()) {
-                    if(listOfFiles[i].getName().toLowerCase().endsWith(".pem")) {
+                    if(listOfFiles[i].getName().toLowerCase().endsWith(".pem") ||
+                            listOfFiles[i].getName().toLowerCase().endsWith(".cer")) {
                         try{
                             X509Certificate fileSystemX509TrustedCerts =
                                     PEMUtils.fromPEMToX509Cert(FileUtils.getBytesFromFile(listOfFiles[i]));

@@ -9,8 +9,6 @@ public enum OperationType implements SystemOperation {
 
     @JsonProperty("ADMIN_OPERATION_PROCESS")
     ADMIN_OPERATION_PROCESS("/api/operation/process"),
-    @JsonProperty("ANON_VOTE_CERT_REQUEST")
-    ANON_VOTE_CERT_REQUEST("/election/validateIdentity"),
     @JsonProperty("BACKUP")
     BACKUP(null),
     @JsonProperty("BACKUP_REQUEST")
@@ -58,6 +56,9 @@ public enum OperationType implements SystemOperation {
     @JsonProperty("INIT_SESSION")
     INIT_SESSION(null),
 
+    @JsonProperty("LOAD_TRUSTED_ENTITY")
+    LOAD_TRUSTED_ENTITY(null),
+
     @JsonProperty("MESSAGE_INFO")
     MESSAGE_INFO(null),
 
@@ -83,7 +84,67 @@ public enum OperationType implements SystemOperation {
     @JsonProperty("VALIDATE_IDENTITY")
     VALIDATE_IDENTITY("/api/auth/validate"),
     @JsonProperty("VOTE_REPOSITORY")
-    VOTE_REPOSITORY("/api/vote/repository");
+    VOTE_REPOSITORY("/api/vote/repository"),
+
+    //currency operations
+    @JsonProperty("BANK_NEW")
+    BANK_NEW(null),
+    @JsonProperty("SESSION_CERTIFICATION")
+    SESSION_CERTIFICATION(null),
+    @JsonProperty("SESSION_CERTIFICATION_RECEIPT")
+    SESSION_CERTIFICATION_RECEIPT(null),
+    @JsonProperty("DEVICE_REGISTER")
+    DEVICE_REGISTER(null),
+    @JsonProperty("DEVICE_SESSION")
+    DEVICE_SESSION(null),
+
+    @JsonProperty("TRANSACTION_FROM_BANK")
+    TRANSACTION_FROM_BANK(null),
+    @JsonProperty("TRANSACTION_FROM_BANK_RECEIPT")
+    TRANSACTION_FROM_BANK_RECEIPT(null),
+
+    @JsonProperty("TRANSACTION_FROM_USER")
+    TRANSACTION_FROM_USER(null),
+    @JsonProperty("TRANSACTION_FROM_USER_RECEIPT")
+    TRANSACTION_FROM_USER_RECEIPT(null),
+
+    @JsonProperty("CURRENCY_REQUEST")
+    CURRENCY_REQUEST(null),
+    @JsonProperty("CURRENCY_CHANGE")
+    CURRENCY_CHANGE(null),
+    @JsonProperty("CURRENCY_CHANGE_RECEIPT")
+    CURRENCY_CHANGE_RECEIPT(null),
+    @JsonProperty("CURRENCY_SEND")
+    CURRENCY_SEND(null),
+    @JsonProperty("CURRENCY_SEND_RECEIPT")
+    CURRENCY_SEND_RECEIPT(null),
+    @JsonProperty("CURRENCY_PERIOD_INIT")
+    CURRENCY_PERIOD_INIT(null),
+
+    //Admin documents
+    @JsonProperty("ADMIN_OPERATION")
+    ADMIN_OPERATION(null),
+    @JsonProperty("ADMIN_LOAD_ENTITY")
+    ADMIN_LOAD_ENTITY(null),
+    @JsonProperty("ADMIN_BATCH_RECEIPT")
+    ADMIN_BATCH_RECEIPT(null),
+
+    @JsonProperty("SIGNED_DOCUMENT")
+    SIGNED_DOCUMENT(null),
+
+    @JsonProperty("ENTITY_METADATA")
+    ENTITY_METADATA(null),
+    @JsonProperty("NEW_ELECTION_REQUEST")
+    NEW_ELECTION_REQUEST(null),
+    @JsonProperty("ANON_VOTE_CERT_REQUEST_REPEATED")
+    ANON_VOTE_CERT_REQUEST_REPEATED(null),
+    @JsonProperty("ANON_VOTE_CERT_REQUEST")
+    ANON_VOTE_CERT_REQUEST("/election/validateIdentity"),
+
+    @JsonProperty("VOTE_REPEATED")
+    VOTE_REPEATED(null),
+    @JsonProperty("VOTE")
+    VOTE(null);
 
     private String url;
 

@@ -4,7 +4,6 @@ import eu.europa.esig.dss.InMemoryDocument;
 import org.currency.web.util.AuditLogger;
 import org.currency.web.util.ReportFiles;
 import org.votingsystem.crypto.SignatureParams;
-import org.votingsystem.crypto.SignedDocumentType;
 import org.votingsystem.dto.currency.BalancesDto;
 import org.votingsystem.dto.currency.PeriodResultDto;
 import org.votingsystem.dto.currency.TransactionDto;
@@ -165,7 +164,7 @@ public class AuditEJB {
         byte[] contentToSign = XML.getMapper().writeValueAsBytes(balancesDto);
         byte[] contentSigned = signatureService.signXAdES(contentToSign);
         SignatureParams signatureParams = new SignatureParams(null, User.Type.CURRENCY_SERVER,
-                SignedDocumentType.CURRENCY_PERIOD_INIT).setWithTimeStampValidation(true);
+                OperationType.CURRENCY_PERIOD_INIT).setWithTimeStampValidation(true);
         SignedDocument signedDocument = signatureService.validateXAdESAndSave(
                 new InMemoryDocument(contentSigned), signatureParams);
         File outputFile = reportFiles.getReportFile();

@@ -81,12 +81,12 @@
         <dependency>
             <groupId>org.bouncycastle</groupId>
             <artifactId>bcprov-jdk15on</artifactId>
-            <version>1.54</version>
+            <version>${bouncycastle.version}</version>
         </dependency>
         <dependency>
             <groupId>org.bouncycastle</groupId>
             <artifactId>bcpkix-jdk15on</artifactId>
-            <version>1.54</version>
+            <version>${bouncycastle.version}</version>
         </dependency>
         <dependency>
             <groupId>com.google.zxing</groupId>
@@ -201,5 +201,6 @@
         <version.compiler.plugin>3.7.0</version.compiler.plugin>
         <version.war.plugin>3.2.0</version.war.plugin>
         <version.jackson>2.9.5</version.jackson>
+        <bouncycastle.version>1.59</bouncycastle.version>
     </properties>
 </project>

@@ -2,7 +2,6 @@ package org.votingsystem.idprovider.ejb;
 
 import eu.europa.esig.dss.InMemoryDocument;
 import org.votingsystem.crypto.SignatureParams;
-import org.votingsystem.crypto.SignedDocumentType;
 import org.votingsystem.dto.ResponseDto;
 import org.votingsystem.dto.metadata.MetadataDto;
 import org.votingsystem.dto.voting.ElectionDto;
@@ -95,7 +94,7 @@ public class ElectionsEJB {
                 byte[] requestSignedXML = response.getMessageBytes();
                 ElectionDto electionDto = XML.getMapper().readValue(requestSignedXML, ElectionDto.class);
                 SignatureParams signatureParams = new SignatureParams(null, User.Type.ENTITY,
-                        SignedDocumentType.NEW_ELECTION_REQUEST).setWithTimeStampValidation(true);
+                        OperationType.NEW_ELECTION_REQUEST).setWithTimeStampValidation(true);
                 SignedDocument signedDocument = signatureService.validateXAdESAndSave(
                         new InMemoryDocument(requestSignedXML), signatureParams);
                 Election election = new Election(electionDto, signedDocument).setEntityId(entityId);

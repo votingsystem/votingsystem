@@ -5,6 +5,8 @@ import org.votingsystem.crypto.PEMUtils;
 import org.votingsystem.dto.metadata.MetadataDto;
 import org.votingsystem.dto.metadata.TrustedEntitiesDto;
 import org.votingsystem.http.SystemEntityType;
+import org.votingsystem.throwable.HttpRequestException;
+import org.votingsystem.throwable.XMLValidationException;
 import org.votingsystem.util.OperationType;
 import org.votingsystem.xml.XML;
 
@@ -65,13 +67,18 @@ public class TrustedServicesEJB {
         for(TrustedEntitiesDto.EntityDto trustedEntity: trustedEntities.getEntities()) {
             log.info(trustedEntity.getId() + " - " + trustedEntity.getType() + " from country: " + trustedEntity.getCountryCode());
             try {
-                MetadataDto metadataDto = metadataResource.getMetadataFromURL(OperationType.GET_METADATA.getUrl(
-                        trustedEntity.getId()), true, false);
-                trustedEntitiesMap.put(trustedEntity.getId(), metadataDto);
+                addTrustedEntity(trustedEntity.getId());
             } catch (Exception ex) {
                 log.log(Level.SEVERE, "Error loading trusted entity: " + trustedEntity.getId() + " - " + ex.getMessage(), ex);
             }
         }
+    }
+
+    public MetadataDto addTrustedEntity(String entityId) throws HttpRequestException, XMLValidationException {
+        MetadataDto metadataDto = metadataResource.getMetadataFromURL(OperationType.GET_METADATA.getUrl(
+                entityId), true, false);
+        trustedEntitiesMap.put(entityId, metadataDto);
+        return metadataDto;
     }
 
     public Set<String> getLoadedEntities () {

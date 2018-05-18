@@ -2,13 +2,16 @@ drop table if exists vote cascade;
 drop table if exists signature cascade;
 drop table if exists election_option cascade;
 drop table if exists election cascade;
+drop table if exists anon_vote_cert_request cascade;
+drop table if exists user_csr_request cascade;
+drop table if exists session_certification cascade;
 drop table if exists certificate cascade;
 drop table if exists signer cascade;
 drop table if exists address cascade;
 drop table if exists signed_document cascade;
+drop table if exists device cascade;
 
-
-create table if not exists address
+create table address
 (
 	id bigserial not null
 		constraint address_pkey
@@ -24,7 +27,7 @@ create table if not exists address
 )
 ;
 
-create table if not exists signed_document
+create table signed_document
 (
 	dss_document_type varchar(31) not null,
 	id bigserial not null
@@ -38,14 +41,14 @@ create table if not exists signed_document
 		constraint uk_kym3w8recwem51x5elw5prpfh
 		unique,
 	meta_inf text,
-	document_type varchar(255) not null,
+	operation_type varchar(255) not null,
 	receipt_id bigint
 		constraint fke7evx50odtu3h6peavwsri60u
 		references signed_document
 )
 ;
 
-create table if not exists signer
+create table signer
 (
 	id bigserial not null
 		constraint signer_pkey
@@ -76,7 +79,7 @@ create table if not exists signer
 )
 ;
 
-create table if not exists certificate
+create table certificate
 (
 	id bigserial not null
 		constraint certificate_pkey
@@ -110,7 +113,34 @@ create table if not exists certificate
 )
 ;
 
-create table if not exists election
+create table device
+(
+	id bigserial not null
+		constraint device_pkey
+		primary key,
+	uuid varchar(255),
+	date_created timestamp,
+	device_name varchar(255),
+	email varchar(255),
+	last_update timestamp,
+	meta_inf varchar(255),
+	phone varchar(255),
+	reason text,
+	state varchar(255),
+	type varchar(255),
+	certificate_id bigint
+		constraint fka23pjhk261v40thkfel045q1p
+		references certificate,
+	signed_document bigint
+		constraint fk3koyny3sp95n8h1b6sp3483pv
+		references signed_document,
+	user_id bigint
+		constraint fk9rt7l8pehnt3bm9d0avri9xlk
+		references signer
+)
+;
+
+create table election
 (
 	id bigserial not null
 		constraint election_pkey
@@ -141,7 +171,29 @@ create table if not exists election
 )
 ;
 
-create table if not exists election_option
+create table anon_vote_cert_request
+(
+	id bigserial not null
+		constraint anon_vote_cert_request_pkey
+		primary key,
+	date_created timestamp,
+	last_update timestamp,
+	meta_inf varchar(255),
+	revocation_hash varchar(255),
+	state varchar(255) not null,
+	election bigint
+		constraint fka15dujlffxq1tafy7fi060hq6
+		references election,
+	signed_document_id bigint
+		constraint fkokah46jna8w61jnwiqrpe2hjb
+		references signed_document,
+	user_id bigint
+		constraint fkcav13qokd11uc3ym5r14os2l5
+		references signer
+)
+;
+
+create table election_option
 (
 	id bigserial not null
 		constraint election_option_pkey
@@ -155,7 +207,29 @@ create table if not exists election_option
 )
 ;
 
-create table if not exists signature
+create table session_certification
+(
+	id bigserial not null
+		constraint session_certification_pkey
+		primary key,
+	date_created timestamp,
+	last_update timestamp,
+	browser_certificate_id bigint
+		constraint fkox57gugo3exxdpyb7fvvc29vu
+		references certificate,
+	mobile_certificate_id bigint
+		constraint fkg0i3fqde177vucyccnuc0rxsc
+		references certificate,
+	signed_document bigint
+		constraint fkljn8d9fhk8170gglpy6vop228
+		references signed_document,
+	signer_id bigint
+		constraint fk62b3ifrusc67w3xjwt8oocjpx
+		references signer
+)
+;
+
+create table signature
 (
 	id bigserial not null
 		constraint signature_pkey
@@ -179,26 +253,31 @@ create table if not exists signature
 )
 ;
 
-create table if not exists vote
+create table user_csr_request
 (
 	id bigserial not null
-		constraint vote_pkey
+		constraint user_csr_request_pkey
 		primary key,
+	content bytea not null,
 	date_created timestamp,
-	identity_service_entity_id varchar(255) not null,
 	last_update timestamp,
+	serial_number bigint,
 	state varchar(255) not null,
+	activation_document_id bigint
+		constraint fk9ss1jsofscctm1xbocxe8mvj4
+		references signed_document,
+	cancelation_document_id bigint
+		constraint fke2jq8mknn4plcom0i2ma3mjep
+		references signed_document,
 	certificate_id bigint
-		constraint fkb57r6k1j2l1heycx1ukfc0vx3
+		constraint fkpawmtxh2v6k20lh4cyielv5ye
 		references certificate,
-	election_id bigint
-		constraint fkhode5yg62tlloicyys0w7oamt
-		references election,
-	option_selected_id bigint
-		constraint fkmm0bani8f8l0dgpt1xx7jaeti
-		references election_option,
-	signed_document_id bigint
-		constraint fk82bdyahbyyg9c96q4ypvwx72q
-		references signed_document
+	device_id bigint
+		constraint fk1vpcci5ba5dghiiycpqs37vno
+		references device,
+	user_id bigint
+		constraint fkik1cehgql94p3gcffmyf7yqdj
+		references signer
 )
 ;
+

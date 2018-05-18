@@ -6,6 +6,7 @@ import eu.europa.esig.dss.token.JKSSignatureToken;
 import eu.europa.esig.dss.tsl.TrustedListsCertificateSource;
 import eu.europa.esig.dss.x509.CertificateToken;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.votingsystem.crypto.CertificateUtils;
 import org.votingsystem.crypto.KeyGenerator;
 import org.votingsystem.crypto.PEMUtils;
 import org.votingsystem.dto.metadata.MetadataDto;
@@ -17,6 +18,7 @@ import org.votingsystem.http.SystemEntityType;
 import org.votingsystem.model.Certificate;
 import org.votingsystem.model.User;
 import org.votingsystem.model.voting.Election;
+import org.votingsystem.throwable.ValidationException;
 import org.votingsystem.util.Constants;
 import org.votingsystem.util.Messages;
 import org.votingsystem.util.OperationType;
@@ -91,16 +93,17 @@ public class ConfigEJB implements Config, ConfigServiceProvider, Serializable {
             KeyGenerator.INSTANCE.init(Constants.SIG_NAME, Constants.PROVIDER, Constants.KEY_SIZE, Constants.ALGORITHM_RNG);
             HttpConn.init(HttpConn.HTTPS_POLICY.ALL, null);
 
-            //TODO load certs from config dir
-            Set<X509Certificate> adminCerts = new HashSet<>();
-            for(X509Certificate adminCert : adminCerts) {
-                User admin = User.FROM_CERT(adminCert, User.Type.USER);
-                adminMap.put(admin.getNumIdAndType(), admin);
-            }
-
             applicationDirPath = System.getProperty("voting_provider_server_dir");
             if(StringUtils.isEmpty(applicationDirPath))
                 applicationDirPath = DEFAULT_APP_HOME;
+
+            Collection<X509Certificate> adminCertificates = CertificateUtils.loadCertificatesFromFolder(
+                    new File(applicationDirPath + "/sec/admins"));
+            for(X509Certificate adminCert : adminCertificates) {
+                User admin = User.FROM_CERT(adminCert, User.Type.USER);
+                adminMap.put(CertificateUtils.getHash(adminCert), admin);
+                log.info("Added admin: " + admin.getX509Certificate().getSubjectDN());
+            }
 
             Properties properties = new Properties();
             File propertiesFile = new File(applicationDirPath + "/config.properties");
@@ -274,8 +277,13 @@ public class ConfigEJB implements Config, ConfigServiceProvider, Serializable {
     }
 
     @Override
-    public boolean isAdmin(User user) {
-        return adminMap.containsKey(user.getNumIdAndType());
+    public boolean isAdmin(User user) throws ValidationException {
+        try {
+            String certHash = CertificateUtils.getHash(user.getX509Certificate());
+            return adminMap.containsKey(certHash);
+        } catch (Exception ex) {
+            throw new ValidationException(ex.getMessage());
+        }
     }
 
     public void addTrustedTimeStampIssuer(X509Certificate trustedTimeStampIssuer) {

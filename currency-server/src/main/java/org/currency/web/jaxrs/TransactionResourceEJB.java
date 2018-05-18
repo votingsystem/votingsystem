@@ -213,7 +213,7 @@ public class TransactionResourceEJB {
         CurrencyBatchDto batchDto = JSON.getMapper().readValue(postData, CurrencyBatchDto.class);
         CurrencyTransactionRequest transactionRequest = CurrencyTransactionRequest.build(batchDto);
         CurrencyBatchResponseDto responseDto = currencyBean.processCurrencyTransaction(transactionRequest);
-        return HttpResponse.sendResponseDto(ResponseDto.SC_OK, req, res, responseDto);
+        return new HttpResponse().sendResponseDto(ResponseDto.SC_OK, req, res, responseDto);
     }
 
     @Path("/currency-change")
@@ -222,7 +222,7 @@ public class TransactionResourceEJB {
         CurrencyBatchDto batchDto = JSON.getMapper().readValue(postData, CurrencyBatchDto.class);
         CurrencyChangeTransactionRequest transactionRequest = CurrencyChangeTransactionRequest.build(batchDto);
         CurrencyBatchResponseDto responseDto = currencyBean.processCurrencyChangeTransaction(transactionRequest);
-        return HttpResponse.sendResponseDto(ResponseDto.SC_OK, req, res, responseDto);
+        return new HttpResponse().sendResponseDto(ResponseDto.SC_OK, req, res, responseDto);
     }
 
 }

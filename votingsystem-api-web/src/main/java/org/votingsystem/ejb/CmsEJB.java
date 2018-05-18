@@ -6,7 +6,6 @@ import org.bouncycastle.operator.OperatorCreationException;
 import org.bouncycastle.tsp.TSPException;
 import org.bouncycastle.tsp.TimeStampToken;
 import org.votingsystem.crypto.Encryptor;
-import org.votingsystem.crypto.SignedDocumentType;
 import org.votingsystem.crypto.cms.CMSGenerator;
 import org.votingsystem.crypto.cms.CMSSignedMessage;
 import org.votingsystem.crypto.cms.CMSUtils;
@@ -20,6 +19,7 @@ import org.votingsystem.throwable.ValidationException;
 import org.votingsystem.util.Constants;
 import org.votingsystem.util.CurrencyOperation;
 import org.votingsystem.util.Messages;
+import org.votingsystem.util.OperationType;
 
 import javax.annotation.PostConstruct;
 import javax.ejb.Singleton;
@@ -84,10 +84,10 @@ public class CmsEJB {
     }
 
     @TransactionAttribute(REQUIRES_NEW)
-    public CMSDto validateCMS(CMSSignedMessage cmsSignedMessage, SignedDocumentType documentType)
+    public CMSDto validateCMS(CMSSignedMessage cmsSignedMessage, OperationType documentType)
             throws Exception {
         if(documentType == null)
-            documentType = SignedDocumentType.SIGNED_DOCUMENT;
+            documentType = OperationType.SIGNED_DOCUMENT;
         if (cmsSignedMessage.checkSignatureInfo() != null) {
             List<CMSDocument> documentList = em.createNamedQuery(CMSDocument.FIND_BY_MESSAGE_DIGEST)
                     .setParameter("messageDigest", cmsSignedMessage.getContentDigestStr()).getResultList();
@@ -104,14 +104,14 @@ public class CmsEJB {
             if(operationDto.getOperation().isCurrencyOperation()) {
                 switch ((CurrencyOperation)operationDto.getOperation().getType()) {
                     case REGISTER_DEVICE:
-                        documentType = SignedDocumentType.DEVICE_REGISTER;
+                        documentType = OperationType.DEVICE_REGISTER;
                         break;
                 }
             }
             CMSDto cmsDto = validateSignersCerts(cmsSignedMessage, operationDto.getOperation().getEntityId(), userType);
 
             CMSDocument cmsDocument = new CMSDocument(cmsSignedMessage);
-            cmsDocument.setIndication(SignedDocument.Indication.TOTAL_PASSED).setSignedDocumentType(documentType);
+            cmsDocument.setIndication(SignedDocument.Indication.TOTAL_PASSED).setOperationType(documentType);
             em.persist(cmsDocument);
 
             for(Signature signature : cmsDto.getSignatures()) {
@@ -165,10 +165,10 @@ public class CmsEJB {
         return cmsGenerator.signDataWithTimeStamp(contentToSign, timeStampToken);
     }
 
-    public CMSDocument signAndSave(byte[] contentToSign, SignedDocumentType signedDocumentType) throws Exception {
+    public CMSDocument signAndSave(byte[] contentToSign, OperationType OperationType) throws Exception {
         CMSSignedMessage cmsSignedMessage = signDataWithTimeStamp(contentToSign);
         CMSDocument cmsDocument = new CMSDocument(cmsSignedMessage);
-        cmsDocument.setIndication(SignedDocument.Indication.LOCAL_SIGNATURE).setSignedDocumentType(signedDocumentType);
+        cmsDocument.setIndication(SignedDocument.Indication.LOCAL_SIGNATURE).setOperationType(OperationType);
         em.persist(cmsDocument);
         return cmsDocument;
     }

@@ -1,6 +1,6 @@
 package org.currency.web.ejb;
 
-import org.votingsystem.crypto.SignedDocumentType;
+import org.votingsystem.util.OperationType;
 import org.votingsystem.currency.AccountMovements;
 import org.votingsystem.dto.ResponseDto;
 import org.votingsystem.dto.ResultListDto;
@@ -52,7 +52,7 @@ public class UserTransactionEJB {
                 request.getCurrencyCode(), request.getSubject(), signedDocument);
         em.persist(transaction);
         transactionBean.updateCurrencyAccounts(transaction);
-        signatureService.addReceipt(SignedDocumentType.TRANSACTION_FROM_USER_RECEIPT, signedDocument);
+        signatureService.addReceipt(OperationType.TRANSACTION_FROM_USER_RECEIPT, signedDocument);
 
         TransactionDto dto = new TransactionDto(transaction);
         dto.setSignedDocumentBase64(Base64.getEncoder().encodeToString(signedDocument.getReceipt().getBody().getBytes()));

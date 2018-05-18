@@ -3,7 +3,7 @@ package org.currency.web.ejb;
 import org.votingsystem.crypto.CertificateUtils;
 import org.votingsystem.crypto.PEMUtils;
 import org.votingsystem.crypto.SignatureParams;
-import org.votingsystem.crypto.SignedDocumentType;
+import org.votingsystem.util.OperationType;
 import org.votingsystem.crypto.cms.CMSSignedMessage;
 import org.votingsystem.currency.AccountMovements;
 import org.votingsystem.currency.CurrencyChangeTransactionRequest;
@@ -86,7 +86,7 @@ public class CurrencyEJB {
                 Currency.Type.CHANGE, currencyBatch, Constants.CURRENY_ISSUED_LIVE_IN_YEARS);
 
         SignatureParams signatureParams = new SignatureParams(config.getEntityId(), User.Type.CURRENCY_SERVER,
-                SignedDocumentType.CURRENCY_CHANGE_RECEIPT).setWithTimeStampValidation(false);
+                OperationType.CURRENCY_CHANGE_RECEIPT).setWithTimeStampValidation(false);
         byte[] documentToSign = XML.getMapper().writeValueAsBytes(batchDto);
         SignedDocument receipt = signatureService.signXAdESAndSave(documentToSign, signatureParams);
 
@@ -132,7 +132,7 @@ public class CurrencyEJB {
             leftOverCert = new String(PEMUtils.getPEMEncoded(leftOver.getCurrencyCertificate()));
         }
         SignatureParams signatureParams = new SignatureParams(config.getEntityId(), User.Type.CURRENCY_SERVER,
-                SignedDocumentType.CURRENCY_SEND_RECEIPT).setWithTimeStampValidation(false);
+                OperationType.CURRENCY_SEND_RECEIPT).setWithTimeStampValidation(false);
         byte[] documentToSign = XML.getMapper().writeValueAsBytes(batchDto);
         SignedDocument receipt = signatureService.signXAdESAndSave(documentToSign, signatureParams);
         em.persist(currencyBatch.setSignedDocument(receipt).setState(CurrencyBatch.State.OK));

@@ -15,7 +15,9 @@ import java.io.IOException;
  */
 public class HttpResponse {
 
-    public static Response sendResponseDto(final int statusCode, final HttpServletRequest req,
+    public HttpResponse() {}
+
+    public Response sendResponseDto(final int statusCode, final HttpServletRequest req,
             final HttpServletResponse res, final Object responseDto) throws IOException, ServletException {
         String reqContentType = HttpRequest.getContentType(req, true);
         if(reqContentType.contains("json")) {
@@ -29,7 +31,7 @@ public class HttpResponse {
         return Response.status(statusCode).build();
     }
 
-    public static Response getResponse(final HttpServletRequest req, final Integer statusCode,
+    public Response getResponse(final HttpServletRequest req, final Integer statusCode,
                                      final Object responseDto) throws JsonProcessingException {
         String reqContentType = HttpRequest.getContentType(req, true);
         if(reqContentType.contains("json")) {
@@ -50,13 +52,4 @@ public class HttpResponse {
             return XML.getMapper().writeValueAsBytes(responseDto);
     }
 
-    public static Response getResponseFromBytes(final HttpServletRequest req, final Integer statusCode,
-                                       final byte[] response) throws JsonProcessingException {
-        String reqContentType = HttpRequest.getContentType(req, true);
-        if(reqContentType.contains("json")) {
-            return Response.status(statusCode).type(javax.ws.rs.core.MediaType.APPLICATION_JSON_TYPE).entity(response).build();
-        } else {
-            return Response.status(statusCode).type(javax.ws.rs.core.MediaType.APPLICATION_XML_TYPE).entity(response).build();
-        }
-    }
 }

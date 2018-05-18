@@ -11,6 +11,8 @@ public enum SystemEntityType {
     VOTING_SERVICE_PROVIDER("voting-service-provider"),
     @JsonProperty("idprovider")
     ID_PROVIDER("idprovider"),
+    @JsonProperty("timestamp-server")
+    TIMESTAMP_SERVER("timestamp-server"),
     @JsonProperty("anonymizer")
     ANONYMIZER("anonymizer");
 

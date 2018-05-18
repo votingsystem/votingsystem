@@ -52,10 +52,10 @@ public class QRRequestBundle<T extends Dto> {
     public byte[] generateResponse(HttpServletRequest req, LocalDateTime localDateTime) throws IOException, ServletException {
         QRResponseDto qrResponseDto = new QRResponseDto(operationType, localDateTime);
         if(reponseDto != null)
-            qrResponseDto.setBase64Data(Base64.getEncoder().encodeToString(HttpResponse.getResponseContent(req, reponseDto)));
+            qrResponseDto.setBase64Data(Base64.getEncoder().encodeToString(new HttpResponse().getResponseContent(req, reponseDto)));
         else
             qrResponseDto.setBase64Data(base64Data);
-        return HttpResponse.getResponseContent(req, qrResponseDto);
+        return new HttpResponse().getResponseContent(req, qrResponseDto);
     }
 
     public OperationType getOperationType() {

@@ -34,7 +34,7 @@ public class TestPKCS7Resource {
     public Response test(@Context HttpServletRequest req, @Context HttpServletResponse res,
                          SignedDocument signedDocument) throws Exception {
         log.info("signedDocument: " + signedDocument.getBody());
-        return HttpResponse.getResponse(req, ResponseDto.SC_OK, "OK");
+        return new HttpResponse().getResponse(req, ResponseDto.SC_OK, "OK");
     }
 
     @Path("/sign") @POST
@@ -48,7 +48,7 @@ public class TestPKCS7Resource {
     public Response testCMS(@Context HttpServletRequest req, @Context HttpServletResponse res,
                             CMSDocument signedDocument) throws Exception {
         log.info("signedDocument: " + signedDocument.getBody());
-        return HttpResponse.getResponse(req, ResponseDto.SC_OK, "OK");
+        return new HttpResponse().getResponse(req, ResponseDto.SC_OK, "OK");
     }
 
     @Path("/multiSign") @POST

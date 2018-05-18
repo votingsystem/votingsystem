@@ -12,18 +12,15 @@ import eu.europa.esig.dss.validation.reports.SimpleReport;
 import eu.europa.esig.dss.x509.CertificateToken;
 import eu.europa.esig.dss.xades.validation.XAdESSignature;
 import org.votingsystem.crypto.SignatureParams;
-import org.votingsystem.crypto.SignedDocumentType;
 import org.votingsystem.crypto.TSPHttpSource;
 import org.votingsystem.dto.OperationCheckerDto;
 import org.votingsystem.dto.metadata.MetaInfDto;
-import org.votingsystem.model.Signature;
-import org.votingsystem.model.SignedDocument;
-import org.votingsystem.model.User;
-import org.votingsystem.model.XAdESDocument;
+import org.votingsystem.model.*;
 import org.votingsystem.throwable.*;
 import org.votingsystem.util.CurrencyOperation;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.Messages;
+import org.votingsystem.util.OperationType;
 import org.votingsystem.xades.CertificateVerifier;
 import org.votingsystem.xml.XML;
 
@@ -66,7 +63,7 @@ public class SignatureServiceEJB {
                     new TSPHttpSource(config.getTimestampServiceURL()));
             DSSDocument signedDocument = new InMemoryDocument(signedDocumentBytes);
             String documentDigest = signedDocument.getDigest(DigestAlgorithm.MD5);
-            XAdESDocument xadesDocument = new XAdESDocument(signedDocument, signatureParams.getSignedDocumentType(),
+            XAdESDocument xadesDocument = new XAdESDocument(signedDocument, signatureParams.getOperationType(),
                     documentDigest);
             xadesDocument.setIndication(SignedDocument.Indication.LOCAL_SIGNATURE);
             em.persist(xadesDocument);
@@ -116,17 +113,17 @@ public class SignatureServiceEJB {
             switch ((CurrencyOperation)checkerDto.getOperation().getType()) {
                 case GET_SESSION_CERTIFICATION:
                     signatureParams = new SignatureParams(checkerDto.getOperation().getEntityId(),
-                            User.Type.IDENTITY_SERVER, SignedDocumentType.SESSION_CERTIFICATION_RECEIPT)
+                            User.Type.IDENTITY_SERVER, OperationType.SESSION_CERTIFICATION_RECEIPT)
                             .setWithTimeStampValidation(true);
                     break;
                 default:
                     signatureParams = new SignatureParams(checkerDto.getOperation().getEntityId(),
-                            User.Type.ID_CARD_USER, SignedDocumentType.SIGNED_DOCUMENT).setWithTimeStampValidation(true);
+                            User.Type.ID_CARD_USER, OperationType.SIGNED_DOCUMENT).setWithTimeStampValidation(true);
                     break;
             }
         } else if(checkerDto.getOperation().isOperationType()) {
             signatureParams = new SignatureParams(null, User.Type.ID_CARD_USER,
-                    SignedDocumentType.SIGNED_DOCUMENT).setWithTimeStampValidation(true);
+                    OperationType.SIGNED_DOCUMENT).setWithTimeStampValidation(true);
         }
         return validateXAdESAndSave(new InMemoryDocument(httpRequestBytes), signatureParams);
     }
@@ -138,7 +135,7 @@ public class SignatureServiceEJB {
         XAdESDocument xAdESDocument = null;
         SignedDocumentValidator validator = null;
         try {
-            xAdESDocument = new XAdESDocument(signedDocument, signatureParams.getSignedDocumentType(), documentDigest);
+            xAdESDocument = new XAdESDocument(signedDocument, signatureParams.getOperationType(), documentDigest);
             validator = SignedDocumentValidator.fromDocument(signedDocument);
         } catch (Exception ex) {
             if (xAdESDocument != null) {
@@ -151,7 +148,6 @@ public class SignatureServiceEJB {
         Reports reports = null;
         try {
             validator.setCertificateVerifier(CertificateVerifier.create(config.getTrustedCertSource()));
-            //validator.setCertificateVerifier(new CommonCertificateVerifier());
 
             //if we set validationLevel to ValidationLevel.TIMESTAMPS we get exceptions (it doesn't seem that this is the
             // recommended way o check this)
@@ -189,20 +185,22 @@ public class SignatureServiceEJB {
                 CertificateToken signingCertToken = xAdESSignature.getCandidatesForSigningCertificate()
                         .getTheBestCandidate().getCertificateToken();
                 CertificateToken issuerToken = signingCertToken.getIssuerToken();
-                if(issuerToken == null) {
+                /*if(issuerToken == null) {
                     for(CertificateToken certificateToken : certList) {
                         if(signingCertToken.isSignedBy(certificateToken))
                             issuerToken = certificateToken;
                     }
-                }
+                }*/
+                Certificate certificateCA = config.getCACertificate(issuerToken.getCertificate().getSerialNumber().longValue());
                 User signer = signerInfoService.checkSigner(signingCertToken.getCertificate(),
-                        signatureParams.getSignerType(), signatureParams.getEntityId());
+                        signatureParams.getSignerType(), signatureParams.getEntityId(), certificateCA);
+
                 signatureParams.setSigningCert(signingCertToken.getCertificate()).setCertificateCA(signer.getCertificateCA());
                 switch (signatureParams.getSignerType()) {
                     case ANON_ELECTOR:
                         xAdESDocument.setAnonSigner(signer);
                         if(!signer.isValidElector()) {
-                            xAdESDocument.setSignedDocumentType(SignedDocumentType.VOTE_REPEATED);
+                            xAdESDocument.setOperationType(OperationType.VOTE_REPEATED);
                             return xAdESDocument;
                         }
                         break;
@@ -265,6 +263,5 @@ public class SignatureServiceEJB {
         }
         return xAdESDocument;
     }
-
 
 }

@@ -1,7 +1,7 @@
 package org.votingsystem.model;
 
 import eu.europa.esig.dss.DSSDocument;
-import org.votingsystem.crypto.SignedDocumentType;
+import org.votingsystem.util.OperationType;
 
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
@@ -20,12 +20,12 @@ public class XAdESDocument extends SignedDocument implements Serializable {
 
     public XAdESDocument() {}
 
-    public XAdESDocument(DSSDocument signedDocument, SignedDocumentType signedDocumentType) throws IOException {
-        super(signedDocument, signedDocumentType);
+    public XAdESDocument(DSSDocument signedDocument, OperationType OperationType) throws IOException {
+        super(signedDocument, OperationType);
     }
 
-    public XAdESDocument(DSSDocument signedDocument, SignedDocumentType signedDocumentType, String messageDigest)
+    public XAdESDocument(DSSDocument signedDocument, OperationType OperationType, String messageDigest)
             throws IOException {
-        super(signedDocument, signedDocumentType, messageDigest);
+        super(signedDocument, OperationType, messageDigest);
     }
 }

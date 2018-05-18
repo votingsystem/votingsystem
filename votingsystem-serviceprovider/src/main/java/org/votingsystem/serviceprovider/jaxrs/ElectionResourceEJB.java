@@ -2,7 +2,6 @@ package org.votingsystem.serviceprovider.jaxrs;
 
 import eu.europa.esig.dss.InMemoryDocument;
 import org.votingsystem.crypto.SignatureParams;
-import org.votingsystem.crypto.SignedDocumentType;
 import org.votingsystem.dto.ResponseDto;
 import org.votingsystem.dto.ResultListDto;
 import org.votingsystem.dto.voting.ElectionDto;
@@ -21,6 +20,7 @@ import org.votingsystem.model.voting.ElectionOption;
 import org.votingsystem.model.voting.Vote;
 import org.votingsystem.throwable.ValidationException;
 import org.votingsystem.util.Messages;
+import org.votingsystem.util.OperationType;
 import org.votingsystem.xml.XML;
 
 import javax.ejb.EJB;
@@ -63,7 +63,7 @@ public class ElectionResourceEJB {
     public Response save(@Context HttpServletRequest req, byte[] xmlRequestSigned) throws Exception {
         ElectionDto electionDto = XML.getMapper().readValue(xmlRequestSigned, ElectionDto.class);
         SignatureParams signatureParams = new SignatureParams(null, User.Type.ID_CARD_USER,
-                SignedDocumentType.NEW_ELECTION_REQUEST).setWithTimeStampValidation(true);
+                OperationType.NEW_ELECTION_REQUEST).setWithTimeStampValidation(true);
         SignedDocument signedDocument = signatureService.validateXAdESAndSave(new InMemoryDocument(xmlRequestSigned), signatureParams);
         electionDto.validatePublishRequest();
         byte[] receiptXML = signatureService.signXAdES(xmlRequestSigned);
@@ -113,7 +113,7 @@ public class ElectionResourceEJB {
             electionDtoList.add(new ElectionDto(election));
         }
         ResultListDto<ElectionDto> resultListDto = new ResultListDto<>(electionDtoList, offset, max, totalCount);
-        return HttpResponse.sendResponseDto(ResponseDto.SC_OK, req, res, resultListDto);
+        return new HttpResponse().sendResponseDto(ResponseDto.SC_OK, req, res, resultListDto);
     }
 
     @GET @Path("/search")
@@ -139,7 +139,7 @@ public class ElectionResourceEJB {
             electionDtoList.add(new ElectionDto(election));
         }
         ResultListDto<ElectionDto> resultListDto = new ResultListDto<>(electionDtoList, offset, max, electionList.size());
-        return HttpResponse.sendResponseDto(ResponseDto.SC_OK, req, res, resultListDto);
+        return new HttpResponse().sendResponseDto(ResponseDto.SC_OK, req, res, resultListDto);
 
     }
 
@@ -169,7 +169,7 @@ public class ElectionResourceEJB {
             req.getSession().setAttribute("statsDto", statsDto);
             res.sendRedirect(req.getContextPath() + "/election/stats.xhtml");
             return Response.ok().build();
-        } else return HttpResponse.sendResponseDto(ResponseDto.SC_OK, req, res, statsDto);
+        } else return new HttpResponse().sendResponseDto(ResponseDto.SC_OK, req, res, statsDto);
     }
 
 }

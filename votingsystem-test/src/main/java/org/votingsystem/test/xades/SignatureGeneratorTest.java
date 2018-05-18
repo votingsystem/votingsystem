@@ -10,7 +10,6 @@ import org.votingsystem.dto.ResponseDto;
 import org.votingsystem.dto.metadata.MetadataDto;
 import org.votingsystem.dto.metadata.SystemEntityDto;
 import org.votingsystem.http.HttpConn;
-import org.votingsystem.http.MediaType;
 import org.votingsystem.http.SystemEntityType;
 import org.votingsystem.test.Constants;
 import org.votingsystem.testlib.BaseTest;
@@ -81,12 +80,6 @@ public class SignatureGeneratorTest extends BaseTest {
         ResponseDto responseDto = HttpConn.getInstance().doPostForm(
                 OperationType.VALIDATE_SIGNED_DOCUMENT.getUrl(Constants.ID_PROVIDER_ENTITY_ID), urlParameters);
         log.info("response: " + responseDto.getStatusCode() + " - " + responseDto.getMessage());
-    }
-
-    public void sendToServer(byte[] signedXML) {
-        ResponseDto response = HttpConn.getInstance().doPostRequest(signedXML, MediaType.XML,
-                "https://voting.ddns.net/currency-server/api/test/xml-signed-document");
-        log.info("statusCode: " + response.getStatusCode() + " - " + response.getMessage());
     }
 
 

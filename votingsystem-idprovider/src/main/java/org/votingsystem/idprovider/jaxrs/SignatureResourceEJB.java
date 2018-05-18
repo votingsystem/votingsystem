@@ -2,12 +2,12 @@ package org.votingsystem.idprovider.jaxrs;
 
 import eu.europa.esig.dss.InMemoryDocument;
 import org.votingsystem.crypto.SignatureParams;
-import org.votingsystem.crypto.SignedDocumentType;
 import org.votingsystem.dto.ResponseDto;
 import org.votingsystem.ejb.Config;
 import org.votingsystem.ejb.SignatureServiceEJB;
 import org.votingsystem.model.SignedDocument;
 import org.votingsystem.model.User;
+import org.votingsystem.util.OperationType;
 import org.votingsystem.xml.XML;
 
 import javax.ejb.EJB;
@@ -38,7 +38,7 @@ public class SignatureResourceEJB {
                                              @FormParam("withTimeStampValidation") Boolean withTimeStampValidation) throws Exception {
         log.info("withTimeStampValidation: " + withTimeStampValidation + " - signedXML: " + signedXML);
         SignatureParams signatureParams = new SignatureParams(null, User.Type.ID_CARD_USER,
-                SignedDocumentType.SIGNED_DOCUMENT).setWithTimeStampValidation(withTimeStampValidation);
+                OperationType.SIGNED_DOCUMENT).setWithTimeStampValidation(withTimeStampValidation);
         try {
             SignedDocument signedDocument = signatureService.validateXAdESAndSave(
                     new InMemoryDocument(signedXML.getBytes()), signatureParams);

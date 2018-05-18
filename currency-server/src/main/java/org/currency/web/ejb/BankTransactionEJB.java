@@ -1,7 +1,7 @@
 package org.currency.web.ejb;
 
 import org.votingsystem.crypto.CertificateUtils;
-import org.votingsystem.crypto.SignedDocumentType;
+import org.votingsystem.util.OperationType;
 import org.votingsystem.dto.ResultListDto;
 import org.votingsystem.dto.currency.TransactionDto;
 import org.votingsystem.model.SignedDocument;
@@ -72,8 +72,8 @@ public class BankTransactionEJB {
 
         em.persist(transaction);
 
-        transactionDto.getSignedDocument().setSignedDocumentType(SignedDocumentType.TRANSACTION_FROM_BANK);
-        signatureService.addReceipt(SignedDocumentType.TRANSACTION_FROM_BANK_RECEIPT, signedDocument);
+        transactionDto.getSignedDocument().setOperationType(OperationType.TRANSACTION_FROM_BANK);
+        signatureService.addReceipt(OperationType.TRANSACTION_FROM_BANK_RECEIPT, signedDocument);
 
 
         transactionBean.updateCurrencyAccounts(transaction);

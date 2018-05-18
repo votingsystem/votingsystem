@@ -2,7 +2,6 @@ package org.votingsystem.serviceprovider.jaxrs;
 
 import eu.europa.esig.dss.InMemoryDocument;
 import org.votingsystem.crypto.SignatureParams;
-import org.votingsystem.crypto.SignedDocumentType;
 import org.votingsystem.dto.ResponseDto;
 import org.votingsystem.dto.voting.VoteDto;
 import org.votingsystem.ejb.Config;
@@ -16,6 +15,7 @@ import org.votingsystem.model.voting.ElectionOption;
 import org.votingsystem.model.voting.Vote;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.Messages;
+import org.votingsystem.util.OperationType;
 import org.votingsystem.xml.XML;
 
 import javax.ejb.Stateless;
@@ -57,13 +57,13 @@ public class VoteResourceEJB {
             throw new IllegalArgumentException("Vote with bad format");
         }
         SignatureParams signatureParams = new SignatureParams(null, User.Type.ANON_ELECTOR,
-                SignedDocumentType.VOTE).setWithTimeStampValidation(true);
+                OperationType.VOTE).setWithTimeStampValidation(true);
         SignedDocument signedDocument = signatureService.validateXAdESAndSave(new InMemoryDocument(signedVote), signatureParams);
         Certificate certificate = signedDocument.getAnonSigner().getCertificate();
         if(!signedDocument.getAnonSigner().isValidElector()) {
             String message = Messages.currentInstance().get("voteCertificateRepeatedErrorMsg");
             log.severe("VOTE REPEATED - signedDocument id: " + signedDocument.getId());
-            return HttpResponse.sendResponseDto(ResponseDto.SC_ERROR_REQUEST_REPEATED, req, res,
+            return new HttpResponse().sendResponseDto(ResponseDto.SC_ERROR_REQUEST_REPEATED, req, res,
                     new ResponseDto(ResponseDto.SC_ERROR_REQUEST_REPEATED, message));
         }
         voteDto.validate(certificate.getCertVoteExtension(), config.getEntityId());

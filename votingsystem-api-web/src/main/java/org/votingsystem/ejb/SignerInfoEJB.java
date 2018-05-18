@@ -1,5 +1,14 @@
 package org.votingsystem.ejb;
 
+import eu.europa.esig.dss.client.crl.OnlineCRLSource;
+import eu.europa.esig.dss.client.ocsp.OnlineOCSPSource;
+import eu.europa.esig.dss.validation.CertificateValidator;
+import eu.europa.esig.dss.validation.CertificateVerifier;
+import eu.europa.esig.dss.validation.CommonCertificateVerifier;
+import eu.europa.esig.dss.validation.reports.CertificateReports;
+import eu.europa.esig.dss.validation.reports.wrapper.DiagnosticData;
+import eu.europa.esig.dss.x509.CertificateSource;
+import eu.europa.esig.dss.x509.CertificateToken;
 import org.votingsystem.crypto.CertificateUtils;
 import org.votingsystem.dto.voting.CertVoteExtensionDto;
 import org.votingsystem.model.Certificate;
@@ -40,20 +49,41 @@ public class SignerInfoEJB implements SignerInfoService {
     @Inject private Config config;
 
     @Override
+    public User checkSigner(X509Certificate certificate, User.Type userType, String entityId, Certificate certificateCA)
+            throws SignerValidationException, CertificateValidationException {
+        try {
+            return checkSigner(User.FROM_CERT(certificate, userType), userType, entityId, certificateCA);
+        } catch (InstantiationException | IllegalAccessException | CertificateEncodingException e) {
+            throw new SignerValidationException(e.getMessage());
+        }
+    }
+
+    @Override
+    public User checkSigner(User signer, User.Type userType, String entityId)
+            throws SignerValidationException, CertificateValidationException {
+        try {
+            Certificate certificateCA = verifyCertificate(signer.getX509Certificate());
+            return checkSigner(User.FROM_CERT(signer.getX509Certificate(), userType), userType, entityId, certificateCA);
+        } catch (InstantiationException | IllegalAccessException | CertificateEncodingException e) {
+            throw new SignerValidationException(e.getMessage());
+        }
+    }
+
+    @Override
     public User checkSigner(X509Certificate certificate, User.Type userType, String entityId)
             throws SignerValidationException, CertificateValidationException {
         try {
-            return checkSigner(User.FROM_CERT(certificate, userType), userType, entityId);
+            Certificate certificateCA = verifyCertificate(certificate);
+            return checkSigner(User.FROM_CERT(certificate, userType), userType, entityId, certificateCA);
         } catch (InstantiationException | IllegalAccessException | CertificateEncodingException e) {
             throw new SignerValidationException(e.getMessage());
         }
     }
 
     @TransactionAttribute(REQUIRES_NEW)
-    public User checkSigner(User signer, User.Type signerType, String entityId) throws SignerValidationException,
-            CertificateValidationException {
+    public User checkSigner(User signer, User.Type signerType, String entityId, Certificate certificateCA)
+            throws SignerValidationException, CertificateValidationException {
         X509Certificate x509CertSigner = signer.getX509Certificate();
-        Certificate certificateCA = verifyCertificate(x509CertSigner);
         if(certificateCA == null) {
             throw new CertificateValidationException(Messages.currentInstance().get("signerCertWithoutCAErrorMsg"));
         }
@@ -136,6 +166,34 @@ public class SignerInfoEJB implements SignerInfoService {
                 config.getTrustedCertAnchors(), false, Arrays.asList(certToCheck));
         X509Certificate certCaResult = validatorResult.getTrustAnchor().getTrustedCert();
         return config.getCACertificate(certCaResult.getSerialNumber().longValue());
+    }
+
+    public CertificateReports getCertificateStatus(CertificateToken token, CertificateSource trustedCertSource) {
+        //CertificateToken token = DSSUtils.loadCertificate(new File("src/main/resources/keystore/ec.europa.eu.1.cer"));
+        CertificateVerifier cv = new CommonCertificateVerifier();
+        // We can inject several sources. eg: OCSP, CRL, AIA, trusted lists
+        // Capability to download resources from AIA
+        //cv.setDataLoader(new CommonsDataLoader());
+        // Capability to request OCSP Responders
+        cv.setOcspSource(new OnlineOCSPSource());
+        // Capability to download CRL
+        cv.setCrlSource(new OnlineCRLSource());
+        // We now add trust anchors (trusted list, keystore,...)
+        cv.setTrustedCertSource(trustedCertSource);
+        // We also can add missing certificates
+        //cv.setAdjunctCertSource(adjunctCertSource);
+        CertificateValidator validator = CertificateValidator.fromCertificate(token);
+        validator.setCertificateVerifier(cv);
+        CertificateReports certificateReports = validator.validate();
+        // We have 3 reports
+        // The diagnostic data which contains all used and static data
+        DiagnosticData diagnosticData = certificateReports.getDiagnosticData();
+        // The detailed report which is the result of the process of the diagnostic data and the validation policy
+        //DetailedReport detailedReport = certificateReports.getDetailedReport();
+
+        // The simple report is a summary of the detailed report or diagnostic data (more user-friendly)
+        //SimpleCertificateReport simpleReport = certificateReports.getSimpleReport();
+        return certificateReports;
     }
 
 }

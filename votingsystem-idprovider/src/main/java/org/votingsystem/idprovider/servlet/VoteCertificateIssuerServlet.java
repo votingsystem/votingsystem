@@ -2,7 +2,6 @@ package org.votingsystem.idprovider.servlet;
 
 import org.votingsystem.crypto.CsrResponse;
 import org.votingsystem.crypto.SignatureParams;
-import org.votingsystem.crypto.SignedDocumentType;
 import org.votingsystem.dto.ResponseDto;
 import org.votingsystem.ejb.SignatureServiceEJB;
 import org.votingsystem.http.AnonCertMultipartRequest;
@@ -10,6 +9,7 @@ import org.votingsystem.http.ContentType;
 import org.votingsystem.idprovider.ejb.CertIssuerEJB;
 import org.votingsystem.model.SignedDocument;
 import org.votingsystem.model.User;
+import org.votingsystem.util.OperationType;
 
 import javax.ejb.EJB;
 import javax.ejb.TransactionAttribute;
@@ -54,7 +54,7 @@ public class VoteCertificateIssuerServlet extends HttpServlet {
             AnonCertMultipartRequest request = new AnonCertMultipartRequest(req.getParts(),
                     AnonCertMultipartRequest.Type.ELECTION_IDENTIFICATION);
             SignatureParams signatureParams = new SignatureParams(null, User.Type.ID_CARD_USER,
-                    SignedDocumentType.ANON_VOTE_CERT_REQUEST).setWithTimeStampValidation(true);
+                    OperationType.ANON_VOTE_CERT_REQUEST).setWithTimeStampValidation(true);
             signedDocument = signatureService.validateXAdESAndSave(request.getDssDocument(), signatureParams);
             CsrResponse csrResponse = certIssuer.processAnonymousCertificateRequest(signedDocument, request.getCSRBytes());
             res.setContentType(ContentType.TEXT_STREAM.getName());

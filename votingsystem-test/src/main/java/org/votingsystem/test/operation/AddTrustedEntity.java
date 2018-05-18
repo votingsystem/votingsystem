@@ -23,27 +23,28 @@ import java.util.logging.Logger;
 /**
  * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-public class LoadTrustedEntities extends BaseTest {
+public class AddTrustedEntity extends BaseTest {
 
-    private static final Logger log = Logger.getLogger(LoadTrustedEntities.class.getName());
+    private static final Logger log = Logger.getLogger(AddTrustedEntity.class.getName());
 
-    private static String TEST_ENTITY = "https://voting.ddns.net/timestamp-server";
+    private static String TEST_ENTITY = "https://voting.ddns.net/idprovider";
 
     private static String ADMIN_KEYSTORE = "certs/fake_08888888D.jks";
     private static String ADMIN_KEYSTORE_PASSWORD = org.votingsystem.util.Constants.PASSW_DEMO;
 
 
     public static void main(String[] args) throws Exception {
-        new LoadTrustedEntities().checkCert();
+        new AddTrustedEntity().checkCert();
         System.exit(0);
     }
 
-    public LoadTrustedEntities() {
+    public AddTrustedEntity() {
         super();
     }
 
     private void checkCert() throws Exception {
-        AdminRequestDto adminRequest = new AdminRequestDto(OperationType.GET_METADATA);
+        AdminRequestDto adminRequest = new AdminRequestDto(OperationType.LOAD_TRUSTED_ENTITY);
+        adminRequest.setEntityId("https://voting.ddns.net/timestamp-server");
         byte[] xmlToSign = XML.getMapper().writeValueAsBytes(adminRequest);
         log.info("xmlToSign: " + new String(xmlToSign));
         AbstractSignatureTokenConnection signingToken = new JKSSignatureToken(

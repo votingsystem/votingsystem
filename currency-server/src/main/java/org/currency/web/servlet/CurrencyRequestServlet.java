@@ -4,7 +4,7 @@ import org.currency.web.ejb.ConfigCurrencyServer;
 import org.currency.web.ejb.CurrencyEJB;
 import org.currency.web.ejb.CurrencySignatureEJB;
 import org.votingsystem.crypto.SignatureParams;
-import org.votingsystem.crypto.SignedDocumentType;
+import org.votingsystem.util.OperationType;
 import org.votingsystem.dto.ResponseDto;
 import org.votingsystem.dto.ResultListDto;
 import org.votingsystem.dto.currency.CurrencyRequestDto;
@@ -45,7 +45,7 @@ public class CurrencyRequestServlet extends HttpServlet {
             AnonCertMultipartRequest request = new AnonCertMultipartRequest(req.getParts(),
                     AnonCertMultipartRequest.Type.CURRENCY_REQUEST);
             SignatureParams signatureParams = new SignatureParams(null, User.Type.ID_CARD_USER,
-                    SignedDocumentType.CURRENCY_REQUEST).setWithTimeStampValidation(true);
+                    OperationType.CURRENCY_REQUEST).setWithTimeStampValidation(true);
             signedDocument = signatureService.validateXAdESAndSave(request.getDssDocument(), signatureParams);
             CurrencyRequestDto requestDto = CurrencyRequestDto.validateRequest(request.getRequestCSRSet(),
                     signedDocument, config.getEntityId());

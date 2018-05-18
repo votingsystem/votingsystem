@@ -3,6 +3,7 @@ package org.votingsystem.crypto;
 import org.bouncycastle.util.Store;
 import org.votingsystem.model.Certificate;
 import org.votingsystem.model.User;
+import org.votingsystem.util.OperationType;
 
 import java.security.PrivateKey;
 import java.security.cert.X509Certificate;
@@ -12,7 +13,7 @@ import java.security.cert.X509Certificate;
  */
 public class SignatureParams {
 
-    private SignedDocumentType signedDocumentType;
+    private OperationType operationType;
     private User.Type signerType;
     private String entityId;
     private X509Certificate signingCert;
@@ -23,8 +24,8 @@ public class SignatureParams {
 
     public SignatureParams(){}
 
-    public SignatureParams(String entityId, User.Type signerType, SignedDocumentType signedDocumentType) {
-        this.signedDocumentType = signedDocumentType;
+    public SignatureParams(String entityId, User.Type signerType, OperationType operationType) {
+        this.operationType = operationType;
         this.signerType = signerType;
         this.entityId = entityId;
     }
@@ -66,12 +67,12 @@ public class SignatureParams {
         this.certs = certs;
     }
 
-    public SignedDocumentType getSignedDocumentType() {
-        return signedDocumentType;
+    public OperationType getOperationType() {
+        return operationType;
     }
 
-    public void setSignedDocumentType(SignedDocumentType signedDocumentType) {
-        this.signedDocumentType = signedDocumentType;
+    public void setOperationType(OperationType operationType) {
+        this.operationType = operationType;
     }
 
     public User.Type getSignerType() {

@@ -18,6 +18,8 @@ import javax.faces.context.FacesContext;
 import javax.faces.flow.FlowScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
 import javax.servlet.http.HttpServletRequest;
 import java.io.Serializable;
 import java.time.*;
@@ -37,6 +39,7 @@ public class PublishElectionBean implements Serializable {
 
     public static final int ELECTION_CONTENT_MAX_LENGTH = 2000;
 
+
     @Inject private Config config;
     @EJB private QRSessionsEJB qrSessions;
 
@@ -50,6 +53,8 @@ public class PublishElectionBean implements Serializable {
     private String qrUUID;
     private int maxContentLength = ELECTION_CONTENT_MAX_LENGTH;
     private List<ElectionOption> optionList;
+    private boolean electionSaved;
+    private Election election;
 
     public PublishElectionBean() {
         electionOptionsSeparator = UUID.randomUUID().toString().substring(0, 7);
@@ -78,7 +83,7 @@ public class PublishElectionBean implements Serializable {
                 return "publish-election";
             }
 
-            Election election = new Election(electionSubject, electionContent, dateBegin, dateBegin.plusDays(1),
+            election = new Election(electionSubject, electionContent, dateBegin, dateBegin.plusDays(1),
                     Election.State.PENDING);
             election.setUUID(UUID.randomUUID().toString()).setElectionOptions(new HashSet<>(optionList));
 
@@ -103,6 +108,12 @@ public class PublishElectionBean implements Serializable {
                     Messages.currentInstance().get("errorLbl"), ex.getMessage()));
             return null;
         }
+    }
+
+    public String showElection() {
+        HttpServletRequest req = (HttpServletRequest)FacesContext.getCurrentInstance().getExternalContext().getRequest();
+        req.setAttribute("election", election);
+        return "endFlowPublishOk";
     }
 
     public String getQRCodeURL() {
@@ -189,4 +200,11 @@ public class PublishElectionBean implements Serializable {
         this.maxContentLength = maxContentLength;
     }
 
+    public boolean isElectionSaved() {
+        return electionSaved;
+    }
+
+    public void setElectionSaved(boolean electionSaved) {
+        this.electionSaved = electionSaved;
+    }
 }

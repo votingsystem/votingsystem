@@ -88,7 +88,6 @@ public class CertIssuerEJB {
             certIssuerSigningCert = (X509Certificate) keyStoreCertIssuer.getCertificate(keyAlias);
             certificate = config.loadAuthorityCertificate(new CertificateToken(certIssuerSigningCert));
             certIssuerPrivateKey = (PrivateKey) keyStoreCertIssuer.getKey(keyAlias, issuerKeyPassword.toCharArray());
-            signerEJB.checkSigner(config.getSigningCert(), User.Type.ENTITY, config.getEntityId());
         } catch (Exception ex) {
             log.log(Level.SEVERE, ex.getMessage(), ex);
         }
@@ -136,7 +135,8 @@ public class CertIssuerEJB {
         KeyStore keyStore = KeyStoreUtils.generateUserKeyStore(validFromDate, validToDate, password, Constants.USER_CERT_ALIAS,
                 rootCAPrivateCredential, testUserDN, config.getOcspServerURL());
         X509Certificate issuedCert = (X509Certificate) keyStore.getCertificate(Constants.USER_CERT_ALIAS);
-        signerEJB.checkSigner(issuedCert, User.Type.USER, null);
+        signerEJB.checkSigner(issuedCert, User.Type.USER, null,
+                config.getCACertificate(certIssuerSigningCert.getSerialNumber().longValue()));
         return keyStore;
     }
 
@@ -154,7 +154,8 @@ public class CertIssuerEJB {
         KeyStore keyStore = KeyStoreUtils.generateTimeStampServerKeyStore(validFromDate, validToDate, password, keyAlias,
                 rootCAPrivateCredential, userDN, config.getOcspServerURL());
         X509Certificate issuedCert = (X509Certificate) keyStore.getCertificate(Constants.USER_CERT_ALIAS);
-        signerEJB.checkSigner(issuedCert, User.Type.TIMESTAMP_SERVER, null);
+        signerEJB.checkSigner(issuedCert, User.Type.TIMESTAMP_SERVER, null,
+                config.getCACertificate(certIssuerSigningCert.getSerialNumber().longValue()));
         return keyStore;
     }
 
@@ -171,7 +172,8 @@ public class CertIssuerEJB {
         KeyStore keyStore = KeyStoreUtils.generateUserKeyStore(validFromDate, validToDate, password, keyAlias,
                 rootCAPrivateCredential, userDN, config.getOcspServerURL());
         X509Certificate issuedCert = (X509Certificate) keyStore.getCertificate(Constants.USER_CERT_ALIAS);
-        signerEJB.checkSigner(issuedCert, User.Type.ENTITY, null);
+        signerEJB.checkSigner(issuedCert, User.Type.ENTITY, null,
+                config.getCACertificate(certIssuerSigningCert.getSerialNumber().longValue()));
         return keyStore;
     }
 
@@ -225,7 +227,7 @@ public class CertIssuerEJB {
                             "ERROR processing anonymous certificate request - unexpected operation type: " + request.getType());
             }
         } catch (RequestRepeatedException ex) {
-            em.merge(signedDocument.setSignedDocumentType(SignedDocumentType.ANON_VOTE_CERT_REQUEST_REPEATED));
+            em.merge(signedDocument.setOperationType(OperationType.ANON_VOTE_CERT_REQUEST_REPEATED));
             log.severe("RequestRepeatedException: " + ex.getMessage() + " - SignedDocument id: " + signedDocument.getId());
             return new CsrResponse(ResponseDto.SC_ERROR, ex.getMessage());
         }
@@ -404,14 +406,14 @@ public class CertIssuerEJB {
         em.persist(sessionCertification);
         log.info("sessionCertification id: " + sessionCertification.getId());
         SignatureParams signatureParams = new SignatureParams(config.getEntityId(), User.Type.IDENTITY_SERVER,
-                SignedDocumentType.SESSION_CERTIFICATION_RECEIPT).setWithTimeStampValidation(true);
+                OperationType.SESSION_CERTIFICATION_RECEIPT).setWithTimeStampValidation(true);
         SignedDocument response = null;
         if(signedDocument instanceof CMSDocument)
             response = cmsEJB.signAndSave(JSON.getMapper().writeValueAsBytes(csrResponse),
-                    SignedDocumentType.SESSION_CERTIFICATION_RECEIPT);
+                    OperationType.SESSION_CERTIFICATION_RECEIPT);
         else
             response = signatureService.signXAdESAndSave(XML.getMapper().writeValueAsBytes(csrResponse), signatureParams);
-        em.merge(signedDocument.setReceipt(response).setSignedDocumentType(SignedDocumentType.SESSION_CERTIFICATION));
+        em.merge(signedDocument.setReceipt(response).setOperationType(OperationType.SESSION_CERTIFICATION));
         return response;
     }
 

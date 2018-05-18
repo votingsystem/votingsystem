@@ -90,16 +90,17 @@ public class ConfigEJB implements Config, ConfigIdProvider {
             KeyGenerator.INSTANCE.init(Constants.SIG_NAME, Constants.PROVIDER, Constants.KEY_SIZE, Constants.ALGORITHM_RNG);
             HttpConn.init(HttpConn.HTTPS_POLICY.ALL, null);
 
+            applicationDirPath = System.getProperty("idprovider_server_dir");
+            if(StringUtils.isEmpty(applicationDirPath))
+                applicationDirPath = DEFAULT_APP_HOME;
+
             Collection<X509Certificate> adminCertificates = CertificateUtils.loadCertificatesFromFolder(
                     new File(applicationDirPath + "/sec/admins"));
             for(X509Certificate adminCert : adminCertificates) {
                 User admin = User.FROM_CERT(adminCert, User.Type.USER);
                 adminMap.put(CertificateUtils.getHash(adminCert), admin);
+                log.severe("Admin added: " + admin.getX509Certificate().getSubjectDN());
             }
-
-            applicationDirPath = System.getProperty("idprovider_server_dir");
-            if(StringUtils.isEmpty(applicationDirPath))
-                applicationDirPath = DEFAULT_APP_HOME;
 
             Properties properties = new Properties();
             File propertiesFile = new File(applicationDirPath + "/config.properties");
