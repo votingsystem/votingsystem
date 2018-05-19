@@ -53,7 +53,7 @@ public class OperationResourceEJB {
         User user = signedDocument.getSignatures().iterator().next().getSigner();
         if(!config.isAdmin(user))
             return Response.status(Response.Status.UNAUTHORIZED).build();
-        AdminRequestDto adminRequest = XML.getMapper().readValue(signedDocument.getBody().getBytes(), AdminRequestDto.class);
+        AdminRequestDto adminRequest = new XML().getMapper().readValue(signedDocument.getBody().getBytes(), AdminRequestDto.class);
         String message = null;
         log.info("Admin operation: " + adminRequest.getOperationType());
         switch (adminRequest.getOperationType()) {

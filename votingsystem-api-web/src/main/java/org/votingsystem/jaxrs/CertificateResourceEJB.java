@@ -135,7 +135,7 @@ public class CertificateResourceEJB {
                 listDto.add(new CertificateDto(certificate));
             }
             ResultListDto<CertificateDto> resultListDto = new ResultListDto<>(listDto, offset, max, totalCount);
-            return Response.ok().entity(JSON.getMapper().writeValueAsBytes(resultListDto)).build();
+            return Response.ok().entity(new JSON().getMapper().writeValueAsBytes(resultListDto)).build();
         }
     }
 
@@ -156,7 +156,7 @@ public class CertificateResourceEJB {
             resp.setHeader("Content-Disposition", "inline; filename='trustedCert_" + serialNumber + "'");
             return Response.ok().entity(PEMUtils.getPEMEncoded(certificate.getX509Certificate())).type(MediaType.PEM).build();
         } else
-            return Response.ok().entity(JSON.getMapper().writeValueAsBytes(new CertificateDto(certificate))).build();
+            return Response.ok().entity(new JSON().getMapper().writeValueAsBytes(new CertificateDto(certificate))).build();
     }
 
     @GET @Path("/trusted")

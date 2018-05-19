@@ -45,7 +45,7 @@ public class LoadTrustedEntitiesTest extends BaseTest {
 
     private void checkCert() throws Exception {
         AdminRequestDto adminRequest = new AdminRequestDto(OperationType.GET_METADATA);
-        byte[] xmlToSign = XML.getMapper().writeValueAsBytes(adminRequest);
+        byte[] xmlToSign = new XML().getMapper().writeValueAsBytes(adminRequest);
         log.info("xmlToSign: " + new String(xmlToSign));
         AbstractSignatureTokenConnection signingToken = new JKSSignatureToken(
                 Thread.currentThread().getContextClassLoader().getResource(ADMIN_KEYSTORE).openStream(),

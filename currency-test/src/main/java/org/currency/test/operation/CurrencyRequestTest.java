@@ -46,10 +46,10 @@ public class CurrencyRequestTest extends BaseTest {
         CurrencyRequestDto requestDto = CurrencyRequestDto.CREATE_REQUEST(transactionDto, totalAmount,
                 Constants.CURRENCY_SERVICE_ENTITY_ID);
         Map<String, byte[]> mapToSend = new HashMap<>();
-        byte[] requestBytes = XML.getMapper().writeValueAsBytes(requestDto.getRequestCSRSet());
+        byte[] requestBytes = new XML().getMapper().writeValueAsBytes(requestDto.getRequestCSRSet());
         mapToSend.put(org.votingsystem.util.Constants.CSR_CURRENCY_FILE_NAME, requestBytes);
 
-        byte[] signedBytes =  new XAdESSignature().sign(XML.getMapper().writeValueAsBytes(requestDto),
+        byte[] signedBytes =  new XAdESSignature().sign(new XML().getMapper().writeValueAsBytes(requestDto),
                 mockDNIe.getJksSignatureToken(), new TSPHttpSource(Constants.TIMESTAMP_SERVICE_URL));
 
         mapToSend.put(org.votingsystem.util.Constants.CURRENCY_REQUEST_FILE_NAME, signedBytes);

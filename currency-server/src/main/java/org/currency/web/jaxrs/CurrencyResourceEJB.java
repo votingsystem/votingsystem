@@ -65,13 +65,13 @@ public class CurrencyResourceEJB {
                     .setParameter("currencyBatch", currency.getCurrencyBatch()).getResultList();
             currencyStateDto.setBatchResponseCerts(currencyList);
         }
-        return Response.ok().entity(JSON.getMapper().writeValueAsBytes(currencyStateDto)).type(MediaType.JSON).build();
+        return Response.ok().entity(new JSON().getMapper().writeValueAsBytes(currencyStateDto)).type(MediaType.JSON).build();
     }
 
     @Path("/bundle-state")
     @POST @Consumes(javax.ws.rs.core.MediaType.APPLICATION_JSON) @Produces(javax.ws.rs.core.MediaType.APPLICATION_JSON)
     public Response bundleState(Set<String> hashSet) throws Exception {
-        return Response.ok().entity(JSON.getMapper().writeValueAsBytes(currencyBean.checkBundleState(hashSet))).build();
+        return Response.ok().entity(new JSON().getMapper().writeValueAsBytes(currencyBean.checkBundleState(hashSet))).build();
     }
 
     @GET @Produces(javax.ws.rs.core.MediaType.APPLICATION_JSON)
@@ -81,14 +81,14 @@ public class CurrencyResourceEJB {
         for(CurrencyCode currencyCode :CurrencyCode.values()) {
             result.put(currencyCode, getCurrencyIssuedDto(currencyCode));
         }
-        return Response.ok().entity(JSON.getMapper().writeValueAsBytes(result)).build();
+        return Response.ok().entity(new JSON().getMapper().writeValueAsBytes(result)).build();
     }
 
     @GET @Produces(javax.ws.rs.core.MediaType.APPLICATION_JSON)
     @Path("/issued/currencyCode/{currencyCode}") @Transactional
     public Response currencyIssued(@PathParam("currencyCode") String currencyCode) throws JsonProcessingException {
         CurrencyIssuedDto currencyIssuedDto = getCurrencyIssuedDto(CurrencyCode.valueOf(currencyCode));
-        return Response.ok().entity(JSON.getMapper().writeValueAsBytes(currencyIssuedDto)).build();
+        return Response.ok().entity(new JSON().getMapper().writeValueAsBytes(currencyIssuedDto)).build();
     }
 
     private CurrencyIssuedDto getCurrencyIssuedDto(CurrencyCode currencyCode) {

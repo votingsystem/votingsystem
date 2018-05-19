@@ -1,7 +1,7 @@
 package org.votingsystem.test.android.xml;
 
 import org.kxml2.kdom.Element;
-import org.votingsystem.dto.QRResponseDto;
+import org.votingsystem.dto.OperationDto;
 import org.votingsystem.dto.ResponseDto;
 import org.votingsystem.dto.ResultListDto;
 import org.votingsystem.dto.indentity.IdentityRequestDto;
@@ -33,13 +33,13 @@ public class XmlReader {
         return getElection(mainElement);
     }
 
-    public static QRResponseDto readQRResponse(byte[] xmlBytes) throws IOException, XmlPullParserException {
+    public static OperationDto readQRResponse(byte[] xmlBytes) throws IOException, XmlPullParserException {
         Element mainElement = XMLUtils.parse(xmlBytes).getRootElement();
-        QRResponseDto qrResponse = new QRResponseDto();
+        OperationDto operation = new OperationDto();
         mainElement.getAttributeValue(null, "QRResponse");
-        qrResponse.setOperationType(OperationType.valueOf(mainElement.getAttributeValue(null, "Type")));
-        qrResponse.setBase64Data(XMLUtils.getTextChild(mainElement, "Base64Data"));
-        return qrResponse;
+        /*qrResponse.setOperationType(OperationType.valueOf(mainElement.getAttributeValue(null, "Type")));
+        qrResponse.setBase64Data(XMLUtils.getTextChild(mainElement, "Base64Data"));*/
+        return operation;
     }
 
     public static IdentityRequestDto readIdentityRequest(byte[] xmlBytes) throws IOException, XmlPullParserException {

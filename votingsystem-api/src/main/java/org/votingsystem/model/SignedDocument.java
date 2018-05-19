@@ -212,7 +212,7 @@ public class SignedDocument extends EntityBase implements Serializable {
     }
 
     public <T> T getSignedContent(Class<T> type) throws Exception {
-        return XML.getMapper().readValue(body, type);
+        return new XML().getMapper().readValue(body, type);
     }
 
     public X509Certificate getCurrencyCert() {

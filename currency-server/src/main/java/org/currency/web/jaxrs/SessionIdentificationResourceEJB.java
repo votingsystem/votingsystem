@@ -78,7 +78,7 @@ public class SessionIdentificationResourceEJB {
         CMSSignedMessage cmsSignedMessage = CMSSignedMessage.FROM_PEM(cmsMessage.getBytes());
         deviceEJB.sessionCertification(cmsSignedMessage);
 
-        MessageDto message = JSON.getMapper().readValue(socketMsg, MessageDto.class);
+        MessageDto message = new JSON().getMapper().readValue(socketMsg, MessageDto.class);
         SocketPushEvent pushEvent = new SocketPushEvent(socketMsg, message.getDeviceToUUID(),
                 SocketPushEvent.Type.TO_USER);
         beanManager.fireEvent(pushEvent);
@@ -101,7 +101,7 @@ public class SessionIdentificationResourceEJB {
         if(!signer.getNumId().equals(sessionUser.getNumId()))
             throw new ValidationException("signer NIF doesn't match session NIF");
         DeviceDto dto = new DeviceDto(sessionUser.getDevice());
-        return Response.ok().entity(JSON.getMapper().writeValueAsBytes(dto)).build();
+        return Response.ok().entity(new JSON().getMapper().writeValueAsBytes(dto)).build();
     }
 
 }

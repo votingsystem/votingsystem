@@ -91,7 +91,7 @@ public class TestJPAResourceEJB {
         }
         resultMap.put("currencyExpendedMap", currencyExpendedMap);
 
-        return Response.ok().entity(JSON.getMapper().writeValueAsBytes(resultMap)).build();
+        return Response.ok().entity(new JSON().getMapper().writeValueAsBytes(resultMap)).build();
     }
 
     @GET @Path("/bank-trans")
@@ -116,7 +116,7 @@ public class TestJPAResourceEJB {
                 totalBalanceMap.put(bankName, currencyMap);
             }
         }
-        return Response.ok().entity(JSON.getMapper().writeValueAsBytes(totalBalanceMap)).build();
+        return Response.ok().entity(new JSON().getMapper().writeValueAsBytes(totalBalanceMap)).build();
     }
 
     @Transactional

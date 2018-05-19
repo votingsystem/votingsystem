@@ -225,9 +225,9 @@ public class HttpConn {
             byte[] responseBytes = EntityUtils.toByteArray(response.getEntity());
             if(ResponseDto.SC_OK == response.getStatusLine().getStatusCode()) {
                 if(type != null) 
-                    return JSON.getMapper().readValue(responseBytes, type);
+                    return new JSON().getMapper().readValue(responseBytes, type);
                 else 
-                    return JSON.getMapper().readValue(responseBytes, typeReference);
+                    return new JSON().getMapper().readValue(responseBytes, typeReference);
             } else {
                 String responseStr = new String(responseBytes, StandardCharsets.UTF_8);
                 switch (response.getStatusLine().getStatusCode()) {
@@ -497,9 +497,9 @@ public class HttpConn {
         byte[] responseBytes = EntityUtils.toByteArray(response.getEntity());
         if(ResponseDto.SC_OK == response.getStatusLine().getStatusCode()) {
             if(type != null) 
-                return JSON.getMapper().readValue(responseBytes, type);
+                return new JSON().getMapper().readValue(responseBytes, type);
             else 
-                return JSON.getMapper().readValue(responseBytes, typeReference);
+                return new JSON().getMapper().readValue(responseBytes, typeReference);
         } else {
             String responseStr = new String(responseBytes, "UTF-8");
             switch (response.getStatusLine().getStatusCode()) {

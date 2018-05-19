@@ -83,8 +83,8 @@ public class DeviceEJB {
 
     @TransactionAttribute(REQUIRES_NEW)
     public void initDeviceSession(CMSDocument signedDocument, HttpSession httpSession) throws Exception {
-        OperationDto operation = JSON.getMapper().readValue(signedDocument.getCMS().getSignedContentStr(), OperationDto.class);
-        operation.getOperation().validate(CurrencyOperation.INIT_DEVICE_SESSION, config.getEntityId());
+        OperationDto operation = new JSON().getMapper().readValue(signedDocument.getCMS().getSignedContentStr(), OperationDto.class);
+        operation.checkEntityAndType(CurrencyOperation.INIT_DEVICE_SESSION, config.getEntityId());
         signedDocument.setOperationType(OperationType.DEVICE_SESSION);
         em.merge(signedDocument);
         String previousSessionUUID = (String) httpSession.getAttribute(Constants.SESSION_UUID);
@@ -94,8 +94,8 @@ public class DeviceEJB {
 
     @TransactionAttribute(REQUIRES_NEW)
     public void closeDeviceSession(CMSDocument signedDocument, HttpSession httpSession) throws Exception {
-        OperationDto operation = JSON.getMapper().readValue(signedDocument.getCMS().getSignedContentStr(), OperationDto.class);
-        operation.getOperation().validate(CurrencyOperation.CLOSE_SESSION, config.getEntityId());
+        OperationDto operation = new JSON().getMapper().readValue(signedDocument.getCMS().getSignedContentStr(), OperationDto.class);
+        operation.checkEntityAndType(CurrencyOperation.CLOSE_SESSION, config.getEntityId());
         signedDocument.setOperationType(OperationType.CLOSE_SESSION);
         em.merge(signedDocument);
         httpSession.invalidate();

@@ -397,8 +397,8 @@ public class User extends EntityBase implements Serializable {
         if(metaInfMap == null) {
             if(metaInf == null) {
                 metaInfMap = new HashMap<>();
-                metaInf = JSON.getMapper().writeValueAsString(metaInfMap);
-            } else metaInfMap = JSON.getMapper().readValue(metaInf, HashMap.class);
+                metaInf = new JSON().getMapper().writeValueAsString(metaInfMap);
+            } else metaInfMap = new JSON().getMapper().readValue(metaInf, HashMap.class);
         }
         return metaInfMap;
     }

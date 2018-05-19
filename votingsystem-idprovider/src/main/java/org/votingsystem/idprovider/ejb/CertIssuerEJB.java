@@ -369,7 +369,7 @@ public class CertIssuerEJB {
         X509Certificate signerCertificate = signedDocument.getFirstSignature().getSigningCert();
         SessionCertificationDto csrRequest = null;
         if(signedDocument instanceof CMSDocument)
-            csrRequest = JSON.getMapper().readValue(((CMSDocument)signedDocument).getCMS().getSignedContentStr(),
+            csrRequest = new JSON().getMapper().readValue(((CMSDocument)signedDocument).getCMS().getSignedContentStr(),
                     SessionCertificationDto.class);
         else
             csrRequest = signedDocument.getSignedContent(SessionCertificationDto.class);
@@ -409,10 +409,10 @@ public class CertIssuerEJB {
                 OperationType.SESSION_CERTIFICATION_RECEIPT).setWithTimeStampValidation(true);
         SignedDocument response = null;
         if(signedDocument instanceof CMSDocument)
-            response = cmsEJB.signAndSave(JSON.getMapper().writeValueAsBytes(csrResponse),
+            response = cmsEJB.signAndSave(new JSON().getMapper().writeValueAsBytes(csrResponse),
                     OperationType.SESSION_CERTIFICATION_RECEIPT);
         else
-            response = signatureService.signXAdESAndSave(XML.getMapper().writeValueAsBytes(csrResponse), signatureParams);
+            response = signatureService.signXAdESAndSave(new XML().getMapper().writeValueAsBytes(csrResponse), signatureParams);
         em.merge(signedDocument.setReceipt(response).setOperationType(OperationType.SESSION_CERTIFICATION));
         return response;
     }

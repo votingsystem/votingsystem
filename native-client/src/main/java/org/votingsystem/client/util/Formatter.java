@@ -69,13 +69,13 @@ public class Formatter {
         result.append("<b>" + Messages.currentInstance().get("optionSelectedLbl") +": </b>" +
                 voteDto.getOptionSelected().getContent());
         result.append("</html>");
-        return JSON.getMapper().writeValueAsString(result);
+        return new JSON().getMapper().writeValueAsString(result);
     }
 
     public static String formatElectionStats(ElectionStatsDto election) {
         String result = null;
         try {
-            result = XML.getMapper().writeValueAsString(election);
+            result = new XML().getMapper().writeValueAsString(election);
         }catch (Exception ex) {
 
         }

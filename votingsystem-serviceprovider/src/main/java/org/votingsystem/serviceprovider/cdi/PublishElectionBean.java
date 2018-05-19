@@ -1,17 +1,15 @@
 package org.votingsystem.serviceprovider.cdi;
 
+import org.votingsystem.dto.OperationDto;
 import org.votingsystem.dto.voting.ElectionDto;
 import org.votingsystem.ejb.Config;
 import org.votingsystem.ejb.QRSessionsEJB;
 import org.votingsystem.model.voting.Election;
 import org.votingsystem.model.voting.ElectionOption;
-import org.votingsystem.qr.QRRequestBundle;
 import org.votingsystem.qr.QRUtils;
 import org.votingsystem.util.Constants;
 import org.votingsystem.util.Messages;
 import org.votingsystem.util.OperationType;
-import org.votingsystem.xml.XML;
-
 import javax.annotation.PreDestroy;
 import javax.ejb.EJB;
 import javax.faces.application.FacesMessage;
@@ -91,10 +89,10 @@ public class PublishElectionBean implements Serializable {
             }
 
             ElectionDto electionDto = new ElectionDto(election);
-            electionDto.setEntityId(config.getEntityId());
+            electionDto.setEntityId(config.getEntityId()).setIdProviderEntityId(config.getIdProviderEntityId());
 
-            byte[] reqBytes = XML.getMapper().writeValueAsBytes(electionDto);
-            log.info("reqBytes: " + new String(reqBytes));
+            //byte[] reqBytes = new XML().getMapper().writeValueAsBytes(electionDto);
+            //log.finest("reqBytes: " + new String(reqBytes));
             //XMLValidator.validatePublishElectionRequest(reqBytes);
 
             qrUUID = electionUUID;
@@ -103,8 +101,10 @@ public class PublishElectionBean implements Serializable {
             if(qrSessionsSet == null)
                 qrSessionsSet = new HashSet<>();
             qrSessionsSet.add(qrUUID);
-            qrSessions.putOperation(qrUUID, new QRRequestBundle<>(OperationType.PUBLISH_ELECTION, electionDto));
-            log.finest("qrSessions - put: " + qrUUID);
+
+            qrSessions.putOperation(qrUUID, new OperationDto<>(config.getEntityId(), OperationType.PUBLISH_ELECTION,
+                    electionDto, LocalDateTime.now()));
+            log.info("qrSessions - put: " + qrUUID);
             return "publish-election-page2";
         } catch (Exception ex) {
             log.log(Level.SEVERE, ex.getMessage(), ex);

@@ -54,7 +54,7 @@ public class JSONFormDialog extends AppDialog {
         Button acceptButton = new Button(Messages.currentInstance().get("acceptLbl"));
         acceptButton.setOnAction(actionEvent -> {
             try {
-                Map<String, Object> dataMap = JSON.getMapper().readValue(textArea.getText(),
+                Map<String, Object> dataMap = new JSON().getMapper().readValue(textArea.getText(),
                         new TypeReference<HashMap<String, Object>>() {});
                 if(listener != null) listener.processJSONForm(dataMap);
                 else log.info("No listeners to send JSON form");
@@ -76,7 +76,7 @@ public class JSONFormDialog extends AppDialog {
     public void showMessage(String title, Map dataMap, Listener listener) throws JsonProcessingException {
         this.listener = listener;
         messageLabel.setText(title);
-        textArea.setText(JSON.getMapper().configure(SerializationFeature.INDENT_OUTPUT, true).writeValueAsString(dataMap));
+        textArea.setText(new JSON().getMapper().configure(SerializationFeature.INDENT_OUTPUT, true).writeValueAsString(dataMap));
         show();
     }
 

@@ -55,7 +55,7 @@ public class AppResourceEJB {
                          @Context HttpServletResponse resp) throws ServletException, IOException {
         Interval timePeriod = new Interval(ZonedDateTime.now(), ZonedDateTime.now().minus(1, ChronoUnit.HOURS));
         DashBoardDto dto = dashBoardBean.getUserInfo(timePeriod);
-        return Response.ok().entity(JSON.getMapper().writeValueAsBytes(dto)).build();
+        return Response.ok().entity(new JSON().getMapper().writeValueAsBytes(dto)).build();
     }
 
     @GET @Path("/user-dashboard/hours-ago/{numHours}")
@@ -64,7 +64,7 @@ public class AppResourceEJB {
              @Context HttpServletRequest req, @Context HttpServletResponse resp) throws ServletException, IOException {
         Interval timePeriod = new Interval(ZonedDateTime.now(), ZonedDateTime.now().minus(numHours, ChronoUnit.HOURS));
         DashBoardDto dto = dashBoardBean.getUserInfo(timePeriod);
-        return Response.ok().entity(JSON.getMapper().writeValueAsBytes(dto)).build();
+        return Response.ok().entity(new JSON().getMapper().writeValueAsBytes(dto)).build();
     }
 
 }

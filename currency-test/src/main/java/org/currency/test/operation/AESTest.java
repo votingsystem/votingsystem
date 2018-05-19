@@ -22,9 +22,9 @@ public class AESTest extends BaseTest {
 
     public void test() throws Exception {
         AESParamsDto aesParamsDto = AESParamsDto.CREATE();
-        String aesStr = JSON.getMapper().writeValueAsString(aesParamsDto);
+        String aesStr = new JSON().getMapper().writeValueAsString(aesParamsDto);
         log.info("aesParamsDtoStr: " + aesStr);
-        aesParamsDto = JSON.getMapper().readValue(aesStr.getBytes(), AESParamsDto.class);
+        aesParamsDto = new JSON().getMapper().readValue(aesStr.getBytes(), AESParamsDto.class);
         log.info("aesParamsDto: " + aesParamsDto);
         String encryptedData = Encryptor.encryptAES("Message to encrypt", aesParamsDto);
         log.info("encryptedData: " + encryptedData);

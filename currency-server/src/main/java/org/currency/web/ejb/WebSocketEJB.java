@@ -50,14 +50,14 @@ public class WebSocketEJB {
                 String deviceToUUID = socketRequest.getDto().getDeviceToUUID();
                 if(deviceToUUID != null) {
                     if(SessionManager.getInstance().sendMessageByTargetDeviceUUID(socketRequest.getDto())) {//message send OK
-                        socketRequest.getSession().getBasicRemote().sendText(XML.getMapper().writeValueAsString(
+                        socketRequest.getSession().getBasicRemote().sendText(new XML().getMapper().writeValueAsString(
                                 socketRequest.getDto().getServerResponse(ResponseDto.SC_WS_MESSAGE_SEND_OK, null,
                                         config.getEntityId())));
                         return;
                     }
                 }
                 log.severe("Target device UUID: " + deviceToUUID + " not found");
-                socketRequest.getSession().getBasicRemote().sendText(JSON.getMapper().writeValueAsString(
+                socketRequest.getSession().getBasicRemote().sendText(new JSON().getMapper().writeValueAsString(
                         socketRequest.getDto().getServerResponse(ResponseDto.SC_WS_CONNECTION_NOT_FOUND,
                                 Messages.currentInstance().get("webSocketDeviceSessionNotFoundErrorMsg"),
                                 config.getEntityId())));

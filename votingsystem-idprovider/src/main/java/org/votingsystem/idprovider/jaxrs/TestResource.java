@@ -32,12 +32,12 @@ public class TestResource {
     @GET @Path("/")
     public Response test(@Context HttpServletRequest req, @Context HttpServletResponse res) throws Exception {
         ResponseDto responseDto = new ResponseDto(ResponseDto.SC_OK, "message");
-        CMSSignedMessage cmsSignedMessage = cmsEJB.signDataWithTimeStamp(JSON.getMapper().writeValueAsBytes(responseDto));
+        CMSSignedMessage cmsSignedMessage = cmsEJB.signDataWithTimeStamp(new JSON().getMapper().writeValueAsBytes(responseDto));
         try {
             return Response.ok().entity(cmsSignedMessage.toPEM()).build();
         } catch (Exception ex) {
             ResponseDto response = ResponseDto.ERROR(ex.getMessage());
-            return Response.status(ResponseDto.SC_ERROR).entity(XML.getMapper().writeValueAsBytes(response)).build();
+            return Response.status(ResponseDto.SC_ERROR).entity(new XML().getMapper().writeValueAsBytes(response)).build();
         }
     }
 

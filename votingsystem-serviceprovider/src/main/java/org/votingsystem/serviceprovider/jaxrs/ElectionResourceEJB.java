@@ -2,16 +2,20 @@ package org.votingsystem.serviceprovider.jaxrs;
 
 import eu.europa.esig.dss.InMemoryDocument;
 import org.votingsystem.crypto.SignatureParams;
+import org.votingsystem.dto.OperationDto;
 import org.votingsystem.dto.ResponseDto;
 import org.votingsystem.dto.ResultListDto;
+import org.votingsystem.dto.metadata.MetadataDto;
 import org.votingsystem.dto.voting.ElectionDto;
 import org.votingsystem.dto.voting.ElectionOptionDto;
 import org.votingsystem.dto.voting.ElectionStatsDto;
 import org.votingsystem.ejb.Config;
 import org.votingsystem.ejb.QRSessionsEJB;
 import org.votingsystem.ejb.SignatureServiceEJB;
+import org.votingsystem.ejb.TrustedServicesEJB;
 import org.votingsystem.http.HttpRequest;
 import org.votingsystem.http.HttpResponse;
+import org.votingsystem.http.SystemEntityType;
 import org.votingsystem.jsf.ServiceUpdatedMessage;
 import org.votingsystem.model.SignedDocument;
 import org.votingsystem.model.User;
@@ -61,14 +65,15 @@ public class ElectionResourceEJB {
     @POST @Path("/save")
     @Produces({"application/xml"})
     public Response save(@Context HttpServletRequest req, byte[] xmlRequestSigned) throws Exception {
-        ElectionDto electionDto = XML.getMapper().readValue(xmlRequestSigned, ElectionDto.class);
-        SignatureParams signatureParams = new SignatureParams(null, User.Type.ID_CARD_USER,
-                OperationType.NEW_ELECTION_REQUEST).setWithTimeStampValidation(true);
+        OperationDto operationDto = new XML().getMapper().readValue(xmlRequestSigned, OperationDto.class);
+        ElectionDto electionDto = new XML().getMapper().readValue(operationDto.getBase64DataDecoded(), ElectionDto.class);
+        SignatureParams signatureParams = new SignatureParams(null, User.Type.USER,
+                OperationType.PUBLISH_ELECTION).setWithTimeStampValidation(true);
         SignedDocument signedDocument = signatureService.validateXAdESAndSave(new InMemoryDocument(xmlRequestSigned), signatureParams);
         electionDto.validatePublishRequest();
         byte[] receiptXML = signatureService.signXAdES(xmlRequestSigned);
         signedDocument.setBody(new String(receiptXML));
-        Election election = new Election(electionDto, signedDocument).setEntityId(config.getEntityId());
+        Election election = new Election(electionDto, signedDocument);
         em.persist(election);
         qrSessions.removeOperation(election.getUUID());
         ResponseDto response = new ResponseDto(ResponseDto.SC_OK,

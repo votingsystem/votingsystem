@@ -56,7 +56,7 @@ public class SignatureGeneratorTest extends BaseTest {
         MetadataDto metadataDto = new MetadataDto();
         metadataDto.setEntity(new SystemEntityDto("SystemEntityId", SystemEntityType.VOTING_SERVICE_PROVIDER))
                 .setOperation(new OperationTypeDto(OperationType.GET_METADATA, null));
-        byte[] xmlToSign = XML.getMapper().writeValueAsBytes(metadataDto);
+        byte[] xmlToSign = new XML().getMapper().writeValueAsBytes(metadataDto);
         log.info("xmlToSign: " + new String(xmlToSign));
         InputStream inputStream = Thread.currentThread().getContextClassLoader().getResource(SIGNER_KEYSTORE).openStream();
         AbstractSignatureTokenConnection signingToken = new JKSSignatureToken(inputStream,

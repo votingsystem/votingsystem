@@ -23,7 +23,7 @@ public class Test {
                 UUID.randomUUID().toString(), new SystemEntityDto("ID_PROVIDER_URL", SystemEntityType.ID_PROVIDER))
                 .setRevocationHash("RevocationHash").setDate(ZonedDateTime.now())
                 .setCallbackServiceEntityId(new SystemEntityDto("SERVICE_PROVIDER_URL", SystemEntityType.VOTING_SERVICE_PROVIDER));
-        //byte[] identityRequestBytes = XML.getMapper().writeValueAsBytes(identityRequest);
+        //byte[] identityRequestBytes = new XML().getMapper().writeValueAsBytes(identityRequest);
         byte[] identityRequestBytes = XmlWriter.write(identityRequest);
         log.info("identityRequest: " + new String(identityRequestBytes));
         identityRequest = XmlReader.readIdentityRequest(identityRequestBytes);

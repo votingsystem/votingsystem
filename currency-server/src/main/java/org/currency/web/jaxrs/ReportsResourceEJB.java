@@ -69,7 +69,7 @@ public class ReportsResourceEJB {
                 }
             });
         }
-        return Response.ok().entity(JSON.getMapper().writeValueAsBytes(periods)).build();
+        return Response.ok().entity(new JSON().getMapper().writeValueAsBytes(periods)).build();
     }
 
     @Path("/logs")
@@ -92,7 +92,7 @@ public class ReportsResourceEJB {
         File reportsFile = AuditLogger.getTransactionsLogFile();
         if(!reportsFile.exists()) return Response.status(Response.Status.NOT_FOUND).entity(
                 "ERROR - not found - file: " + AuditLogger.getTransactionsLogFile().getAbsolutePath()).build();
-        ObjectMapper mapper =  JSON.getMapper();
+        ObjectMapper mapper =  new JSON().getMapper();
         String result = null;
         AtomicLong totalCount = new AtomicLong(0);
         if(transactionType != null) {

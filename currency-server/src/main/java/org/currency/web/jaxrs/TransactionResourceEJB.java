@@ -77,7 +77,7 @@ public class TransactionResourceEJB {
             TransactionDto transactionDto = transactionBean.getTransactionDto(transaction);
             transactionDto.setSignedDocumentBase64(
                     Base64.getEncoder().encodeToString(transaction.getSignedDocument().getBody().getBytes()));
-            return Response.ok().entity(JSON.getMapper().writeValueAsBytes(transactionDto)).build();
+            return Response.ok().entity(new JSON().getMapper().writeValueAsBytes(transactionDto)).build();
         } else return Response.status(Response.Status.NOT_FOUND).entity("ERROR - Transaction not found - id: " + id).build();
     }
 
@@ -104,13 +104,13 @@ public class TransactionResourceEJB {
         criteria.setFirstResult(0); //reset offset for total count
         long totalCount = ((Number)criteria.setProjection(Projections.rowCount()).uniqueResult()).longValue();
         ResultListDto resultListDto = new ResultListDto(resultList, offset, max, totalCount);
-        return Response.ok().entity(JSON.getMapper().writeValueAsBytes(resultListDto)).build();
+        return Response.ok().entity(new JSON().getMapper().writeValueAsBytes(resultListDto)).build();
     }
 
     @Path("/") @POST @Produces(MediaType.APPLICATION_JSON)
     public Response post(SignedDocument signedDocument, @Context HttpServletRequest req) throws Exception {
         ResultListDto dto = transactionBean.processTransaction(signedDocument);
-        return Response.ok().entity(XML.getMapper().writeValueAsBytes(dto)).build();
+        return Response.ok().entity(new XML().getMapper().writeValueAsBytes(dto)).build();
     }
 
     @Transactional
@@ -152,7 +152,7 @@ public class TransactionResourceEJB {
             tempDir.mkdirs();
             File metaInfFile = new File(tempPath + File.separator + "meta.inf");
             MetaInfDto metaInf = new MetaInfDto().setOperation(CurrencyOperation.TRANSACTION_INFO);
-            JSON.getMapper().writeValue(new FileOutputStream(metaInfFile), metaInf);
+            new JSON().getMapper().writeValue(new FileOutputStream(metaInfFile), metaInf);
             String desc = (transactionType == null? "":transactionType) + (tag == null? "":tag);
             File zipFile = new File (tempDir, "transaction_" + desc + "_" + transactionList.size() +  ".zip");
             for(Transaction transaction :  transactionList) {
@@ -170,7 +170,7 @@ public class TransactionResourceEJB {
             criteria.setFirstResult(0); //reset offset for total count
             long totalCount = ((Number)criteria.setProjection(Projections.rowCount()).uniqueResult()).longValue();
             ResultListDto resultListDto = new ResultListDto(resultList, offset, max, totalCount);
-            return Response.ok().entity(JSON.getMapper().writeValueAsBytes(resultListDto)).build();
+            return Response.ok().entity(new JSON().getMapper().writeValueAsBytes(resultListDto)).build();
         }
     }
 
@@ -200,9 +200,9 @@ public class TransactionResourceEJB {
         balancesDto.setTransactionToList(transactionsToListDto);
         balancesDto.setTransactionFromList(transactionsFromListDto);
         if(contentType.contains("json")) return Response.ok().entity(
-                JSON.getMapper().writeValueAsBytes(balancesDto)).build();
+                new JSON().getMapper().writeValueAsBytes(balancesDto)).build();
         else {
-            req.getSession().setAttribute("balancesDto", JSON.getMapper().writeValueAsString(balancesDto));
+            req.getSession().setAttribute("balancesDto", new JSON().getMapper().writeValueAsString(balancesDto));
             return Response.temporaryRedirect(new URI("../transaction/user.xhtml")).build();
         }
     }
@@ -210,7 +210,7 @@ public class TransactionResourceEJB {
     @Path("/currency")
     @POST @Produces(MediaType.APPLICATION_JSON) @Consumes(MediaType.APPLICATION_JSON)
     public Response currency(byte[] postData, @Context HttpServletRequest req, @Context HttpServletResponse res) throws Exception {
-        CurrencyBatchDto batchDto = JSON.getMapper().readValue(postData, CurrencyBatchDto.class);
+        CurrencyBatchDto batchDto = new JSON().getMapper().readValue(postData, CurrencyBatchDto.class);
         CurrencyTransactionRequest transactionRequest = CurrencyTransactionRequest.build(batchDto);
         CurrencyBatchResponseDto responseDto = currencyBean.processCurrencyTransaction(transactionRequest);
         return new HttpResponse().sendResponseDto(ResponseDto.SC_OK, req, res, responseDto);
@@ -219,7 +219,7 @@ public class TransactionResourceEJB {
     @Path("/currency-change")
     @POST @Produces(MediaType.APPLICATION_JSON) @Consumes(MediaType.APPLICATION_JSON)
     public Response currencyChange(byte[] postData, @Context HttpServletRequest req, @Context HttpServletResponse res) throws Exception {
-        CurrencyBatchDto batchDto = JSON.getMapper().readValue(postData, CurrencyBatchDto.class);
+        CurrencyBatchDto batchDto = new JSON().getMapper().readValue(postData, CurrencyBatchDto.class);
         CurrencyChangeTransactionRequest transactionRequest = CurrencyChangeTransactionRequest.build(batchDto);
         CurrencyBatchResponseDto responseDto = currencyBean.processCurrencyChangeTransaction(transactionRequest);
         return new HttpResponse().sendResponseDto(ResponseDto.SC_OK, req, res, responseDto);

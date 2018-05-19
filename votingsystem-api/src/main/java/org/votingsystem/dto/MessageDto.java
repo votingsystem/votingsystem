@@ -285,10 +285,10 @@ public class MessageDto {
     private static String encryptMessage(MessageDto msgToEncrypt, DeviceDto targetDevice) throws Exception {
         if(targetDevice.getX509Certificate() != null) {
             byte[] encryptedMsg = Encryptor.encryptToCMS(
-                    JSON.getMapper().writeValueAsBytes(msgToEncrypt), targetDevice.getX509Certificate());
+                    new JSON().getMapper().writeValueAsBytes(msgToEncrypt), targetDevice.getX509Certificate());
             return new String(encryptedMsg);
         } else if(targetDevice.getPublicKeyPEM() != null) {
-            byte[] encryptedCMS_PEM = Encryptor.encryptToCMS(JSON.getMapper().writeValueAsBytes(msgToEncrypt),
+            byte[] encryptedCMS_PEM = Encryptor.encryptToCMS(new JSON().getMapper().writeValueAsBytes(msgToEncrypt),
                     PEMUtils.fromPEMToRSAPublicKey(targetDevice.getPublicKeyPEM()));
             return new String(encryptedCMS_PEM);
         } else throw new IllegalArgumentException("Imposible to encrypt message, target device without certificate");
@@ -297,7 +297,7 @@ public class MessageDto {
     @JsonIgnore
     public void decryptMessage(PrivateKey privateKey) throws Exception {
         byte[] decryptedBytes = Encryptor.decryptCMS(encryptedMessage.getBytes(), privateKey);
-        MessageDto decryptedDto = XML.getMapper().readValue(decryptedBytes, MessageDto.class);
+        MessageDto decryptedDto = new XML().getMapper().readValue(decryptedBytes, MessageDto.class);
         this.operation = decryptedDto.getOperation();
         if(decryptedDto.getOperationCode() != null)
             operationCode = decryptedDto.getOperationCode();
@@ -357,12 +357,12 @@ public class MessageDto {
         if(certificatePEM != null) {
             X509Certificate targetDeviceCert = PEMUtils.fromPEMToX509Cert(certificatePEM.getBytes());
             byte[] encryptedMessageBytes = Encryptor.encryptToCMS(
-                    JSON.getMapper().writeValueAsBytes(msgToEncrypt), targetDeviceCert);
+                    new JSON().getMapper().writeValueAsBytes(msgToEncrypt), targetDeviceCert);
             encryptedMessage = new String(encryptedMessageBytes);
         } else if(publicKeyPEM != null) {
             PublicKey publicKey = PEMUtils.fromPEMToRSAPublicKey(publicKeyPEM);
             byte[] encryptedMessageBytes = Encryptor.encryptToCMS(
-                    JSON.getMapper().writeValueAsBytes(msgToEncrypt), publicKey);
+                    new JSON().getMapper().writeValueAsBytes(msgToEncrypt), publicKey);
             encryptedMessage = new String(encryptedMessageBytes);
         } else log.log(Level.SEVERE, "Missing target public key info");
         socketMessageDto.setUUID(UUID);

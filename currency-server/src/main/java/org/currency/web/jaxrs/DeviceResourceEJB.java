@@ -48,7 +48,7 @@ public class DeviceResourceEJB {
         if(devicelist.isEmpty()) return Response.status(Response.Status.NOT_FOUND).entity(
                 "ERROR - Device not found - id:" + UUID).build();
         DeviceDto dto = new DeviceDto(devicelist.iterator().next());
-        return Response.ok().entity(JSON.getMapper().writeValueAsBytes(dto)).build();
+        return Response.ok().entity(new JSON().getMapper().writeValueAsBytes(dto)).build();
     }
 
     @Path("/nif/{nif}/list")
@@ -63,7 +63,7 @@ public class DeviceResourceEJB {
         }
         ResultListDto<DeviceDto> resultListDto = new ResultListDto<DeviceDto>(resultList, 0, resultList.size(),
                 Long.valueOf(resultList.size()));
-        return Response.ok().entity(JSON.getMapper().writeValueAsBytes(resultListDto)).build();
+        return Response.ok().entity(new JSON().getMapper().writeValueAsBytes(resultListDto)).build();
     }
 
     @Path("/nif/{nif}/connected")
@@ -80,7 +80,7 @@ public class DeviceResourceEJB {
         for(Device device : deviceSet) {
             deviceSetDto.add(new DeviceDto(device));
         }
-        return Response.ok().entity(JSON.getMapper().writeValueAsBytes(UserDto.DEVICES(user, deviceSetDto, null))).build();
+        return Response.ok().entity(new JSON().getMapper().writeValueAsBytes(UserDto.DEVICES(user, deviceSetDto, null))).build();
     }
 
     @Path("/id/{deviceUUID}/connected")
@@ -109,7 +109,7 @@ public class DeviceResourceEJB {
                 if(dev == null || !dev.getId().equals(dev.getId())) deviceSetDto.add(new DeviceDto(dev));
             }
         }
-        return Response.ok().entity(JSON.getMapper().writeValueAsBytes(UserDto.DEVICES(user, deviceSetDto, null))).build();
+        return Response.ok().entity(new JSON().getMapper().writeValueAsBytes(UserDto.DEVICES(user, deviceSetDto, null))).build();
     }
 
 }

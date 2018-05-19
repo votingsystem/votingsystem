@@ -78,7 +78,7 @@ public class TestEJB {
 
     public Response push(String socketClientId) throws Exception {
         ResponseDto response = new ResponseDto(ResponseDto.SC_OK, "messsage");
-        serviceUpdated.send(JSON.getMapper().writeValueAsString(response), socketClientId);
+        serviceUpdated.send(new JSON().getMapper().writeValueAsString(response), socketClientId);
         return Response.ok().entity("push sent").build();
     }
 

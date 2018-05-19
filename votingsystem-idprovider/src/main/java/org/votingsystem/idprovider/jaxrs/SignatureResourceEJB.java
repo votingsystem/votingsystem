@@ -43,10 +43,10 @@ public class SignatureResourceEJB {
             SignedDocument signedDocument = signatureService.validateXAdESAndSave(
                     new InMemoryDocument(signedXML.getBytes()), signatureParams);
             ResponseDto response = ResponseDto.OK().setMessage("signedDocument id: " + signedDocument.getId());
-            return Response.ok().entity(XML.getMapper().writeValueAsBytes(response)).build();
+            return Response.ok().entity(new XML().getMapper().writeValueAsBytes(response)).build();
         } catch (Exception ex) {
             ResponseDto response = ResponseDto.ERROR(ex.getMessage());
-            return Response.status(ResponseDto.SC_ERROR).entity(XML.getMapper().writeValueAsBytes(response)).build();
+            return Response.status(ResponseDto.SC_ERROR).entity(new XML().getMapper().writeValueAsBytes(response)).build();
         }
     }
 }

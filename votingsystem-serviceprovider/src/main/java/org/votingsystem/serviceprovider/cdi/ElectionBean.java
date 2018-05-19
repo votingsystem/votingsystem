@@ -57,7 +57,7 @@ public class ElectionBean implements Serializable {
         } else {
             IdentityRequestDto identityRequest = new IdentityRequestDto(OperationType.ANON_VOTE_CERT_REQUEST,
                     electionUUID, new SystemEntityDto(config.getEntityId(), SystemEntityType.VOTING_SERVICE_PROVIDER));
-            String xmlInput = Base64.getEncoder().encodeToString(XML.getMapper().writeValueAsBytes(identityRequest));
+            String xmlInput = Base64.getEncoder().encodeToString(new XML().getMapper().writeValueAsBytes(identityRequest));
             String message = Messages.currentInstance().get("connectingToIdProviderMsg");
             String formAction = OperationType.ELECTION_INIT_AUTHENTICATION.getUrl(metadata.getEntity().getId());
             FacesContext.getCurrentInstance().getExternalContext().getSessionMap().put("message", message);

@@ -36,7 +36,7 @@ public class MetadataResourceEJB {
     @Produces({"application/xml"})
     public Response trustedEntities(@Context HttpServletRequest req) throws Exception {
         return Response.ok().type(javax.ws.rs.core.MediaType.APPLICATION_XML_TYPE)
-                .entity(XML.getMapper().writeValueAsBytes(trustedServicesEJB.getTrustedEntities())).build();
+                .entity(new XML().getMapper().writeValueAsBytes(trustedServicesEJB.getTrustedEntities())).build();
     }
 
 }

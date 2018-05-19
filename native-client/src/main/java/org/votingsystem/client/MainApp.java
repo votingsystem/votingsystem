@@ -154,7 +154,7 @@ public class MainApp extends Application {
     private MetadataDto getSystemEntityFromURL(String entityId) throws Exception {
         ResponseDto responseDto = HttpConn.getInstance().doGetRequest(entityId, MediaType.XML);
         log.severe("validate metadata signature!!!");
-        MetadataDto systemEntity = XML.getMapper().readValue(responseDto.getMessageBytes(), MetadataDto.class);
+        MetadataDto systemEntity = new XML().getMapper().readValue(responseDto.getMessageBytes(), MetadataDto.class);
         systemEntityMap.put(entityId, systemEntity);
         return systemEntity;
     }

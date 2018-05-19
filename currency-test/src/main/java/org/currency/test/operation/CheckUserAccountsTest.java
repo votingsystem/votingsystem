@@ -33,9 +33,8 @@ public class CheckUserAccountsTest extends BaseTest {
     public void test() throws Exception {
         MockDNIe mockDNIe = new MockDNIe("02222222P");
         CMSSignatureBuilder signatureService = new CMSSignatureBuilder(mockDNIe);
-        OperationDto operationDto = new OperationDto(new OperationTypeDto(CurrencyOperation.GET_USER_ACCOUNTS,
-                Constants.CURRENCY_SERVICE_ENTITY_ID)).setUUID(UUID.randomUUID().toString());
-        byte[] contentToSign = JSON.getMapper().writeValueAsBytes(operationDto);
+        OperationDto operationDto = new OperationDto(Constants.CURRENCY_SERVICE_ENTITY_ID, CurrencyOperation.GET_USER_ACCOUNTS).setUUID(UUID.randomUUID().toString());
+        byte[] contentToSign = new JSON().getMapper().writeValueAsBytes(operationDto);
         CMSSignedMessage cmsSignedMessage = signatureService.signDataWithTimeStamp(contentToSign, Constants.TIMESTAMP_SERVICE_URL);
         ResponseDto responseDto = HttpConn.getInstance().doPostRequest(cmsSignedMessage.toPEM(),
                 MediaType.PKCS7_SIGNED, CurrencyOperation.GET_USER_ACCOUNTS.getUrl(Constants.CURRENCY_SERVICE_ENTITY_ID));

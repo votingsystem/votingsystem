@@ -45,7 +45,7 @@ public class WebSocketResourceEJB {
     @POST @Path("/send")
     public Response send(@Context HttpServletRequest req, @Context HttpServletResponse res, byte[] requestBytes)
             throws Exception {
-        MessageDto message = JSON.getMapper().readValue(requestBytes, MessageDto.class);
+        MessageDto message = new JSON().getMapper().readValue(requestBytes, MessageDto.class);
         CurrencyOperation socketOperation = (CurrencyOperation)message.getOperation().getType();
         switch (socketOperation) {
             case MSG_TO_DEVICE:

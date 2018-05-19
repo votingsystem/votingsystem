@@ -52,7 +52,7 @@ public class CurrencyRequestServlet extends HttpServlet {
             ResultListDto<String> dto = currencyBean.processCurrencyRequest(requestDto);
             res.setStatus(dto.getStatusCode());
             res.setContentType(MediaType.JSON);
-            res.getOutputStream().write(JSON.getMapper().writeValueAsBytes(dto));
+            res.getOutputStream().write(new JSON().getMapper().writeValueAsBytes(dto));
         } catch (Exception ex) {
             log.log(Level.SEVERE, ex.getMessage(), ex);
             String message = ex.getMessage() != null ? ex.getMessage(): "EXCEPTION: " + ex.getClass();

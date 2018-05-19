@@ -4,8 +4,8 @@ import org.votingsystem.crypto.CertificationRequest;
 import org.votingsystem.crypto.KeyStoreUtils;
 import org.votingsystem.crypto.MockDNIe;
 import org.votingsystem.crypto.VoteRequest;
+import org.votingsystem.dto.OperationDto;
 import org.votingsystem.dto.QRMessageDto;
-import org.votingsystem.dto.QRResponseDto;
 import org.votingsystem.dto.ResponseDto;
 import org.votingsystem.dto.indentity.IdentityRequestDto;
 import org.votingsystem.dto.metadata.SystemEntityDto;
@@ -65,20 +65,19 @@ public class VoteTest extends BaseTest {
             log.info("bad request - msg: " + responseDto.getMessage());
             System.exit(0);
         }
-        QRResponseDto qrResponseDto = XML.getMapper().readValue(responseDto.getMessageBytes(), QRResponseDto.class);
-        log.info("data: " + new String(qrResponseDto.getData()));
-        ElectionDto electionDto = XmlReader.readElection(qrResponseDto.getData());
+        OperationDto operation = new XML().getMapper().readValue(responseDto.getMessageBytes(), OperationDto.class);
+        ElectionDto electionDto = XmlReader.readElection(operation.getBase64DataDecoded());
         ElectionOptionDto electionOption = electionDto.getElectionOptions().iterator().next();
         log.info("selected option: " + electionOption.getContent() + " - election UUID: " + electionDto.getUUID());
-        VoteRequest voteRequest = VoteRequest.build(electionDto, electionOption, qrMessageDto.getSystemEntityID());
+        VoteRequest voteRequest = new VoteRequest(electionDto, electionOption, qrMessageDto.getSystemEntityID());
         CertificationRequest certificationRequest = voteRequest.getCertificationRequest();
 
         //log.info("Csr PEM: " + new String(voteRequest.getCertificationRequest().getCsrPEM()));
 
         IdentityRequestDto identityRequest = new IdentityRequestDto();
 
-        SystemEntityDto identityEntity = new SystemEntityDto(
-                org.votingsystem.test.Constants.ID_PROVIDER_ENTITY_ID, SystemEntityType.ID_PROVIDER);
+        SystemEntityDto identityEntity = new SystemEntityDto(electionDto.getIdProviderEntityId(),
+                SystemEntityType.ID_PROVIDER);
         SystemEntityDto callbackEntity = new SystemEntityDto(
                 org.votingsystem.test.Constants.VOTING_SERVICE_ENTITY_ID, SystemEntityType.VOTING_SERVICE_PROVIDER);
         identityRequest.setIndentityServiceEntity(identityEntity).setCallbackServiceEntityId(callbackEntity);
@@ -130,12 +129,11 @@ public class VoteTest extends BaseTest {
             log.info("bad request - msg: " + responseDto.getMessage());
             System.exit(0);
         }
-        QRResponseDto qrResponseDto = XML.getMapper().readValue(responseDto.getMessageBytes(), QRResponseDto.class);
-        log.info("data: " + new String(qrResponseDto.getData()));
-        ElectionDto electionDto = XmlReader.readElection(qrResponseDto.getData());
+        OperationDto operation = new XML().getMapper().readValue(responseDto.getMessageBytes(), OperationDto.class);
+        ElectionDto electionDto = XmlReader.readElection(operation.getBase64DataDecoded());
         ElectionOptionDto electionOption = electionDto.getElectionOptions().iterator().next();
         log.info("selected option: " + electionOption.getContent() + " - election UUID: " + electionDto.getUUID());
-        VoteRequest voteRequest = VoteRequest.build(electionDto, electionOption, qrMessageDto.getSystemEntityID());
+        VoteRequest voteRequest = new VoteRequest(electionDto, electionOption, qrMessageDto.getSystemEntityID());
         CertificationRequest certificationRequest = voteRequest.getCertificationRequest();
 
         //we use discrete timestamps to avoid associate by time proximity signed request with votes in the audits

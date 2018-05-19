@@ -41,7 +41,7 @@ public class DtoTest extends BaseTest {
                 .setOptionSelected(electionOptionDto)
                 .setIndentityServiceEntity("IndentityServiceEntity").setVotingServiceEntity("VotingServiceEntity")
                 .setOperation(OperationType.SEND_VOTE);
-        String voteStr = XML.getMapper().writeValueAsString(vote);
+        String voteStr = new XML().getMapper().writeValueAsString(vote);
         log.info("" + voteStr);
         VoteDto voteDto = XmlReader.readVoteDto(voteStr.getBytes());
         log.info("voteDto: " + voteDto.getOperation());

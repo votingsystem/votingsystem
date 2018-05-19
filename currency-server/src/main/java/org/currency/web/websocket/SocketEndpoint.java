@@ -33,7 +33,7 @@ public class SocketEndpoint {
         MessageDto messageDto = null;
         try {
             if (session.isOpen()) {
-                messageDto = JSON.getMapper().readValue(msg, MessageDto.class);
+                messageDto = new JSON().getMapper().readValue(msg, MessageDto.class);
                 Messages.setCurrentInstance(
                         Locale.forLanguageTag(messageDto.getLocale()), Constants.BUNDLE_BASE_NAME);
                 webSocketBean.processRequest(new SocketRequest(messageDto, msg, session));
@@ -44,7 +44,7 @@ public class SocketEndpoint {
             if(message == null)
                 message = Messages.currentInstance().get("socketRequestErrorMsg");
             try {
-                if(messageDto != null) session.getBasicRemote().sendText(XML.getMapper().writeValueAsString(
+                if(messageDto != null) session.getBasicRemote().sendText(new XML().getMapper().writeValueAsString(
                         messageDto.getServerResponse(ResponseDto.SC_ERROR, message, config.getEntityId())));
                 session.close();
             } catch (Exception ex1) {

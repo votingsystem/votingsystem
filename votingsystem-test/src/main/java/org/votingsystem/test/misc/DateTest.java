@@ -78,12 +78,12 @@ public class DateTest {
 
     public static void serializeXML() throws Exception {
         TestDate testDate = new TestDate(ZonedDateTime.now());
-        String testDateStr = XML.getMapper().writeValueAsString(testDate);
+        String testDateStr = new XML().getMapper().writeValueAsString(testDate);
         log.info("testDateStr: " + testDateStr);
-        testDate = XML.getMapper().readValue(testDateStr.getBytes(), TestDate.class);
+        testDate = new XML().getMapper().readValue(testDateStr.getBytes(), TestDate.class);
         log.info("testDate: " + testDate);
         String androidXML = "<TestDate><date>2016-12-24T10:55:01.641+0100</date></TestDate>";
-        testDate = XML.getMapper().readValue(androidXML.getBytes(), TestDate.class);
+        testDate = new XML().getMapper().readValue(androidXML.getBytes(), TestDate.class);
     }
 
     private static void testAmounts() {

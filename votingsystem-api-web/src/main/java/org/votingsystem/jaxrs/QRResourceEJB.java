@@ -4,10 +4,11 @@ import com.google.zxing.BarcodeFormat;
 import com.google.zxing.client.j2se.MatrixToImageWriter;
 import com.google.zxing.common.BitMatrix;
 import com.google.zxing.qrcode.QRCodeWriter;
+import org.votingsystem.dto.OperationDto;
 import org.votingsystem.dto.ResponseDto;
 import org.votingsystem.ejb.Config;
 import org.votingsystem.ejb.QRSessionsEJB;
-import org.votingsystem.qr.QRRequestBundle;
+import org.votingsystem.http.HttpRequest;
 import org.votingsystem.qr.QRUtils;
 import org.votingsystem.util.Messages;
 
@@ -44,7 +45,7 @@ public class QRResourceEJB {
     @Path("/")
     public Response getCode(@Context HttpServletRequest req, @Context HttpServletResponse res) throws Exception {
         try {
-            QRUtils.ChartServletRequestParameters qrRequest = QRUtils.parseRequest(req, "POST".equals(req.getMethod()));
+            QRUtils.ChartServletRequestParameters qrRequest = QRUtils.parseRequest(req, false);
             BitMatrix matrix = new QRCodeWriter().encode(qrRequest.getText(), BarcodeFormat.QR_CODE,
                     qrRequest.getWidth(), qrRequest.getHeight(), qrRequest.getHints());
             ByteArrayOutputStream pngOut = new ByteArrayOutputStream();
@@ -66,9 +67,10 @@ public class QRResourceEJB {
     @POST @Path("/info")
     @Produces(MediaType.TEXT_XML)
     public Response info(@Context HttpServletRequest req, String uuid) throws Exception {
-        QRRequestBundle qrRequest = qrSessions.getOperation(uuid);
-        if(qrRequest != null)
-            return Response.ok().entity(qrRequest.generateResponse(req, LocalDateTime.now())).build();
+        OperationDto operation = qrSessions.getOperation(uuid);
+        if(operation != null)
+            return Response.ok().entity(operation.encode(HttpRequest.getContentType(req, true),
+                    LocalDateTime.now())).build();
         else {
             return Response.status(Response.Status.NOT_FOUND).entity(
                     Messages.currentInstance().get("itemNotFoundErrorMsg")).build();

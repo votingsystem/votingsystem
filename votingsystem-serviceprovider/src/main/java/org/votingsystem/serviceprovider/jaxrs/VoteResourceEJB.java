@@ -52,7 +52,7 @@ public class VoteResourceEJB {
             throws Exception {
         VoteDto voteDto = null;
         try {
-            voteDto = XML.getMapper().readValue(signedVote, VoteDto.class);
+            voteDto = new XML().getMapper().readValue(signedVote, VoteDto.class);
         } catch (Exception ex) {
             throw new IllegalArgumentException("Vote with bad format");
         }

@@ -57,11 +57,11 @@ public class CMSSignedMessage extends CMSSignedData {
     }
 
     public <T> T getSignedContent(Class<T> type) throws Exception {
-        return JSON.getMapper().readValue((byte[]) getSignedContent().getContent(), type);
+        return new JSON().getMapper().readValue((byte[]) getSignedContent().getContent(), type);
     }
 
     public <T> T getSignedContent(TypeReference type) throws Exception {
-        return JSON.getMapper().readValue((byte[]) getSignedContent().getContent(), type);
+        return new JSON().getMapper().readValue((byte[]) getSignedContent().getContent(), type);
     }
 
     public static TimeStampToken checkTimeStampToken(SignerInformation signer) throws Exception {

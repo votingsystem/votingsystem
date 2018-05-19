@@ -69,7 +69,7 @@ public class CurrencyAccountResourceEJB {
             userAccounts.add(new CurrencyAccountDto(account));
         }
         ResultListDto<CurrencyAccountDto> resultListDto = new ResultListDto<>(userAccounts);
-        return Response.ok().entity(JSON.getMapper().writeValueAsBytes(resultListDto)).build();
+        return Response.ok().entity(new JSON().getMapper().writeValueAsBytes(resultListDto)).build();
     }
 
     @RolesAllowed(AuthRole.USER)
@@ -85,7 +85,7 @@ public class CurrencyAccountResourceEJB {
         for(CurrencyAccount account : userAccountList) {
             resultMap.put(account.getCurrencyCode(), new CurrencyAccountDto(account));
         }
-        return Response.ok().entity(JSON.getMapper().writeValueAsBytes(resultMap)).build();
+        return Response.ok().entity(new JSON().getMapper().writeValueAsBytes(resultMap)).build();
     }
 
     @PermitAll
@@ -103,7 +103,7 @@ public class CurrencyAccountResourceEJB {
         for(CurrencyAccount account : userAccountList) {
             resultMap.put(account.getCurrencyCode(), new CurrencyAccountDto(account));
         }
-        return Response.ok().entity(JSON.getMapper().writeValueAsBytes(resultMap)).build();
+        return Response.ok().entity(new JSON().getMapper().writeValueAsBytes(resultMap)).build();
     }
 
     @PermitAll
@@ -138,7 +138,7 @@ public class CurrencyAccountResourceEJB {
             bankInputs.put((CurrencyCode) result[1], (BigDecimal) result[0]);
         }
         SystemAccountsDto resultDto = new SystemAccountsDto(systemAccountsDto, userAccounts, bankInputs);
-        return Response.ok().entity(JSON.getMapper().writeValueAsBytes(resultDto)).build();
+        return Response.ok().entity(new JSON().getMapper().writeValueAsBytes(resultDto)).build();
     }
 
     @GET @Produces(MediaType.APPLICATION_JSON)
@@ -158,7 +158,7 @@ public class CurrencyAccountResourceEJB {
             bankInputs.put((CurrencyCode) result[1], (BigDecimal) result[0]);
         }
         Map result = ImmutableMap.of("bank", userBean.getUserDto(bank, false), "balance", bankInputs);
-        return Response.ok().entity(JSON.getMapper().writeValueAsBytes(result)).build();
+        return Response.ok().entity(new JSON().getMapper().writeValueAsBytes(result)).build();
     }
 
 }

@@ -46,7 +46,7 @@ public class BankEJB {
     @TransactionAttribute(REQUIRES_NEW)
     public void updateBanksInfo() throws Exception {
         File banksFile = new File(config.getApplicationDirPath() + "/sec/banks.xml");
-        List<BankDto> bankList = XML.getMapper().readValue(banksFile,  new TypeReference<List<BankDto>>() {});
+        List<BankDto> bankList = new XML().getMapper().readValue(banksFile,  new TypeReference<List<BankDto>>() {});
         for(BankDto bankDto : bankList) {
             bankDto.validatePublishRequest(config.getEntityId());
             Iban IBAN = Iban.valueOf(bankDto.getIBAN());

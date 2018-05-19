@@ -49,7 +49,9 @@ public class JSON {
         }
     }
 
-    public static ObjectMapper getMapper() {
+    public JSON() {}
+
+    public ObjectMapper getMapper() {
         ObjectMapper mapper = new ObjectMapper();
         mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
         mapper.enable(SerializationFeature.WRITE_BIGDECIMAL_AS_PLAIN);

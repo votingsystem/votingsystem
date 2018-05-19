@@ -65,8 +65,8 @@ public class Wallet {
     public Set<Currency> saveWallet(Set<CurrencyDto> currencyDtoSet) throws Exception {
         File walletFile = getWalletFile(password);
         if(walletFile == null) walletFile.createNewFile();
-        EncryptedBundle bundle = Encryptor.pbeAES_Encrypt(password, JSON.getMapper().writeValueAsBytes(currencyDtoSet));
-        JSON.getMapper().writeValue(walletFile, new EncryptedBundleDto(bundle));
+        EncryptedBundle bundle = Encryptor.pbeAES_Encrypt(password, new JSON().getMapper().writeValueAsBytes(currencyDtoSet));
+        new JSON().getMapper().writeValue(walletFile, new EncryptedBundleDto(bundle));
         this.currencySet = CurrencyDto.deSerialize(currencyDtoSet);
         return this.currencySet;
     }
@@ -75,8 +75,8 @@ public class Wallet {
         File walletFile = getWalletFile(password);
         walletFile.getParentFile().mkdirs();
         log.info("new walletFile: " + walletFile.getAbsolutePath());
-        EncryptedBundle bundle = Encryptor.pbeAES_Encrypt(password, JSON.getMapper().writeValueAsBytes(currencySet));
-        JSON.getMapper().writeValue(walletFile, new EncryptedBundleDto(bundle));
+        EncryptedBundle bundle = Encryptor.pbeAES_Encrypt(password, new JSON().getMapper().writeValueAsBytes(currencySet));
+        new JSON().getMapper().writeValue(walletFile, new EncryptedBundleDto(bundle));
         this.currencySet = CurrencyDto.deSerialize(currencySet);
     }
 
@@ -96,10 +96,10 @@ public class Wallet {
     public Wallet load() throws Exception {
         File walletFile = getWalletFile(password);
         if(walletFile.exists()) {
-            EncryptedBundleDto bundleDto = JSON.getMapper().readValue(walletFile, EncryptedBundleDto.class);
+            EncryptedBundleDto bundleDto = new JSON().getMapper().readValue(walletFile, EncryptedBundleDto.class);
             EncryptedBundle bundle = bundleDto.getEncryptedBundle();
             byte[] decryptedWalletBytes = Encryptor.pbeAES_Decrypt(password, bundle);
-            Set<CurrencyDto> currencyDtoSet = JSON.getMapper().readValue(
+            Set<CurrencyDto> currencyDtoSet = new JSON().getMapper().readValue(
                     decryptedWalletBytes, new TypeReference<Set<CurrencyDto>>() {});
             this.currencySet = CurrencyDto.deSerialize(currencyDtoSet);
         } else createWallet(new HashSet<>());
@@ -125,8 +125,8 @@ public class Wallet {
         File newWalletFile = getWalletFile(newpassword);
         if(!newWalletFile.createNewFile())
             throw new ValidationException(Messages.currentInstance().get("walletFoundErrorMsg"));
-        EncryptedBundle bundle = Encryptor.pbeAES_Encrypt(newpassword, JSON.getMapper().writeValueAsBytes(walletDto));
-        JSON.getMapper().writeValue(newWalletFile, new EncryptedBundleDto(bundle));
+        EncryptedBundle bundle = Encryptor.pbeAES_Encrypt(newpassword, new JSON().getMapper().writeValueAsBytes(walletDto));
+        new JSON().getMapper().writeValue(newWalletFile, new EncryptedBundleDto(bundle));
         oldWalletFile.delete();
     }
 
@@ -140,7 +140,7 @@ public class Wallet {
                 return currency.getRevocationHash();}).collect(toSet());
             Set<CurrencyStateDto> responseDto =  HttpConn.getInstance().doPostRequest(
                     new TypeReference<Set<CurrencyStateDto>>() {},
-                    JSON.getMapper().writeValueAsBytes(hashSet),
+                    new JSON().getMapper().writeValueAsBytes(hashSet),
                     CurrencyOperation.GET_CURRENCY_BUNDLE_STATUS.getUrl(currencyServerEntityId),
                     ContentType.JSON);
             response = CurrencyCheckResponse.load(responseDto, currencyMap);

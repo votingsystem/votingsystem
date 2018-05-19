@@ -131,7 +131,7 @@ public class DocumentBrowserPane extends VBox {
                 return;
             }
             try {
-                metaInf = XML.getMapper().readValue(metaInfFile, MetaInfDto.class);
+                metaInf = new XML().getMapper().readValue(metaInfFile, MetaInfDto.class);
                 fileList = new ArrayList<>();
                 for(File file : decompressedBackupDir.listFiles()) {
                     if(file.getName().toLowerCase().endsWith(ContentType.XML.getExtension()))

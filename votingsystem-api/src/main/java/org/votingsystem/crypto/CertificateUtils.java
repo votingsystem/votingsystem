@@ -423,7 +423,7 @@ public class CertificateUtils {
         if(extensionValue == null) return null;
         ASN1Primitive asn1Primitive = X509ExtensionUtil.fromExtensionValue(extensionValue);
         if(asn1Primitive instanceof DLSet) {
-            return JSON.getMapper().readValue(((DLSet) asn1Primitive).getObjectAt(0).toString(), type);
+            return new JSON().getMapper().readValue(((DLSet) asn1Primitive).getObjectAt(0).toString(), type);
         }
         return null;
     }
@@ -442,7 +442,7 @@ public class CertificateUtils {
         org.bouncycastle.asn1.pkcs.Attribute[] attributes = csr.getAttributes(new ASN1ObjectIdentifier(oid));
         if(attributes.length > 0) {
             String certAttributeJSONStr = ((DERUTF8String) attributes[0].getAttrValues().getObjectAt(0)).getString();
-            return JSON.getMapper().readValue(certAttributeJSONStr, type);
+            return new JSON().getMapper().readValue(certAttributeJSONStr, type);
         }
         log.info("missing attribute with oid: " + oid);
         return null;

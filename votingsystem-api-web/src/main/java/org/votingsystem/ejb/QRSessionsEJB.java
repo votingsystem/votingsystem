@@ -1,7 +1,6 @@
 package org.votingsystem.ejb;
 
-import org.votingsystem.qr.QRRequestBundle;
-
+import org.votingsystem.dto.OperationDto;
 import javax.ejb.Lock;
 import javax.ejb.LockType;
 import javax.ejb.Singleton;
@@ -19,13 +18,13 @@ public class QRSessionsEJB {
 
     private static Logger log = Logger.getLogger(QRSessionsEJB.class.getName());
 
-    private static final Map<String, QRRequestBundle> operationRequestMap = new ConcurrentHashMap<>();
+    private static final Map<String, OperationDto> operationRequestMap = new ConcurrentHashMap<>();
 
-    public void putOperation(String uuid, QRRequestBundle identityRequestBundle) {
-        operationRequestMap.put(uuid, identityRequestBundle);
+    public void putOperation(String uuid, OperationDto operation) {
+        operationRequestMap.put(uuid, operation);
     }
 
-    public QRRequestBundle getOperation(String uuid) {
+    public OperationDto getOperation(String uuid) {
         return operationRequestMap.get(uuid);
     }
 

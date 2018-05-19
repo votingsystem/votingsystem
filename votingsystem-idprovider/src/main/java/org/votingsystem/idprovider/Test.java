@@ -23,7 +23,7 @@ public class Test {
     private static void createIdentityRequestDto() throws IOException {
         IdentityRequestDto requestDto = new IdentityRequestDto();
         //requestDto.setLanguage().; ZoneId.systemDefault().toString()
-        log.info(XML.getMapper().writeValueAsString(requestDto));
+        log.info(new XML().getMapper().writeValueAsString(requestDto));
     }
 
     private static void createResponse() throws IOException {

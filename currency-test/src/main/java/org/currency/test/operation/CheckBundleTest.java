@@ -26,7 +26,7 @@ public class CheckBundleTest extends BaseTest {
 
     private void checkBundle() throws Exception {
         Set<String> revocationHashSet = Sets.newHashSet("2dZCSiH8prnd731kyUEGzhoPF0OwA23vFvG+RYOcR5o=");
-        ResponseDto responseDto = HttpConn.getInstance().doPostRequest(JSON.getMapper().writeValueAsBytes(revocationHashSet),
+        ResponseDto responseDto = HttpConn.getInstance().doPostRequest(new JSON().getMapper().writeValueAsBytes(revocationHashSet),
                 MediaType.JSON, CurrencyOperation.BUNDLE_STATE.getUrl(Constants.CURRENCY_SERVICE_ENTITY_ID));
         log.info("response: " + responseDto.getMessage().trim());
         Map<String, CurrencyStateDto> result = (Map<String, CurrencyStateDto>) responseDto.getMessage(

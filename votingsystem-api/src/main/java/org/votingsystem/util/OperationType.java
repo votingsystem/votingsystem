@@ -134,8 +134,6 @@ public enum OperationType implements SystemOperation {
 
     @JsonProperty("ENTITY_METADATA")
     ENTITY_METADATA(null),
-    @JsonProperty("NEW_ELECTION_REQUEST")
-    NEW_ELECTION_REQUEST(null),
     @JsonProperty("ANON_VOTE_CERT_REQUEST_REPEATED")
     ANON_VOTE_CERT_REQUEST_REPEATED(null),
     @JsonProperty("ANON_VOTE_CERT_REQUEST")

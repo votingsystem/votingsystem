@@ -1,5 +1,6 @@
 package org.votingsystem.idprovider.jaxrs;
 
+import org.votingsystem.dto.OperationDto;
 import org.votingsystem.dto.ResponseDto;
 import org.votingsystem.dto.indentity.IdentityRequestDto;
 import org.votingsystem.dto.voting.ElectionDto;
@@ -7,13 +8,11 @@ import org.votingsystem.ejb.Config;
 import org.votingsystem.ejb.QRSessionsEJB;
 import org.votingsystem.idprovider.ejb.ElectionsEJB;
 import org.votingsystem.model.voting.Election;
-import org.votingsystem.qr.QRRequestBundle;
 import org.votingsystem.qr.QRUtils;
 import org.votingsystem.util.FileUtils;
 import org.votingsystem.util.Messages;
 import org.votingsystem.util.OperationType;
 import org.votingsystem.xml.XML;
-
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
@@ -25,6 +24,7 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
+import java.time.LocalDateTime;
 import java.util.Base64;
 import java.util.logging.Logger;
 
@@ -53,7 +53,7 @@ public class ElectionResourceEJB {
         else requestBytes = FileUtils.getBytesFromStream(req.getInputStream());
         //URL schemaRes = Thread.currentThread().getContextClassLoader().getResource("xsd/electionIdentityRequest.xsd");
         //XMLValidator.validate(requestBytes, schemaRes);
-        IdentityRequestDto identityRequest = XML.getMapper().readValue(requestBytes, IdentityRequestDto.class);
+        IdentityRequestDto identityRequest = new XML().getMapper().readValue(requestBytes, IdentityRequestDto.class);
         switch (identityRequest.getType()) {
             case ANON_VOTE_CERT_REQUEST:
                 Election election = electionsEJB.getElection(identityRequest.getUUID(),
@@ -63,8 +63,11 @@ public class ElectionResourceEJB {
                             Messages.currentInstance().get("electionUntrustedErrorMsg")));
                     res.sendRedirect(req.getContextPath() + "/response.xhtml");
                 }
-                qrSessionsEJB.putOperation(election.getUUID(), new QRRequestBundle(OperationType.ANON_VOTE_CERT_REQUEST,
-                        new ElectionDto(election)).setIdentityRequest(identityRequest));
+
+                //String entityId, OperationType operationType,T data, LocalDateTime localDateTime
+                qrSessionsEJB.putOperation(election.getUUID(), new OperationDto(config.getEntityId(),
+                        OperationType.ANON_VOTE_CERT_REQUEST, new ElectionDto(election),
+                        LocalDateTime.now()).setIdentityRequest(identityRequest));
                 QRUtils.sendRedirect(req, res, config.getEntityId(), election.getUUID(),
                         Messages.currentInstance().get("authPageHeaderMsg") + " - " + Messages.currentInstance().get("electionsLbl"),
                         Messages.currentInstance().get("authPageReadCodeMsg"));

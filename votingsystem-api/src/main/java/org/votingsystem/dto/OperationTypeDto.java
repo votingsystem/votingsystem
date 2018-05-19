@@ -22,6 +22,9 @@ public class OperationTypeDto<T> {
     private SystemOperation type;
     @JacksonXmlProperty(localName = "EntityId", isAttribute = true)
     private String entityId;
+    @JacksonXmlProperty(localName = "OperationCode", isAttribute = true)
+    private String operationCode;
+
 
     public OperationTypeDto() {}
 
@@ -76,4 +79,11 @@ public class OperationTypeDto<T> {
         }
     }
 
+    public String getOperationCode() {
+        return operationCode;
+    }
+
+    public void setOperationCode(String operationCode) {
+        this.operationCode = operationCode;
+    }
 }

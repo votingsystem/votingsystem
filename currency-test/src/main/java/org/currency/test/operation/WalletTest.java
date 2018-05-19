@@ -32,16 +32,16 @@ public class WalletTest {
         if(currencyFiles == null || currencyFiles.length == 0) throw new ExceptionVS(" --- Empty wallet ---");
         //we have al the currencies with its anonymous signed cert, now we can make de transactions
         File currencyFile = currencyFiles[0];
-        CurrencyDto currencyDto = JSON.getMapper().readValue(currencyFile, CurrencyDto.class);
+        CurrencyDto currencyDto = new JSON().getMapper().readValue(currencyFile, CurrencyDto.class);
         CurrencyBatchDto currencyBatchDto =  CurrencyBatchDto.NEW("First Currency Transaction",
                 "ES4678788989450000000002", new BigDecimal(9), CurrencyCode.EUR, "HIDROGENO", true,
                 Arrays.asList(currencyDto.deSerialize()), currencyServer.getServerURL());
 
-        ResponseVS responseVS = HttpHelper.getInstance().sendData(JSON.getMapper().writeValueAsBytes(currencyBatchDto),
+        ResponseVS responseVS = HttpHelper.getInstance().sendData(new JSON().getMapper().writeValueAsBytes(currencyBatchDto),
                 ContentType.JSON, currencyServer.getCurrencyTransactionServiceURL());
         log.info("Currency Transaction result: " + responseVS.getStatusCode());
         if(ResponseVS.SC_OK != responseVS.getStatusCode()) throw new ExceptionVS(responseVS.getMessage());
-        CurrencyBatchResponseDto responseDto = JSON.getMapper().readValue(responseVS.getMessage(),
+        CurrencyBatchResponseDto responseDto = new JSON().getMapper().readValue(responseVS.getMessage(),
                 CurrencyBatchResponseDto.class);
         currencyBatchDto.validateResponse(responseDto, currencyServer.getTrustAnchors());
         currencyFile.renameTo(new File(currencyFile.getParent() + File.separator + "EXPENDED_" + currencyFile.getName()));
@@ -51,7 +51,7 @@ public class WalletTest {
         new File(walletPath).mkdirs();
         currencyFile = new File(walletPath + "leftOver_" + StringUtils.toHex(currencyDto.getHashCertVS())  +
                 ContextVS.SERIALIZED_OBJECT_EXTENSION);
-        JSON.getMapper().writeValue(currencyFile, currencyDto);*/
+        new JSON().getMapper().writeValue(currencyFile, currencyDto);*/
         System.exit(0);
     }
 

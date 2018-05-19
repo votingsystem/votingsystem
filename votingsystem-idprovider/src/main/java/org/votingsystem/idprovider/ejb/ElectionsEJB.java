@@ -92,9 +92,9 @@ public class ElectionsEJB {
                     OperationType.FETCH_ELECTION.getUrl(entityId));
             if(ResponseDto.SC_OK == response.getStatusCode()) {
                 byte[] requestSignedXML = response.getMessageBytes();
-                ElectionDto electionDto = XML.getMapper().readValue(requestSignedXML, ElectionDto.class);
+                ElectionDto electionDto = new XML().getMapper().readValue(requestSignedXML, ElectionDto.class);
                 SignatureParams signatureParams = new SignatureParams(null, User.Type.ENTITY,
-                        OperationType.NEW_ELECTION_REQUEST).setWithTimeStampValidation(true);
+                        OperationType.PUBLISH_ELECTION).setWithTimeStampValidation(true);
                 SignedDocument signedDocument = signatureService.validateXAdESAndSave(
                         new InMemoryDocument(requestSignedXML), signatureParams);
                 Election election = new Election(electionDto, signedDocument).setEntityId(entityId);

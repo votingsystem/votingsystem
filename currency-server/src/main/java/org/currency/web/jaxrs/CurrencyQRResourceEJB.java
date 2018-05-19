@@ -1,15 +1,15 @@
 package org.currency.web.jaxrs;
 
 import org.currency.web.http.HttpSessionManager;
+import org.votingsystem.dto.OperationDto;
 import org.votingsystem.dto.indentity.PublickeyDto;
 import org.votingsystem.ejb.Config;
 import org.votingsystem.ejb.QRSessionsEJB;
-import org.votingsystem.qr.QRRequestBundle;
+import org.votingsystem.http.HttpRequest;
 import org.votingsystem.qr.QRUtils;
 import org.votingsystem.util.Constants;
 import org.votingsystem.util.JSON;
 import org.votingsystem.util.Messages;
-
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
@@ -49,7 +49,7 @@ public class CurrencyQRResourceEJB {
                         PublickeyDto browserPublickey = (PublickeyDto) httpSession.
                                 getAttribute(Constants.BROWSER_PLUBLIC_KEY);
                         if(browserPublickey != null) {
-                            return Response.ok().entity(JSON.getMapper().writeValueAsBytes(
+                            return Response.ok().entity(new JSON().getMapper().writeValueAsBytes(
                                     browserPublickey)).build();
                         } else httpSession.invalidate();
                     }
@@ -61,9 +61,10 @@ public class CurrencyQRResourceEJB {
                     break;
             }
         }
-        QRRequestBundle qrRequest = qrSessions.getOperation(UUID);
-        if(qrRequest != null)
-            return Response.ok().entity(qrRequest.generateResponse(req, LocalDateTime.now())).build();
+        OperationDto operationDto = qrSessions.getOperation(UUID);
+        if(operationDto != null)
+            return Response.ok().entity(operationDto.encode(HttpRequest.getContentType(req, true),
+                    LocalDateTime.now())).build();
         else
             return Response.status(Response.Status.NOT_FOUND).entity(
                     Messages.currentInstance().get("itemNotFoundErrorMsg")).build();
@@ -80,7 +81,7 @@ public class CurrencyQRResourceEJB {
     @POST @Path("/put-publickey")
     @Produces(MediaType.TEXT_PLAIN)
     public Response publickey(@Context HttpServletRequest req, byte[] csrRequestBytes) throws Exception {
-        PublickeyDto publickeyDto = JSON.getMapper().readValue(csrRequestBytes, PublickeyDto.class);
+        PublickeyDto publickeyDto = new JSON().getMapper().readValue(csrRequestBytes, PublickeyDto.class);
         req.getSession().setAttribute(Constants.BROWSER_PLUBLIC_KEY, publickeyDto);
         return Response.ok().entity("OK").build();
     }

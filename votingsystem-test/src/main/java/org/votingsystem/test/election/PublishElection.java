@@ -3,21 +3,18 @@ package org.votingsystem.test.election;
 import eu.europa.esig.dss.token.AbstractSignatureTokenConnection;
 import eu.europa.esig.dss.token.JKSSignatureToken;
 import org.votingsystem.crypto.TSPHttpSource;
+import org.votingsystem.dto.OperationDto;
 import org.votingsystem.dto.QRMessageDto;
-import org.votingsystem.dto.QRResponseDto;
 import org.votingsystem.dto.ResponseDto;
-import org.votingsystem.dto.voting.ElectionDto;
 import org.votingsystem.http.HttpConn;
 import org.votingsystem.http.MediaType;
 import org.votingsystem.test.Constants;
 import org.votingsystem.testlib.BaseTest;
-import org.votingsystem.util.JSON;
 import org.votingsystem.util.OperationType;
 import org.votingsystem.xades.XAdESSignature;
 import org.votingsystem.xml.XML;
 
 import java.security.KeyStore;
-import java.util.Base64;
 import java.util.logging.Logger;
 
 /**
@@ -27,7 +24,7 @@ public class PublishElection extends BaseTest {
 
     private static final Logger log = Logger.getLogger(PublishElection.class.getName());
 
-    private static String QR_CODE = "eid=https://voting.ddns.net/voting-service;uid=af5784e6-3cdf-4c3e-9486-22e764872f44;";
+    private static String QR_CODE = "eid=https://voting.ddns.net/voting-service;uid=4b33a837-946a-4812-a1c3-dcfd59be3b69;";
     private static String KEYSTORE = "certs/fake_08888888D.jks";
     private static String KEYSTORE_PASSWORD = Constants.PASSW_DEMO;
 
@@ -44,7 +41,7 @@ public class PublishElection extends BaseTest {
     public void publish() throws Exception {
         QRMessageDto qrMessageDto = QRMessageDto.FROM_QR_CODE(QR_CODE);
         log.info(qrMessageDto.getSystemEntityID());
-        ResponseDto responseDto = HttpConn.getInstance().doPostRequest(qrMessageDto.getUUID().getBytes(), "application/json",
+        ResponseDto responseDto = HttpConn.getInstance().doPostRequest(qrMessageDto.getUUID().getBytes(), "application/xml",
                 OperationType.GET_QR_INFO.getUrl(qrMessageDto.getSystemEntityID()));
 
         log.info("electionXML: " + responseDto.getMessage());
@@ -52,18 +49,15 @@ public class PublishElection extends BaseTest {
             log.info("bad request - msg: " + responseDto.getMessage());
             System.exit(0);
         }
-        QRResponseDto qrResponseDto = JSON.getMapper().readValue(responseDto.getMessageBytes(), QRResponseDto.class);
-        //QRResponseDto qrResponseDto = XML.getMapper().readValue(responseDto.getMessageBytes(), QRResponseDto.class);
+        OperationDto operation = new XML().getMapper().readValue(responseDto.getMessageBytes(), OperationDto.class);
 
-        log.info("dataBase64: " + new String(Base64.getDecoder().decode(qrResponseDto.getBase64Data())));
+        log.info("dataBase64: " + new String(operation.getBase64DataDecoded()));
 
         //ElectionDto electionDto = qrResponseDto.getDataXml(ElectionDto.class);
-        ElectionDto electionDto = qrResponseDto.getDataJson(ElectionDto.class);
-        byte[] dataToSign = XML.getMapper().writeValueAsBytes(electionDto);
         AbstractSignatureTokenConnection signingToken = new JKSSignatureToken(
                 Thread.currentThread().getContextClassLoader().getResource(KEYSTORE).openStream(),
                 new KeyStore.PasswordProtection(KEYSTORE_PASSWORD.toCharArray()));
-        byte[] signatureBytes = new XAdESSignature().sign(dataToSign, signingToken,
+        byte[] signatureBytes = new XAdESSignature().sign(responseDto.getMessageBytes(), signingToken,
                 new TSPHttpSource(org.votingsystem.test.Constants.TIMESTAMP_SERVICE_URL));
 
         log.info("signedXML: " + new String(signatureBytes));

@@ -89,7 +89,7 @@ public class BalanceResourceEJB {
         }
         Interval.Lapse lapse =  Interval.Lapse.valueOf(lapseStr.toUpperCase());
         Interval timePeriod = DateUtils.getLapsePeriod(LocalDateTime.now(), lapse);
-        return Response.ok().entity(JSON.getMapper().writeValueAsBytes(
+        return Response.ok().entity(new JSON().getMapper().writeValueAsBytes(
                 balancesBean.getBalancesDto(user, timePeriod))).build();
     }
 
@@ -155,7 +155,7 @@ public class BalanceResourceEJB {
     private Response getUserBalancesDto(User user, Interval timePeriod) throws Exception {
         BalancesDto balancesDto = balancesBean.getBalancesDto(user, timePeriod);
         return Response.ok().type(MediaType.JSON).entity(
-                JSON.getMapper().writeValueAsBytes(balancesDto)).build();
+                new JSON().getMapper().writeValueAsBytes(balancesDto)).build();
     }
 
     @RolesAllowed(AuthRole.ADMIN)

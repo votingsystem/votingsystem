@@ -47,7 +47,7 @@ public class PageBean implements Serializable {
     public void serviceUpdated(@Observes ServiceUpdatedMessage serviceUpdatedMessage) {
         log.log(Level.INFO, "uuid: " + serviceUpdatedMessage.getClientUUID());
         try {
-            serviceUpdated.send(JSON.getMapper().writeValueAsString(serviceUpdatedMessage.getResponse()),
+            serviceUpdated.send(new JSON().getMapper().writeValueAsString(serviceUpdatedMessage.getResponse()),
                     serviceUpdatedMessage.getClientUUID());
         } catch (Exception ex) {
             log.log(Level.SEVERE, ex.getMessage(), ex);
@@ -105,7 +105,7 @@ public class PageBean implements Serializable {
             String countryCode = metadataDto.getEntity().getLocation().getCountry().getCode();
             resultMap.put(countryCode, new Locale("", countryCode).getDisplayCountry());
         }
-        return JSON.getMapper().writeValueAsString(resultMap);
+        return new JSON().getMapper().writeValueAsString(resultMap);
     }
 
 }

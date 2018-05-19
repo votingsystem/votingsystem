@@ -60,7 +60,7 @@ public class MultipleSignatureGeneratorTest extends BaseTest {
 
         MetadataDto metadataDto = new MetadataDto();
         metadataDto.setEntity(new SystemEntityDto("SystemEntityId", SystemEntityType.VOTING_SERVICE_PROVIDER));
-        byte[] xmlToSign = XML.getMapper().writeValueAsBytes(metadataDto);
+        byte[] xmlToSign = new XML().getMapper().writeValueAsBytes(metadataDto);
         log.info("xmlToSign: " + new String(xmlToSign));
 
 

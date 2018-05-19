@@ -54,7 +54,7 @@ public class CertIssuerResourceEJB {
         Certificate certificate = certIssuer.signUserCert(cmsMessage, registerDto);
         byte[] issuedCert = PEMUtils.getPEMEncoded(certificate.getX509Certificate());
         registerDto.setIssuedCertificate(new String(issuedCert));
-        return Response.ok().entity(JSON.getMapper().writeValueAsBytes(registerDto)).build();
+        return Response.ok().entity(new JSON().getMapper().writeValueAsBytes(registerDto)).build();
     }
 
 }

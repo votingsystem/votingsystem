@@ -34,7 +34,7 @@ public class AnonCertMultipartRequest {
             case CURRENCY_REQUEST:
                 for(Part part : parts) {
                     if(part.getName().contains(Constants.CSR_CURRENCY_FILE_NAME)) {
-                        requestCSRSet = XML.getMapper().readValue(IOUtils.toByteArray(part.getInputStream()),
+                        requestCSRSet = new XML().getMapper().readValue(IOUtils.toByteArray(part.getInputStream()),
                                 new TypeReference<Set<String>>() {});
                     } else if(part.getName().contains(Constants.CURRENCY_REQUEST_FILE_NAME)) {
                         dssDocument = new InMemoryDocument(part.getInputStream());

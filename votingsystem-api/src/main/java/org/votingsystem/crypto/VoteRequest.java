@@ -33,39 +33,37 @@ public class VoteRequest implements Serializable {
     public VoteRequest() throws Exception {}
 
 
-    public static VoteRequest build(ElectionDto election, ElectionOptionDto optionSelected,
+    public VoteRequest(ElectionDto election, ElectionOptionDto optionSelected,
                                        String identityServiceId) throws Exception {
-        VoteRequest result = new VoteRequest();
-        result.originHashIdentityRequest = UUID.randomUUID().toString();
-        result.hashIdentityRequestBase64 = HashUtils.getHashBase64(
-                result.originHashIdentityRequest.getBytes(), Constants.DATA_DIGEST_ALGORITHM);
-        result.originRevocationHash = UUID.randomUUID().toString();
-        result.revocationHash = HashUtils.getHashBase64(
-                result.originRevocationHash.getBytes(), Constants.DATA_DIGEST_ALGORITHM);
-        result.election = election;
+        this.originHashIdentityRequest = UUID.randomUUID().toString();
+        this.hashIdentityRequestBase64 = HashUtils.getHashBase64(
+                this.originHashIdentityRequest.getBytes(), Constants.DATA_DIGEST_ALGORITHM);
+        this.originRevocationHash = UUID.randomUUID().toString();
+        this.revocationHash = HashUtils.getHashBase64(
+                this.originRevocationHash.getBytes(), Constants.DATA_DIGEST_ALGORITHM);
+        this.election = election;
 
         IdentityRequestDto identityRequestDto = new IdentityRequestDto();
         identityRequestDto.setUUID(election.getUUID());
         identityRequestDto.setCallbackServiceEntityId(new SystemEntityDto(election.getEntityId(),
                 SystemEntityType.VOTING_SERVICE_PROVIDER));
-        identityRequestDto.setRevocationHash(result.hashIdentityRequestBase64);
+        identityRequestDto.setRevocationHash(this.hashIdentityRequestBase64);
         identityRequestDto.setUUID(UUID.randomUUID().toString());
-        result.identityRequestDto = identityRequestDto;
+        this.identityRequestDto = identityRequestDto;
 
         VoteDto voteDto = new VoteDto(identityServiceId, election.getEntityId());
         voteDto.setOperation(OperationType.SEND_VOTE);
-        voteDto.setRevocationHash(result.revocationHash);
+        voteDto.setRevocationHash(this.revocationHash);
         voteDto.setElectionUUID(election.getUUID());
         voteDto.setOptionSelected(optionSelected);
-        result.voteDto = voteDto;
-        result.certificationRequest = CertificationRequest.getVoteRequest(identityServiceId, election.getEntityId(),
-                election.getUUID(), result.revocationHash);
-        return result;
+        this.voteDto = voteDto;
+        this.certificationRequest = CertificationRequest.getVoteRequest(identityServiceId, election.getEntityId(),
+                election.getUUID(), this.revocationHash);
     }
 
     public static VoteRequest genRandomVote(ElectionDto election, String identityServiceId) throws Exception {
         ElectionOptionDto optionSelected = getRandomOption(election.getElectionOptions());
-        return  VoteRequest.build(election, optionSelected, identityServiceId);
+        return new VoteRequest(election, optionSelected, identityServiceId);
     }
 
     public static ElectionOptionDto getRandomOption(Set<ElectionOptionDto> options) {

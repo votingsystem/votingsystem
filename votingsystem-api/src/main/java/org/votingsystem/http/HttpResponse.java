@@ -22,10 +22,10 @@ public class HttpResponse {
         String reqContentType = HttpRequest.getContentType(req, true);
         if(reqContentType.contains("json")) {
             res.setContentType(javax.ws.rs.core.MediaType.APPLICATION_JSON);
-            res.getOutputStream().write(JSON.getMapper().writeValueAsBytes(responseDto));
+            res.getOutputStream().write(new JSON().getMapper().writeValueAsBytes(responseDto));
         } else {
             res.setContentType(javax.ws.rs.core.MediaType.APPLICATION_XML);
-            res.getOutputStream().write(XML.getMapper().writeValueAsBytes(responseDto));
+            res.getOutputStream().write(new XML().getMapper().writeValueAsBytes(responseDto));
         }
         res.setStatus(statusCode);
         return Response.status(statusCode).build();
@@ -36,20 +36,19 @@ public class HttpResponse {
         String reqContentType = HttpRequest.getContentType(req, true);
         if(reqContentType.contains("json")) {
             return Response.status(statusCode).type(javax.ws.rs.core.MediaType.APPLICATION_JSON_TYPE)
-                    .entity(JSON.getMapper().writeValueAsBytes(responseDto)).build();
+                    .entity(new JSON().getMapper().writeValueAsBytes(responseDto)).build();
         } else {
             return Response.status(statusCode).type(javax.ws.rs.core.MediaType.APPLICATION_XML_TYPE)
-                    .entity(XML.getMapper().writeValueAsBytes(responseDto)).build();
+                    .entity(new XML().getMapper().writeValueAsBytes(responseDto)).build();
         }
     }
 
-    public static byte[] getResponseContent(final HttpServletRequest req,
-                                            final Object responseDto) throws JsonProcessingException {
+    public byte[] getResponseContent(final HttpServletRequest req, final Object responseDto) throws JsonProcessingException {
         String reqContentType = HttpRequest.getContentType(req, true);
         if(reqContentType.contains("json"))
-            return JSON.getMapper().writeValueAsBytes(responseDto);
+            return new JSON().getMapper().writeValueAsBytes(responseDto);
         else
-            return XML.getMapper().writeValueAsBytes(responseDto);
+            return new XML().getMapper().writeValueAsBytes(responseDto);
     }
 
 }

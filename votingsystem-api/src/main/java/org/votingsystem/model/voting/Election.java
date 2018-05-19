@@ -71,6 +71,8 @@ public class Election extends EntityBase implements Serializable {
     private String subject;
     @Column(name="ENTITY_ID")
     private String entityId;
+    @Column(name="ID_PROVIDER_ENTITY_ID")
+    private String idProviderEntityId;
     @Enumerated(EnumType.ORDINAL)
     @Column(name="STATE")
     private State state;
@@ -126,6 +128,8 @@ public class Election extends EntityBase implements Serializable {
         if(this.signedDocument != null && this.signedDocument.getSignatures() != null) {
             this.publisher = this.signedDocument.getSignatures().iterator().next().getSigner();
         }
+        this.entityId = electionDto.getEntityId();
+        this.idProviderEntityId = electionDto.getIdProviderEntityId();
     }
 
     public Election(String subject, String content, LocalDateTime dateBegin, LocalDateTime dateFinish, State state) {
@@ -287,4 +291,14 @@ public class Election extends EntityBase implements Serializable {
     public void setSignedDocument(SignedDocument signedDocument) {
         this.signedDocument = signedDocument;
     }
+
+    public String getIdProviderEntityId() {
+        return idProviderEntityId;
+    }
+
+    public Election setIdProviderEntityId(String idProviderEntityId) {
+        this.idProviderEntityId = idProviderEntityId;
+        return this;
+    }
+
 }

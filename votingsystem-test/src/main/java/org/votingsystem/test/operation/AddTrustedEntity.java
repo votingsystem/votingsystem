@@ -45,7 +45,7 @@ public class AddTrustedEntity extends BaseTest {
     private void checkCert() throws Exception {
         AdminRequestDto adminRequest = new AdminRequestDto(OperationType.LOAD_TRUSTED_ENTITY);
         adminRequest.setEntityId("https://voting.ddns.net/timestamp-server");
-        byte[] xmlToSign = XML.getMapper().writeValueAsBytes(adminRequest);
+        byte[] xmlToSign = new XML().getMapper().writeValueAsBytes(adminRequest);
         log.info("xmlToSign: " + new String(xmlToSign));
         AbstractSignatureTokenConnection signingToken = new JKSSignatureToken(
                 Thread.currentThread().getContextClassLoader().getResource(ADMIN_KEYSTORE).openStream(),

@@ -107,7 +107,7 @@ public class AuditEJB {
         }
         balancesDto.setTo(transactionToList, balancesToMap);
         File userHistoryFile = new File(backupDir.getAbsolutePath() + "/" + user.getNumIdAndType() + ".xml");
-        XML.getMapper().writeValue(userHistoryFile, balancesDto);
+        new XML().getMapper().writeValue(userHistoryFile, balancesDto);
         log.info("user: " + user.getId() + " - userHistoryFile:" + userHistoryFile.getAbsolutePath());
         return balancesDto;
     }
@@ -161,7 +161,7 @@ public class AuditEJB {
         log.info(format("initUserWeekPeriod - User ''{0}'' - dir ''{1}''", user.getId(),
                 reportFiles.getBaseDir().getAbsolutePath()) );
         Map<CurrencyCode, BigDecimal> currencyMap = balancesDto.getBalancesCash();
-        byte[] contentToSign = XML.getMapper().writeValueAsBytes(balancesDto);
+        byte[] contentToSign = new XML().getMapper().writeValueAsBytes(balancesDto);
         byte[] contentSigned = signatureService.signXAdES(contentToSign);
         SignatureParams signatureParams = new SignatureParams(null, User.Type.CURRENCY_SERVER,
                 OperationType.CURRENCY_PERIOD_INIT).setWithTimeStampValidation(true);
@@ -208,7 +208,7 @@ public class AuditEJB {
                     timeBegin.until(LocalDateTime.now(), ChronoUnit.SECONDS) + " seconds");
         }
         periodResultDto.setSystemBalance(balancesBean.getSystemBalancesDto(timePeriod));
-        byte[] resultBalanceBytes = XML.getMapper().writeValueAsBytes(periodResultDto);
+        byte[] resultBalanceBytes = new XML().getMapper().writeValueAsBytes(periodResultDto);
         Files.write(Paths.get(reportFiles.getReportFile().getAbsolutePath()), resultBalanceBytes);
         byte[] receiptBytes = signatureService.signXAdES(resultBalanceBytes);
         FileUtils.copyBytesToFile(receiptBytes, reportFiles.getReceiptFile());

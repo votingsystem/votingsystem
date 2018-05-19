@@ -69,7 +69,7 @@ public class Test extends BaseTest {
     public static void test() throws Exception {
         CertVoteExtensionDto dto = new CertVoteExtensionDto("indentityServiceEntity", "votingServiceEntity",
                 "revocationHash", "electionUUID");
-        log.info("dto: " + JSON.getMapper().writeValueAsString(dto));
+        log.info("dto: " + new JSON().getMapper().writeValueAsString(dto));
     }
 
 }

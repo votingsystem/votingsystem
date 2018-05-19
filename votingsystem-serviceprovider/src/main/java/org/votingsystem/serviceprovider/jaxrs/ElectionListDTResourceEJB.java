@@ -177,7 +177,7 @@ public class ElectionListDTResourceEJB {
         ElectionsDTDto responseDto = new ElectionsDTDto(draw, Long.valueOf(numRecordsTotal).intValue(),
                 Long.valueOf(numRecordsFiltered).intValue(), electionList );
         res.setContentType(javax.ws.rs.core.MediaType.APPLICATION_JSON);
-        res.getOutputStream().write(JSON.getMapper().writeValueAsBytes(responseDto));
+        res.getOutputStream().write(new JSON().getMapper().writeValueAsBytes(responseDto));
         res.setStatus(ResponseDto.SC_OK);
         return Response.status(ResponseDto.SC_OK).build();
     }

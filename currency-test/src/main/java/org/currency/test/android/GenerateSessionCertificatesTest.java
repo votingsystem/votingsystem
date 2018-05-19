@@ -71,7 +71,7 @@ public class GenerateSessionCertificatesTest extends BaseTest {
                     new OperationTypeDto(CurrencyOperation.GET_SESSION_CERTIFICATION, Constants.CURRENCY_SERVICE_ENTITY_ID));
             sessionCertDto.setOperation(new OperationTypeDto(CurrencyOperation.GET_SESSION_CERTIFICATION,
                     Constants.CURRENCY_SERVICE_ENTITY_ID));
-            byte[] requestBytes = JSON.getMapper().writeValueAsBytes(sessionCertDto);
+            byte[] requestBytes = new JSON().getMapper().writeValueAsBytes(sessionCertDto);
 
             CMSSignedMessage cmsSignedMessage = signatureService.signDataWithTimeStamp(requestBytes,
                     Constants.TIMESTAMP_SERVICE_URL);
@@ -86,7 +86,7 @@ public class GenerateSessionCertificatesTest extends BaseTest {
                 System.exit(0);
             }
             sessionCertification = CMSSignedMessage.FROM_PEM(response.getMessageBytes());
-            SessionCertificationDto certificationResponse = JSON.getMapper().readValue(
+            SessionCertificationDto certificationResponse = new JSON().getMapper().readValue(
                     sessionCertification.getSignedContentStr(), SessionCertificationDto.class);
 
 
@@ -95,7 +95,7 @@ public class GenerateSessionCertificatesTest extends BaseTest {
             log.info("BrowserCsrSigned: " + certificationResponse.getBrowserCertificate());
 
             result = sessionInfo.buildBrowserCertificationDto();
-            log.info("sessionCertificationDto: " + JSON.getMapper().writeValueAsString(result));
+            log.info("sessionCertificationDto: " + new JSON().getMapper().writeValueAsString(result));
         } catch (Exception ex) {
             ex.printStackTrace();
         }
@@ -114,7 +114,7 @@ public class GenerateSessionCertificatesTest extends BaseTest {
             log.info("status: " + responseDto.getStatusCode() + " - responseDto: " + responseDto.getMessage());
             System.exit(0);
         }
-        PublickeyDto browserPublicKey = JSON.getMapper().readValue(responseDto.getMessageBytes(), PublickeyDto.class);
+        PublickeyDto browserPublicKey = new JSON().getMapper().readValue(responseDto.getMessageBytes(), PublickeyDto.class);
         PublicKey publicKey = PEMUtils.fromPEMToRSAPublicKey(browserPublicKey.getPublicKeyPEM());
 
         MessageDto messageDto = new MessageDto();
@@ -126,16 +126,16 @@ public class GenerateSessionCertificatesTest extends BaseTest {
                 qrMessageDto.getSystemEntityID())).setMessage("");
 
         String base64Data = Base64.getEncoder().encodeToString(
-                JSON.getMapper().writeValueAsString(certificationDto).getBytes());
+                new JSON().getMapper().writeValueAsString(certificationDto).getBytes());
         messageContent.setBase64Data(base64Data);
 
-        byte[] encryptedMessage = Encryptor.encryptToCMS(JSON.getMapper().writeValueAsBytes(messageContent), publicKey);
+        byte[] encryptedMessage = Encryptor.encryptToCMS(new JSON().getMapper().writeValueAsBytes(messageContent), publicKey);
         messageDto.setEncryptedMessage(new String(encryptedMessage));
 
         urlParameters = new ArrayList<>();
         urlParameters.add(new BasicNameValuePair("browserUUID", qrMessageDto.getUUID()));
         urlParameters.add(new BasicNameValuePair("cmsMessage", new String(sessionCertification.toPEM())));
-        urlParameters.add(new BasicNameValuePair("socketMsg", JSON.getMapper().writeValueAsString(messageDto)));
+        urlParameters.add(new BasicNameValuePair("socketMsg", new JSON().getMapper().writeValueAsString(messageDto)));
         responseDto = HttpConn.getInstance().doPostForm(
                 CurrencyOperation.VALIDATE_SESSION_CERTIFICATES.getUrl(Constants.CURRENCY_SERVICE_ENTITY_ID), urlParameters);
         log.info("message: " + responseDto.getMessage());

@@ -87,7 +87,7 @@ public class CurrencyEJB {
 
         SignatureParams signatureParams = new SignatureParams(config.getEntityId(), User.Type.CURRENCY_SERVER,
                 OperationType.CURRENCY_CHANGE_RECEIPT).setWithTimeStampValidation(false);
-        byte[] documentToSign = XML.getMapper().writeValueAsBytes(batchDto);
+        byte[] documentToSign = new XML().getMapper().writeValueAsBytes(batchDto);
         SignedDocument receipt = signatureService.signXAdESAndSave(documentToSign, signatureParams);
 
         currencyBatch.setCurrencyChange(currencyChange);
@@ -133,7 +133,7 @@ public class CurrencyEJB {
         }
         SignatureParams signatureParams = new SignatureParams(config.getEntityId(), User.Type.CURRENCY_SERVER,
                 OperationType.CURRENCY_SEND_RECEIPT).setWithTimeStampValidation(false);
-        byte[] documentToSign = XML.getMapper().writeValueAsBytes(batchDto);
+        byte[] documentToSign = new XML().getMapper().writeValueAsBytes(batchDto);
         SignedDocument receipt = signatureService.signXAdESAndSave(documentToSign, signatureParams);
         em.persist(currencyBatch.setSignedDocument(receipt).setState(CurrencyBatch.State.OK));
         log.info("currencyBatch:" + currencyBatch.getId() + " - receipt:" + receipt.getId());

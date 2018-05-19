@@ -152,6 +152,7 @@ create table election
 	date_created timestamp,
 	date_finish timestamp not null,
 	entity_id varchar(255),
+	id_provider_entity_id varchar(255),
 	last_update timestamp,
 	meta_inf text,
 	state integer,
@@ -280,4 +281,3 @@ create table user_csr_request
 		references signer
 )
 ;
-

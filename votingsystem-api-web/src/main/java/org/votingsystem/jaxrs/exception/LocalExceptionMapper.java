@@ -74,7 +74,7 @@ public class LocalExceptionMapper implements ExceptionMapper<Exception> {
             }
             try {
                 if(reqContentType.contains("json") || reqContentType.contains("application/pkcs7-signature")){
-                    return Response.status(appCode.getStatusCode()).entity(JSON.getMapper().writeValueAsBytes(
+                    return Response.status(appCode.getStatusCode()).entity(new JSON().getMapper().writeValueAsBytes(
                                     new ResponseDto(appCode, message))).type(org.votingsystem.http.MediaType.JSON).build();
                 } else if(reqContentType.contains("html")) {
                     res.setStatus(appCode.getStatusCode());

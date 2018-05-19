@@ -1,10 +1,8 @@
 package org.votingsystem.test.android;
 
-import org.apache.http.NameValuePair;
-import org.apache.http.message.BasicNameValuePair;
 import org.votingsystem.crypto.MockDNIe;
+import org.votingsystem.dto.OperationDto;
 import org.votingsystem.dto.QRMessageDto;
-import org.votingsystem.dto.QRResponseDto;
 import org.votingsystem.dto.ResponseDto;
 import org.votingsystem.dto.voting.ElectionDto;
 import org.votingsystem.http.HttpConn;
@@ -19,8 +17,6 @@ import org.votingsystem.testlib.xml.XMLSignatureBuilder;
 import org.votingsystem.util.OperationType;
 import org.votingsystem.xml.XML;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.logging.Logger;
 
 /**
@@ -32,7 +28,7 @@ public class PublishElection extends BaseTest {
 
     private static final String TAG = PublishElection.class.getSimpleName();
 
-    private static final String QR_CODE = "eid=https://voting.ddns.net/voting-service;uid=ac726ddb-2fef-42bc-bd2e-94c82a8e9e79;";
+    private static final String QR_CODE = "eid=https://voting.ddns.net/voting-service;uid=ad7bfe33-37c2-49cb-9994-ed16e6cad1c3;";
 
     public PublishElection() {
         super();
@@ -49,24 +45,23 @@ public class PublishElection extends BaseTest {
         String serviceURL = OperationType.GET_QR_INFO.getUrl(qrMessageDto.getSystemEntityID());
         ResponseDto responseDto = HttpConn.getInstance().doPostRequest(qrMessageDto.getUUID().getBytes(), null, serviceURL);
 
-        log.info("QRResponseDto: " + responseDto.getMessage());
+        log.info("responseDto: " + responseDto.getMessage());
         if(ResponseDto.SC_OK != responseDto.getStatusCode()) {
             log.info("bad request - msg: " + responseDto.getMessage());
             System.exit(0);
         }
 
-        QRResponseDto qrResponseDto = XML.getMapper().readValue(responseDto.getMessageBytes(), QRResponseDto.class);
-        log.info("Election: " + new String(qrResponseDto.getData()));
-
-        ElectionDto electionDto = XmlReader.readElection(qrResponseDto.getData());
-        String textToSign = XMLUtils.prepareRequestToSign(qrResponseDto.getData());
+        OperationDto operation = new XML().getMapper().readValue(responseDto.getMessageBytes(), OperationDto.class);
+        ElectionDto electionDto = XmlReader.readElection(operation.getBase64DataDecoded());
+        log.info("Operation decoded base64 data: " + new String(operation.getBase64DataDecoded()));
+        String textToSign = XMLUtils.prepareRequestToSign(responseDto.getMessageBytes());
 
         byte[] signatureBytes = new XMLSignatureBuilder(textToSign.getBytes(), XAdESUtils.XML_MIME_TYPE,
                 SignatureAlgorithm.RSA_SHA_256.getName(), new MockDNIe("08888888D"),
                 Constants.TIMESTAMP_SERVICE_URL).build();
 
         log.info("signatureBytes: " + new String(signatureBytes));
-        //new SignatureValidator(signatureBytes).validate();
+        new SignatureValidator(signatureBytes).validate();
         log.info("Signature OK");
 
         responseDto = HttpConn.getInstance().doPostRequest(signatureBytes, null,
@@ -74,13 +69,5 @@ public class PublishElection extends BaseTest {
         log.info("StatusCode: " + responseDto.getStatusCode() + " - message: " + responseDto.getMessage());
     }
 
-    private void validateSignature(byte[] signatureBytes, String entityId) {
-        List<NameValuePair> urlParameters = new ArrayList<>();
-        urlParameters.add(new BasicNameValuePair("signedXML", new String(signatureBytes)));
-        urlParameters.add(new BasicNameValuePair("withTimeStampValidation", Boolean.TRUE.toString()));
-        ResponseDto responseDto = HttpConn.getInstance().doPostForm(OperationType.VALIDATE_SIGNED_DOCUMENT
-                        .getUrl(entityId), urlParameters);
-        log.info("Publish result: " + responseDto.getStatusCode() + " - msg: " + responseDto.getMessage());
-    }
 
 }

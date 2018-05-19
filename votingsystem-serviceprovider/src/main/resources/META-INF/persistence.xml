@@ -17,7 +17,7 @@
 
             <!--
             <property name="javax.persistence.schema-generation.database.action" value="drop-and-create"/>
-            
+
             <property name="format_sql" value="true"/>
             <property name="use_sql_comments" value="true"/>
 

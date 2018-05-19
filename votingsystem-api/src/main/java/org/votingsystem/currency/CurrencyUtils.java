@@ -50,7 +50,7 @@ public class CurrencyUtils {
         }
         Set<String> currencySet = new HashSet<>();
         for (org.votingsystem.model.currency.Currency currency : currencyList) {
-            byte[] contentToSign = JSON.getMapper().writeValueAsBytes(batchDto.buildBatchItem(currency));
+            byte[] contentToSign = new JSON().getMapper().writeValueAsBytes(batchDto.buildBatchItem(currency));
             byte[] contentSigned = currency.getCertificationRequest().signPKCS7WithTimeStamp(contentToSign,
                     OperationType.TIMESTAMP_REQUEST.getUrl(timestampEntityId));
             currency.setContent(contentSigned);

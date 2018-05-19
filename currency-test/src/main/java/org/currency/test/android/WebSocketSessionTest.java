@@ -83,7 +83,7 @@ public class WebSocketSessionTest extends BaseTest {
         messageDto.setOperation(operationType).setDate(ZonedDateTime.now());
         messageDto.setMessage(message);
         messageDto.setUUID(UUID.randomUUID().toString());
-        webSocket.send(JSON.getMapper().writeValueAsString(messageDto));
+        webSocket.send(new JSON().getMapper().writeValueAsString(messageDto));
     }
 
     private void logMessage(String message) {

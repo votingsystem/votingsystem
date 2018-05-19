@@ -55,7 +55,7 @@ public class TrustedServicesEJB {
     //@Schedule(hour = "*", minute = "0", second = "0", persistent = false)
     public void loadTrustedServices() throws IOException {
         File timeStampServersFile = new File(config.getApplicationDirPath() + "/sec/timestamp-servers.xml");
-        List<String> timeStampServersCertificates = XML.getMapper().readValue(
+        List<String> timeStampServersCertificates = new XML().getMapper().readValue(
                 timeStampServersFile, new TypeReference<List<String>>() {});
         for(String timeStampServerCertificate : timeStampServersCertificates) {
             try {
@@ -72,6 +72,8 @@ public class TrustedServicesEJB {
                 log.log(Level.SEVERE, "Error loading trusted entity: " + trustedEntity.getId() + " - " + ex.getMessage(), ex);
             }
         }
+        //TODO
+        config.setIdProviderEntityId(getFirstEntity(SystemEntityType.ID_PROVIDER).getEntity().getId());
     }
 
     public MetadataDto addTrustedEntity(String entityId) throws HttpRequestException, XMLValidationException {

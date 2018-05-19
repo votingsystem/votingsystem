@@ -23,7 +23,9 @@ public class XML {
 
     public static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
 
-    public static ObjectMapper getMapper() {
+    public XML() {}
+
+    public ObjectMapper getMapper() {
         final ObjectMapper mapper = new XmlMapper();
         JavaTimeModule javaTimeModule = new JavaTimeModule();
 

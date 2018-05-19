@@ -105,7 +105,7 @@ public class SignatureServiceEJB {
 
     public SignedDocument validateXAdESAndSave(byte[] httpRequestBytes) throws XAdESValidationException,
             DuplicatedDbItemException, IOException {
-        OperationCheckerDto checkerDto = XML.getMapper().readValue(httpRequestBytes, OperationCheckerDto.class);
+        OperationCheckerDto checkerDto = new XML().getMapper().readValue(httpRequestBytes, OperationCheckerDto.class);
         if(checkerDto.getOperation() == null)
             throw new WebApplicationException("Signed document without operation info");
         SignatureParams signatureParams = null;

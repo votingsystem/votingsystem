@@ -55,7 +55,7 @@ public class CheckUserCertificateTest extends BaseTest {
         X509Certificate userCert = PEMUtils.fromPEMToX509Cert(FileUtils.getBytesFromStream(
                 Thread.currentThread().getContextClassLoader().getResource(CERT_TO_CHECK).openStream()));
         AdminRequestDto adminRequest = new AdminRequestDto(OperationType.CERT_USER_CHECK).setKey(new KeyDto(userCert, null));
-        byte[] xmlToSign = XML.getMapper().writeValueAsBytes(adminRequest);
+        byte[] xmlToSign = new XML().getMapper().writeValueAsBytes(adminRequest);
         log.info("xmlToSign: " + new String(xmlToSign));
         AbstractSignatureTokenConnection signingToken = new JKSSignatureToken(
                 Thread.currentThread().getContextClassLoader().getResource(ADMIN_KEYSTORE).openStream(),

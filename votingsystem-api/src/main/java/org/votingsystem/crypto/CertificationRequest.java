@@ -68,7 +68,7 @@ public class CertificationRequest implements java.io.Serializable {
                     revocationHash, electionUUID);
             PKCS10CertificationRequestBuilder pkcs10Builder = new JcaPKCS10CertificationRequestBuilder(subject, keyPair.getPublic());
             pkcs10Builder.addAttribute(new  ASN1ObjectIdentifier(Constants.VOTE_OID),
-                    new DERUTF8String(JSON.getMapper().writeValueAsString(dto)));
+                    new DERUTF8String(new JSON().getMapper().writeValueAsString(dto)));
             pkcs10Builder.addAttribute(new  ASN1ObjectIdentifier(Constants.ANON_CERT_OID), ASN1Boolean.getInstance(true));
             PKCS10CertificationRequest request = pkcs10Builder.build(new JcaContentSignerBuilder(
                     Constants.SIGNATURE_ALGORITHM).setProvider(Constants.PROVIDER).build(keyPair.getPrivate()));
@@ -89,7 +89,7 @@ public class CertificationRequest implements java.io.Serializable {
             PKCS10CertificationRequestBuilder pkcs10Builder = new JcaPKCS10CertificationRequestBuilder(subject,
                     keyPair.getPublic());
             pkcs10Builder.addAttribute(new  ASN1ObjectIdentifier(Constants.CURRENCY_OID),
-                    new DERUTF8String(JSON.getMapper().writeValueAsString(dto)));
+                    new DERUTF8String(new JSON().getMapper().writeValueAsString(dto)));
             pkcs10Builder.addAttribute(new  ASN1ObjectIdentifier(Constants.ANON_CERT_OID), ASN1Boolean.getInstance(true));
             PKCS10CertificationRequest request = pkcs10Builder.build(new JcaContentSignerBuilder(
                     Constants.SIGNATURE_ALGORITHM).setProvider(Constants.PROVIDER).build(keyPair.getPrivate()));
@@ -110,7 +110,7 @@ public class CertificationRequest implements java.io.Serializable {
             PKCS10CertificationRequestBuilder pkcs10Builder = new JcaPKCS10CertificationRequestBuilder(subject,
                     keyPair.getPublic());
             pkcs10Builder.addAttribute(new  ASN1ObjectIdentifier(Constants.DEVICE_OID),
-                    new DERUTF8String(JSON.getMapper().writeValueAsString(dto)));
+                    new DERUTF8String(new JSON().getMapper().writeValueAsString(dto)));
             PKCS10CertificationRequest request = pkcs10Builder.build(new JcaContentSignerBuilder(
                     Constants.SIGNATURE_ALGORITHM).setProvider(Constants.PROVIDER).build(keyPair.getPrivate()));
             return new CertificationRequest(keyPair, request, Constants.SIGNATURE_ALGORITHM);
@@ -126,7 +126,7 @@ public class CertificationRequest implements java.io.Serializable {
             X500Principal subject = new X500Principal(certExtensionDto.getPrincipal());
             PKCS10CertificationRequestBuilder pkcs10Builder = new JcaPKCS10CertificationRequestBuilder(subject, keyPair.getPublic());
             pkcs10Builder.addAttribute(new  ASN1ObjectIdentifier(Constants.DEVICE_OID),
-                    new DERUTF8String(JSON.getMapper().writeValueAsString(certExtensionDto)));
+                    new DERUTF8String(new JSON().getMapper().writeValueAsString(certExtensionDto)));
             PKCS10CertificationRequest request = pkcs10Builder.build(new JcaContentSignerBuilder(
                     Constants.SIGNATURE_ALGORITHM).setProvider(Constants.PROVIDER).build(keyPair.getPrivate()));
             return new CertificationRequest(keyPair, request, Constants.SIGNATURE_ALGORITHM);

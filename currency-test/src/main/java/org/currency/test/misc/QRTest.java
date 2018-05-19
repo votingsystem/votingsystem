@@ -55,7 +55,7 @@ public class QRTest extends BaseTest {
             case MediaType.JSON:
                 switch (qrMessageDto.getOperation()) {
                     case QRUtils.GEN_BROWSER_CERTIFICATE:
-                        SessionCertificationDto sessionCertificationDto = JSON.getMapper().readValue(
+                        SessionCertificationDto sessionCertificationDto = new JSON().getMapper().readValue(
                                 responseDto.getMessageBytes(), SessionCertificationDto.class);
                         buildSessionCertificates(sessionCertificationDto);
                         break;
@@ -64,7 +64,7 @@ public class QRTest extends BaseTest {
             case MediaType.XML:
                 switch (qrMessageDto.getOperation()) {
                     case QRUtils.GEN_BROWSER_CERTIFICATE:
-                        SessionCertificationDto sessionCertificationDto = XML.getMapper().readValue(
+                        SessionCertificationDto sessionCertificationDto = new XML().getMapper().readValue(
                                 responseDto.getMessageBytes(), SessionCertificationDto.class);
                         break;
                 }

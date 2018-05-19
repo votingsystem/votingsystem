@@ -29,5 +29,7 @@ public interface Config {
     public MetadataDto getMetadata();
     public boolean isAdmin(User user) throws ValidationException;
     public X509Certificate getSigningCert();
+    public String getIdProviderEntityId();
+    public void setIdProviderEntityId(String idProviderEntityId);
 
 }

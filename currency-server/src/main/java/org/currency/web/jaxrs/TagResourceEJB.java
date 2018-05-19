@@ -45,14 +45,14 @@ public class TagResourceEJB {
         List<Tag> tagList = em.createQuery("select t from Tag t where upper(t.name) like :tag").setParameter("tag",
                 "%" + StringUtils.removeAccents(tag).toUpperCase() + "%").getResultList();
         ResultListDto<Tag> resultListDto = new ResultListDto<>(tagList);
-        return Response.ok().entity(JSON.getMapper().writeValueAsBytes(resultListDto)).type(MediaType.JSON).build();
+        return Response.ok().entity(new JSON().getMapper().writeValueAsBytes(resultListDto)).type(MediaType.JSON).build();
     }
 
     @GET @Path("/list")
     public Response list() throws JsonProcessingException {
         List<Tag> tagList = em.createQuery("select t from Tag t").getResultList();
         ResultListDto resultList = new ResultListDto(tagList);
-        return Response.ok().entity(JSON.getMapper().writeValueAsBytes(resultList)).type(MediaType.JSON).build();
+        return Response.ok().entity(new JSON().getMapper().writeValueAsBytes(resultList)).type(MediaType.JSON).build();
     }
 
 }

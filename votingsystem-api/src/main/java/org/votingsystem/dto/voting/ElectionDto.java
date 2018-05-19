@@ -52,6 +52,8 @@ public class ElectionDto implements Dto {
     private String certChain;
     @JacksonXmlProperty(localName = "EntityId")
     private String entityId;
+    @JacksonXmlProperty(localName = "IdProviderEntityId")
+    private String idProviderEntityId;
     @JsonProperty("UUID")
     @JacksonXmlProperty(localName = "UUID")
     private String UUID;
@@ -86,6 +88,7 @@ public class ElectionDto implements Dto {
                 electionOptions.add(new ElectionOptionDto(electionOption));
             }
         }
+        this.idProviderEntityId = election.getIdProviderEntityId();
         this.entityId = election.getEntityId();
         this.UUID = election.getUUID();
     }
@@ -212,8 +215,9 @@ public class ElectionDto implements Dto {
         return entityId;
     }
 
-    public void setEntityId(String entityId) {
+    public ElectionDto setEntityId(String entityId) {
         this.entityId = entityId;
+        return this;
     }
 
     @JsonIgnore
@@ -222,4 +226,14 @@ public class ElectionDto implements Dto {
         if(LocalDateTime.now().isAfter(dateFinish.toLocalDateTime())) throw new ValidationException("Bad date finish");
         if(electionOptions == null || electionOptions.size() < 2) throw new ValidationException("Bad number of election options");
     }
+
+    public String getIdProviderEntityId() {
+        return idProviderEntityId;
+    }
+
+    public ElectionDto setIdProviderEntityId(String idProviderEntityId) {
+        this.idProviderEntityId = idProviderEntityId;
+        return this;
+    }
+
 }

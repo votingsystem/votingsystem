@@ -101,7 +101,7 @@ public class UserResourceEJB {
         criteria.setFirstResult(0); //reset offset for total count
         long totalCount = ((Number)criteria.setProjection(Projections.rowCount()).uniqueResult()).longValue();
         ResultListDto resultListDto = new ResultListDto(resultList, offset, max, totalCount);
-        return Response.ok().entity(JSON.getMapper().writeValueAsBytes(resultListDto)).type(MediaType.JSON).build();
+        return Response.ok().entity(new JSON().getMapper().writeValueAsBytes(resultListDto)).type(MediaType.JSON).build();
     }
 
     @Path("/IBAN/{IBAN}")
@@ -137,7 +137,7 @@ public class UserResourceEJB {
                 Messages.currentInstance().get("objectNotFoundMsg", Long.valueOf(id).toString())).build();
         if(connectedDevices) {
             UserDto resultDto = userBean.getUserDto(user, false);
-            return Response.ok().entity(JSON.getMapper().writeValueAsBytes(resultDto)).build() ;
+            return Response.ok().entity(new JSON().getMapper().writeValueAsBytes(resultDto)).build() ;
         } else return processUserResult(user, null);
     }
 
@@ -154,7 +154,7 @@ public class UserResourceEJB {
         User user = userList.iterator().next();
         if(connectedDevices) {
             UserDto resultDto = userBean.getUserDto(user, false);
-            return Response.ok().entity(JSON.getMapper().writeValueAsBytes(resultDto)).build() ;
+            return Response.ok().entity(new JSON().getMapper().writeValueAsBytes(resultDto)).build() ;
         } else return processUserResult(user, null);
     }
 
@@ -162,7 +162,7 @@ public class UserResourceEJB {
         UserDto resultDto = UserDto.COMPLETE(user);
         if(user instanceof Bank)
             resultDto.setDetails(msg);
-        return Response.ok().entity(JSON.getMapper().writeValueAsBytes(resultDto)).build() ;
+        return Response.ok().entity(new JSON().getMapper().writeValueAsBytes(resultDto)).build() ;
     }
 
     @Path("/search")
@@ -195,7 +195,7 @@ public class UserResourceEJB {
                 .setParameter("state", User.State.ACTIVE)
                 .setParameter("searchText", "%" + searchText + "%");
         ResultListDto resultListDto = new ResultListDto(resultList, offset, max, (long)query.getSingleResult());
-        return Response.ok().entity(JSON.getMapper().writeValueAsBytes(resultListDto)).type(MediaType.JSON).build();
+        return Response.ok().entity(new JSON().getMapper().writeValueAsBytes(resultListDto)).type(MediaType.JSON).build();
     }
 
     @Transactional
@@ -214,7 +214,7 @@ public class UserResourceEJB {
         } else {
             Device device = deviceList.iterator().next();
             UserDto dto = userBean.getUserDto(device.getUser(), false);
-            return Response.ok().entity(JSON.getMapper().writeValueAsBytes(dto)).build();
+            return Response.ok().entity(new JSON().getMapper().writeValueAsBytes(dto)).build();
         }
     }
 
@@ -228,7 +228,7 @@ public class UserResourceEJB {
         for(Bank bank : bankList) {
             resultList.add(userBean.getUserDto(bank, false));
         }
-        return Response.ok().entity(JSON.getMapper().writeValueAsBytes(resultList)).build();
+        return Response.ok().entity(new JSON().getMapper().writeValueAsBytes(resultList)).build();
     }
 
     @RolesAllowed(AuthRole.ADMIN)
@@ -236,7 +236,7 @@ public class UserResourceEJB {
     @GET @Produces(javax.ws.rs.core.MediaType.APPLICATION_JSON)
     public Response connected(@Context HttpServletRequest req) throws Exception {
         //TODO
-        return Response.ok().entity(JSON.getMapper().writeValueAsBytes(
+        return Response.ok().entity(new JSON().getMapper().writeValueAsBytes(
                 SessionManager.getInstance().getConnectedUsersDto())).build();
     }
 

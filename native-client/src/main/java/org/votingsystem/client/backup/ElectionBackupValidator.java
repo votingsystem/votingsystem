@@ -82,7 +82,7 @@ public class ElectionBackupValidator implements BackupValidator<ResponseDto> {
         timeStampServerCert = timeStampCerts.iterator().next();
             
         File statsFile = new File(backupPath + File.separator + "stats.xml");
-        ElectionStatsDto electionStats = XML.getMapper().readValue(
+        ElectionStatsDto electionStats = new XML().getMapper().readValue(
                 FileUtils.getBytesFromFile(statsFile), ElectionStatsDto.class);
         for(ElectionOptionDto electionOption : electionStats.getElectionOptions()) {
             optionsMap.put(electionOption.getContent(), electionOption.getNumVotes());

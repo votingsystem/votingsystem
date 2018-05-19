@@ -87,14 +87,14 @@ public class TestResourceEJB {
     @Produces(MediaType.APPLICATION_JSON)
     public Response getSessions(@Context HttpServletRequest req, @Context HttpServletResponse res) throws Exception {
         return Response.ok().entity(
-                JSON.getMapper().writeValueAsBytes(HttpSessionManager.getInstance().getSessionUUIDSet())).build() ;
+                new JSON().getMapper().writeValueAsBytes(HttpSessionManager.getInstance().getSessionUUIDSet())).build() ;
     }
 
     @GET @Path("/sessionsMap")
     @Produces(MediaType.APPLICATION_JSON)
     public Response getSessionsMap(@Context HttpServletRequest req, @Context HttpServletResponse res) throws Exception {
         return Response.ok().entity(
-                JSON.getMapper().writeValueAsBytes(HttpSessionManager.getInstance().getSessionUUIDSessionIdMap())).build() ;
+                new JSON().getMapper().writeValueAsBytes(HttpSessionManager.getInstance().getSessionUUIDSessionIdMap())).build() ;
     }
 
     @GET @Path("/addToRealm")
@@ -201,7 +201,7 @@ public class TestResourceEJB {
         dataMap.put("status", 200);
         dataMap.put("message", "Hello");
         dataMap.put("coreSignal", "transaction-new");
-        SessionManager.getInstance().broadcast(JSON.getMapper().writeValueAsString(dataMap));
+        SessionManager.getInstance().broadcast(new JSON().getMapper().writeValueAsString(dataMap));
         return Response.ok().entity("OK").build();
     }
 

@@ -175,7 +175,7 @@ public class SessionManager {
         if(deviceSession == null)
             return false;
         else
-            return sendMessage(JSON.getMapper().writeValueAsString(messageDto), deviceSession.getId());
+            return sendMessage(new JSON().getMapper().writeValueAsString(messageDto), deviceSession.getId());
     }
 
     public Session getDeviceSession(String deviceUUID) throws JsonProcessingException {

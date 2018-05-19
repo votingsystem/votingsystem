@@ -52,7 +52,7 @@ public class AuditLogger {
 
     public static void logReport(Map dataMap) throws JsonProcessingException {
         dataMap.put("date", Calendar.getInstance().getTime());
-        reportslog.info(JSON.getMapper().writeValueAsString(dataMap) + ",");
+        reportslog.info(new JSON().getMapper().writeValueAsString(dataMap) + ",");
     }
 
     public static void logReport(int status, String type, String message, String url) throws JsonProcessingException {
@@ -62,17 +62,17 @@ public class AuditLogger {
         dataMap.put("type", type);
         dataMap.put("message", message);
         dataMap.put("url", url);
-        reportslog.info(JSON.getMapper().writeValueAsString(dataMap) + ",");
+        reportslog.info(new JSON().getMapper().writeValueAsString(dataMap) + ",");
     }
 
     public static void logTransaction(TransactionDto dto) throws JsonProcessingException {
         dto.setDateCreated(ZonedDateTime.now());
-        transactionslog.info(JSON.getMapper().writeValueAsString(dto) + ",");
+        transactionslog.info(new JSON().getMapper().writeValueAsString(dto) + ",");
     }
 
     public static void logCurrencyIssued(Currency currency) throws JsonProcessingException {
         CurrencyDto currencyDto = new CurrencyDto(currency);
-        currencyIssuedlog.info(JSON.getMapper().writeValueAsString(currencyDto) + ",");
+        currencyIssuedlog.info(new JSON().getMapper().writeValueAsString(currencyDto) + ",");
     }
 
     public static void weekLog(Level level, String msg, Throwable thrown) {

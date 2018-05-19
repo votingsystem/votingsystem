@@ -190,11 +190,11 @@ public class ResponseDto<T> implements Serializable {
     }
 
     public <T> T getMessage(Class<T> type) throws Exception {
-        return JSON.getMapper().readValue(getMessage(), type);
+        return new JSON().getMapper().readValue(getMessage(), type);
     }
 
     public <T> T getMessage(TypeReference typeReference) throws Exception {
-        return JSON.getMapper().readValue(getMessage(), typeReference);
+        return new JSON().getMapper().readValue(getMessage(), typeReference);
     }
     
     public String toString () {
@@ -374,10 +374,10 @@ public class ResponseDto<T> implements Serializable {
             return new ResponseDto(statusCode, messageBytes, contentType);
         switch (contentType) {
             case JSON:
-                responseDto = JSON.getMapper().readValue(messageBytes, ResponseDto.class);
+                responseDto = new JSON().getMapper().readValue(messageBytes, ResponseDto.class);
                 break;
             case XML:
-                responseDto = XML.getMapper().readValue(messageBytes, ResponseDto.class);
+                responseDto = new XML().getMapper().readValue(messageBytes, ResponseDto.class);
                 break;
             default:
                 responseDto = new ResponseDto(statusCode, messageBytes, contentType);

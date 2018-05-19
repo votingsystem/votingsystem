@@ -401,4 +401,14 @@ public class ConfigEJB implements Config, ConfigCurrencyServer, Serializable {
         return ocspServerURL;
     }
 
+    @Override
+    public String getIdProviderEntityId() {
+        return null;
+    }
+
+    @Override
+    public void setIdProviderEntityId(String idProviderEntityId) {
+        log.severe("TODO - idProviderEntityId: " + idProviderEntityId);
+    }
+
 }

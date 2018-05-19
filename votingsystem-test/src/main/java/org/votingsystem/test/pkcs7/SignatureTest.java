@@ -3,7 +3,6 @@ package org.votingsystem.test.pkcs7;
 import org.votingsystem.crypto.MockDNIe;
 import org.votingsystem.crypto.cms.CMSSignedMessage;
 import org.votingsystem.dto.OperationDto;
-import org.votingsystem.dto.OperationTypeDto;
 import org.votingsystem.dto.ResponseDto;
 import org.votingsystem.http.HttpConn;
 import org.votingsystem.http.MediaType;
@@ -98,11 +97,9 @@ public class SignatureTest extends BaseTest {
 
     public CMSSignedMessage sign() throws Exception {
         CMSSignatureBuilder signatureService = new CMSSignatureBuilder(new MockDNIe("08888888D"));
-        OperationTypeDto operationType = new OperationTypeDto(CurrencyOperation.INIT_DEVICE_SESSION, null);
-        OperationDto operation = new OperationDto();
-        operation.setOperation(operationType);
+        OperationDto operation = new OperationDto(null, CurrencyOperation.INIT_DEVICE_SESSION);
         operation.setUUID(UUID.randomUUID().toString());
-        String operationStr = JSON.getMapper().writeValueAsString(operation);
+        String operationStr = new JSON().getMapper().writeValueAsString(operation);
         log.info("operation: " + operationStr);
 
         CMSSignedMessage cmsSignedMessage = signatureService.signDataWithTimeStamp(operationStr.getBytes(),

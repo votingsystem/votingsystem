@@ -249,6 +249,16 @@ public class ConfigEJB implements Config, ConfigIdProvider {
         return signingCert;
     }
 
+    @Override
+    public String getIdProviderEntityId() {
+        return entityId;
+    }
+
+    @Override
+    public void setIdProviderEntityId(String idProviderEntityId) {
+        log.severe("TODO - idProviderEntityId: " + idProviderEntityId);
+    }
+
     public MetadataDto getMetadata() {
         try {
             if(metadata == null) {

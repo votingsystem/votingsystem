@@ -1,7 +1,7 @@
 package org.votingsystem.test.misc;
 
+import org.votingsystem.dto.OperationDto;
 import org.votingsystem.dto.QRMessageDto;
-import org.votingsystem.dto.QRResponseDto;
 import org.votingsystem.dto.ResponseDto;
 import org.votingsystem.dto.voting.ElectionDto;
 import org.votingsystem.http.HttpConn;
@@ -45,19 +45,19 @@ public class QRTest extends BaseTest {
             log.info("bad request - msg: " + responseDto.getMessage());
             System.exit(0);
         }
-        QRResponseDto qrResponseDto = null;
+        OperationDto<ElectionDto> operation = null;
         ElectionDto electionDto = null;
         switch (reqContentType) {
             case "application/json":
-                qrResponseDto = JSON.getMapper().readValue(responseDto.getMessageBytes(), QRResponseDto.class);
-                electionDto = qrResponseDto.getDataJson(ElectionDto.class);
+                operation = new JSON().getMapper().readValue(responseDto.getMessageBytes(), OperationDto.class);
+                electionDto = operation.getDataJson(ElectionDto.class);
                 break;
             case "application/xml":
-                qrResponseDto = XML.getMapper().readValue(responseDto.getMessageBytes(), QRResponseDto.class);
-                electionDto = qrResponseDto.getDataXml(ElectionDto.class);
+                operation = new XML().getMapper().readValue(responseDto.getMessageBytes(), OperationDto.class);
+                electionDto = operation.getDataXml(ElectionDto.class);
                 break;
         }
-        log.info("dataBase64: " + new String(Base64.getDecoder().decode(qrResponseDto.getBase64Data())));
+        log.info("dataBase64: " + new String(Base64.getDecoder().decode(operation.getBase64Data())));
         log.info("electionDto.getEntityId: " + electionDto.getEntityId());
     }
 

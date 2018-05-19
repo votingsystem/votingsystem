@@ -33,7 +33,7 @@ public class MetadataEJB implements MetadataService {
 
     public byte[] getMetadataSigned() throws JsonProcessingException, SignatureException {
         MetadataDto metadata = config.getMetadata();
-        byte[] metadataBytes = XML.getMapper().writeValueAsBytes(metadata);
+        byte[] metadataBytes = new XML().getMapper().writeValueAsBytes(metadata);
         return signatureService.signXAdES(metadataBytes);
     }
 

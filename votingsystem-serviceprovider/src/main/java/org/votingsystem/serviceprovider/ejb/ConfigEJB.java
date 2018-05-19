@@ -71,6 +71,7 @@ public class ConfigEJB implements Config, ConfigServiceProvider, Serializable {
     @Inject TrustedServicesEJB trustedServices;
 
     private String entityId;
+    private String idProviderEntityId;
     private String timestampServiceURL;
     private String applicationDirPath;
     private byte[] signatureCertChainPEMBytes;
@@ -302,6 +303,16 @@ public class ConfigEJB implements Config, ConfigServiceProvider, Serializable {
 
     public TrustedListsCertificateSource getTrustedCertSource() {
         return trustedCertSource;
+    }
+
+    @Override
+    public String getIdProviderEntityId() {
+        return idProviderEntityId;
+    }
+
+    @Override
+    public void setIdProviderEntityId(String idProviderEntityId) {
+        this.idProviderEntityId = idProviderEntityId;
     }
 
 }
