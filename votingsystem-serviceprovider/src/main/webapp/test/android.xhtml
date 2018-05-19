@@ -1,0 +1,22 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                template="/WEB-INF/templates/bootstrap.xhtml">
+    <ui:define name="head">
+    </ui:define>
+    <ui:define name="content">
+        <div style="margin: 10px auto;">
+
+        </div>
+        <div class="card">
+            <p>User agent (java): #{request.getHeader("User-Agent")}</p>
+            <p>User agent (javascript): <span id="jsInfoDiv"></span></p>
+            <p><a href="votingsystem://vote?vote_election=election data">Test link</a> </p>
+        </div>
+
+        <script>
+            //<![CDATA[
+            document.getElementById("jsInfoDiv").innerHTML = navigator.userAgent;
+            // ]]>
+        </script>
+    </ui:define>
+</ui:composition>

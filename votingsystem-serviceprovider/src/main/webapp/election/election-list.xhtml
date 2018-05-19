@@ -2,6 +2,7 @@
                 xmlns:ui="http://java.sun.com/jsf/facelets"
                 xmlns:h="http://xmlns.jcp.org/jsf/html"
                 xmlns:a="http://xmlns.jcp.org/jsf/passthrough"
+                xmlns:c="http://java.sun.com/jsp/jstl/core"
                 template="/WEB-INF/templates/main-template.xhtml">
   <ui:define name="head">
     <style>
@@ -54,13 +55,19 @@
                 <ul id="electionOptions"></ul>
               </div>
             </div>
+
             <h:form prependId="false" a:accept-charset="ISO-8859-1" id="electionForm">
               <div class="modal-footer d-flex" style="display: none;">
-
-
                 <h:inputHidden id="electionUUID" value="#{electionBean.electionUUID}"></h:inputHidden>
                 <div class="ml-auto p-2">
-                  <h:commandButton class="btn btn-block btn-primary" value="#{msg.voteLbl}" type="submit" action="#{electionBean.initAuthentication}"/>
+                <c:choose>
+                  <c:when test="${request.getHeader('User-Agent').toLowerCase().contains('android')}">
+                      <a id="selectedElectionAndroidLink" class="btn btn-block btn-primary">Test link</a>
+                  </c:when>
+                  <c:otherwise>
+                    <h:commandButton class="btn btn-block btn-primary" value="#{msg.voteLbl}" type="submit" action="#{electionBean.initAuthentication}"/>
+                  </c:otherwise>
+                </c:choose>
                 </div>
               </div>
             </h:form>
@@ -83,6 +90,16 @@
     </ui:define>
 
     <ui:define name="javascript-code">
+      <script>
+        var isAndroidClient = false
+      </script>
+
+      <c:if test="${request.getHeader('User-Agent').toLowerCase().contains('android')}">
+        <script>
+            isAndroidClient = true;
+        </script>
+      </c:if>
+
       <script>
 
         var languageURL;
@@ -139,8 +156,9 @@
               } );
           } );
 
-        function showElectionDialog(data) {
-            var rowData = JSON.parse(atob(data));
+        function showElectionDialog(base64RowData) {
+            console.log("base64RowData: ", base64RowData)
+            var rowData = JSON.parse(atob(base64RowData));
             console.log("rowData: ", rowData)
 
             var optionTemplate = '<li style="margin: 5px 0 0 0; font-size:1.3em;color: #20a8d8;">{0}</li>'
@@ -172,6 +190,10 @@
                     break;
                 default:
                     document.querySelector("#closedElectionMsg").style.display = "";
+            }
+
+            if(isAndroidClient) {
+                document.querySelector("#selectedElectionAndroidLink").href = "votingsystem://vote?vote_election=" + base64RowData;
             }
 
             $("#electionDialogModal").modal();
