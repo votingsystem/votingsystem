@@ -25,7 +25,7 @@ public class PublishElection extends BaseTest {
     private static final Logger log = Logger.getLogger(PublishElection.class.getName());
 
     private static String QR_CODE = "eid=https://voting.ddns.net/voting-service;uid=4b33a837-946a-4812-a1c3-dcfd59be3b69;";
-    private static String KEYSTORE = "certs/fake_08888888D.jks";
+    private static String SIGNER_KEYSTORE = "certs/fake_08888888D.jks";
     private static String KEYSTORE_PASSWORD = Constants.PASSW_DEMO;
 
 
@@ -55,7 +55,7 @@ public class PublishElection extends BaseTest {
 
         //ElectionDto electionDto = qrResponseDto.getDataXml(ElectionDto.class);
         AbstractSignatureTokenConnection signingToken = new JKSSignatureToken(
-                Thread.currentThread().getContextClassLoader().getResource(KEYSTORE).openStream(),
+                Thread.currentThread().getContextClassLoader().getResource(SIGNER_KEYSTORE).openStream(),
                 new KeyStore.PasswordProtection(KEYSTORE_PASSWORD.toCharArray()));
         byte[] signatureBytes = new XAdESSignature().sign(responseDto.getMessageBytes(), signingToken,
                 new TSPHttpSource(org.votingsystem.test.Constants.TIMESTAMP_SERVICE_URL));

@@ -31,10 +31,14 @@ import java.util.Base64;
 @JacksonXmlRootElement(localName = "Operation")
 public class OperationDto<T> implements Serializable {
 
-    @JacksonXmlProperty(localName = "Type")
-    private SystemOperation type;
+
+    @JacksonXmlProperty(localName = "Date", isAttribute = true)
+    private ZonedDateTime date;
     @JacksonXmlProperty(localName = "EntityId", isAttribute = true)
     private String entityId;
+
+    @JacksonXmlProperty(localName = "Type")
+    private SystemOperation type;
     @JacksonXmlProperty(localName = "OperationCode")
     private String operationCode;
 
@@ -58,8 +62,6 @@ public class OperationDto<T> implements Serializable {
     private String url;
 
 
-    @JacksonXmlProperty(localName = "Date")
-    private ZonedDateTime date;
     @JacksonXmlProperty(localName = "PublicKeyBase64")
     private String publicKeyBase64;
 

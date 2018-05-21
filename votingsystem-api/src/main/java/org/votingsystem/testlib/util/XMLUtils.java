@@ -4,12 +4,17 @@ import org.kxml2.io.KXmlParser;
 import org.kxml2.io.KXmlSerializer;
 import org.kxml2.kdom.Document;
 import org.kxml2.kdom.Element;
+import org.kxml2.kdom.Node;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -29,8 +34,38 @@ public class XMLUtils {
 
     public static String prepareRequestToSign(byte[] bytesToSign) throws IOException, XmlPullParserException {
         Document document = XMLUtils.parse(bytesToSign);
-        byte[] dummyRequestBytes = XMLUtils.serialize(document);
-        return new String(dummyRequestBytes, "UTF-8").replaceAll("<\\?xml(.+?)\\?>", "").trim();
+        Element elementWithCanonicalizedAttributes = canonicalizeAttributes(document.getRootElement());
+        Document doc = new Document();
+        doc.addChild(Node.ELEMENT, elementWithCanonicalizedAttributes);
+        String result = new String(XMLUtils.serialize(doc), "UTF-8");
+        return result.replaceAll("<\\?xml(.+?)\\?>", "").trim();
+    }
+
+
+    public static Element canonicalizeAttributes(Element mainElement) {
+        Element elementCanonicalized = new Element();
+        elementCanonicalized.setName(mainElement.getName());
+
+        List<String> attributeNameList = new ArrayList<>();
+        for(int i = 0 ; i < mainElement.getAttributeCount(); i++) {
+            attributeNameList.add(mainElement.getAttributeName(i));
+        }
+        Collections.sort(attributeNameList);
+        for(String attributeName : attributeNameList) {
+            elementCanonicalized.setAttribute(null, attributeName, mainElement.getAttributeValue(null, attributeName));
+        }
+        for(int i = 0; i < mainElement.getChildCount(); i ++) {
+            if(mainElement.getChild(i) instanceof Element) {
+                Element iteratedElement = (Element) mainElement.getChild(i);
+                try {
+                    Element orderedChild = canonicalizeAttributes(iteratedElement);
+                    elementCanonicalized.addChild(i, Node.ELEMENT, orderedChild);
+                } catch (Exception ex) {
+                    log.log(Level.SEVERE, ex.getMessage(), ex);
+                }
+            } else elementCanonicalized.addChild(i, Node.TEXT, mainElement.getChild(i));
+        }
+        return elementCanonicalized;
     }
 
     public static byte[] serialize(Document doc, boolean indent) throws IOException {
