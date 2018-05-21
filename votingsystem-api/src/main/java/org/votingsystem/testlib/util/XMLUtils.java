@@ -42,6 +42,9 @@ public class XMLUtils {
     }
 
 
+    /**
+     * check canonicalization -> $xmllint --c14n temp.xml > tempc14n.xml
+     */
     public static Element canonicalizeAttributes(Element mainElement) {
         Element elementCanonicalized = new Element();
         elementCanonicalized.setName(mainElement.getName());
